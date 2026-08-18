@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Powertrain Mix by Country — World Auto Sales</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="index.html">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="50" r="46" fill="var(--surface)" stroke="var(--accent)" stroke-width="4"/>
+        <path d="M20 58 L26 40 C28 35 32 32 38 32 L62 32 C68 32 72 35 74 40 L80 58 L80 66 C80 69 78 71 75 71 L71 71 C68 71 66 69 66 66 L66 64 L34 64 L34 66 C34 69 32 71 29 71 L25 71 C22 71 20 69 20 66 Z" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linejoin="round"/>
+        <circle cx="32" cy="64" r="6" fill="var(--text)"/>
+        <circle cx="68" cy="64" r="6" fill="var(--text)"/>
+        <line x1="30" y1="45" x2="70" y2="45" stroke="var(--accent)" stroke-width="3" opacity="0.5"/>
+      </svg>
+      <span class="wordmark">
+        <span class="brand">World Auto</span>
+        <span class="sub">Sales Stats</span>
+      </span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <a href="index.html"><span class="dot"></span>Home</a>
+
+      <div class="nav-heading">Powertrain</div>
+      <a href="powertrain-mix-by-country.html" aria-current="page"><span class="dot"></span>Mix by Country (Europe)</a>
+
+      <div class="nav-heading">Manufacturers<span class="soon-pill">Soon</span></div>
+      <div class="nav-heading">Regions<span class="soon-pill">Soon</span></div>
+      <div class="nav-heading">Trends<span class="soon-pill">Soon</span></div>
+    </nav>
+
+    <div class="sidebar-footer">
+      Monthly worldwide car sales &amp; powertrain stats — built for video &amp; social.
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page">
+      <header class="page-header">
+        <div class="eyebrow">World Auto Sales · Powertrain</div>
+        <h1>Powertrain Mix by Country</h1>
+        <p class="subtitle">New car registrations by powertrain (Battery Electric, Plug-in Hybrid, Hybrid, Petrol, Diesel, Others) across 31 European markets, May 2026. Countries ranked by electrified share (BEV+PHEV+HEV).</p>
+      </header>
+
+      <div class="stat-row" id="stat-row"></div>
+
+      <div class="card notes-card">
+        <div class="notes-label">📝 Notes</div>
+        <ul class="notes-body">
+          <li>Norway leads the world in EV adoption by a wide margin — battery-electric alone made up over 97% of May 2026 registrations, a market so far along the transition that petrol and diesel are now a rounding error.</li>
+          <li>Some of the largest EU markets (Germany, France, Italy) still sit in the middle of the pack once hybrids are counted — hybrid-electric (not battery-electric) is the single most popular powertrain in most of Europe right now.</li>
+          <li>A handful of Eastern European markets (Latvia, Romania, Bulgaria) remain almost entirely petrol/diesel, showing how uneven the EV transition still is within the EU itself.</li>
+        </ul>
+      </div>
+
+      <div class="card chart-card">
+        <h2>Electrified Share by Country</h2>
+        <p class="note">Each bar is 100% of that country's May 2026 registrations. Hover a segment for exact figures.</p>
+        <div class="chart-legend" id="legend"></div>
+        <div class="rank-rows" id="rank-rows"></div>
+        <div class="tooltip" id="tooltip"></div>
+      </div>
+
+      <div class="card table-card">
+        <h2>Country Detail — May 2026</h2>
+        <p class="note">Click a header to sort. Units = new car registrations for the month.</p>
+        <div class="table-scroll">
+          <table id="data-table">
+            <thead>
+              <tr>
+                <th data-key="country" data-type="str">Country</th>
+                <th data-key="bev" data-type="num">BEV</th>
+                <th data-key="phev" data-type="num">PHEV</th>
+                <th data-key="hev" data-type="num">HEV</th>
+                <th data-key="petrol" data-type="num">Petrol</th>
+                <th data-key="diesel" data-type="num">Diesel</th>
+                <th data-key="others" data-type="num">Others</th>
+                <th data-key="total" data-type="num">Total</th>
+                <th data-key="electrifiedPct" data-type="num">Electrified %</th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <footer class="page-footer">
+        Source: ACEA (European Automobile Manufacturers' Association), press release for May 2026 · covers EU + EFTA + UK · refreshed monthly
+      </footer>
+    </div>
+  </main>
+</div>
+
+<script>
+// country: [BEV, PHEV, HEV, OTHERS, PETROL, DIESEL, TOTAL] — May 2026, source: ACEA
+const RAW = {
+"Austria": [6598,2932,7239,1,6135,2624,25529],
+"Belgium": [12586,1596,4130,485,13765,1063,33625],
+"Bulgaria": [362,55,292,49,3148,387,4293],
+"Croatia": [327,573,3888,68,3693,1046,9595],
+"Cyprus": [135,103,677,0,372,25,1312],
+"Czechia": [1356,1098,5025,531,8722,3731,20463],
+"Denmark": [15020,98,2265,0,1264,445,19092],
+"Estonia": [96,146,1229,0,218,194,1883],
+"Finland": [3309,722,2042,0,507,203,6783],
+"France": [37412,7648,55602,5605,18926,3291,128484],
+"Germany": [59969,27921,67545,1660,51806,30547,239448],
+"Greece": [951,957,9117,593,4198,426,16242],
+"Hungary": [1319,1202,5272,94,2457,1174,11518],
+"Ireland": [2328,1075,1792,0,1830,1016,8041],
+"Italy": [13274,15164,70334,10402,30768,10101,150043],
+"Latvia": [106,149,0,47,1490,263,2055],
+"Lithuania": [288,543,2797,97,733,374,4832],
+"Luxembourg": [1248,235,1372,0,841,244,3940],
+"Malta": [291,67,268,0,144,30,800],
+"Netherlands": [12363,6816,8186,151,2075,324,29915],
+"Poland": [2015,4601,24818,1042,14095,3020,49591],
+"Portugal": [6988,3896,5999,1616,5780,801,25080],
+"Romania": [798,0,6843,1098,1787,724,11250],
+"Slovakia": [474,376,2383,215,2928,790,7166],
+"Slovenia": [1037,194,908,113,3087,815,6154],
+"Spain": [12049,13741,53414,3807,24744,4139,111894],
+"Sweden": [10718,6645,1990,77,4870,1685,25985],
+"Iceland": [789,229,337,0,148,44,1547],
+"Norway": [15210,97,103,0,32,118,15560],
+"Switzerland": [5140,2293,6818,2,4466,1022,19741],
+"United Kingdom": [43931,22167,56321,0,35068,3175,160662]
+};
+
+const FUEL_COLORS = {
+  bev: "#1e8f5f", phev: "#4fb3a9", hev: "#f4a742",
+  petrol: "#2b3a55", diesel: "#8a94a3", others: "#c9c9c9"
+};
+const FUEL_LABELS = { bev:"Battery Electric", phev:"Plug-in Hybrid", hev:"Hybrid", petrol:"Petrol", diesel:"Diesel", others:"Others" };
+
+const DATA = Object.entries(RAW).map(([country, v]) => {
+  const [bev, phev, hev, others, petrol, diesel, total] = v;
+  const electrified = bev + phev + hev;
+  return {
+    country, bev, phev, hev, others, petrol, diesel, total,
+    electrifiedPct: +(electrified / total * 100).toFixed(1)
+  };
+}).sort((a,b) => b.electrifiedPct - a.electrifiedPct);
+
+// --- stat row ---
+const totals = DATA.reduce((acc,d) => {
+  acc.bev += d.bev; acc.phev += d.phev; acc.hev += d.hev;
+  acc.others += d.others; acc.petrol += d.petrol; acc.diesel += d.diesel; acc.total += d.total;
+  return acc;
+}, {bev:0,phev:0,hev:0,others:0,petrol:0,diesel:0,total:0});
+const eurElectrifiedPct = +((totals.bev+totals.phev+totals.hev)/totals.total*100).toFixed(1);
+const topCountry = DATA[0], bottom = DATA[DATA.length-1];
+
+const stats = [
+  {label:'Markets Covered', value:DATA.length, small:'EU + EFTA + UK'},
+  {label:'Electrified Share (avg)', value:eurElectrifiedPct+'%', small:'BEV+PHEV+HEV, May 2026'},
+  {label:'Highest', value:topCountry.electrifiedPct+'%', small:topCountry.country},
+  {label:'Lowest', value:bottom.electrifiedPct+'%', small:bottom.country},
+  {label:'Total Registrations', value:totals.total.toLocaleString('en-US'), small:'May 2026'},
+];
+document.getElementById('stat-row').innerHTML = stats.map(s => `
+  <div class="stat">
+    <div class="label">${s.label}</div>
+    <div class="value">${s.value}<small>${s.small}</small></div>
+  </div>`).join('');
+
+// --- legend ---
+document.getElementById('legend').innerHTML = Object.keys(FUEL_COLORS).map(k => `
+  <div class="legend-chip"><span class="swatch" style="background:${FUEL_COLORS[k]}"></span>${FUEL_LABELS[k]}</div>
+`).join('');
+
+// --- ranked stacked bars ---
+const rankRows = document.getElementById('rank-rows');
+const tooltip = document.getElementById('tooltip');
+const chartCard = document.querySelector('.chart-card');
+
+function segHTML(d, key){
+  const pct = d[key] / d.total * 100;
+  if(pct <= 0) return '';
+  return `<div class="bar-seg" style="width:${pct}%; background:${FUEL_COLORS[key]}" data-country="${d.country}" data-key="${key}" data-units="${d[key]}" data-pct="${pct.toFixed(1)}"></div>`;
+}
+
+rankRows.innerHTML = DATA.map(d => `
+  <div class="rank-row">
+    <div class="country-label">${d.country}</div>
+    <div class="bar-track">
+      ${['bev','phev','hev','petrol','diesel','others'].map(k => segHTML(d,k)).join('')}
+    </div>
+    <div class="pct-label">${d.electrifiedPct}%</div>
+  </div>`).join('');
+
+rankRows.addEventListener('pointermove', e => {
+  const seg = e.target.closest('.bar-seg');
+  if(!seg){ tooltip.style.opacity = 0; return; }
+  const key = seg.dataset.key;
+  const cardRect = chartCard.getBoundingClientRect();
+  tooltip.style.left = (e.clientX - cardRect.left) + 'px';
+  tooltip.style.top = (e.clientY - cardRect.top - 10) + 'px';
+  tooltip.style.opacity = 1;
+  tooltip.innerHTML = `${seg.dataset.country} — ${FUEL_LABELS[key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)`;
+});
+rankRows.addEventListener('pointerleave', () => { tooltip.style.opacity = 0; });
+
+// --- table ---
+const tbody = document.getElementById('table-body');
+function renderTable(rows){
+  tbody.innerHTML = rows.map(d => `
+    <tr>
+      <td>${d.country}</td>
+      <td>${d.bev.toLocaleString('en-US')}</td>
+      <td>${d.phev.toLocaleString('en-US')}</td>
+      <td>${d.hev.toLocaleString('en-US')}</td>
+      <td>${d.petrol.toLocaleString('en-US')}</td>
+      <td>${d.diesel.toLocaleString('en-US')}</td>
+      <td>${d.others.toLocaleString('en-US')}</td>
+      <td>${d.total.toLocaleString('en-US')}</td>
+      <td class="${d.electrifiedPct >= eurElectrifiedPct ? 'vs-above' : 'vs-below'}">${d.electrifiedPct}%</td>
+    </tr>`).join('');
+}
+renderTable(DATA);
+
+let sortKey = 'electrifiedPct', sortDir = -1;
+document.querySelectorAll('thead th').forEach(th=>{
+  th.innerHTML += '<span class="arrow">▲</span>';
+  th.addEventListener('click', () => {
+    const key = th.dataset.key;
+    sortDir = (sortKey === key) ? -sortDir : 1;
+    sortKey = key;
+    document.querySelectorAll('thead th').forEach(t=>t.classList.remove('sorted'));
+    th.classList.add('sorted');
+    th.querySelector('.arrow').textContent = sortDir === 1 ? '▲' : '▼';
+    const sorted = [...DATA].sort((a,b)=> {
+      const av = a[sortKey], bv = b[sortKey];
+      if(typeof av === 'string') return av.localeCompare(bv) * sortDir;
+      return (av-bv) * sortDir;
+    });
+    renderTable(sorted);
+  });
+});
+</script>
+</body>
+</html>
