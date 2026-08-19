@@ -115,9 +115,19 @@
         </div>
 
         <div class="card chart-card">
-          <h2>Electrified Share by Country</h2>
-          <p class="note">Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments. The number at the right of each bar is that country's BEV year-over-year change (same month, prior year) — hover any segment for exact figures.</p>
+          <div class="chart-header-row">
+            <h2>Electrified Share by Country</h2>
+            <div class="chart-mode-toggle" role="group" aria-label="Bar display mode">
+              <button type="button" class="mode-btn active" data-bar-mode="pct">%</button>
+              <button type="button" class="mode-btn" data-bar-mode="raw"># of Sales</button>
+            </div>
+          </div>
+          <p class="note" id="bars-note">Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments. The number at the right of each bar is that country's BEV year-over-year change (same month, prior year) — hover any segment for exact figures.</p>
           <div class="chart-legend" id="legend"></div>
+          <div class="rank-rows-header">
+            <span class="rrh-spacer"></span>
+            <span class="rrh-yoy" title="Battery-electric registrations vs. the same month last year">YoY %</span>
+          </div>
           <div class="rank-rows" id="rank-rows"></div>
           <div class="tooltip" id="tooltip"></div>
         </div>
@@ -356,18 +366,25 @@ const tooltip = document.getElementById('tooltip');
 const chartCards = document.querySelectorAll('.chart-card');
 const barChartCard = chartCards[1];
 
-function segHTML(d, key, denom){
+let barMode = 'pct'; // 'pct' or 'raw'
+
+function segHTML(d, key, denom, widthDenom){
   const units = d[key];
   if(units <= 0 || denom <= 0) return '';
-  const pct = units / denom * 100;
-  const showLabel = pct >= 7;
-  return `<div class="bar-seg" style="width:${pct}%; background:${FUEL_COLORS[key]}" data-country="${d.country}" data-key="${key}" data-units="${units}" data-pct="${pct.toFixed(1)}">${showLabel ? `<span class="seg-label">${pct.toFixed(0)}%</span>` : ''}</div>`;
+  const pct = units / denom * 100; // always the true share, used for the tooltip
+  const width = units / widthDenom * 100; // bar geometry: 100%-stacked in pct mode, scaled-to-max in raw mode
+  const showLabel = width >= 7;
+  const labelText = barMode === 'raw' ? units.toLocaleString('en-US') : pct.toFixed(0) + '%';
+  return `<div class="bar-seg" style="width:${width}%; background:${FUEL_COLORS[key]}" data-country="${d.country}" data-key="${key}" data-units="${units}" data-pct="${pct.toFixed(1)}">${showLabel ? `<span class="seg-label">${labelText}</span>` : ''}</div>`;
 }
 
 function renderBars(){
   const fuels = FUEL_KEYS.filter(k => selectedFuels.has(k));
-  rankRows.innerHTML = DATA.map(d => {
-    const denom = fuels.reduce((s,k) => s + d[k], 0);
+  const denoms = DATA.map(d => fuels.reduce((s,k) => s + d[k], 0));
+  const globalMax = Math.max(1, ...denoms);
+  rankRows.innerHTML = DATA.map((d,i) => {
+    const denom = denoms[i];
+    const widthDenom = barMode === 'raw' ? globalMax : denom;
     const yoy = d.bevYoyPct;
     const yoyText = yoy == null ? '—' : `${yoy > 0 ? '+' : ''}${yoy}%`;
     const yoyClass = yoy == null ? '' : (yoy >= 0 ? 'yoy-up' : 'yoy-down');
@@ -375,12 +392,25 @@ function renderBars(){
     <div class="rank-row">
       <div class="country-label">${d.country}</div>
       <div class="bar-track">
-        ${fuels.map(k => segHTML(d,k,denom)).join('')}
+        ${fuels.map(k => segHTML(d,k,denom,widthDenom)).join('')}
       </div>
       <div class="pct-label ${yoyClass}" title="BEV year-over-year change">${yoyText}</div>
     </div>`;
   }).join('');
 }
+
+const barsNote = document.getElementById('bars-note');
+const PCT_NOTE = 'Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments. The number at the right of each bar is that country\'s BEV year-over-year change (same month, prior year) — hover any segment for exact figures.';
+const RAW_NOTE = 'Bar length now reflects actual registrations (scaled to the biggest market shown), so countries are comparable by volume, not just mix. Sorted by BEV share, high to low. Segment labels show unit counts — hover any segment for exact figures.';
+document.querySelectorAll('[data-bar-mode]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if(btn.dataset.barMode === barMode) return;
+    barMode = btn.dataset.barMode;
+    document.querySelectorAll('[data-bar-mode]').forEach(b => b.classList.toggle('active', b === btn));
+    barsNote.textContent = barMode === 'raw' ? RAW_NOTE : PCT_NOTE;
+    renderBars();
+  });
+});
 
 rankRows.addEventListener('pointermove', e => {
   const seg = e.target.closest('.bar-seg');
