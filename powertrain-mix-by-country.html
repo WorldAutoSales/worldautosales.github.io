@@ -332,7 +332,7 @@ function renderMap(){
       mapTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
       mapTooltip.style.opacity = 1;
       mapTooltip.innerHTML = entry
-        ? `${entry.country}<br><strong>${entry.bevPct}%</strong> BEV share · ${entry.total.toLocaleString('en-US')} registrations`
+        ? `${entry.country}<br><strong>${entry.bevPct}%</strong> BEV share · ${entry.total.toLocaleString('en-US')} registrations${entry.bevYoyPct == null ? '' : `<br>BEV YoY: <strong>${entry.bevYoyPct > 0 ? '+' : ''}${entry.bevYoyPct}%</strong>`}`
         : `${d.properties.name}<br>No data`;
     })
     .on('pointerleave', () => { mapTooltip.style.opacity = 0; });
