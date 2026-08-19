@@ -28,6 +28,9 @@
     <nav class="sidebar-nav">
       <a href="index.html"><span class="dot"></span>Home</a>
 
+      <div class="nav-heading">Overview</div>
+      <a href="world-auto-sales.html"><span class="dot"></span>World Auto Sales</a>
+
       <div class="nav-heading">Powertrain</div>
       <a href="powertrain-mix-by-country.html" aria-current="page"><span class="dot"></span>Mix by Country (Europe)</a>
 
@@ -42,165 +45,348 @@
   </aside>
 
   <main class="main">
-    <div class="page">
-      <header class="page-header">
-        <div class="eyebrow">World Auto Sales · Powertrain</div>
-        <h1>Powertrain Mix by Country</h1>
-        <p class="subtitle">New car registrations by powertrain (Battery Electric, Plug-in Hybrid, Hybrid, Petrol, Diesel, Others) across 31 European markets, May 2026. Countries ranked by electrified share (BEV+PHEV+HEV).</p>
-      </header>
-
-      <div class="stat-row" id="stat-row"></div>
-
-      <div class="card notes-card">
-        <div class="notes-label">📝 Notes</div>
-        <ul class="notes-body">
-          <li>Norway leads the world in EV adoption by a wide margin — battery-electric alone made up over 97% of May 2026 registrations, a market so far along the transition that petrol and diesel are now a rounding error.</li>
-          <li>Some of the largest EU markets (Germany, France, Italy) still sit in the middle of the pack once hybrids are counted — hybrid-electric (not battery-electric) is the single most popular powertrain in most of Europe right now.</li>
-          <li>A handful of Eastern European markets (Latvia, Romania, Bulgaria) remain almost entirely petrol/diesel, showing how uneven the EV transition still is within the EU itself.</li>
-        </ul>
-      </div>
-
-      <div class="card chart-card">
-        <h2>Electrified Share by Country</h2>
-        <p class="note">Each bar is 100% of that country's May 2026 registrations. Hover a segment for exact figures.</p>
-        <div class="chart-legend" id="legend"></div>
-        <div class="rank-rows" id="rank-rows"></div>
-        <div class="tooltip" id="tooltip"></div>
-      </div>
-
-      <div class="card table-card">
-        <h2>Country Detail — May 2026</h2>
-        <p class="note">Click a header to sort. Units = new car registrations for the month.</p>
-        <div class="table-scroll">
-          <table id="data-table">
-            <thead>
-              <tr>
-                <th data-key="country" data-type="str">Country</th>
-                <th data-key="bev" data-type="num">BEV</th>
-                <th data-key="phev" data-type="num">PHEV</th>
-                <th data-key="hev" data-type="num">HEV</th>
-                <th data-key="petrol" data-type="num">Petrol</th>
-                <th data-key="diesel" data-type="num">Diesel</th>
-                <th data-key="others" data-type="num">Others</th>
-                <th data-key="total" data-type="num">Total</th>
-                <th data-key="electrifiedPct" data-type="num">Electrified %</th>
-              </tr>
-            </thead>
-            <tbody id="table-body"></tbody>
-          </table>
+    <div class="content-with-filters">
+      <aside class="filters-panel">
+        <div class="filter-group">
+          <div class="filter-label">
+            Powertrain
+            <span class="filter-bulk">
+              <button type="button" class="filter-bulk-btn" data-target="fuels" data-action="check">Check all</button> / <button type="button" class="filter-bulk-btn" data-target="fuels" data-action="uncheck">Uncheck all</button>
+            </span>
+          </div>
+          <div class="filter-countries" id="filter-fuels"></div>
         </div>
-      </div>
 
-      <footer class="page-footer">
-        Source: ACEA (European Automobile Manufacturers' Association), press release for May 2026 · covers EU + EFTA + UK · refreshed monthly
-      </footer>
+        <div class="filter-group">
+          <div class="filter-label">
+            <button type="button" class="filter-toggle" data-collapse-target="filter-countries-group" aria-expanded="true"><span class="chevron">▾</span> Country</button>
+            <span class="filter-bulk">
+              <button type="button" class="filter-bulk-btn" data-target="countries" data-action="check">Check all</button> / <button type="button" class="filter-bulk-btn" data-target="countries" data-action="uncheck">Uncheck all</button>
+            </span>
+          </div>
+          <div class="filter-countries" id="filter-countries-group"></div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-label">
+            Month
+            <span class="filter-bulk">
+              <button type="button" class="filter-bulk-btn" data-target="months" data-action="check">Check all</button> / <button type="button" class="filter-bulk-btn" data-target="months" data-action="uncheck">Uncheck all</button>
+            </span>
+          </div>
+          <div class="filter-countries" id="filter-months"></div>
+          <p class="filter-note">More months get added as sources are found — this list grows over time.</p>
+        </div>
+
+        <button class="filter-reset" id="filter-reset">Reset all filters</button>
+      </aside>
+
+      <div class="page">
+        <header class="page-header">
+          <div class="eyebrow">World Auto Sales · Powertrain</div>
+          <h1>Powertrain Mix by Country</h1>
+          <p class="subtitle">New car registrations by powertrain (Battery Electric, Plug-in Hybrid, Hybrid, Petrol, Diesel, Others) across 31 European markets. Countries ranked by BEV (battery-electric) share. Use the filters to zoom into a powertrain, country, or month.</p>
+        </header>
+
+        <div class="stat-row" id="stat-row"></div>
+
+        <div class="card notes-card">
+          <div class="notes-label">📝 Notes</div>
+          <ul class="notes-body">
+            <li>Norway leads the world in EV adoption by a wide margin — battery-electric alone made up over 97% of May 2026 registrations, a market so far along the transition that petrol and diesel are now a rounding error.</li>
+            <li>Some of the largest EU markets (Germany, France, Italy) still sit in the middle of the pack once hybrids are counted — hybrid-electric (not battery-electric) is the single most popular powertrain in most of Europe right now.</li>
+            <li>A handful of Eastern European markets (Latvia, Romania, Bulgaria) remain almost entirely petrol/diesel, showing how uneven the EV transition still is within the EU itself.</li>
+          </ul>
+        </div>
+
+        <div class="card chart-card">
+          <h2>BEV Share Map</h2>
+          <p class="note">Darker green = higher battery-electric share. Scroll/pinch or use the buttons to zoom, drag to pan. Hover a country for exact figures.</p>
+          <div class="map-wrap">
+            <svg class="map-svg" id="map-svg" viewBox="0 0 940 460" role="img" aria-label="World map shaded by battery-electric vehicle share"></svg>
+            <div class="map-zoom-controls">
+              <button type="button" class="map-zoom-btn" id="zoom-in" title="Zoom in">+</button>
+              <button type="button" class="map-zoom-btn" id="zoom-out" title="Zoom out">−</button>
+              <button type="button" class="map-zoom-btn" id="zoom-reset" title="Reset view">⟲</button>
+            </div>
+            <div class="tooltip" id="map-tooltip"></div>
+          </div>
+          <div class="map-legend" id="map-legend"></div>
+        </div>
+
+        <div class="card chart-card">
+          <h2>Electrified Share by Country</h2>
+          <p class="note">Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments. The number at the right of each bar is that country's BEV year-over-year change (same month, prior year) — hover any segment for exact figures.</p>
+          <div class="chart-legend" id="legend"></div>
+          <div class="rank-rows" id="rank-rows"></div>
+          <div class="tooltip" id="tooltip"></div>
+        </div>
+
+        <div class="card table-card">
+          <h2>Country Detail</h2>
+          <p class="note">Click a header to sort. Units = new car registrations, summed over the selected month(s).</p>
+          <div class="table-scroll">
+            <table id="data-table">
+              <thead>
+                <tr>
+                  <th data-key="country" data-type="str">Country</th>
+                  <th data-key="bev" data-type="num">BEV</th>
+                  <th data-key="phev" data-type="num">PHEV</th>
+                  <th data-key="hev" data-type="num">HEV</th>
+                  <th data-key="petrol" data-type="num">Petrol</th>
+                  <th data-key="diesel" data-type="num">Diesel</th>
+                  <th data-key="others" data-type="num">Others</th>
+                  <th data-key="total" data-type="num">Total</th>
+                  <th data-key="bevPct" data-type="num">BEV %</th>
+                </tr>
+              </thead>
+              <tbody id="table-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <footer class="page-footer">
+          Source: ACEA (European Automobile Manufacturers' Association) · covers EU + EFTA + UK · refreshed monthly<br>
+          Map boundaries: Natural Earth via world-atlas (public domain)
+        </footer>
+      </div>
     </div>
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
 <script>
-// country: [BEV, PHEV, HEV, OTHERS, PETROL, DIESEL, TOTAL] — May 2026, source: ACEA
-const RAW = {
-"Austria": [6598,2932,7239,1,6135,2624,25529],
-"Belgium": [12586,1596,4130,485,13765,1063,33625],
-"Bulgaria": [362,55,292,49,3148,387,4293],
-"Croatia": [327,573,3888,68,3693,1046,9595],
-"Cyprus": [135,103,677,0,372,25,1312],
-"Czechia": [1356,1098,5025,531,8722,3731,20463],
-"Denmark": [15020,98,2265,0,1264,445,19092],
-"Estonia": [96,146,1229,0,218,194,1883],
-"Finland": [3309,722,2042,0,507,203,6783],
-"France": [37412,7648,55602,5605,18926,3291,128484],
-"Germany": [59969,27921,67545,1660,51806,30547,239448],
-"Greece": [951,957,9117,593,4198,426,16242],
-"Hungary": [1319,1202,5272,94,2457,1174,11518],
-"Ireland": [2328,1075,1792,0,1830,1016,8041],
-"Italy": [13274,15164,70334,10402,30768,10101,150043],
-"Latvia": [106,149,0,47,1490,263,2055],
-"Lithuania": [288,543,2797,97,733,374,4832],
-"Luxembourg": [1248,235,1372,0,841,244,3940],
-"Malta": [291,67,268,0,144,30,800],
-"Netherlands": [12363,6816,8186,151,2075,324,29915],
-"Poland": [2015,4601,24818,1042,14095,3020,49591],
-"Portugal": [6988,3896,5999,1616,5780,801,25080],
-"Romania": [798,0,6843,1098,1787,724,11250],
-"Slovakia": [474,376,2383,215,2928,790,7166],
-"Slovenia": [1037,194,908,113,3087,815,6154],
-"Spain": [12049,13741,53414,3807,24744,4139,111894],
-"Sweden": [10718,6645,1990,77,4870,1685,25985],
-"Iceland": [789,229,337,0,148,44,1547],
-"Norway": [15210,97,103,0,32,118,15560],
-"Switzerland": [5140,2293,6818,2,4466,1022,19741],
-"United Kingdom": [43931,22167,56321,0,35068,3175,160662]
+// month key -> { label, raw: { country: [BEV, PHEV, HEV, OTHERS, PETROL, DIESEL, TOTAL] } } — source: ACEA
+const MONTHLY_DATA = {
+  "2026-05": {
+    label: "May 2026",
+    raw: {
+      "Austria": [6598,2932,7239,1,6135,2624,25529],
+      "Belgium": [12586,1596,4130,485,13765,1063,33625],
+      "Bulgaria": [362,55,292,49,3148,387,4293],
+      "Croatia": [327,573,3888,68,3693,1046,9595],
+      "Cyprus": [135,103,677,0,372,25,1312],
+      "Czechia": [1356,1098,5025,531,8722,3731,20463],
+      "Denmark": [15020,98,2265,0,1264,445,19092],
+      "Estonia": [96,146,1229,0,218,194,1883],
+      "Finland": [3309,722,2042,0,507,203,6783],
+      "France": [37412,7648,55602,5605,18926,3291,128484],
+      "Germany": [59969,27921,67545,1660,51806,30547,239448],
+      "Greece": [951,957,9117,593,4198,426,16242],
+      "Hungary": [1319,1202,5272,94,2457,1174,11518],
+      "Ireland": [2328,1075,1792,0,1830,1016,8041],
+      "Italy": [13274,15164,70334,10402,30768,10101,150043],
+      "Latvia": [106,149,0,47,1490,263,2055],
+      "Lithuania": [288,543,2797,97,733,374,4832],
+      "Luxembourg": [1248,235,1372,0,841,244,3940],
+      "Malta": [291,67,268,0,144,30,800],
+      "Netherlands": [12363,6816,8186,151,2075,324,29915],
+      "Poland": [2015,4601,24818,1042,14095,3020,49591],
+      "Portugal": [6988,3896,5999,1616,5780,801,25080],
+      "Romania": [798,0,6843,1098,1787,724,11250],
+      "Slovakia": [474,376,2383,215,2928,790,7166],
+      "Slovenia": [1037,194,908,113,3087,815,6154],
+      "Spain": [12049,13741,53414,3807,24744,4139,111894],
+      "Sweden": [10718,6645,1990,77,4870,1685,25985],
+      "Iceland": [789,229,337,0,148,44,1547],
+      "Norway": [15210,97,103,0,32,118,15560],
+      "Switzerland": [5140,2293,6818,2,4466,1022,19741],
+      "United Kingdom": [43931,22167,56321,0,35068,3175,160662]
+    },
+    // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-05), for YoY %
+    priorYearBev: {
+      "Austria":5428,"Belgium":11347,"Bulgaria":197,"Croatia":55,"Cyprus":119,"Czechia":1210,"Denmark":10949,
+      "Estonia":59,"Finland":2296,"France":19414,"Germany":43060,"Greece":746,"Hungary":799,"Iceland":418,
+      "Ireland":1086,"Italy":7118,"Latvia":161,"Lithuania":222,"Luxembourg":888,"Malta":165,"Netherlands":10459,
+      "Norway":13384,"Poland":2818,"Portugal":4478,"Romania":432,"Slovakia":376,"Slovenia":460,"Spain":8965,
+      "Sweden":9469,"Switzerland":4177,"United Kingdom":32738
+    }
+  }
 };
 
+const FUEL_KEYS = ['bev','phev','hev','petrol','diesel','others'];
 const FUEL_COLORS = {
   bev: "#1e8f5f", phev: "#4fb3a9", hev: "#f4a742",
   petrol: "#2b3a55", diesel: "#8a94a3", others: "#c9c9c9"
 };
 const FUEL_LABELS = { bev:"Battery Electric", phev:"Plug-in Hybrid", hev:"Hybrid", petrol:"Petrol", diesel:"Diesel", others:"Others" };
+const ALL_COUNTRIES = [...new Set(Object.values(MONTHLY_DATA).flatMap(m => Object.keys(m.raw)))].sort();
+const ALL_MONTHS = Object.keys(MONTHLY_DATA);
 
-const DATA = Object.entries(RAW).map(([country, v]) => {
-  const [bev, phev, hev, others, petrol, diesel, total] = v;
-  const electrified = bev + phev + hev;
-  return {
-    country, bev, phev, hev, others, petrol, diesel, total,
-    electrifiedPct: +(electrified / total * 100).toFixed(1)
-  };
-}).sort((a,b) => b.electrifiedPct - a.electrifiedPct);
+// --- filter state ---
+let selectedFuels = new Set(FUEL_KEYS);
+let selectedCountries = new Set(ALL_COUNTRIES);
+let selectedMonths = new Set(ALL_MONTHS);
 
-// --- stat row ---
-const totals = DATA.reduce((acc,d) => {
-  acc.bev += d.bev; acc.phev += d.phev; acc.hev += d.hev;
-  acc.others += d.others; acc.petrol += d.petrol; acc.diesel += d.diesel; acc.total += d.total;
-  return acc;
-}, {bev:0,phev:0,hev:0,others:0,petrol:0,diesel:0,total:0});
-const eurElectrifiedPct = +((totals.bev+totals.phev+totals.hev)/totals.total*100).toFixed(1);
-const topCountry = DATA[0], bottom = DATA[DATA.length-1];
+// --- build filter panel ---
+const fuelsBox = document.getElementById('filter-fuels');
+fuelsBox.innerHTML = FUEL_KEYS.map(k => `
+  <label class="filter-checkbox">
+    <input type="checkbox" data-fuel="${k}" checked>
+    <span class="swatch" style="background:${FUEL_COLORS[k]}"></span>
+    <span class="fc-label">${FUEL_LABELS[k]}</span>
+    <button type="button" class="only-btn" data-only-fuel="${k}">Only</button>
+  </label>`).join('');
 
-const stats = [
-  {label:'Markets Covered', value:DATA.length, small:'EU + EFTA + UK'},
-  {label:'Electrified Share (avg)', value:eurElectrifiedPct+'%', small:'BEV+PHEV+HEV, May 2026'},
-  {label:'Highest', value:topCountry.electrifiedPct+'%', small:topCountry.country},
-  {label:'Lowest', value:bottom.electrifiedPct+'%', small:bottom.country},
-  {label:'Total Registrations', value:totals.total.toLocaleString('en-US'), small:'May 2026'},
-];
-document.getElementById('stat-row').innerHTML = stats.map(s => `
-  <div class="stat">
-    <div class="label">${s.label}</div>
-    <div class="value">${s.value}<small>${s.small}</small></div>
-  </div>`).join('');
+const countriesBox = document.getElementById('filter-countries-group');
+countriesBox.innerHTML = ALL_COUNTRIES.map(c => `
+  <label class="filter-checkbox">
+    <input type="checkbox" data-country="${c}" checked>
+    <span class="fc-label">${c}</span>
+    <button type="button" class="only-btn" data-only-country="${c}">Only</button>
+  </label>`).join('');
 
-// --- legend ---
-document.getElementById('legend').innerHTML = Object.keys(FUEL_COLORS).map(k => `
+const monthsBox = document.getElementById('filter-months');
+monthsBox.innerHTML = ALL_MONTHS.map(m => `
+  <label class="filter-checkbox">
+    <input type="checkbox" data-month="${m}" checked>
+    <span class="fc-label">${MONTHLY_DATA[m].label}</span>
+    <button type="button" class="only-btn" data-only-month="${m}">Only</button>
+  </label>`).join('');
+
+// --- aggregate raw data across selected months, per country ---
+function buildData(){
+  const byCountry = {};
+  ALL_COUNTRIES.forEach(c => { byCountry[c] = { country:c, bev:0, phev:0, hev:0, others:0, petrol:0, diesel:0, total:0, bevPrior:0 }; });
+  [...selectedMonths].forEach(m => {
+    const month = MONTHLY_DATA[m];
+    Object.entries(month.raw).forEach(([country, v]) => {
+      const [bev, phev, hev, others, petrol, diesel, total] = v;
+      const d = byCountry[country];
+      d.bev += bev; d.phev += phev; d.hev += hev;
+      d.others += others; d.petrol += petrol; d.diesel += diesel; d.total += total;
+      d.bevPrior += (month.priorYearBev && month.priorYearBev[country]) || 0;
+    });
+  });
+  return Object.values(byCountry)
+    .filter(d => selectedCountries.has(d.country) && d.total > 0)
+    .map(d => ({
+      ...d,
+      bevPct: d.total ? +(d.bev/d.total*100).toFixed(1) : 0,
+      bevYoyPct: d.bevPrior ? +((d.bev - d.bevPrior)/d.bevPrior*100).toFixed(1) : null,
+    }))
+    .sort((a,b) => b.bevPct - a.bevPct);
+}
+
+// full (country-filtered, month-filtered) data — used for the map & sort order, independent of powertrain filter
+let DATA = [];
+const DATA_BY_NAME = {};
+
+// --- color scale for the map: continuous, pale -> dark green by BEV% (0% = palest) ---
+function makeColorScale(){
+  const maxPct = d3.max(DATA, d => d.bevPct) || 1;
+  return d3.scaleSequential().domain([0, maxPct]).interpolator(d3.interpolate("#EAF3DE", "#173404"));
+}
+let colorScale = null;
+
+function renderLegend(){
+  const maxPct = d3.max(DATA, d => d.bevPct) || 0;
+  const steps = 6;
+  document.getElementById('map-legend').innerHTML = `
+    <div class="legend-label">BEV share</div>
+    <div class="legend-scale">
+      ${Array.from({length:steps}, (_,i) => {
+        const v = maxPct * i / (steps-1);
+        return `<div class="legend-step">
+          <div class="legend-swatch" style="background:${colorScale(v)}"></div>
+          <div class="legend-num">${v.toFixed(0)}%</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="legend-nodata"><span class="legend-swatch" style="background:var(--surface-alt);border:1px solid var(--border)"></span>No data / filtered out</div>
+  `;
+}
+
+// --- map (D3 + local topojson, with zoom/pan) ---
+const mapTooltip = document.getElementById('map-tooltip');
+const mapWrap = document.querySelector('.map-wrap');
+const svg = d3.select('#map-svg');
+const mapG = svg.append('g');
+const projection = d3.geoNaturalEarth1();
+const path = d3.geoPath(projection);
+let geoFeatures = null;
+
+const zoom = d3.zoom()
+  .scaleExtent([1, 8])
+  .on('zoom', (event) => { mapG.attr('transform', event.transform); });
+svg.call(zoom);
+
+document.getElementById('zoom-in').addEventListener('click', () => svg.transition().duration(200).call(zoom.scaleBy, 1.5));
+document.getElementById('zoom-out').addEventListener('click', () => svg.transition().duration(200).call(zoom.scaleBy, 1/1.5));
+document.getElementById('zoom-reset').addEventListener('click', () => svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity));
+
+function renderMap(){
+  if(!geoFeatures) return;
+  mapG.selectAll('path').data(geoFeatures).join('path')
+    .attr('class', d => 'country ' + (DATA_BY_NAME[d.properties.name] ? 'has-data' : 'no-data'))
+    .attr('d', path)
+    .attr('fill', d => {
+      const entry = DATA_BY_NAME[d.properties.name];
+      return entry ? colorScale(entry.bevPct) : null;
+    })
+    .on('pointermove', (e, d) => {
+      const entry = DATA_BY_NAME[d.properties.name];
+      const rect = mapWrap.getBoundingClientRect();
+      mapTooltip.style.left = (e.clientX - rect.left) + 'px';
+      mapTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
+      mapTooltip.style.opacity = 1;
+      mapTooltip.innerHTML = entry
+        ? `${entry.country}<br><strong>${entry.bevPct}%</strong> BEV share · ${entry.total.toLocaleString('en-US')} registrations`
+        : `${d.properties.name}<br>No data`;
+    })
+    .on('pointerleave', () => { mapTooltip.style.opacity = 0; });
+}
+
+fetch('assets/countries-50m.json').then(r => r.json()).then(topology => {
+  const geo = topojson.feature(topology, topology.objects.countries);
+  geoFeatures = geo.features;
+  projection.fitExtent([[10,10],[930,450]], geo);
+  recompute();
+});
+
+// --- legend chips (fuel types) ---
+document.getElementById('legend').innerHTML = FUEL_KEYS.map(k => `
   <div class="legend-chip"><span class="swatch" style="background:${FUEL_COLORS[k]}"></span>${FUEL_LABELS[k]}</div>
 `).join('');
 
-// --- ranked stacked bars ---
+// --- ranked stacked bars, with in-segment % labels ---
 const rankRows = document.getElementById('rank-rows');
 const tooltip = document.getElementById('tooltip');
-const chartCard = document.querySelector('.chart-card');
+const chartCards = document.querySelectorAll('.chart-card');
+const barChartCard = chartCards[1];
 
-function segHTML(d, key){
-  const pct = d[key] / d.total * 100;
-  if(pct <= 0) return '';
-  return `<div class="bar-seg" style="width:${pct}%; background:${FUEL_COLORS[key]}" data-country="${d.country}" data-key="${key}" data-units="${d[key]}" data-pct="${pct.toFixed(1)}"></div>`;
+function segHTML(d, key, denom){
+  const units = d[key];
+  if(units <= 0 || denom <= 0) return '';
+  const pct = units / denom * 100;
+  const showLabel = pct >= 7;
+  return `<div class="bar-seg" style="width:${pct}%; background:${FUEL_COLORS[key]}" data-country="${d.country}" data-key="${key}" data-units="${units}" data-pct="${pct.toFixed(1)}">${showLabel ? `<span class="seg-label">${pct.toFixed(0)}%</span>` : ''}</div>`;
 }
 
-rankRows.innerHTML = DATA.map(d => `
-  <div class="rank-row">
-    <div class="country-label">${d.country}</div>
-    <div class="bar-track">
-      ${['bev','phev','hev','petrol','diesel','others'].map(k => segHTML(d,k)).join('')}
-    </div>
-    <div class="pct-label">${d.electrifiedPct}%</div>
-  </div>`).join('');
+function renderBars(){
+  const fuels = FUEL_KEYS.filter(k => selectedFuels.has(k));
+  rankRows.innerHTML = DATA.map(d => {
+    const denom = fuels.reduce((s,k) => s + d[k], 0);
+    const yoy = d.bevYoyPct;
+    const yoyText = yoy == null ? '—' : `${yoy > 0 ? '+' : ''}${yoy}%`;
+    const yoyClass = yoy == null ? '' : (yoy >= 0 ? 'yoy-up' : 'yoy-down');
+    return `
+    <div class="rank-row">
+      <div class="country-label">${d.country}</div>
+      <div class="bar-track">
+        ${fuels.map(k => segHTML(d,k,denom)).join('')}
+      </div>
+      <div class="pct-label ${yoyClass}" title="BEV year-over-year change">${yoyText}</div>
+    </div>`;
+  }).join('');
+}
 
 rankRows.addEventListener('pointermove', e => {
   const seg = e.target.closest('.bar-seg');
   if(!seg){ tooltip.style.opacity = 0; return; }
   const key = seg.dataset.key;
-  const cardRect = chartCard.getBoundingClientRect();
+  const cardRect = barChartCard.getBoundingClientRect();
   tooltip.style.left = (e.clientX - cardRect.left) + 'px';
   tooltip.style.top = (e.clientY - cardRect.top - 10) + 'px';
   tooltip.style.opacity = 1;
@@ -208,10 +394,42 @@ rankRows.addEventListener('pointermove', e => {
 });
 rankRows.addEventListener('pointerleave', () => { tooltip.style.opacity = 0; });
 
+// --- stat row ---
+function renderStats(){
+  const totals = DATA.reduce((acc,d) => {
+    acc.bev += d.bev; acc.total += d.total; acc.bevPrior += d.bevPrior;
+    return acc;
+  }, {bev:0, total:0, bevPrior:0});
+  const avgPct = totals.total ? +(totals.bev/totals.total*100).toFixed(1) : 0;
+  const totalYoy = totals.bevPrior ? +((totals.bev-totals.bevPrior)/totals.bevPrior*100).toFixed(1) : null;
+  const top = DATA[0], bottom = DATA[DATA.length-1];
+  const monthLabel = selectedMonths.size === 1 ? MONTHLY_DATA[[...selectedMonths][0]].label : `${selectedMonths.size} months`;
+
+  const stats = [
+    {label:'Markets Shown', value:DATA.length, small:`of ${ALL_COUNTRIES.length}`},
+    {label:'BEV Share (avg)', value:avgPct+'%', small:monthLabel},
+    {label:'Highest', value: top ? top.bevPct+'%' : '—', small: top ? top.country : ''},
+    {label:'Lowest', value: bottom ? bottom.bevPct+'%' : '—', small: bottom ? bottom.country : ''},
+    {label:'Total EV Registrations', value:totals.bev.toLocaleString('en-US'), small: totalYoy == null ? monthLabel : `${totalYoy > 0 ? '+' : ''}${totalYoy}% YoY`},
+  ];
+  document.getElementById('stat-row').innerHTML = stats.map(s => `
+    <div class="stat">
+      <div class="label">${s.label}</div>
+      <div class="value">${s.value}<small>${s.small}</small></div>
+    </div>`).join('');
+}
+
 // --- table ---
 const tbody = document.getElementById('table-body');
-function renderTable(rows){
-  tbody.innerHTML = rows.map(d => `
+let sortKey = 'bevPct', sortDir = -1;
+function renderTable(){
+  const avgPct = DATA.length ? DATA.reduce((s,d)=>s+d.bev,0) / DATA.reduce((s,d)=>s+d.total,0) * 100 : 0;
+  const sorted = [...DATA].sort((a,b) => {
+    const av = a[sortKey], bv = b[sortKey];
+    if(typeof av === 'string') return av.localeCompare(bv) * sortDir;
+    return (av-bv) * sortDir;
+  });
+  tbody.innerHTML = sorted.map(d => `
     <tr>
       <td>${d.country}</td>
       <td>${d.bev.toLocaleString('en-US')}</td>
@@ -221,28 +439,112 @@ function renderTable(rows){
       <td>${d.diesel.toLocaleString('en-US')}</td>
       <td>${d.others.toLocaleString('en-US')}</td>
       <td>${d.total.toLocaleString('en-US')}</td>
-      <td class="${d.electrifiedPct >= eurElectrifiedPct ? 'vs-above' : 'vs-below'}">${d.electrifiedPct}%</td>
+      <td class="${d.bevPct >= avgPct ? 'vs-above' : 'vs-below'}">${d.bevPct}%</td>
     </tr>`).join('');
 }
-renderTable(DATA);
-
-let sortKey = 'electrifiedPct', sortDir = -1;
-document.querySelectorAll('thead th').forEach(th=>{
+document.querySelectorAll('#data-table thead th').forEach(th=>{
   th.innerHTML += '<span class="arrow">▲</span>';
   th.addEventListener('click', () => {
     const key = th.dataset.key;
     sortDir = (sortKey === key) ? -sortDir : 1;
     sortKey = key;
-    document.querySelectorAll('thead th').forEach(t=>t.classList.remove('sorted'));
+    document.querySelectorAll('#data-table thead th').forEach(t=>t.classList.remove('sorted'));
     th.classList.add('sorted');
     th.querySelector('.arrow').textContent = sortDir === 1 ? '▲' : '▼';
-    const sorted = [...DATA].sort((a,b)=> {
-      const av = a[sortKey], bv = b[sortKey];
-      if(typeof av === 'string') return av.localeCompare(bv) * sortDir;
-      return (av-bv) * sortDir;
-    });
-    renderTable(sorted);
+    renderTable();
   });
+});
+
+// --- main recompute ---
+function recompute(){
+  DATA = buildData();
+  Object.keys(DATA_BY_NAME).forEach(k => delete DATA_BY_NAME[k]);
+  DATA.forEach(d => { DATA_BY_NAME[d.country] = d; });
+  colorScale = makeColorScale();
+  renderStats();
+  renderBars();
+  renderTable();
+  renderMap();
+  renderLegend();
+}
+
+// --- filter event wiring ---
+fuelsBox.addEventListener('change', e => {
+  const cb = e.target;
+  if(!cb.matches('input[type="checkbox"]')) return;
+  const key = cb.dataset.fuel;
+  if(cb.checked) selectedFuels.add(key); else selectedFuels.delete(key);
+  renderBars();
+});
+fuelsBox.addEventListener('click', e => {
+  const btn = e.target.closest('.only-btn');
+  if(!btn) return;
+  const key = btn.dataset.onlyFuel;
+  selectedFuels = new Set([key]);
+  fuelsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = cb.dataset.fuel === key; });
+  renderBars();
+});
+
+countriesBox.addEventListener('change', e => {
+  const cb = e.target;
+  if(!cb.matches('input[type="checkbox"]')) return;
+  const c = cb.dataset.country;
+  if(cb.checked) selectedCountries.add(c); else selectedCountries.delete(c);
+  recompute();
+});
+countriesBox.addEventListener('click', e => {
+  const btn = e.target.closest('.only-btn');
+  if(!btn) return;
+  const c = btn.dataset.onlyCountry;
+  selectedCountries = new Set([c]);
+  countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = cb.dataset.country === c; });
+  recompute();
+});
+
+monthsBox.addEventListener('change', e => {
+  const cb = e.target;
+  if(!cb.matches('input[type="checkbox"]')) return;
+  const m = cb.dataset.month;
+  if(cb.checked) selectedMonths.add(m); else selectedMonths.delete(m);
+  recompute();
+});
+monthsBox.addEventListener('click', e => {
+  const btn = e.target.closest('.only-btn');
+  if(!btn) return;
+  const m = btn.dataset.onlyMonth;
+  selectedMonths = new Set([m]);
+  monthsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = cb.dataset.month === m; });
+  recompute();
+});
+
+document.querySelectorAll('.filter-bulk-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.target;
+    const check = btn.dataset.action === 'check';
+    if(target === 'fuels'){
+      selectedFuels = check ? new Set(FUEL_KEYS) : new Set();
+      fuelsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = check);
+      renderBars();
+    } else if(target === 'countries'){
+      selectedCountries = check ? new Set(ALL_COUNTRIES) : new Set();
+      countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = check);
+      recompute();
+    } else if(target === 'months'){
+      selectedMonths = check ? new Set(ALL_MONTHS) : new Set();
+      monthsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = check);
+      recompute();
+    }
+  });
+});
+
+document.getElementById('filter-reset').addEventListener('click', () => {
+  selectedFuels = new Set(FUEL_KEYS);
+  selectedCountries = new Set(ALL_COUNTRIES);
+  selectedMonths = new Set(ALL_MONTHS);
+  fuelsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+  countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+  monthsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+  recompute();
 });
 </script>
 </body>

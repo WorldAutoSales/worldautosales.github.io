@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Auto Sales — EV Adoption by Country</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="index.html">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="50" r="46" fill="var(--surface)" stroke="var(--accent)" stroke-width="4"/>
+        <path d="M20 58 L26 40 C28 35 32 32 38 32 L62 32 C68 32 72 35 74 40 L80 58 L80 66 C80 69 78 71 75 71 L71 71 C68 71 66 69 66 66 L66 64 L34 64 L34 66 C34 69 32 71 29 71 L25 71 C22 71 20 69 20 66 Z" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linejoin="round"/>
+        <circle cx="32" cy="64" r="6" fill="var(--text)"/>
+        <circle cx="68" cy="64" r="6" fill="var(--text)"/>
+        <line x1="30" y1="45" x2="70" y2="45" stroke="var(--accent)" stroke-width="3" opacity="0.5"/>
+      </svg>
+      <span class="wordmark">
+        <span class="brand">World Auto</span>
+        <span class="sub">Sales Stats</span>
+      </span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <a href="index.html"><span class="dot"></span>Home</a>
+
+      <div class="nav-heading">Overview</div>
+      <a href="world-auto-sales.html" aria-current="page"><span class="dot"></span>World Auto Sales</a>
+
+      <div class="nav-heading">Powertrain</div>
+      <a href="powertrain-mix-by-country.html"><span class="dot"></span>Mix by Country (Europe)</a>
+
+      <div class="nav-heading">Manufacturers<span class="soon-pill">Soon</span></div>
+      <div class="nav-heading">Regions<span class="soon-pill">Soon</span></div>
+      <div class="nav-heading">Trends<span class="soon-pill">Soon</span></div>
+    </nav>
+
+    <div class="sidebar-footer">
+      Monthly worldwide car sales &amp; powertrain stats — built for video &amp; social.
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page">
+      <header class="page-header">
+        <div class="eyebrow">World Auto Sales · Overview</div>
+        <h1>Electric Vehicle Adoption Around the World</h1>
+        <p class="subtitle">Battery-electric (BEV) share of new car registrations by country, June 2026. Darker green = more of that market's new cars are fully electric. Coverage today: 31 European markets — more regions get added as sources are found.</p>
+      </header>
+
+      <div class="stat-row" id="stat-row"></div>
+
+      <div class="card chart-card">
+        <h2>EV Adoption Map</h2>
+        <p class="note">Shaded by BEV share of June 2026 registrations. Hover a country for exact figures. Grey = no data yet.</p>
+        <div class="map-wrap">
+          <svg class="map-svg" id="map-svg" viewBox="0 0 940 460" role="img" aria-label="World map shaded by battery-electric vehicle share"></svg>
+          <div class="tooltip" id="map-tooltip"></div>
+        </div>
+        <div class="map-legend" id="map-legend"></div>
+      </div>
+
+      <div class="card chart-card">
+        <h2>Full Powertrain Mix by Country</h2>
+        <p class="note">Same 31 markets, ranked by BEV share. Each bar is 100% of that country's June 2026 registrations — hover a segment for exact figures.</p>
+        <div class="chart-legend" id="legend"></div>
+        <div class="rank-rows" id="rank-rows"></div>
+        <div class="tooltip" id="bar-tooltip"></div>
+      </div>
+
+      <div class="card notes-card">
+        <div class="notes-label">📝 Notes</div>
+        <ul class="notes-body">
+          <li>Norway is a massive outlier — its BEV share is so far ahead of every other market that a straight linear color scale would leave the rest of the map looking flat. The map colors are bucketed by rank (quantiles), not raw percentage, so the spread across the other 30 countries stays readable.</li>
+          <li>"EV %" here means battery-electric (BEV) only. Plug-in hybrids (PHEV) and full hybrids (HEV) are shown as their own segments in the stacked bars below, not folded into the map's green.</li>
+          <li>Only Europe is populated so far. As more regional sources get added (Americas, Asia, Africa, Oceania), the map will fill in — the grey countries aren't zero, they're just not sourced yet.</li>
+        </ul>
+      </div>
+
+      <footer class="page-footer">
+        Source: ACEA (European Automobile Manufacturers' Association), June 2026 · covers EU + EFTA + UK · refreshed monthly<br>
+        Map boundaries: Natural Earth via world-atlas (public domain)
+      </footer>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script>
+// country: [BEV, PHEV, HEV, OTHERS, PETROL, DIESEL, TOTAL, abbr] — June 2026, source: ACEA
+const RAW = {
+"Austria": [8993,4040,10472,0,7577,3174,34256,"AT"],
+"Belgium": [17256,2788,5935,652,17344,1474,45449,"BE"],
+"Bulgaria": [478,128,345,5,3613,888,5457,"BG"],
+"Croatia": [344,554,3491,49,3432,1146,9016,"HR"],
+"Cyprus": [170,64,575,0,301,23,1133,"CY"],
+"Czechia": [2151,1546,6312,671,11154,4564,26398,"CZ"],
+"Denmark": [16996,84,2653,0,1161,592,21486,"DK"],
+"Estonia": [146,161,1067,0,336,222,1932,"EE"],
+"Finland": [3642,911,2102,0,616,293,7564,"FI"],
+"France": [55851,12300,79773,7101,28807,4955,188787,"FR"],
+"Germany": [84057,32212,83315,2136,60796,33862,296378,"DE"],
+"Greece": [1346,1064,10308,931,4771,248,18668,"GR"],
+"Hungary": [1561,1364,7337,135,3287,1412,15096,"HU"],
+"Iceland": [809,145,259,0,132,94,1439,"IS"],
+"Ireland": [1119,291,390,0,164,223,2187,"IE"],
+"Italy": [14869,15627,67147,12691,26493,9524,146351,"IT"],
+"Latvia": [287,387,0,84,1408,223,2389,"LV"],
+"Lithuania": [475,640,2504,112,848,437,5016,"LT"],
+"Luxembourg": [1583,316,1761,0,1153,296,5109,"LU"],
+"Malta": [236,57,148,0,131,47,619,"MT"],
+"Netherlands": [17257,8128,10854,194,2275,307,39015,"NL"],
+"Poland": [3050,5377,28369,1559,17005,3619,58979,"PL"],
+"Portugal": [7572,3917,6435,2183,5481,761,26349,"PT"],
+"Romania": [1496,0,8753,1783,3281,807,16120,"RO"],
+"Slovakia": [694,488,2932,292,3533,1400,9339,"SK"],
+"Slovenia": [1690,188,1000,111,3004,691,6684,"SI"],
+"Spain": [14224,15567,58890,4715,31259,3771,128426,"ES"],
+"Sweden": [13014,7515,1740,68,5603,1819,29759,"SE"],
+"Norway": [18875,175,334,0,23,151,19558,"NO"],
+"Switzerland": [6652,3432,8609,1,5037,1476,25207,"CH"],
+"United Kingdom": [63950,26702,74830,0,44205,3479,213166,"GB"]
+};
+
+const FUEL_COLORS = {
+  bev: "#c1621f", phev: "#4fb3a9", hev: "#f4a742",
+  petrol: "#2b3a55", diesel: "#8a94a3", others: "#c9c9c9"
+};
+const FUEL_LABELS = { bev:"Battery Electric", phev:"Plug-in Hybrid", hev:"Hybrid", petrol:"Petrol", diesel:"Diesel", others:"Others" };
+const GREEN_STEPS = ["#EAF3DE","#C0DD97","#97C459","#639922","#3B6D11","#173404"];
+
+const DATA = Object.entries(RAW).map(([country, v]) => {
+  const [bev, phev, hev, others, petrol, diesel, total, abbr] = v;
+  return { country, abbr, bev, phev, hev, others, petrol, diesel, total, evPct: +(bev/total*100).toFixed(1) };
+}).sort((a,b) => b.evPct - a.evPct);
+
+const DATA_BY_NAME = Object.fromEntries(DATA.map(d => [d.country, d]));
+
+// --- stat row ---
+const totals = DATA.reduce((acc,d) => {
+  acc.bev += d.bev; acc.total += d.total;
+  return acc;
+}, {bev:0, total:0});
+const worldEvPct = +(totals.bev/totals.total*100).toFixed(1);
+const topCountry = DATA[0], bottom = DATA[DATA.length-1];
+
+const stats = [
+  {label:'Markets Covered', value:DATA.length, small:'EU + EFTA + UK'},
+  {label:'BEV Share (avg)', value:worldEvPct+'%', small:'weighted, June 2026'},
+  {label:'Highest', value:topCountry.evPct+'%', small:topCountry.country},
+  {label:'Lowest', value:bottom.evPct+'%', small:bottom.country},
+  {label:'Total Registrations', value:totals.total.toLocaleString('en-US'), small:'June 2026'},
+];
+document.getElementById('stat-row').innerHTML = stats.map(s => `
+  <div class="stat">
+    <div class="label">${s.label}</div>
+    <div class="value">${s.value}<small>${s.small}</small></div>
+  </div>`).join('');
+
+// --- color scale (quantile buckets so Norway's outlier share doesn't flatten the rest) ---
+const evValues = DATA.map(d => d.evPct);
+const colorScale = d3.scaleQuantile().domain(evValues).range(GREEN_STEPS);
+const breaks = colorScale.quantiles();
+const edges = [d3.min(evValues), ...breaks, d3.max(evValues)];
+
+document.getElementById('map-legend').innerHTML = `
+  <div class="legend-label">BEV share</div>
+  <div class="legend-scale">
+    ${GREEN_STEPS.map((c,i) => `
+      <div class="legend-step">
+        <div class="legend-swatch" style="background:${c}"></div>
+        <div class="legend-num">${edges[i].toFixed(1)}–${edges[i+1].toFixed(1)}%</div>
+      </div>`).join('')}
+  </div>
+  <div class="legend-nodata"><span class="legend-swatch" style="background:var(--surface-alt);border:1px solid var(--border)"></span>No data</div>
+`;
+
+// --- map ---
+const mapTooltip = document.getElementById('map-tooltip');
+const mapWrap = document.querySelector('.map-wrap');
+const svg = d3.select('#map-svg');
+const projection = d3.geoNaturalEarth1();
+const path = d3.geoPath(projection);
+
+fetch('assets/countries-50m.json').then(r => r.json()).then(topology => {
+  const geo = topojson.feature(topology, topology.objects.countries);
+  projection.fitExtent([[10,10],[930,450]], geo);
+
+  svg.selectAll('path').data(geo.features).join('path')
+    .attr('class', d => 'country ' + (DATA_BY_NAME[d.properties.name] ? 'has-data' : 'no-data'))
+    .attr('d', path)
+    .attr('fill', d => {
+      const entry = DATA_BY_NAME[d.properties.name];
+      return entry ? colorScale(entry.evPct) : null;
+    })
+    .on('pointermove', (e, d) => {
+      const entry = DATA_BY_NAME[d.properties.name];
+      const rect = mapWrap.getBoundingClientRect();
+      mapTooltip.style.left = (e.clientX - rect.left) + 'px';
+      mapTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
+      mapTooltip.style.opacity = 1;
+      mapTooltip.innerHTML = entry
+        ? `${entry.country}<br><strong>${entry.evPct}%</strong> BEV share · ${entry.total.toLocaleString('en-US')} registrations`
+        : `${d.properties.name}<br>No data yet`;
+    })
+    .on('pointerleave', () => { mapTooltip.style.opacity = 0; });
+});
+
+// --- legend chips (fuel types) ---
+document.getElementById('legend').innerHTML = Object.keys(FUEL_COLORS).map(k => `
+  <div class="legend-chip"><span class="swatch" style="background:${FUEL_COLORS[k]}"></span>${FUEL_LABELS[k]}</div>
+`).join('');
+
+// --- ranked stacked bars ---
+const rankRows = document.getElementById('rank-rows');
+const barTooltip = document.getElementById('bar-tooltip');
+const chartCards = document.querySelectorAll('.chart-card');
+const barChartCard = chartCards[1];
+
+function segHTML(d, key){
+  const pct = d[key] / d.total * 100;
+  if(pct <= 0) return '';
+  return `<div class="bar-seg" style="width:${pct}%; background:${FUEL_COLORS[key]}" data-country="${d.country}" data-key="${key}" data-units="${d[key]}" data-pct="${pct.toFixed(1)}"></div>`;
+}
+
+rankRows.innerHTML = DATA.map(d => `
+  <div class="rank-row">
+    <div class="country-label">${d.country}</div>
+    <div class="bar-track">
+      ${['bev','phev','hev','petrol','diesel','others'].map(k => segHTML(d,k)).join('')}
+    </div>
+    <div class="pct-label">${d.evPct}%</div>
+  </div>`).join('');
+
+rankRows.addEventListener('pointermove', e => {
+  const seg = e.target.closest('.bar-seg');
+  if(!seg){ barTooltip.style.opacity = 0; return; }
+  const key = seg.dataset.key;
+  const cardRect = barChartCard.getBoundingClientRect();
+  barTooltip.style.left = (e.clientX - cardRect.left) + 'px';
+  barTooltip.style.top = (e.clientY - cardRect.top - 10) + 'px';
+  barTooltip.style.opacity = 1;
+  barTooltip.innerHTML = `${seg.dataset.country} — ${FUEL_LABELS[key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)`;
+});
+rankRows.addEventListener('pointerleave', () => { barTooltip.style.opacity = 0; });
+</script>
+</body>
+</html>
