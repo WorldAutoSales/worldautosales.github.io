@@ -132,6 +132,13 @@
           <div class="tooltip" id="tooltip"></div>
         </div>
 
+        <div class="card chart-card">
+          <h2>Volume vs. BEV Share</h2>
+          <p class="note">X = total vehicles sold, Y = BEV share of that total, bubble size = number of BEV units sold. Hover a bubble for exact figures.</p>
+          <svg class="chart" id="bubble-svg" viewBox="0 0 900 460" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="tooltip" id="bubble-tooltip"></div>
+        </div>
+
         <div class="card table-card">
           <h2>Country Detail</h2>
           <p class="note">Click a header to sort. Units = new car registrations, summed over the selected month(s).</p>
@@ -424,6 +431,74 @@ rankRows.addEventListener('pointermove', e => {
 });
 rankRows.addEventListener('pointerleave', () => { tooltip.style.opacity = 0; });
 
+// --- bubble chart: total volume (x) vs BEV share (y), bubble size = BEV units ---
+const bubbleSvg = d3.select('#bubble-svg');
+const bubbleTooltip = document.getElementById('bubble-tooltip');
+const bubbleWrap = document.getElementById('bubble-svg').closest('.chart-card');
+
+function renderBubbleChart(){
+  const W = 900, H = 460, M = {top:20, right:30, bottom:50, left:70};
+  const innerW = W - M.left - M.right;
+  const innerH = H - M.top - M.bottom;
+
+  bubbleSvg.selectAll('*').remove();
+  if(!DATA.length) return;
+
+  const xMax = d3.max(DATA, d => d.total) || 1;
+  const yMax = d3.max(DATA, d => d.bevPct) || 1;
+  const rMax = d3.max(DATA, d => d.bev) || 1;
+
+  const xScale = d3.scaleLinear().domain([0, xMax * 1.08]).range([0, innerW]);
+  const yScale = d3.scaleLinear().domain([0, yMax * 1.12]).range([innerH, 0]);
+  const rScale = d3.scaleSqrt().domain([0, rMax]).range([3, 42]);
+
+  const g = bubbleSvg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+
+  g.append('g')
+    .attr('class', 'bubble-axis')
+    .attr('transform', `translate(0,${innerH})`)
+    .call(d3.axisBottom(xScale).ticks(6).tickFormat(d3.format('~s')));
+
+  g.append('g')
+    .attr('class', 'bubble-axis')
+    .call(d3.axisLeft(yScale).ticks(6).tickFormat(d => d + '%'));
+
+  g.append('text')
+    .attr('class', 'bubble-axis-title')
+    .attr('x', innerW/2)
+    .attr('y', innerH + 40)
+    .text('Total vehicles sold →');
+
+  g.append('text')
+    .attr('class', 'bubble-axis-title')
+    .attr('transform', `translate(-50,${innerH/2}) rotate(-90)`)
+    .text('BEV share (%) →');
+
+  const nodes = g.selectAll('.bubble-node').data(DATA, d => d.country).join('circle')
+    .attr('class', 'bubble-node')
+    .attr('cx', d => xScale(d.total))
+    .attr('cy', d => yScale(d.bevPct))
+    .attr('r', d => rScale(d.bev));
+
+  nodes
+    .on('pointermove', (e, d) => {
+      const rect = bubbleWrap.getBoundingClientRect();
+      bubbleTooltip.style.left = (e.clientX - rect.left) + 'px';
+      bubbleTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
+      bubbleTooltip.style.opacity = 1;
+      bubbleTooltip.innerHTML = `${d.country}<br>Total sold: <strong>${d.total.toLocaleString('en-US')}</strong><br>BEV share: <strong>${d.bevPct}%</strong><br>BEV units: <strong>${d.bev.toLocaleString('en-US')}</strong>`;
+    })
+    .on('pointerleave', () => { bubbleTooltip.style.opacity = 0; });
+
+  // label the biggest bubbles only, to avoid clutter
+  const topByBev = new Set([...DATA].sort((a,b) => b.bev - a.bev).slice(0, 8).map(d => d.country));
+  g.selectAll('.bubble-label').data(DATA.filter(d => topByBev.has(d.country)), d => d.country).join('text')
+    .attr('class', 'bubble-label')
+    .attr('x', d => xScale(d.total))
+    .attr('y', d => yScale(d.bevPct) - rScale(d.bev) - 4)
+    .text(d => d.country);
+}
+
 // --- stat row ---
 function renderStats(){
   const totals = DATA.reduce((acc,d) => {
@@ -496,6 +571,7 @@ function recompute(){
   renderTable();
   renderMap();
   renderLegend();
+  renderBubbleChart();
 }
 
 // --- filter event wiring ---

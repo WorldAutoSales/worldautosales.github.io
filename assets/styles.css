@@ -302,6 +302,37 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
 .mode-btn:hover{ color:var(--text); }
 .mode-btn.active{ background:var(--accent); color:var(--surface); }
 
+/* ---------- bubble chart (volume vs BEV share) ---------- */
+.bubble-axis .domain, .bubble-axis .tick line{ stroke:var(--border); }
+.bubble-axis .tick text{
+  fill:var(--text-muted);
+  font-size:10px;
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+}
+.bubble-axis-title{
+  fill:var(--text-muted);
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+}
+.bubble-node{
+  fill:var(--accent);
+  fill-opacity:0.5;
+  stroke:var(--accent-strong);
+  stroke-width:1;
+  cursor:pointer;
+  transition:fill-opacity 0.1s ease;
+}
+.bubble-node:hover{ fill-opacity:0.85; }
+.bubble-label{
+  fill:var(--text);
+  font-size:9.5px;
+  font-weight:600;
+  pointer-events:none;
+  text-anchor:middle;
+}
+
 /* ---------- ranked bar rows (country comparison) ---------- */
 .rank-rows-header{
   display:flex;
