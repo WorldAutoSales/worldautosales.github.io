@@ -49,14 +49,14 @@
       <header class="page-header">
         <div class="eyebrow">World Auto Sales · Overview</div>
         <h1>Electric Vehicle Adoption Around the World</h1>
-        <p class="subtitle">Battery-electric (BEV) share of new car registrations by country, June 2026. Darker green = more of that market's new cars are fully electric. Coverage today: 31 European markets — more regions get added as sources are found.</p>
+        <p class="subtitle">Battery-electric (BEV) share of new car registrations by country. Darker green = more of that market's new cars are fully electric. Coverage today: 31 European markets (June 2026) plus Canada (Q1 2026, quarterly) — more regions get added as sources are found.</p>
       </header>
 
       <div class="stat-row" id="stat-row"></div>
 
       <div class="card chart-card">
         <h2>EV Adoption Map</h2>
-        <p class="note">Shaded by BEV share of June 2026 registrations. Hover a country for exact figures, click a country for its monthly trend. Grey = no data yet.</p>
+        <p class="note">Shaded by BEV share of each market's latest available month. Hover a country for exact figures, click a country for its monthly trend. Grey = no data yet.</p>
         <div class="map-wrap">
           <svg class="map-svg" id="map-svg" viewBox="0 0 940 460" role="img" aria-label="World map shaded by battery-electric vehicle share"></svg>
           <div class="tooltip" id="map-tooltip"></div>
@@ -84,7 +84,7 @@
             <button type="button" class="mode-btn" data-sort="icePct">% Petrol+Diesel</button>
           </div>
         </div>
-        <p class="note">Same 31 markets. Each bar is 100% of that country's June 2026 registrations — hover a segment for exact figures.</p>
+        <p class="note">Same markets as above. Each bar is 100% of that country's latest available month — hover a segment for exact figures.</p>
         <div class="chart-legend" id="legend"></div>
         <div class="rank-rows-header">
           <span class="rrh-spacer"></span>
@@ -100,12 +100,12 @@
         <ul class="notes-body">
           <li>Norway is a massive outlier — its BEV share is so far ahead of every other market that a straight linear color scale would leave the rest of the map looking flat. The map colors are bucketed by rank (quantiles), not raw percentage, so the spread across the other 30 countries stays readable.</li>
           <li>"EV %" here means battery-electric (BEV) only. Plug-in hybrids (PHEV) and full hybrids (HEV) are shown as their own segments in the stacked bars below, not folded into the map's green.</li>
-          <li>Only Europe is populated so far. As more regional sources get added (Americas, Asia, Africa, Oceania), the map will fill in — the grey countries aren't zero, they're just not sourced yet.</li>
+          <li>Canada joined in Q1 2026. Statistics Canada reports quarterly, not monthly like Europe's ACEA source — its quarterly total is split evenly across the quarter's 3 months rather than fabricating a real monthly breakdown, and its "latest month" trails Europe's until a newer quarter is published. Most of Asia, Africa, South America, and Oceania are still unsourced; the grey countries aren't zero, they're just not sourced yet.</li>
         </ul>
       </div>
 
       <footer class="page-footer">
-        Source: ACEA (European Automobile Manufacturers' Association), June 2026 · covers EU + EFTA + UK · refreshed monthly<br>
+        Sources: ACEA (European Automobile Manufacturers' Association, EU + EFTA + UK, refreshed monthly) · Statistics Canada, Table 20-10-0025-01 (refreshed quarterly)<br>
         Map boundaries: Natural Earth via world-atlas (public domain)
       </footer>
     </div>
@@ -149,6 +149,27 @@ const HIST = {
 "Sweden":[[4202,3401,1630,3153,1606,609,14601],[6123,3841,1769,4097,2004,608,18442],[12577,5540,2652,6424,2312,756,30261],[6928,4549,1707,4743,2086,573,20586],[11657,5975,2038,5835,2390,595,28490],[10956,5798,2015,6595,2282,637,28283],[6487,3882,1157,3901,1451,422,17300],[9784,4557,1889,5286,1812,543,23871],[12500,5337,1924,5624,2155,595,28135],[9408,5749,2008,5372,1884,595,25016],[10076,5307,2444,5057,1776,746,25406],[11510,7064,2235,6110,2043,474,29436],[4936,4072,1819,3943,1717,677,17164],[5229,4492,1894,4794,1584,773,18766],[8339,5551,1833,5695,1705,768,23891],[6801,5717,2131,5177,1506,645,21977],[7614,5824,2878,6258,1914,606,25094],[9118,5240,2580,6225,1852,386,25401],[5516,4223,1616,3418,1422,142,16337],[6790,3863,2321,4252,1579,231,19036],[11535,5193,2227,5219,1243,308,25725],[8780,6789,2686,4993,1434,344,25026],[9011,6310,2620,5290,1296,317,24844],[10697,5797,2553,5523,1520,231,26321],[5660,4464,3062,3811,957,1678,19632],[6872,5106,1942,4503,1182,3,19608],[8386,6316,2720,5194,1587,1,24204],[8555,6829,2392,4869,1643,4,24292],[9469,6767,2690,5185,1547,17,25675],[10725,7264,2345,5660,1570,1,27565],[6172,4840,1648,3903,1118,3,17684],[6772,5134,2861,4031,1368,2,20168],[9619,7622,2530,4379,1045,4,25199],[8707,7111,2702,4280,1249,29,24078],[8496,5253,2617,3566,1015,69,21016],[10290,6081,2846,3448,1131,81,23877],[6710,3582,2135,2693,822,99,16041],[7650,4912,2128,3352,1200,99,19341],[10875,6466,2450,4987,1647,153,26578],[9834,5810,2121,4488,1766,128,24147],[10718,6645,1990,4870,1685,77,25985],[13014,7515,1740,5603,1819,68,29759]],
 "Switzerland":[[2840,1387,4667,5905,1628,10,16437],[2598,1432,4911,6642,1610,5,17198],[4812,2131,6920,8955,2343,23,25184],[3375,1443,5061,6617,1648,5,18149],[4313,1683,5900,7486,2179,9,21570],[5226,2302,6748,8476,2457,5,25214],[3649,1777,4887,6301,1981,4,18599],[4289,1715,5165,6038,1769,1,18977],[5133,2086,5787,6747,1824,1,21578],[4505,2063,5730,6308,1747,2,20355],[4748,2164,6235,6811,2045,2,22005],[7240,2782,7074,7580,2268,4,26948],[2364,1582,4620,4965,1698,7,15236],[3301,1684,5336,6274,2178,15,18788],[4765,1994,7277,7382,2048,1,23467],[3179,1713,6380,6716,2052,1,20041],[3568,1779,6595,6881,2440,2,21265],[4216,1802,7921,6497,2252,1,22689],[3434,1553,6313,5252,1877,1,18430],[3421,1231,5604,4261,1410,0,15927],[4560,1704,6972,5232,1683,4,20155],[3564,1763,6861,4960,1605,0,18753],[4151,1657,7298,5092,1499,1,19698],[5624,2263,8899,6330,2235,3,25354],[2910,1355,5478,3822,1221,2,14788],[3402,1462,6000,4071,1274,3,16212],[4421,2083,8259,5319,1607,1,21690],[3480,1975,6841,5027,1340,1,18664],[4177,2304,7189,4913,1386,0,19969],[4813,2413,7899,5192,1491,2,21810],[4083,2406,6897,4689,1553,1,19629],[3257,1989,5840,3873,1177,0,16136],[5182,2553,6805,4369,1121,1,20031],[4175,2355,6443,4305,1173,1,18452],[4766,2263,6736,4613,1237,0,19615],[8584,3016,8231,5539,1373,1,26744],[2913,1709,5557,2975,873,0,14027],[3113,1829,6009,3812,933,1,15697],[5388,2894,8884,4894,1198,0,23258],[4683,2299,6611,4040,984,1,18618],[5140,2293,6818,4466,1022,2,19741],[6652,3432,8609,5037,1476,1,25207]],
 "United Kingdom":[[17294,9109,41338,58973,5280,0,131994],[12310,4723,21749,32311,3348,0,74441],[46626,17933,92964,119278,11024,0,287825],[20522,8595,41163,56885,5825,0,132990],[24513,9025,46142,59766,5758,0,145204],[31700,12770,56208,70367,6221,0,177266],[23010,11702,45372,58150,5687,0,143921],[17243,6601,23410,34756,3647,0,85657],[45323,18535,93393,105463,9896,0,272610],[23943,14285,47737,62303,5261,0,153529],[24359,15871,49757,61875,4663,0,156525],[27841,12162,41838,54360,4891,0,141092],[20935,11944,47435,58236,4326,0,142876],[14991,6098,26140,34579,3078,0,84886],[48388,24517,116664,119005,9212,0,317786],[22717,10493,45685,51210,4169,0,134274],[26031,11866,51736,53643,4402,0,147678],[34034,16604,63980,59942,4703,0,179263],[27335,13149,53982,49428,3623,0,147517],[19113,5786,29076,27894,2706,0,84575],[56387,24486,104237,83100,7029,0,275239],[29802,13832,51251,45071,4332,0,144288],[38581,15687,53495,41925,3922,0,153610],[43656,12716,46292,34820,3302,0,140786],[29634,12598,51785,41630,3698,0,139345],[21244,7273,29849,22986,2702,0,84054],[69313,33815,147931,97566,8478,0,357103],[24558,14073,44488,33980,3232,0,120331],[32738,17898,55140,40703,3591,0,150070],[47354,21382,67039,50215,5326,0,191316],[29825,17489,51531,37312,3997,0,140154],[21969,9803,28366,20536,2234,0,82908],[72779,38308,119917,76690,5197,0,312891],[36830,17601,50527,36760,3230,0,144948],[39965,18005,51524,38561,3099,0,151154],[47139,16898,47291,32346,2575,0,146249],[29654,18557,55653,37109,3152,2,144127],[21840,10438,34758,20984,2080,0,90100],[86120,49671,153785,85137,5914,0,380627],[39084,20597,53652,33292,2622,0,149247],[43931,22167,56321,35068,3175,0,160662],[63950,26702,74830,44205,3479,0,213166]],
+// Canada: Statistics Canada Table 20-10-0025-01, quarterly (Jan/Apr/Jul/Oct). Each quarter's total is
+// divided by 3 and repeated across its 3 months (no real monthly breakdown exists at the source) — user's
+// explicit choice over leaving gaps or repeating the full quarterly figure per month. Q2 2026 (Apr-Jun)
+// not yet published as of 2026-08-20 (StatCan's past cadence points to ~September 2026), so those 3
+// trailing months are left null rather than guessed.
+"Canada":[
+  [8072,2254,7640,95139,5522,2,118629],[8072,2254,7640,95139,5522,2,118629],[8072,2254,7640,95139,5522,2,118629],
+  [11878,4017,13000,122382,6589,2,157868],[11878,4017,13000,122382,6589,2,157868],[11878,4017,13000,122382,6589,2,157868],
+  [14588,4548,12917,114367,6035,1,152456],[14588,4548,12917,114367,6035,1,152456],[14588,4548,12917,114367,6035,1,152456],
+  [13351,4211,11672,106949,6530,1,142714],[13351,4211,11672,106949,6530,1,142714],[13351,4211,11672,106949,6530,1,142714],
+  [11927,4214,11645,104526,5993,1,138306],[11927,4214,11645,104526,5993,1,138306],[11927,4214,11645,104526,5993,1,138306],
+  [16184,5749,13648,127900,6974,4,170459],[16184,5749,13648,127900,6974,4,170459],[16184,5749,13648,127900,6974,4,170459],
+  [18732,6530,15452,113192,7289,1,161196],[18732,6530,15452,113192,7289,1,161196],[18732,6530,15452,113192,7289,1,161196],
+  [20601,6471,15607,98845,6327,1,147852],[20601,6471,15607,98845,6327,1,147852],[20601,6471,15607,98845,6327,1,147852],
+  [8800,3609,17943,104057,7879,3,142291],[8800,3609,17943,104057,7879,3,142291],[8800,3609,17943,104057,7879,3,142291],
+  [9845,5626,21944,135139,8078,0,180632],[9845,5626,21944,135139,8078,0,180632],[9845,5626,21944,135139,8078,0,180632],
+  [9549,6191,19984,119216,7152,2,162094],[9549,6191,19984,119216,7152,2,162094],[9549,6191,19984,119216,7152,2,162094],
+  [10494,5241,16826,99042,5973,6,137582],[10494,5241,16826,99042,5973,6,137582],[10494,5241,16826,99042,5973,6,137582],
+  [9936,4435,17861,94454,5848,0,132534],[9936,4435,17861,94454,5848,0,132534],[9936,4435,17861,94454,5848,0,132534],
+  null,null,null
+],
 };
 const FUEL_KEYS = ['bev','phev','hev','petrol','diesel','others'];
 const FUEL_COLORS = {
@@ -168,19 +189,33 @@ function rowAt(country, idx){
   return (idx >= 0 && idx < rows.length) ? rows[idx] : null;
 }
 
+// most countries have a value at LATEST_IDX, but a country on a coarser (e.g. quarterly)
+// source can have trailing nulls — use its own most recent available month instead.
+function latestValidIdx(country){
+  const rows = HIST[country];
+  for(let i = Math.min(LATEST_IDX, rows.length - 1); i >= 0; i--){
+    if(rows[i]) return i;
+  }
+  return -1;
+}
+
 const DATA = COUNTRIES.map(country => {
-  const [bev,phev,hev,petrol,diesel,others,total] = rowAt(country, LATEST_IDX);
-  const prior = rowAt(country, PRIOR_YEAR_IDX);
+  const idx = latestValidIdx(country);
+  const row = rowAt(country, idx);
+  if(!row) return null;
+  const [bev,phev,hev,petrol,diesel,others,total] = row;
+  const prior = rowAt(country, idx - 12);
   const priorBev = prior ? prior[0] : null;
   const yoyPct = priorBev ? +(((bev-priorBev)/priorBev)*100).toFixed(1) : null;
   return {
     country, bev, phev, hev, petrol, diesel, others, total,
+    asOf: MONTHS[idx],
     evPct: +(bev/total*100).toFixed(1),
     electrifiedPct: +(((bev+phev+hev)/total)*100).toFixed(1),
     icePct: +(((petrol+diesel)/total)*100).toFixed(1),
     yoyPct
   };
-});
+}).filter(Boolean);
 
 const DATA_BY_NAME = Object.fromEntries(DATA.map(d => [d.country, d]));
 
@@ -191,11 +226,11 @@ const sortedByEv = [...DATA].sort((a,b) => b.evPct - a.evPct);
 const topCountry = sortedByEv[0], bottomCountry = sortedByEv[sortedByEv.length-1];
 
 const stats = [
-  {label:'Markets Covered', value:DATA.length, small:'EU + EFTA + UK'},
-  {label:'BEV Share (avg)', value:worldEvPct+'%', small:'weighted, '+LATEST_MONTH},
+  {label:'Markets Covered', value:DATA.length, small:'EU + EFTA + UK + Canada'},
+  {label:'BEV Share (avg)', value:worldEvPct+'%', small:'weighted, latest per market'},
   {label:'Highest', value:topCountry.evPct+'%', small:topCountry.country},
   {label:'Lowest', value:bottomCountry.evPct+'%', small:bottomCountry.country},
-  {label:'Total Registrations', value:totals.total.toLocaleString('en-US'), small:LATEST_MONTH},
+  {label:'Total Registrations', value:totals.total.toLocaleString('en-US'), small:'latest per market'},
 ];
 document.getElementById('stat-row').innerHTML = stats.map(s => `
   <div class="stat">
@@ -247,7 +282,8 @@ fetch('assets/countries-50m.json').then(r => r.json()).then(topology => {
       mapTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
       mapTooltip.style.opacity = 1;
       mapTooltip.innerHTML = entry
-        ? `${entry.country}<br><strong>${entry.evPct}%</strong> BEV share · ${entry.total.toLocaleString('en-US')} registrations`
+        ? `${entry.country}<br><strong>${entry.evPct}%</strong> BEV share · ${entry.total.toLocaleString('en-US')} registrations` +
+          (entry.asOf !== LATEST_MONTH ? `<br><span style="opacity:.7">as of ${entry.asOf}</span>` : '')
         : `${d.properties.name}<br>No data yet`;
     })
     .on('pointerleave', () => { mapTooltip.style.opacity = 0; })
@@ -349,11 +385,12 @@ function renderTrendChart(country){
 
   const rows = HIST[country];
   const series = rows.map((r,i) => {
+    if(!r) return null;
     const [bev,phev,hev,petrol,diesel,others,total] = r;
     return { i, month: MONTHS[i], total,
       bev: bev/total*100, phev: phev/total*100, hev: hev/total*100,
       petrol: petrol/total*100, diesel: diesel/total*100, others: others/total*100 };
-  });
+  }).filter(Boolean);
 
   const xScale = d3.scaleLinear().domain([0, MONTHS.length-1]).range([0, innerW]);
   const yMax = Math.max(10, d3.max(series, d => Math.max(d.bev,d.phev,d.hev,d.petrol,d.diesel,d.others)) * 1.15);
@@ -386,9 +423,12 @@ function renderTrendChart(country){
     .attr('fill', 'transparent')
     .on('pointermove', (e) => {
       const [mx] = d3.pointer(e);
-      const idx = Math.max(0, Math.min(series.length-1, Math.round(xScale.invert(mx))));
-      const d = series[idx];
-      guide.attr('x1', xScale(idx)).attr('x2', xScale(idx)).style('opacity', 1);
+      const idx = Math.max(0, Math.min(MONTHS.length-1, Math.round(xScale.invert(mx))));
+      // series can have gaps (e.g. a quarterly source with no monthly breakdown), so find
+      // the nearest actual point to the hovered index rather than indexing directly into it
+      const d = series.reduce((best, s) => (best === null || Math.abs(s.i - idx) < Math.abs(best.i - idx)) ? s : best, null);
+      if(!d) return;
+      guide.attr('x1', xScale(d.i)).attr('x2', xScale(d.i)).style('opacity', 1);
       const rect = trendWrap.getBoundingClientRect();
       trendTooltip.style.left = (e.clientX - rect.left) + 'px';
       trendTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
