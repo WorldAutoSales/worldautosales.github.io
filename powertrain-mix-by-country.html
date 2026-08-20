@@ -78,21 +78,18 @@
           <p class="filter-note">Sorted by continent, then country — makes it easier to zero in as more regions get added.</p>
         </div>
 
-        <div class="filter-group">
-          <div class="filter-label">
-            Month
-            <span class="filter-bulk">
-              <button type="button" class="filter-bulk-btn" data-target="months" data-action="check">Check all</button> / <button type="button" class="filter-bulk-btn" data-target="months" data-action="uncheck">Uncheck all</button>
-            </span>
-          </div>
-          <div class="filter-countries" id="filter-months"></div>
-          <p class="filter-note">More months get added as sources are found — this list grows over time.</p>
-        </div>
-
         <button class="filter-reset" id="filter-reset">Reset all filters</button>
       </aside>
 
       <div class="page">
+        <div class="filter-group month-filter-top">
+          <div class="filter-label">
+            Month
+          </div>
+          <div class="filter-countries" id="filter-months"></div>
+          <p class="filter-note">Pick one month at a time. More months get added as sources are found — this list grows over time.</p>
+        </div>
+
         <header class="page-header">
           <div class="eyebrow">World Auto Sales · Powertrain</div>
           <h1>Powertrain Mix by Country</h1>
@@ -155,12 +152,7 @@
 
         <div class="card chart-card">
           <h2>Volume vs. BEV Share</h2>
-          <p class="note">X = number of BEV units sold, Y = BEV share of that country's total, bubble size = total registrations. Each bubble is itself a mini pie of that country's mix. Hover a bubble for exact figures.</p>
-          <div class="chart-legend">
-            <div class="legend-chip"><span class="swatch" style="background:#1e8f5f"></span>BEV</div>
-            <div class="legend-chip"><span class="swatch" style="background:#2563eb"></span>PHEV</div>
-            <div class="legend-chip"><span class="swatch" style="background:#161616"></span>Rest (HEV/Petrol/Diesel/Others)</div>
-          </div>
+          <p class="note">X = number of BEV units sold, Y = BEV share of that country's total. Each country is its own flag, same size for every market. Hover a flag for exact figures.</p>
           <svg class="chart" id="bubble-svg" viewBox="0 0 900 460" preserveAspectRatio="xMidYMid meet"></svg>
           <div class="tooltip" id="bubble-tooltip"></div>
         </div>
@@ -279,6 +271,15 @@ const COUNTRY_CONTINENT = {
   "Canada":"NA"
 };
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
+
+// country -> ISO 3166-1 alpha-2 code, for flag images (flagcdn.com)
+const COUNTRY_ISO2 = {
+  "Austria":"at","Belgium":"be","Bulgaria":"bg","Croatia":"hr","Cyprus":"cy","Czechia":"cz","Denmark":"dk",
+  "Estonia":"ee","Finland":"fi","France":"fr","Germany":"de","Greece":"gr","Hungary":"hu","Iceland":"is",
+  "Ireland":"ie","Italy":"it","Latvia":"lv","Lithuania":"lt","Luxembourg":"lu","Malta":"mt","Netherlands":"nl",
+  "Norway":"no","Poland":"pl","Portugal":"pt","Romania":"ro","Slovakia":"sk","Slovenia":"si","Spain":"es",
+  "Sweden":"se","Switzerland":"ch","United Kingdom":"gb","Canada":"ca"
+};
 const ALL_COUNTRIES_SORTED = [...ALL_COUNTRIES].sort((a,b) => {
   const ca = COUNTRY_CONTINENT[a] || 'ZZ', cb = COUNTRY_CONTINENT[b] || 'ZZ';
   return ca !== cb ? ca.localeCompare(cb) : a.localeCompare(b);
@@ -288,7 +289,8 @@ const ALL_COUNTRIES_SORTED = [...ALL_COUNTRIES].sort((a,b) => {
 let selectedFuels = new Set(FUEL_KEYS);
 let selectedContinents = new Set(ALL_CONTINENTS);
 let selectedCountries = new Set(ALL_COUNTRIES);
-let selectedMonths = new Set(ALL_MONTHS);
+const DEFAULT_MONTH = ALL_MONTHS[0];
+let selectedMonths = new Set([DEFAULT_MONTH]); // single-select (radio), always exactly one entry
 
 // --- build filter panel ---
 const fuelsBox = document.getElementById('filter-fuels');
@@ -319,9 +321,8 @@ countriesBox.innerHTML = ALL_COUNTRIES_SORTED.map(c => `
 const monthsBox = document.getElementById('filter-months');
 monthsBox.innerHTML = ALL_MONTHS.map(m => `
   <label class="filter-checkbox">
-    <input type="checkbox" data-month="${m}" checked>
+    <input type="radio" name="month-filter" data-month="${m}" ${m === DEFAULT_MONTH ? 'checked' : ''}>
     <span class="fc-label">${MONTHLY_DATA[m].label}</span>
-    <button type="button" class="only-btn" data-only-month="${m}">Only</button>
   </label>`).join('');
 
 // --- aggregate raw data across selected months, per country ---
@@ -510,18 +511,7 @@ const bubbleSvg = d3.select('#bubble-svg');
 const bubbleTooltip = document.getElementById('bubble-tooltip');
 const bubbleWrap = document.getElementById('bubble-svg').closest('.chart-card');
 
-const BUBBLE_PIE_COLORS = { bev: '#1e8f5f', phev: '#2563eb', rest: '#161616' };
-const bubblePieGen = d3.pie().sort(null).value(d => d.value);
-const bubbleArcGen = d3.arc().innerRadius(0);
-
-function bubbleSlices(d){
-  const rest = d.total - d.bev - d.phev;
-  return [
-    { key:'bev', label:'BEV', value: Math.max(0, d.bev) },
-    { key:'phev', label:'PHEV', value: Math.max(0, d.phev) },
-    { key:'rest', label:'PHEV/HEV/Petrol/Diesel/Others', value: Math.max(0, rest) },
-  ];
-}
+const BUBBLE_R = 16; // fixed radius for every country — size no longer encodes a metric
 
 function renderBubbleChart(){
   const W = 900, H = 460, M = {top:20, right:30, bottom:50, left:70};
@@ -533,11 +523,9 @@ function renderBubbleChart(){
 
   const xMax = d3.max(DATA, d => d.bev) || 1;
   const yMax = d3.max(DATA, d => d.bevPct) || 1;
-  const rMax = d3.max(DATA, d => d.total) || 1;
 
   const xScale = d3.scaleLinear().domain([0, xMax * 1.08]).range([0, innerW]);
   const yScale = d3.scaleLinear().domain([0, yMax * 1.12]).range([innerH, 0]);
-  const rScale = d3.scaleSqrt().domain([0, rMax]).range([3, 46]);
 
   const g = bubbleSvg.append('g').attr('transform', `translate(${M.left},${M.top})`);
 
@@ -561,17 +549,27 @@ function renderBubbleChart(){
     .attr('transform', `translate(-50,${innerH/2}) rotate(-90)`)
     .text('BEV share (%) →');
 
+  const defs = bubbleSvg.append('defs');
+  defs.selectAll('clipPath').data(DATA, d => d.country).join('clipPath')
+    .attr('id', d => `flag-clip-${COUNTRY_ISO2[d.country] || d.country}`)
+    .append('circle').attr('r', BUBBLE_R);
+
   const nodeGroups = g.selectAll('.bubble-node-group').data(DATA, d => d.country).join('g')
     .attr('class', 'bubble-node-group')
     .attr('transform', d => `translate(${xScale(d.bev)},${yScale(d.bevPct)})`);
 
   nodeGroups.each(function(d){
-    const r = rScale(d.total);
-    const arc = bubbleArcGen.outerRadius(r);
-    d3.select(this).selectAll('path').data(bubblePieGen(bubbleSlices(d))).join('path')
-      .attr('class', 'bubble-slice')
-      .attr('d', arc)
-      .attr('fill', s => BUBBLE_PIE_COLORS[s.data.key]);
+    const iso = COUNTRY_ISO2[d.country];
+    const sel = d3.select(this);
+    sel.append('circle').attr('class', 'bubble-ring').attr('r', BUBBLE_R);
+    if(iso){
+      sel.append('image')
+        .attr('href', `https://flagcdn.com/w160/${iso}.png`)
+        .attr('x', -BUBBLE_R).attr('y', -BUBBLE_R)
+        .attr('width', BUBBLE_R*2).attr('height', BUBBLE_R*2)
+        .attr('preserveAspectRatio', 'xMidYMid slice')
+        .attr('clip-path', `url(#flag-clip-${iso})`);
+    }
   });
 
   nodeGroups
@@ -581,16 +579,16 @@ function renderBubbleChart(){
       bubbleTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
       bubbleTooltip.style.opacity = 1;
       const rest = d.total - d.bev - d.phev;
-      bubbleTooltip.innerHTML = `${d.country}<br>Total registrations: <strong>${d.total.toLocaleString('en-US')}</strong><br><span style="color:${BUBBLE_PIE_COLORS.bev}">●</span> BEV: <strong>${d.bev.toLocaleString('en-US')}</strong> (${d.bevPct}%)<br><span style="color:${BUBBLE_PIE_COLORS.phev}">●</span> PHEV: <strong>${d.phev.toLocaleString('en-US')}</strong> (${(d.phev/d.total*100).toFixed(1)}%)<br><span style="color:${BUBBLE_PIE_COLORS.rest}">●</span> Rest: <strong>${rest.toLocaleString('en-US')}</strong> (${(rest/d.total*100).toFixed(1)}%)`;
+      bubbleTooltip.innerHTML = `${d.country}<br>Total registrations: <strong>${d.total.toLocaleString('en-US')}</strong><br><span style="color:#1e8f5f">●</span> BEV: <strong>${d.bev.toLocaleString('en-US')}</strong> (${d.bevPct}%)<br><span style="color:#2563eb">●</span> PHEV: <strong>${d.phev.toLocaleString('en-US')}</strong> (${(d.phev/d.total*100).toFixed(1)}%)<br><span style="color:#161616">●</span> Rest: <strong>${rest.toLocaleString('en-US')}</strong> (${(rest/d.total*100).toFixed(1)}%)`;
     })
     .on('pointerleave', () => { bubbleTooltip.style.opacity = 0; });
 
-  // label the biggest bubbles only, to avoid clutter
+  // label the biggest markets only, to avoid clutter
   const topByTotal = new Set([...DATA].sort((a,b) => b.total - a.total).slice(0, 8).map(d => d.country));
   g.selectAll('.bubble-label').data(DATA.filter(d => topByTotal.has(d.country)), d => d.country).join('text')
     .attr('class', 'bubble-label')
     .attr('x', d => xScale(d.bev))
-    .attr('y', d => yScale(d.bevPct) - rScale(d.total) - 4)
+    .attr('y', d => yScale(d.bevPct) - BUBBLE_R - 4)
     .text(d => d.country);
 }
 
@@ -719,18 +717,9 @@ countriesBox.addEventListener('click', e => {
 });
 
 monthsBox.addEventListener('change', e => {
-  const cb = e.target;
-  if(!cb.matches('input[type="checkbox"]')) return;
-  const m = cb.dataset.month;
-  if(cb.checked) selectedMonths.add(m); else selectedMonths.delete(m);
-  recompute();
-});
-monthsBox.addEventListener('click', e => {
-  const btn = e.target.closest('.only-btn');
-  if(!btn) return;
-  const m = btn.dataset.onlyMonth;
-  selectedMonths = new Set([m]);
-  monthsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = cb.dataset.month === m; });
+  const rb = e.target;
+  if(!rb.matches('input[type="radio"]') || !rb.checked) return;
+  selectedMonths = new Set([rb.dataset.month]);
   recompute();
 });
 
@@ -750,10 +739,6 @@ document.querySelectorAll('.filter-bulk-btn').forEach(btn => {
       selectedCountries = check ? new Set(ALL_COUNTRIES) : new Set();
       countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = check);
       recompute();
-    } else if(target === 'months'){
-      selectedMonths = check ? new Set(ALL_MONTHS) : new Set();
-      monthsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = check);
-      recompute();
     }
   });
 });
@@ -762,11 +747,11 @@ document.getElementById('filter-reset').addEventListener('click', () => {
   selectedFuels = new Set(FUEL_KEYS);
   selectedContinents = new Set(ALL_CONTINENTS);
   selectedCountries = new Set(ALL_COUNTRIES);
-  selectedMonths = new Set(ALL_MONTHS);
+  selectedMonths = new Set([DEFAULT_MONTH]);
   fuelsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
   continentsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
   countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
-  monthsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+  monthsBox.querySelectorAll('input[type="radio"]').forEach(rb => { rb.checked = rb.dataset.month === DEFAULT_MONTH; });
   recompute();
 });
 </script>
