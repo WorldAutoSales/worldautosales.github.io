@@ -316,15 +316,14 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
   text-transform:uppercase;
   letter-spacing:0.06em;
 }
-.bubble-node{
-  fill:var(--accent);
-  fill-opacity:0.5;
-  stroke:var(--accent-strong);
+.bubble-node-group{ cursor:pointer; }
+.bubble-slice{
+  stroke:var(--surface);
   stroke-width:1;
-  cursor:pointer;
+  fill-opacity:0.85;
   transition:fill-opacity 0.1s ease;
 }
-.bubble-node:hover{ fill-opacity:0.85; }
+.bubble-node-group:hover .bubble-slice{ fill-opacity:1; }
 .bubble-label{
   fill:var(--text);
   font-size:9.5px;
@@ -379,6 +378,33 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
 }
 .rank-row .pct-label.yoy-up{ color:#1e8f5f; }
 .rank-row .pct-label.yoy-down{ color:var(--accent-strong); }
+.rank-rows-header .rrh-total{
+  width:100px; flex-shrink:0; text-align:right;
+  font-size:10.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase;
+  color:var(--text-muted);
+}
+.rank-row .total-label{
+  width:100px; flex-shrink:0; text-align:right;
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size:12.5px; font-weight:600; color:var(--text-muted);
+}
+
+/* ---------- map country-click drilldown (trend line chart) ---------- */
+.map-svg .country.selected{ stroke:var(--text); stroke-width:2px; }
+.country-drilldown{ margin-top:16px; padding-top:16px; border-top:1px solid var(--border); }
+.country-drilldown.hidden{ display:none; }
+.drilldown-header{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:2px; }
+.drilldown-header h3{ margin:0; font-size:14px; font-weight:700; }
+.drilldown-close{
+  background:transparent; border:1px solid var(--border); border-radius:6px;
+  padding:4px 10px; font-size:11.5px; font-weight:600; color:var(--text-muted); cursor:pointer;
+}
+.drilldown-close:hover{ color:var(--text); border-color:var(--text-muted); }
+.drilldown-placeholder{ font-size:12.5px; color:var(--text-muted); padding:4px 0 2px; }
+.trend-line{ fill:none; stroke-width:2.2px; }
+.trend-guideline{ stroke:var(--border); stroke-width:1; }
+.trend-dot{ stroke:var(--surface); stroke-width:1.5px; }
 
 .tooltip{
   position:absolute;
