@@ -96,7 +96,7 @@
         <header class="page-header">
           <div class="eyebrow">World Auto Sales · Powertrain</div>
           <h1>Powertrain Mix by Country</h1>
-          <p class="subtitle">New car registrations by powertrain (Battery Electric, Plug-in Hybrid, Hybrid, Petrol, Diesel, Others) across 31 European markets. Countries ranked by BEV (battery-electric) share. Use the filters to zoom into a powertrain, country, or month.</p>
+          <p class="subtitle">New car registrations by powertrain (Battery Electric, Plug-in Hybrid, Hybrid, Petrol, Diesel, Others) across Europe and Canada. Countries ranked by BEV (battery-electric) share. Use the filters to zoom into a powertrain, country, or month.</p>
         </header>
 
         <div class="stat-row" id="stat-row"></div>
@@ -106,7 +106,7 @@
           <ul class="notes-body">
             <li>Norway leads the world in EV adoption by a wide margin — battery-electric alone made up over 97% of May 2026 registrations, a market so far along the transition that petrol and diesel are now a rounding error.</li>
             <li>Some of the largest EU markets (Germany, France, Italy) still sit in the middle of the pack once hybrids are counted — hybrid-electric (not battery-electric) is the single most popular powertrain in most of Europe right now.</li>
-            <li>Only Europe is populated so far. As more regional sources get added (Americas, Asia, Africa, Oceania), this page will fill in — countries not shown here aren't at zero, they're just not sourced yet.</li>
+            <li>Canada joined the mix starting January 2026. Statistics Canada publishes registrations quarterly (not monthly like Europe's ACEA data), so it appears as its own selectable month rather than being blended with Europe's figures — select "January 2026" to see it. Most of Asia, Africa, South America, and Oceania are still unsourced; those countries aren't at zero, they just haven't been added yet.</li>
             <li>A handful of Eastern European markets (Latvia, Romania, Bulgaria) remain almost entirely petrol/diesel, showing how uneven the EV transition still is within the EU itself.</li>
             <li>However quickly smaller countries move into EVs, overall Europe's progression depends heavily on the Big 5 (Germany, UK, France, Italy, Spain) — they account for <strong>68.6%</strong> of total registrations across the 31 markets tracked here (May 2026), so their pace sets the continent's pace far more than any single fast-moving small market can.</li>
           </ul>
@@ -189,7 +189,7 @@
         </div>
 
         <footer class="page-footer">
-          Source: ACEA (European Automobile Manufacturers' Association) · covers EU + EFTA + UK · refreshed monthly<br>
+          Sources: ACEA (European Automobile Manufacturers' Association, EU + EFTA + UK, refreshed monthly) · Statistics Canada, Table 20-10-0025-01 (refreshed quarterly)<br>
           Map boundaries: Natural Earth via world-atlas (public domain)
         </footer>
       </div>
@@ -245,6 +245,17 @@ const MONTHLY_DATA = {
       "Norway":13384,"Poland":2818,"Portugal":4478,"Romania":432,"Slovakia":376,"Slovenia":460,"Spain":8965,
       "Sweden":9469,"Switzerland":4177,"United Kingdom":32738
     }
+  },
+  "2026-01": {
+    label: "January 2026",
+    raw: {
+      // source: Statistics Canada, Table 20-10-0025-01 (quarterly; Q1 2026 = Jan/Feb/Mar, filed under its first month)
+      "Canada": [29808,13305,53584,0,283361,17543,397601]
+    },
+    // BEV units for the same quarter a year prior (2025-01) — source: same StatCan table, for YoY %
+    priorYearBev: {
+      "Canada": 26401
+    }
   }
 };
 
@@ -264,7 +275,8 @@ const COUNTRY_CONTINENT = {
   "Estonia":"EU","Finland":"EU","France":"EU","Germany":"EU","Greece":"EU","Hungary":"EU","Iceland":"EU",
   "Ireland":"EU","Italy":"EU","Latvia":"EU","Lithuania":"EU","Luxembourg":"EU","Malta":"EU","Netherlands":"EU",
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
-  "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU"
+  "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
+  "Canada":"NA"
 };
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 const ALL_COUNTRIES_SORTED = [...ALL_COUNTRIES].sort((a,b) => {
