@@ -84,16 +84,16 @@
       <div class="page">
         <div class="filter-group month-filter-top">
           <div class="filter-label">
-            Month
+            Period
           </div>
           <div class="filter-countries" id="filter-months"></div>
-          <p class="filter-note">Pick one month at a time. More months get added as sources are found — this list grows over time.</p>
+          <p class="filter-note">Pick one period at a time — granularity varies (monthly for Europe, quarterly for Canada, annual for India/USA/China/Mexico/South Africa), so periods aren't combined across countries. More periods get added as sources are found.</p>
         </div>
 
         <header class="page-header">
           <div class="eyebrow">World Auto Sales · Powertrain</div>
           <h1>Powertrain Mix by Country</h1>
-          <p class="subtitle">New car registrations by powertrain (Battery Electric, Plug-in Hybrid, Hybrid, Petrol, Diesel, Others) across Europe and Canada. Countries ranked by BEV (battery-electric) share. Use the filters to zoom into a powertrain, country, or month.</p>
+          <p class="subtitle">New car registrations by powertrain (Battery Electric, Plug-in Hybrid, Hybrid, Petrol, Diesel, Others) across Europe, the Americas, Asia, and Africa. Countries ranked by BEV (battery-electric) share. Use the filters to zoom into a powertrain, country, or period.</p>
         </header>
 
         <div class="stat-row" id="stat-row"></div>
@@ -103,7 +103,8 @@
           <ul class="notes-body">
             <li>Norway leads the world in EV adoption by a wide margin — battery-electric alone made up over 97% of May 2026 registrations, a market so far along the transition that petrol and diesel are now a rounding error.</li>
             <li>Some of the largest EU markets (Germany, France, Italy) still sit in the middle of the pack once hybrids are counted — hybrid-electric (not battery-electric) is the single most popular powertrain in most of Europe right now.</li>
-            <li>Canada joined the mix starting January 2026. Statistics Canada publishes registrations quarterly (not monthly like Europe's ACEA data), so it appears as its own selectable month rather than being blended with Europe's figures — select "January 2026" to see it. Most of Asia, Africa, South America, and Oceania are still unsourced; those countries aren't at zero, they just haven't been added yet.</li>
+            <li>Canada joined the mix starting January 2026. Statistics Canada publishes registrations quarterly (not monthly like Europe's ACEA data), so it appears as its own selectable period rather than being blended with Europe's figures — select "January 2026" to see it.</li>
+            <li>India, the United States, China, Mexico, and South Africa are only available as full-year 2025 figures for now (select "2025 (Annual)") — their official sources report annually or the powertrain split isn't available at monthly/quarterly granularity yet. Mixing an annual snapshot with a single month's figures would understate the annual countries relative to Europe/Canada, so periods aren't blended across granularities — pick one period at a time. China's and South Africa's splits in particular rely partly on secondary reporting rather than a single official table and should be read as approximate. Most of Asia, Africa, South America, and Oceania remain unsourced beyond these five; those countries aren't at zero, they just haven't been added yet.</li>
             <li>A handful of Eastern European markets (Latvia, Romania, Bulgaria) remain almost entirely petrol/diesel, showing how uneven the EV transition still is within the EU itself.</li>
             <li>However quickly smaller countries move into EVs, overall Europe's progression depends heavily on the Big 5 (Germany, UK, France, Italy, Spain) — they account for <strong>68.6%</strong> of total registrations across the 31 markets tracked here (May 2026), so their pace sets the continent's pace far more than any single fast-moving small market can.</li>
           </ul>
@@ -181,7 +182,7 @@
         </div>
 
         <footer class="page-footer">
-          Sources: ACEA (European Automobile Manufacturers' Association, EU + EFTA + UK, refreshed monthly) · Statistics Canada, Table 20-10-0025-01 (refreshed quarterly)<br>
+          Sources: ACEA (EU + EFTA + UK, monthly) · Statistics Canada, Table 20-10-0025-01 (quarterly) · Vahan Dashboard, India (annual) · Argonne National Laboratory, USA (annual) · CAAM/CPCA via CnEVPost, China (annual, approximate) · AMIA, Mexico (annual) · naamsa, South Africa (annual, approximate)<br>
           Map boundaries: Natural Earth via world-atlas (public domain)
         </footer>
       </div>
@@ -248,6 +249,25 @@ const MONTHLY_DATA = {
     priorYearBev: {
       "Canada": 26401
     }
+  },
+  "2025-annual": {
+    label: "2025 (Annual)",
+    raw: {
+      // source: world_auto_sales_annual — full-year 2025 figures, several different national sources (see footer). Diesel not tracked/negligible for these markets except India.
+      "India": [196237,73,368555,980869,2243933,842298,4631965],
+      "United States": [1240040,268897,2070038,0,12651631,0,16230606],
+      "China": [10603000,5835000,0,52000,17909621,0,34399621],
+      "Mexico": [20923,13684,112117,0,1377914,0,1524638],
+      "South Africa": [1088,2810,12818,0,580102,0,596818]
+    },
+    // BEV units for full-year 2024, for YoY %
+    priorYearBev: {
+      "India": 105461,
+      "United States": 1243419,
+      "China": 7720000,
+      "Mexico": 24290,
+      "South Africa": 1257
+    }
   }
 };
 
@@ -268,7 +288,7 @@ const COUNTRY_CONTINENT = {
   "Ireland":"EU","Italy":"EU","Latvia":"EU","Lithuania":"EU","Luxembourg":"EU","Malta":"EU","Netherlands":"EU",
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
-  "Canada":"NA"
+  "Canada":"NA","United States":"NA","China":"ASIA","India":"ASIA","Mexico":"LATAM","South Africa":"AFRICA"
 };
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 
@@ -278,7 +298,8 @@ const COUNTRY_ISO2 = {
   "Estonia":"ee","Finland":"fi","France":"fr","Germany":"de","Greece":"gr","Hungary":"hu","Iceland":"is",
   "Ireland":"ie","Italy":"it","Latvia":"lv","Lithuania":"lt","Luxembourg":"lu","Malta":"mt","Netherlands":"nl",
   "Norway":"no","Poland":"pl","Portugal":"pt","Romania":"ro","Slovakia":"sk","Slovenia":"si","Spain":"es",
-  "Sweden":"se","Switzerland":"ch","United Kingdom":"gb","Canada":"ca"
+  "Sweden":"se","Switzerland":"ch","United Kingdom":"gb","Canada":"ca",
+  "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za"
 };
 const ALL_COUNTRIES_SORTED = [...ALL_COUNTRIES].sort((a,b) => {
   const ca = COUNTRY_CONTINENT[a] || 'ZZ', cb = COUNTRY_CONTINENT[b] || 'ZZ';
