@@ -81,8 +81,8 @@
             <li>Norway leads the world in EV adoption by a wide margin — battery-electric alone made up over 97% of May 2026 registrations, a market so far along the transition that petrol and diesel are now a rounding error.</li>
             <li>Some of the largest EU markets (Germany, France, Italy) still sit in the middle of the pack once hybrids are counted — hybrid-electric (not battery-electric) is the single most popular powertrain in most of Europe right now.</li>
             <li>Canada joined the mix starting January 2026. Statistics Canada publishes registrations quarterly (not monthly like Europe's ACEA data), so it appears as its own selectable period rather than being blended with Europe's figures — select "January 2026" to see it.</li>
-            <li>Select "2026 YTD" to see this year's progress so far — but each country is only summed through its own latest available data (Europe through June, Canada through Q1/March only, Mexico through July, India a partial-year snapshot from its live dashboard with no exact cutoff date). Check the "Data Through" column in the Country Detail table below for each country's exact cutoff before comparing totals across countries.</li>
-            <li>Select "2025 (Annual)" to compare full-year 2025 across all 37 markets tracked here at once — the 31 ACEA countries and Canada alongside India, the United States, China, Mexico, and South Africa, which are only available as annual figures since their official sources don't publish a monthly/quarterly powertrain split. Because it mixes a full year with single-month/quarter periods elsewhere in the list, periods still aren't blended together — pick one period at a time. China's and South Africa's splits in particular rely partly on secondary reporting rather than a single official table and should be read as approximate. Most of Asia, Africa, South America, and Oceania remain unsourced beyond these five; those countries aren't at zero, they just haven't been added yet.</li>
+            <li>Select "2026 YTD" to see this year's progress so far — but each country is only summed through its own latest available data (Europe through June, Canada through Q1/March only, Mexico and Japan through July, India a partial-year snapshot from its live dashboard with no exact cutoff date). Check the "Data Through" column in the Country Detail table below for each country's exact cutoff before comparing totals across countries.</li>
+            <li>Select "2025 (Annual)" to compare full-year 2025 across all 38 markets tracked here at once — the 31 ACEA countries and Canada alongside India, the United States, China, Mexico, Japan, and South Africa, which are only available as annual figures since their official sources don't publish a monthly/quarterly powertrain split. Because it mixes a full year with single-month/quarter periods elsewhere in the list, periods still aren't blended together — pick one period at a time. China's and South Africa's splits in particular rely partly on secondary reporting rather than a single official table and should be read as approximate. Japan's figures cover registered passenger cars only and exclude kei-cars (roughly 35-40% of Japan's new-car market) and commercial vehicles, so its totals aren't directly comparable to other countries' all-vehicle figures. Most of Asia, Africa, South America, and Oceania remain unsourced beyond these six; those countries aren't at zero, they just haven't been added yet.</li>
             <li>A handful of Eastern European markets (Latvia, Romania, Bulgaria) remain almost entirely petrol/diesel, showing how uneven the EV transition still is within the EU itself.</li>
             <li>However quickly smaller countries move into EVs, overall Europe's progression depends heavily on the Big 5 (Germany, UK, France, Italy, Spain) — they account for <strong>68.6%</strong> of total registrations across the 31 markets tracked here (May 2026), so their pace sets the continent's pace far more than any single fast-moving small market can.</li>
           </ul>
@@ -161,7 +161,7 @@
         </div>
 
         <footer class="page-footer">
-          Sources: ACEA (EU + EFTA + UK, monthly) · Statistics Canada, Table 20-10-0025-01 (quarterly) · Vahan Dashboard, India (annual) · Argonne National Laboratory, USA (annual) · CAAM/CPCA via CnEVPost, China (annual, approximate) · AMIA, Mexico (annual) · naamsa, South Africa (annual, approximate)<br>
+          Sources: ACEA (EU + EFTA + UK, monthly) · Statistics Canada, Table 20-10-0025-01 (quarterly) · Vahan Dashboard, India (annual) · Argonne National Laboratory, USA (annual) · CAAM/CPCA via CnEVPost, China (annual, approximate) · INEGI (RAIAVL), Mexico (monthly) · JADA, Japan (annual, registered passenger cars excl. kei-cars) · naamsa, South Africa (annual, approximate)<br>
           Map boundaries: Natural Earth via world-atlas (public domain)
         </footer>
       </div>
@@ -467,7 +467,9 @@ const MONTHLY_DATA = {
       // source: INEGI RAIAVL, monthly — 7 of 12 months published so far
       "Mexico": [16605,18696,77012,0,773040,0,885353],
       // source: Vahan Dashboard — live cumulative counter, exact cutoff month not captured at pull time
-      "India": [207279,19,280655,801687,1498999,602756,3391395]
+      "India": [207279,19,280655,801687,1498999,602756,3391395],
+      // source: JADA — registered passenger cars only, excludes kei-cars (~35-40% of Japan's market) and commercial vehicles
+      "Japan": [61090,25914,961974,251,461345,67662,1578236]
     },
     // per-country "as of" coverage, since cutoffs differ by source — surfaced in the Country Detail table's "Data Through" column
     asOf: {
@@ -481,7 +483,8 @@ const MONTHLY_DATA = {
       "Sweden":"through Jun 2026","Switzerland":"through Jun 2026","United Kingdom":"through Jun 2026",
       "Canada":"through Mar 2026 (Q1 only)",
       "Mexico":"through Jul 2026",
-      "India":"partial year, exact cutoff unspecified"
+      "India":"partial year, exact cutoff unspecified",
+      "Japan":"through Jul 2026"
     },
     // BEV units for the matching prior-year period (same months, except India where no matching-period figure is available)
     priorYearBev: {
@@ -502,6 +505,8 @@ const MONTHLY_DATA = {
       "China": [10603000,5835000,0,52000,17909621,0,34399621],
       "Mexico": [20923,13684,112117,0,1377914,0,1524638],
       "South Africa": [1088,2810,12818,0,580102,0,596818],
+      // source: JADA — registered passenger cars only, excludes kei-cars (~35-40% of Japan's market) and commercial vehicles
+      "Japan": [39885,41186,1530019,478,807856,114099,2533523],
       // source: world_auto_sales_annual — aggregated from 12 monthly ACEA press releases per country (Jan-Dec 2025)
       "Austria": [60651,28820,83044,2,79457,33004,284978],
       "Belgium": [143849,39631,46984,3162,168436,12709,414771],
@@ -544,6 +549,7 @@ const MONTHLY_DATA = {
       "China": 7720000,
       "Mexico": 24290,
       "South Africa": 1257,
+      "Japan": 34057,
       "Austria":44622,"Belgium":127703,"Bulgaria":1719,"Croatia":1793,"Cyprus":1193,"Czechia":11018,
       "Denmark":89199,"Estonia":1320,"Finland":21868,"France":290614,"Germany":380609,"Greece":8707,
       "Hungary":8567,"Iceland":2661,"Ireland":17500,"Italy":65413,"Latvia":1250,"Lithuania":1772,
@@ -571,7 +577,7 @@ const COUNTRY_CONTINENT = {
   "Ireland":"EU","Italy":"EU","Latvia":"EU","Lithuania":"EU","Luxembourg":"EU","Malta":"EU","Netherlands":"EU",
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
-  "Canada":"NA","United States":"NA","China":"ASIA","India":"ASIA","Mexico":"LATAM","South Africa":"AFRICA"
+  "Canada":"NA","United States":"NA","China":"ASIA","India":"ASIA","Mexico":"LATAM","South Africa":"AFRICA","Japan":"ASIA"
 };
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 
@@ -582,7 +588,7 @@ const COUNTRY_ISO2 = {
   "Ireland":"ie","Italy":"it","Latvia":"lv","Lithuania":"lt","Luxembourg":"lu","Malta":"mt","Netherlands":"nl",
   "Norway":"no","Poland":"pl","Portugal":"pt","Romania":"ro","Slovakia":"sk","Slovenia":"si","Spain":"es",
   "Sweden":"se","Switzerland":"ch","United Kingdom":"gb","Canada":"ca",
-  "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za"
+  "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp"
 };
 const ALL_COUNTRIES_SORTED = [...ALL_COUNTRIES].sort((a,b) => {
   const ca = COUNTRY_CONTINENT[a] || 'ZZ', cb = COUNTRY_CONTINENT[b] || 'ZZ';
