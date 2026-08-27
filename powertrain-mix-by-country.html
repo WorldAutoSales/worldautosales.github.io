@@ -53,7 +53,7 @@
               Period
             </div>
             <div class="filter-countries" id="filter-months"></div>
-            <p class="filter-note">Pick one period at a time — granularity varies (monthly for Europe, quarterly for Canada, annual for India/USA/China/Mexico/South Africa), so periods aren't combined across countries. More periods get added as sources are found.</p>
+            <p class="filter-note">Pick one period at a time — granularity varies (monthly for Europe, quarterly for Canada, annual for India/USA/China/Mexico/South Africa), so periods aren't combined across countries. "2026 YTD" sums each country only through its own latest available month — check the Country Detail table's "Data Through" column for exactly how far each one goes. More periods get added as sources are found.</p>
           </div>
 
           <div class="filter-group month-filter-top">
@@ -81,6 +81,7 @@
             <li>Norway leads the world in EV adoption by a wide margin — battery-electric alone made up over 97% of May 2026 registrations, a market so far along the transition that petrol and diesel are now a rounding error.</li>
             <li>Some of the largest EU markets (Germany, France, Italy) still sit in the middle of the pack once hybrids are counted — hybrid-electric (not battery-electric) is the single most popular powertrain in most of Europe right now.</li>
             <li>Canada joined the mix starting January 2026. Statistics Canada publishes registrations quarterly (not monthly like Europe's ACEA data), so it appears as its own selectable period rather than being blended with Europe's figures — select "January 2026" to see it.</li>
+            <li>Select "2026 YTD" to see this year's progress so far — but each country is only summed through its own latest available data (Europe through June, Canada through Q1/March only, Mexico through July, India a partial-year snapshot from its live dashboard with no exact cutoff date). Check the "Data Through" column in the Country Detail table below for each country's exact cutoff before comparing totals across countries.</li>
             <li>Select "2025 (Annual)" to compare full-year 2025 across all 37 markets tracked here at once — the 31 ACEA countries and Canada alongside India, the United States, China, Mexico, and South Africa, which are only available as annual figures since their official sources don't publish a monthly/quarterly powertrain split. Because it mixes a full year with single-month/quarter periods elsewhere in the list, periods still aren't blended together — pick one period at a time. China's and South Africa's splits in particular rely partly on secondary reporting rather than a single official table and should be read as approximate. Most of Asia, Africa, South America, and Oceania remain unsourced beyond these five; those countries aren't at zero, they just haven't been added yet.</li>
             <li>A handful of Eastern European markets (Latvia, Romania, Bulgaria) remain almost entirely petrol/diesel, showing how uneven the EV transition still is within the EU itself.</li>
             <li>However quickly smaller countries move into EVs, overall Europe's progression depends heavily on the Big 5 (Germany, UK, France, Italy, Spain) — they account for <strong>68.6%</strong> of total registrations across the 31 markets tracked here (May 2026), so their pace sets the continent's pace far more than any single fast-moving small market can.</li>
@@ -137,7 +138,7 @@
 
         <div class="card table-card">
           <h2>Country Detail</h2>
-          <p class="note">Click a header to sort. Units = new car registrations, summed over the selected month(s).</p>
+          <p class="note">Click a header to sort. Units = new car registrations, summed over the selected month(s). "Data Through" shows each row's actual coverage — useful for "2026 YTD" and "2025 (Annual)" where it varies by country.</p>
           <div class="table-scroll">
             <table id="data-table">
               <thead>
@@ -151,6 +152,7 @@
                   <th data-key="others" data-type="num">Others</th>
                   <th data-key="total" data-type="num">Total</th>
                   <th data-key="bevPct" data-type="num">BEV %</th>
+                  <th data-key="asOf" data-type="str">Data Through</th>
                 </tr>
               </thead>
               <tbody id="table-body"></tbody>
@@ -285,6 +287,135 @@ const MONTHLY_DATA = {
       "Sweden":9469,"Switzerland":4177,"United Kingdom":32738
     }
   },
+  "2026-04": {
+    label: "April 2026",
+    raw: {
+      "Austria": [7122,2997,8366,1,6368,2655,27509],
+      "Belgium": [13971,1830,4506,371,15888,1236,37802],
+      "Bulgaria": [456,83,284,4,3356,559,4742],
+      "Croatia": [330,486,3828,55,2943,1016,8658],
+      "Cyprus": [181,53,536,0,400,15,1185],
+      "Czechia": [1684,1090,5166,399,10170,3888,22397],
+      "Denmark": [13721,113,1655,0,914,351,16754],
+      "Estonia": [115,154,1238,0,185,222,1914],
+      "Finland": [2783,638,1609,0,478,197,5705],
+      "France": [36216,8333,63007,4986,21963,3834,138339],
+      "Germany": [64350,27546,70207,1203,53420,32437,249163],
+      "Greece": [695,863,8194,195,3803,525,14275],
+      "Hungary": [1420,1083,5531,76,2453,1269,11832],
+      "Ireland": [2740,1480,2376,0,2159,1335,10090],
+      "Italy": [13199,13943,75775,9379,31729,11120,155145],
+      "Latvia": [123,191,0,36,1315,244,1909],
+      "Lithuania": [331,569,2441,115,576,660,4692],
+      "Luxembourg": [1533,272,1557,0,1165,395,4922],
+      "Malta": [138,19,211,0,198,27,592],
+      "Netherlands": [9616,6143,7419,130,1928,468,25704],
+      "Poland": [2651,5052,26119,1222,13819,2961,51824],
+      "Portugal": [5010,3234,5731,1618,5248,751,21592],
+      "Romania": [641,0,6227,719,2037,581,10205],
+      "Slovakia": [496,310,2362,141,2940,708,6957],
+      "Slovenia": [1038,238,2353,56,2924,789,7398],
+      "Spain": [9723,13035,50237,4276,25618,3973,106862],
+      "Sweden": [9834,5810,2121,128,4488,1766,24147],
+      "Iceland": [460,159,229,0,54,131,1033],
+      "Norway": [10952,25,8,0,31,87,11103],
+      "Switzerland": [4683,2299,6611,1,4040,984,18618],
+      "United Kingdom": [39084,20597,53652,0,33292,2622,149247]
+    },
+    priorYearBev: {
+      "Austria":5690,"Belgium":12469,"Bulgaria":144,"Croatia":60,"Cyprus":90,"Czechia":1229,"Denmark":9567,
+      "Estonia":72,"Finland":2301,"France":25542,"Germany":45535,"Greece":630,"Hungary":704,"Iceland":364,
+      "Ireland":1335,"Italy":6643,"Latvia":136,"Lithuania":218,"Luxembourg":999,"Malta":140,"Netherlands":9235,
+      "Norway":10942,"Poland":2552,"Portugal":3722,"Romania":218,"Slovakia":320,"Slovenia":400,"Spain":6835,
+      "Sweden":8555,"Switzerland":3480,"United Kingdom":24558
+    }
+  },
+  "2026-03": {
+    label: "March 2026",
+    raw: {
+      "Austria": [8206,3165,10513,0,8181,2953,33018],
+      "Belgium": [15661,2417,5221,423,18908,1103,43733],
+      "Bulgaria": [349,82,231,0,3310,509,4481],
+      "Croatia": [445,480,3001,69,3144,925,8064],
+      "Cyprus": [113,79,622,0,400,18,1232],
+      "Czechia": [1541,996,5939,534,10700,4206,23916],
+      "Denmark": [14616,147,2700,0,1170,335,18968],
+      "Estonia": [119,161,1032,0,289,152,1753],
+      "Finland": [3369,897,1807,0,513,205,6791],
+      "France": [49406,8108,80708,6057,24908,4447,173634],
+      "Germany": [70663,29996,87850,1029,66959,37664,294161],
+      "Greece": [1015,780,8145,299,4175,296,14710],
+      "Hungary": [1557,1022,10145,51,3274,1394,17443],
+      "Ireland": [3829,2264,4510,0,2973,1837,15413],
+      "Italy": [16121,15805,93241,9890,37456,12744,185257],
+      "Latvia": [133,188,0,74,1417,228,2040],
+      "Lithuania": [278,454,2281,73,645,414,4145],
+      "Luxembourg": [1384,234,1578,0,1194,409,4799],
+      "Malta": [133,22,191,0,212,23,580],
+      "Netherlands": [11114,7516,9918,133,2403,383,31467],
+      "Poland": [3406,5126,33077,1459,17194,3634,63896],
+      "Portugal": [6063,3616,7786,1661,6488,1065,26679],
+      "Romania": [679,0,6013,862,2118,711,10383],
+      "Slovakia": [432,269,2971,120,3578,930,8300],
+      "Slovenia": [1162,262,967,52,3294,798,6535],
+      "Spain": [11863,14862,61938,4241,32727,4709,130340],
+      "Sweden": [10875,6466,2450,153,4987,1647,26578],
+      "Iceland": [618,272,317,0,30,46,1283],
+      "Norway": [17406,126,5,0,22,126,17685],
+      "Switzerland": [5388,2894,8884,0,4894,1198,23258],
+      "United Kingdom": [86120,49671,153785,0,85137,5914,380627]
+    },
+    priorYearBev: {
+      "Austria":6122,"Belgium":13650,"Bulgaria":226,"Croatia":82,"Cyprus":105,"Czechia":1395,"Denmark":9855,
+      "Estonia":82,"Finland":2434,"France":29261,"Germany":42521,"Greece":775,"Hungary":1155,"Iceland":482,
+      "Ireland":2537,"Italy":9369,"Latvia":130,"Lithuania":223,"Luxembourg":1432,"Malta":90,"Netherlands":11195,
+      "Norway":11192,"Poland":2311,"Portugal":4964,"Romania":273,"Slovakia":351,"Slovenia":480,"Spain":8101,
+      "Sweden":8386,"Switzerland":4421,"United Kingdom":69313
+    }
+  },
+  "2026-02": {
+    label: "February 2026",
+    raw: {
+      "Austria": [4439,2151,6665,0,5530,2503,21288],
+      "Belgium": [11677,1965,5058,113,17528,734,37075],
+      "Bulgaria": [215,61,209,2,2926,353,3766],
+      "Croatia": [197,336,1757,88,1743,746,4867],
+      "Cyprus": [109,57,600,0,325,54,1145],
+      "Czechia": [958,937,4136,373,8543,3644,18591],
+      "Denmark": [9736,122,1165,2,535,373,11933],
+      "Estonia": [65,87,598,0,242,146,1138],
+      "Finland": [2189,796,1327,0,403,234,4949],
+      "France": [32370,6655,57670,2765,18206,3098,120764],
+      "Germany": [46275,24328,60510,407,48404,31338,211262],
+      "Greece": [646,844,5396,301,2448,380,10015],
+      "Hungary": [856,757,5652,14,2244,1206,10729],
+      "Ireland": [2858,2243,4034,0,3579,2249,14963],
+      "Italy": [12541,12541,81799,7855,31915,10597,157248],
+      "Latvia": [91,136,0,40,1003,173,1443],
+      "Lithuania": [214,305,1381,20,432,241,2593],
+      "Luxembourg": [1022,272,1564,0,1067,475,4400],
+      "Malta": [112,15,178,0,194,22,521],
+      "Netherlands": [6805,5537,7522,24,2111,381,22380],
+      "Poland": [1891,3617,23705,1709,13403,3137,47462],
+      "Portugal": [4732,2559,7054,628,4663,905,20541],
+      "Romania": [934,0,5085,679,1495,772,8965],
+      "Slovakia": [242,238,2232,105,2535,799,6151],
+      "Slovenia": [567,209,774,46,2550,679,4825],
+      "Spain": [8889,12092,46592,3048,22534,3927,97082],
+      "Sweden": [7650,4912,2128,99,3352,1200,19341],
+      "Iceland": [323,167,284,0,36,5,815],
+      "Norway": [7127,46,20,0,12,67,7272],
+      "Switzerland": [3113,1829,6009,1,3812,933,15697],
+      "United Kingdom": [21840,10438,34758,0,20984,2080,90100]
+    },
+    priorYearBev: {
+      "Austria":4233,"Belgium":13040,"Bulgaria":126,"Croatia":53,"Cyprus":107,"Czechia":737,"Denmark":7724,
+      "Estonia":59,"Finland":1563,"France":25335,"Germany":35949,"Greece":718,"Hungary":690,"Iceland":248,
+      "Ireland":2512,"Italy":6922,"Latvia":80,"Lithuania":101,"Luxembourg":1134,"Malta":46,"Netherlands":10174,
+      "Norway":8477,"Poland":1675,"Portugal":3946,"Romania":724,"Slovakia":276,"Slovenia":367,"Spain":6112,
+      "Sweden":6872,"Switzerland":3402,"United Kingdom":21244
+    }
+  },
   "2026-01": {
     label: "January 2026",
     raw: {
@@ -294,6 +425,72 @@ const MONTHLY_DATA = {
     // BEV units for the same quarter a year prior (2025-01) — source: same StatCan table, for YoY %
     priorYearBev: {
       "Canada": 26401
+    }
+  },
+  "2026-ytd": {
+    label: "2026 YTD",
+    raw: {
+      // source: world_auto_sales_annual, period_type='YTD' — each country summed only through its own latest available month/quarter (see asOf below), not a fixed common cutoff
+      "Austria": [40060,18023,49751,2,40509,16184,164529],
+      "Belgium": [83282,12664,28659,2144,97538,6394,230681],
+      "Bulgaria": [2042,454,1565,66,18731,3099,25957],
+      "Croatia": [1781,2707,17496,380,16416,5384,44164],
+      "Cyprus": [911,411,3643,0,2174,161,7300],
+      "Czechia": [8630,6517,31060,2739,57043,23819,129808],
+      "Denmark": [80707,706,11702,2,5591,2327,101035],
+      "Estonia": [617,864,5820,0,1556,1122,9979],
+      "Finland": [17797,4753,10375,0,3020,1309,37254],
+      "France": [241562,47865,388283,29173,128136,22146,857165],
+      "Germany": [368006,163793,427633,6724,325080,193157,1484393],
+      "Greece": [5286,5199,47557,2533,21328,2094,83997],
+      "Hungary": [7493,6066,38433,392,15397,7124,74905],
+      "Iceland": [3180,1602,1838,0,468,414,7502],
+      "Ireland": [20179,12536,23616,0,17941,10964,85236],
+      "Italy": [79427,84718,462718,59360,185002,64812,936037],
+      "Latvia": [839,1214,0,297,7640,1356,11346],
+      "Lithuania": [1852,2914,12652,446,3793,2454,24111],
+      "Luxembourg": [7745,1530,8908,0,6140,2186,26509],
+      "Malta": [1051,219,1141,0,1091,170,3671],
+      "Netherlands": [64320,42165,53445,646,14140,2112,176828],
+      "Norway": [71654,486,482,0,127,647,73396],
+      "Poland": [16557,26603,154745,8038,87287,18803,312033],
+      "Portugal": [34706,19631,38929,8499,30311,5004,137080],
+      "Romania": [5522,0,37563,5630,11998,4137,64850],
+      "Slovakia": [2678,1886,15228,903,17532,5277,43504],
+      "Slovenia": [6062,1354,6927,434,17415,4545,36737],
+      "Spain": [63220,78037,306668,22549,153415,23818,647707],
+      "Sweden": [58801,34930,12564,624,25993,8939,141851],
+      "Switzerland": [27889,14456,42488,5,25224,6486,116548],
+      "United Kingdom": [284579,148132,428999,2,255795,20422,1137929],
+      // source: StatCan 20-10-0025-01 — only Q1 2026 published so far
+      "Canada": [29808,13305,53584,0,283361,17543,397601],
+      // source: INEGI RAIAVL, monthly — 7 of 12 months published so far
+      "Mexico": [16605,18696,77012,0,773040,0,885353],
+      // source: Vahan Dashboard — live cumulative counter, exact cutoff month not captured at pull time
+      "India": [207279,19,280655,801687,1498999,602756,3391395]
+    },
+    // per-country "as of" coverage, since cutoffs differ by source — surfaced in the Country Detail table's "Data Through" column
+    asOf: {
+      "Austria":"through Jun 2026","Belgium":"through Jun 2026","Bulgaria":"through Jun 2026","Croatia":"through Jun 2026",
+      "Cyprus":"through Jun 2026","Czechia":"through Jun 2026","Denmark":"through Jun 2026","Estonia":"through Jun 2026",
+      "Finland":"through Jun 2026","France":"through Jun 2026","Germany":"through Jun 2026","Greece":"through Jun 2026",
+      "Hungary":"through Jun 2026","Iceland":"through Jun 2026","Ireland":"through Jun 2026","Italy":"through Jun 2026",
+      "Latvia":"through Jun 2026","Lithuania":"through Jun 2026","Luxembourg":"through Jun 2026","Malta":"through Jun 2026",
+      "Netherlands":"through Jun 2026","Norway":"through Jun 2026","Poland":"through Jun 2026","Portugal":"through Jun 2026",
+      "Romania":"through Jun 2026","Slovakia":"through Jun 2026","Slovenia":"through Jun 2026","Spain":"through Jun 2026",
+      "Sweden":"through Jun 2026","Switzerland":"through Jun 2026","United Kingdom":"through Jun 2026",
+      "Canada":"through Mar 2026 (Q1 only)",
+      "Mexico":"through Jul 2026",
+      "India":"partial year, exact cutoff unspecified"
+    },
+    // BEV units for the matching prior-year period (same months, except India where no matching-period figure is available)
+    priorYearBev: {
+      "Austria":31534,"Belgium":76980,"Bulgaria":1076,"Croatia":396,"Cyprus":735,"Czechia":6910,"Denmark":57178,
+      "Estonia":444,"Finland":12724,"France":148332,"Germany":248726,"Greece":4265,"Hungary":5219,"Iceland":2357,
+      "Ireland":13637,"Italy":44727,"Latvia":743,"Lithuania":1205,"Luxembourg":6559,"Malta":780,"Netherlands":64440,
+      "Norway":70748,"Poland":14256,"Portugal":25017,"Romania":3201,"Slovakia":2007,"Slovenia":2700,"Spain":46268,
+      "Sweden":49667,"Switzerland":23203,"United Kingdom":224841,
+      "Canada":26401,"Mexico":10889
     }
   },
   "2025-annual": {
@@ -435,7 +632,7 @@ monthsBox.innerHTML = ALL_MONTHS.map(m => `
 // --- aggregate raw data across selected months, per country ---
 function buildData(){
   const byCountry = {};
-  ALL_COUNTRIES.forEach(c => { byCountry[c] = { country:c, bev:0, phev:0, hev:0, others:0, petrol:0, diesel:0, total:0, bevPrior:0 }; });
+  ALL_COUNTRIES.forEach(c => { byCountry[c] = { country:c, bev:0, phev:0, hev:0, others:0, petrol:0, diesel:0, total:0, bevPrior:0, asOf:'' }; });
   [...selectedMonths].forEach(m => {
     const month = MONTHLY_DATA[m];
     Object.entries(month.raw).forEach(([country, v]) => {
@@ -444,6 +641,7 @@ function buildData(){
       d.bev += bev; d.phev += phev; d.hev += hev;
       d.others += others; d.petrol += petrol; d.diesel += diesel; d.total += total;
       d.bevPrior += (month.priorYearBev && month.priorYearBev[country]) || 0;
+      d.asOf = (month.asOf && month.asOf[country]) || month.label;
     });
   });
   return Object.values(byCountry)
@@ -749,6 +947,7 @@ function renderTable(){
       <td>${d.others.toLocaleString('en-US')}</td>
       <td>${d.total.toLocaleString('en-US')}</td>
       <td class="${d.bevPct >= avgPct ? 'vs-above' : 'vs-below'}">${d.bevPct}%</td>
+      <td class="as-of-cell">${d.asOf}</td>
     </tr>`).join('');
 }
 document.querySelectorAll('#data-table thead th').forEach(th=>{
