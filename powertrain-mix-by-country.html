@@ -46,48 +46,25 @@
 
   <main class="main">
     <div class="content-with-filters">
-      <aside class="filters-panel">
-        <div class="filter-group">
-          <div class="filter-label">
-            Powertrain
-            <span class="filter-bulk">
-              <button type="button" class="filter-bulk-btn" data-target="fuels" data-action="check">Check all</button> / <button type="button" class="filter-bulk-btn" data-target="fuels" data-action="uncheck">Uncheck all</button>
-            </span>
-          </div>
-          <div class="filter-countries" id="filter-fuels"></div>
-        </div>
-
-        <div class="filter-group">
-          <div class="filter-label">
-            Continent
-            <span class="filter-bulk">
-              <button type="button" class="filter-bulk-btn" data-target="continents" data-action="check">Check all</button> / <button type="button" class="filter-bulk-btn" data-target="continents" data-action="uncheck">Uncheck all</button>
-            </span>
-          </div>
-          <div class="filter-countries" id="filter-continents"></div>
-        </div>
-
-        <div class="filter-group">
-          <div class="filter-label">
-            <button type="button" class="filter-toggle" data-collapse-target="filter-countries-group" aria-expanded="true"><span class="chevron">▾</span> Country</button>
-            <span class="filter-bulk">
-              <button type="button" class="filter-bulk-btn" data-target="countries" data-action="check">Check all</button> / <button type="button" class="filter-bulk-btn" data-target="countries" data-action="uncheck">Uncheck all</button>
-            </span>
-          </div>
-          <div class="filter-countries" id="filter-countries-group"></div>
-          <p class="filter-note">Sorted by continent, then country — makes it easier to zero in as more regions get added.</p>
-        </div>
-
-        <button class="filter-reset" id="filter-reset">Reset all filters</button>
-      </aside>
-
       <div class="page">
-        <div class="filter-group month-filter-top">
-          <div class="filter-label">
-            Period
+        <div class="top-filters-row">
+          <div class="filter-group month-filter-top">
+            <div class="filter-label">
+              Period
+            </div>
+            <div class="filter-countries" id="filter-months"></div>
+            <p class="filter-note">Pick one period at a time — granularity varies (monthly for Europe, quarterly for Canada, annual for India/USA/China/Mexico/South Africa), so periods aren't combined across countries. More periods get added as sources are found.</p>
           </div>
-          <div class="filter-countries" id="filter-months"></div>
-          <p class="filter-note">Pick one period at a time — granularity varies (monthly for Europe, quarterly for Canada, annual for India/USA/China/Mexico/South Africa), so periods aren't combined across countries. More periods get added as sources are found.</p>
+
+          <div class="filter-group month-filter-top">
+            <div class="filter-label">
+              Powertrain
+              <span class="filter-bulk">
+                <button type="button" class="filter-bulk-btn" data-target="fuels" data-action="check">Check all</button> / <button type="button" class="filter-bulk-btn" data-target="fuels" data-action="uncheck">Uncheck all</button>
+              </span>
+            </div>
+            <div class="filter-countries" id="filter-fuels"></div>
+          </div>
         </div>
 
         <header class="page-header">
@@ -186,6 +163,31 @@
           Map boundaries: Natural Earth via world-atlas (public domain)
         </footer>
       </div>
+
+      <aside class="filters-panel">
+        <div class="filter-group">
+          <div class="filter-label">
+            Continent
+            <span class="filter-bulk">
+              <button type="button" class="filter-bulk-btn" data-target="continents" data-action="check">Check all</button> / <button type="button" class="filter-bulk-btn" data-target="continents" data-action="uncheck">Uncheck all</button>
+            </span>
+          </div>
+          <div class="filter-countries" id="filter-continents"></div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-label">
+            <button type="button" class="filter-toggle" data-collapse-target="filter-countries-group" aria-expanded="true"><span class="chevron">▾</span> Country</button>
+            <span class="filter-bulk">
+              <button type="button" class="filter-bulk-btn" data-target="countries" data-action="check">Check all</button> / <button type="button" class="filter-bulk-btn" data-target="countries" data-action="uncheck">Uncheck all</button>
+            </span>
+          </div>
+          <div class="filter-countries" id="filter-countries-group"></div>
+          <p class="filter-note">Sorted by continent, then country — makes it easier to zero in as more regions get added.</p>
+        </div>
+
+        <button class="filter-reset" id="filter-reset">Reset all filters</button>
+      </aside>
     </div>
   </main>
 </div>
@@ -502,17 +504,21 @@ document.getElementById('zoom-in').addEventListener('click', () => svg.transitio
 document.getElementById('zoom-out').addEventListener('click', () => svg.transition().duration(200).call(zoom.scaleBy, 1/1.5));
 document.getElementById('zoom-reset').addEventListener('click', () => svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity));
 
+// the basemap's Natural Earth names don't always match our country names
+const MAP_NAME_ALIASES = { "United States of America": "United States" };
+function mapEntry(d){ return DATA_BY_NAME[d.properties.name] || DATA_BY_NAME[MAP_NAME_ALIASES[d.properties.name]]; }
+
 function renderMap(){
   if(!geoFeatures) return;
   mapG.selectAll('path').data(geoFeatures).join('path')
-    .attr('class', d => 'country ' + (DATA_BY_NAME[d.properties.name] ? 'has-data' : 'no-data'))
+    .attr('class', d => 'country ' + (mapEntry(d) ? 'has-data' : 'no-data'))
     .attr('d', path)
     .attr('fill', d => {
-      const entry = DATA_BY_NAME[d.properties.name];
+      const entry = mapEntry(d);
       return entry ? colorScale(entry.bevPct) : null;
     })
     .on('pointermove', (e, d) => {
-      const entry = DATA_BY_NAME[d.properties.name];
+      const entry = mapEntry(d);
       const rect = mapWrap.getBoundingClientRect();
       mapTooltip.style.left = (e.clientX - rect.left) + 'px';
       mapTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
