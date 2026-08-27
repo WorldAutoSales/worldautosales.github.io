@@ -46,27 +46,27 @@
 
   <main class="main">
     <div class="content-with-filters">
-      <div class="page">
-        <div class="top-filters-row">
-          <div class="filter-group month-filter-top">
-            <div class="filter-label">
-              Period
-            </div>
-            <div class="filter-countries" id="filter-months"></div>
-            <p class="filter-note">Pick one period at a time — granularity varies (monthly for Europe, quarterly for Canada, annual for India/USA/China/Mexico/South Africa), so periods aren't combined across countries. "2026 YTD" sums each country only through its own latest available month — check the Country Detail table's "Data Through" column for exactly how far each one goes. More periods get added as sources are found.</p>
+      <aside class="filters-panel filters-panel-left">
+        <div class="filter-group">
+          <div class="filter-label">
+            Period
           </div>
-
-          <div class="filter-group month-filter-top">
-            <div class="filter-label">
-              Powertrain
-              <span class="filter-bulk">
-                <button type="button" class="filter-bulk-btn" data-target="fuels" data-action="check">Check all</button> / <button type="button" class="filter-bulk-btn" data-target="fuels" data-action="uncheck">Uncheck all</button>
-              </span>
-            </div>
-            <div class="filter-countries" id="filter-fuels"></div>
-          </div>
+          <div class="filter-countries" id="filter-months"></div>
+          <p class="filter-note">Pick one period at a time — granularity varies (monthly for Europe, quarterly for Canada, annual for India/USA/China/Mexico/South Africa), so periods aren't combined across countries. "2026 YTD" sums each country only through its own latest available month — check the Country Detail table's "Data Through" column for exactly how far each one goes. More periods get added as sources are found.</p>
         </div>
 
+        <div class="filter-group">
+          <div class="filter-label">
+            Powertrain
+            <span class="filter-bulk">
+              <button type="button" class="filter-bulk-btn" data-target="fuels" data-action="check">Check all</button> / <button type="button" class="filter-bulk-btn" data-target="fuels" data-action="uncheck">Uncheck all</button>
+            </span>
+          </div>
+          <div class="filter-countries" id="filter-fuels"></div>
+        </div>
+      </aside>
+
+      <div class="page">
         <header class="page-header">
           <div class="eyebrow">World Auto Sales · Powertrain</div>
           <h1>Powertrain Mix by Country</h1>
