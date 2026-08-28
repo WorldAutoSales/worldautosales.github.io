@@ -55,23 +55,11 @@
       <div class="stat-row" id="stat-row"></div>
 
       <div class="card chart-card">
-        <h2>EV Adoption Map</h2>
-        <p class="note">Shaded by BEV share of each market's latest available month. Hover a country for exact figures, click a country for its monthly trend. Grey = no data yet.</p>
-        <div class="map-wrap">
-          <svg class="map-svg" id="map-svg" viewBox="0 0 940 460" role="img" aria-label="World map shaded by battery-electric vehicle share"></svg>
-          <div class="tooltip" id="map-tooltip"></div>
-        </div>
-        <div class="map-legend" id="map-legend"></div>
-        <div class="drilldown-placeholder" id="drilldown-placeholder">Click a country on the map to see its monthly powertrain-mix trend, 2023–2026.</div>
-        <div class="country-drilldown hidden" id="country-drilldown">
-          <div class="drilldown-header">
-            <h3 id="drilldown-title">Monthly trend</h3>
-            <button type="button" class="drilldown-close" id="drilldown-close">✕ Clear</button>
-          </div>
-          <div class="chart-legend" id="drilldown-legend"></div>
-          <svg class="chart" id="trend-svg" viewBox="0 0 900 300" preserveAspectRatio="none"></svg>
-          <div class="tooltip" id="trend-tooltip"></div>
-        </div>
+        <h2>Motorisation Trends</h2>
+        <p class="note">Share of new car registrations by powertrain, summed across every market tracked on this page, year by year. 2026 is partial (through June) — shown as a dashed final segment.</p>
+        <div class="chart-legend" id="yearly-legend"></div>
+        <svg class="chart" id="yearly-trend-svg" viewBox="0 0 900 300" preserveAspectRatio="none"></svg>
+        <div class="tooltip" id="yearly-trend-tooltip"></div>
       </div>
 
       <div class="card chart-card">
@@ -93,6 +81,26 @@
         </div>
         <div class="rank-rows" id="rank-rows"></div>
         <div class="tooltip" id="bar-tooltip"></div>
+      </div>
+
+      <div class="card chart-card">
+        <h2>EV Adoption Map</h2>
+        <p class="note">Shaded by BEV share of each market's latest available month. Hover a country for exact figures, click a country for its monthly trend. Grey = no data yet.</p>
+        <div class="map-wrap">
+          <svg class="map-svg" id="map-svg" viewBox="0 0 940 460" role="img" aria-label="World map shaded by battery-electric vehicle share"></svg>
+          <div class="tooltip" id="map-tooltip"></div>
+        </div>
+        <div class="map-legend" id="map-legend"></div>
+        <div class="drilldown-placeholder" id="drilldown-placeholder">Click a country on the map to see its monthly powertrain-mix trend, 2023–2026.</div>
+        <div class="country-drilldown hidden" id="country-drilldown">
+          <div class="drilldown-header">
+            <h3 id="drilldown-title">Monthly trend</h3>
+            <button type="button" class="drilldown-close" id="drilldown-close">✕ Clear</button>
+          </div>
+          <div class="chart-legend" id="drilldown-legend"></div>
+          <svg class="chart" id="trend-svg" viewBox="0 0 900 300" preserveAspectRatio="none"></svg>
+          <div class="tooltip" id="trend-tooltip"></div>
+        </div>
       </div>
 
       <div class="card notes-card">
@@ -439,6 +447,104 @@ function renderTrendChart(country){
     })
     .on('pointerleave', () => { guide.style('opacity', 0); trendTooltip.style.opacity = 0; });
 }
+
+// --- motorisation trends: one line per fuel type, aggregated by year across every market ---
+document.getElementById('yearly-legend').innerHTML = FUEL_KEYS.map(k => `
+  <div class="legend-chip"><span class="swatch" style="background:${FUEL_COLORS[k]}"></span>${FUEL_LABELS[k]}</div>
+`).join('');
+
+const YEARS = [...new Set(MONTHS.map(m => m.slice(0,4)))];
+const YEARLY = YEARS.map(year => {
+  const sums = {bev:0, phev:0, hev:0, petrol:0, diesel:0, others:0, total:0};
+  let monthsWithData = 0, lastMonth = null;
+  MONTHS.forEach((m, i) => {
+    if(!m.startsWith(year)) return;
+    let anyData = false;
+    COUNTRIES.forEach(c => {
+      const row = rowAt(c, i);
+      if(!row) return;
+      anyData = true;
+      const [bev,phev,hev,petrol,diesel,others,total] = row;
+      sums.bev += bev; sums.phev += phev; sums.hev += hev;
+      sums.petrol += petrol; sums.diesel += diesel; sums.others += others; sums.total += total;
+    });
+    if(anyData){ monthsWithData++; lastMonth = m; }
+  });
+  return { year, monthsWithData, lastMonth, ...sums };
+}).filter(y => y.monthsWithData > 0);
+
+function renderYearlyTrend(){
+  const W = 900, H = 300, M = {top:16, right:16, bottom:30, left:38};
+  const innerW = W - M.left - M.right;
+  const innerH = H - M.top - M.bottom;
+  const svg = d3.select('#yearly-trend-svg');
+  const tooltip = document.getElementById('yearly-trend-tooltip');
+  const wrap = document.getElementById('yearly-trend-svg').closest('.chart-card');
+
+  const series = YEARLY.map((y, i) => ({
+    i, year: y.year, total: y.total, monthsWithData: y.monthsWithData, lastMonth: y.lastMonth,
+    bev: y.bev/y.total*100, phev: y.phev/y.total*100, hev: y.hev/y.total*100,
+    petrol: y.petrol/y.total*100, diesel: y.diesel/y.total*100, others: y.others/y.total*100
+  }));
+
+  const xScale = d3.scalePoint().domain(series.map(d => d.i)).range([0, innerW]).padding(0.05);
+  const yMax = Math.max(10, d3.max(series, d => Math.max(d.bev,d.phev,d.hev,d.petrol,d.diesel,d.others)) * 1.15);
+  const yScale = d3.scaleLinear().domain([0, yMax]).range([innerH, 0]);
+
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+
+  g.append('g')
+    .attr('class', 'bubble-axis')
+    .attr('transform', `translate(0,${innerH})`)
+    .call(d3.axisBottom(xScale).tickFormat(i => {
+      const d = series.find(s => s.i === i);
+      return d.monthsWithData < 12 ? `${d.year} (partial)` : d.year;
+    }));
+
+  g.append('g')
+    .attr('class', 'bubble-axis')
+    .call(d3.axisLeft(yScale).ticks(5).tickFormat(d => d+'%'));
+
+  const line = key => d3.line().x(d => xScale(d.i)).y(d => yScale(d[key]));
+  FUEL_KEYS.forEach(k => {
+    // split into a solid segment (complete years) and a dashed segment (into the first partial year), so an in-progress year never looks like a settled data point
+    const lastCompleteIdx = series.reduce((acc, d, idx) => d.monthsWithData >= 12 ? idx : acc, -1);
+    const solidPart = series.slice(0, lastCompleteIdx + 1);
+    const dashedPart = series.slice(Math.max(lastCompleteIdx, 0));
+    if(solidPart.length > 1){
+      g.append('path').datum(solidPart).attr('class', 'trend-line').attr('stroke', FUEL_COLORS[k]).attr('d', line(k));
+    }
+    if(dashedPart.length > 1){
+      g.append('path').datum(dashedPart).attr('class', 'trend-line').attr('stroke', FUEL_COLORS[k])
+        .attr('stroke-dasharray', '5,4').attr('d', line(k));
+    }
+    g.selectAll(`.yearly-dot-${k}`)
+      .data(series).join('circle')
+      .attr('class', `yearly-dot-${k}`)
+      .attr('cx', d => xScale(d.i)).attr('cy', d => yScale(d[k])).attr('r', 3.5)
+      .attr('fill', FUEL_COLORS[k]);
+  });
+
+  const guide = g.append('line').attr('class', 'trend-guideline').attr('y1', 0).attr('y2', innerH).style('opacity', 0);
+  g.append('rect')
+    .attr('width', innerW).attr('height', innerH)
+    .attr('fill', 'transparent')
+    .on('pointermove', (e) => {
+      const [mx] = d3.pointer(e);
+      const d = series.reduce((best, s) => (best === null || Math.abs(xScale(s.i) - mx) < Math.abs(xScale(best.i) - mx)) ? s : best, null);
+      if(!d) return;
+      guide.attr('x1', xScale(d.i)).attr('x2', xScale(d.i)).style('opacity', 1);
+      const rect = wrap.getBoundingClientRect();
+      tooltip.style.left = (e.clientX - rect.left) + 'px';
+      tooltip.style.top = (e.clientY - rect.top - 10) + 'px';
+      tooltip.style.opacity = 1;
+      tooltip.innerHTML = `<strong>${d.year}${d.monthsWithData < 12 ? ` (through ${d.lastMonth})` : ''}</strong><br>` +
+        FUEL_KEYS.map(k => `${FUEL_LABELS[k]}: <strong>${d[k].toFixed(1)}%</strong>`).join('<br>') +
+        `<br>Total: ${d.total.toLocaleString('en-US')}`;
+    })
+    .on('pointerleave', () => { guide.style('opacity', 0); tooltip.style.opacity = 0; });
+}
+renderYearlyTrend();
 </script>
 </body>
 </html>
