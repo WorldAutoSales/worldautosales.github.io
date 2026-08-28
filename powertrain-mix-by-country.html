@@ -34,8 +34,10 @@
       <div class="nav-heading">Powertrain</div>
       <a href="powertrain-mix-by-country.html" aria-current="page"><span class="dot"></span>Mix by Country</a>
 
+      <div class="nav-heading">Markets</div>
+      <a href="auto-markets-by-country.html"><span class="dot"></span>Auto Markets by Country</a>
+
       <div class="nav-heading">Manufacturers<span class="soon-pill">Soon</span></div>
-      <div class="nav-heading">Regions<span class="soon-pill">Soon</span></div>
       <div class="nav-heading">Trends<span class="soon-pill">Soon</span></div>
     </nav>
 
@@ -91,7 +93,7 @@
 
         <div class="card chart-card">
           <h2>BEV Share Map</h2>
-          <p class="note">Darker green = higher battery-electric share. Scroll/pinch or use the buttons to zoom, drag to pan. Hover a country for exact figures — gray countries with no data for the selected period still show their last available period if one exists. Click any colored or gray-but-tracked country for its full year-by-year trend.</p>
+          <p class="note">Darker green = higher battery-electric share. Scroll/pinch or use the buttons to zoom, drag to pan. Hover a country for exact figures — gray countries with no data for the selected period still show their last available period if one exists. Click any colored or gray-but-tracked country to focus the Motorisation Trends chart below on it.</p>
           <div class="map-wrap">
             <svg class="map-svg" id="map-svg" viewBox="0 0 940 460" role="img" aria-label="World map shaded by battery-electric vehicle share"></svg>
             <div class="map-zoom-controls">
@@ -102,6 +104,18 @@
             <div class="tooltip" id="map-tooltip"></div>
           </div>
           <div class="map-legend" id="map-legend"></div>
+        </div>
+
+        <div class="card chart-card">
+          <div class="chart-header-row">
+            <h2 id="trends-title">Motorisation Trends</h2>
+            <a href="#" id="trends-clear" class="mode-btn hidden" style="text-decoration:none;">✕ Show all filtered countries</a>
+          </div>
+          <p class="note" id="trends-note">Share of new registrations by powertrain, year by year, summed across every country matching the sidebar filters. Click a country — on the map above, or by name in the table below — to focus on just that one instead.</p>
+          <div class="chart-legend" id="trends-legend"></div>
+          <svg class="chart" id="trends-svg" viewBox="0 0 900 300" preserveAspectRatio="none"></svg>
+          <div class="tooltip" id="trends-tooltip"></div>
+          <a href="#" id="trends-country-page-link" class="back-link hidden" style="margin:10px 0 0;">Open full country page →</a>
         </div>
 
         <div class="card chart-card">
@@ -139,7 +153,7 @@
 
         <div class="card table-card">
           <h2>Country Detail</h2>
-          <p class="note">Click a header to sort, or a country name to see its full year-by-year trend. Units = new car registrations, summed over the selected month(s). "Data Through" shows each row's actual coverage — useful for "2026 YTD" and "2025 (Annual)" where it varies by country.</p>
+          <p class="note">Click a header to sort, or a country name to focus the Motorisation Trends chart above on it. Units = new car registrations, summed over the selected month(s). "Data Through" shows each row's actual coverage — useful for "2026 YTD" and "2025 (Annual)" where it varies by country.</p>
           <div class="table-scroll">
             <table id="data-table">
               <thead>
@@ -197,6 +211,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script src="assets/country-yearly-data.js"></script>
 <script>
 // month key -> { label, raw: { country: [BEV, PHEV, HEV, OTHERS, PETROL, DIESEL, TOTAL] } } — source: ACEA
 const MONTHLY_DATA = {
@@ -746,8 +761,8 @@ const MONTHLY_DATA = {
 
 const FUEL_KEYS = ['bev','phev','hev','petrol','diesel','others'];
 const FUEL_COLORS = {
-  bev: "#1e8f5f", phev: "#4fb3a9", hev: "#f4a742",
-  petrol: "#2b3a55", diesel: "#8a94a3", others: "#c9c9c9"
+  bev: "#1e8f5f", phev: "#2563eb", hev: "#f4a742",
+  petrol: "#1a1a1a", diesel: "#6b7280", others: "#8b5cf6"
 };
 const FUEL_LABELS = { bev:"Battery Electric", phev:"Plug-in Hybrid", hev:"Hybrid", petrol:"Petrol", diesel:"Diesel", others:"Others" };
 const ALL_COUNTRIES = [...new Set(Object.values(MONTHLY_DATA).flatMap(m => Object.keys(m.raw)))].sort();
@@ -935,9 +950,9 @@ function renderMap(){
       mapTooltip.style.opacity = 1;
       if(entry){
         mapTooltip.innerHTML = `${entry.country}<br><strong>${entry.bevPct}%</strong> BEV share · ${entry.total.toLocaleString('en-US')} registrations${entry.bevYoyPct == null ? '' : `<br>BEV YoY: <strong>${entry.bevYoyPct > 0 ? '+' : ''}${entry.bevYoyPct}%</strong>`}` +
-          (COUNTRIES_WITH_TREND.has(name) ? `<br><span style="opacity:.75">Click for full trend →</span>` : '');
+          (COUNTRIES_WITH_TREND.has(name) ? `<br><span style="opacity:.75">Click to focus trend →</span>` : '');
       } else if(LAST_AVAILABLE_PERIOD[name]){
-        mapTooltip.innerHTML = `${name}<br>No data for this period<br><span style="opacity:.75">Last available: ${LAST_AVAILABLE_PERIOD[name]}</span><br><span style="opacity:.75">Click for full trend →</span>`;
+        mapTooltip.innerHTML = `${name}<br>No data for this period<br><span style="opacity:.75">Last available: ${LAST_AVAILABLE_PERIOD[name]}</span><br><span style="opacity:.75">Click to focus trend →</span>`;
       } else {
         mapTooltip.innerHTML = `${name}<br>No data`;
       }
@@ -945,8 +960,150 @@ function renderMap(){
     .on('pointerleave', () => { mapTooltip.style.opacity = 0; })
     .on('click', (e, d) => {
       const name = mapCountryName(d);
-      if(COUNTRIES_WITH_TREND.has(name)) location.href = 'country.html?country=' + encodeURIComponent(name);
+      if(COUNTRIES_WITH_TREND.has(name)) focusCountry(name);
     });
+}
+
+// --- Motorisation Trends chart: aggregate of the filtered countries, or focused on one country ---
+let focusedCountry = null;
+const trendsLegend = document.getElementById('trends-legend');
+const trendsTitle = document.getElementById('trends-title');
+const trendsNote = document.getElementById('trends-note');
+const trendsClearBtn = document.getElementById('trends-clear');
+const trendsCountryPageLink = document.getElementById('trends-country-page-link');
+const trendsSvg = d3.select('#trends-svg');
+const trendsTooltip = document.getElementById('trends-tooltip');
+const trendsWrap = document.getElementById('trends-svg').closest('.chart-card');
+
+function focusCountry(name){
+  focusedCountry = name;
+  renderTrendsChart();
+}
+trendsClearBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  focusedCountry = null;
+  renderTrendsChart();
+});
+
+function trendsSeriesForCountry(name){
+  const rows = COUNTRY_YEARLY[name];
+  return rows ? rows.map(r => ({
+    year: r.year, isPartial: r.period_type === 'YTD', total: r.total,
+    bev: r.bev, phev: r.phev, hev: r.hev, petrol: r.petrol, diesel: r.diesel, others: r.others
+  })) : [];
+}
+
+// only countries/years with a full fuel-type split are summed, so the aggregate never silently understates ICE
+function trendsSeriesAggregate(){
+  const countries = [...selectedCountries].filter(c => selectedContinents.has(COUNTRY_CONTINENT[c] || "OTHER") && COUNTRY_YEARLY[c]);
+  const byYear = {};
+  countries.forEach(c => {
+    (COUNTRY_YEARLY[c] || []).forEach(r => {
+      if(r.petrol == null || r.diesel == null) return;
+      const y = byYear[r.year] || (byYear[r.year] = {year:r.year, bev:0, phev:0, hev:0, petrol:0, diesel:0, others:0, total:0, isPartial:false});
+      y.bev += r.bev; y.phev += r.phev; y.hev += r.hev;
+      y.petrol += r.petrol; y.diesel += r.diesel; y.others += (r.others||0); y.total += r.total;
+      if(r.period_type === 'YTD') y.isPartial = true;
+    });
+  });
+  return Object.values(byYear).sort((a,b) => a.year - b.year);
+}
+
+function renderTrendsChart(){
+  const isFocused = focusedCountry && COUNTRY_YEARLY[focusedCountry];
+  const series = isFocused ? trendsSeriesForCountry(focusedCountry) : trendsSeriesAggregate();
+  const activeKeys = FUEL_KEYS.filter(k => selectedFuels.has(k));
+
+  trendsTitle.textContent = isFocused ? `Motorisation Trend — ${focusedCountry}` : 'Motorisation Trends';
+  trendsClearBtn.classList.toggle('hidden', !isFocused);
+  trendsCountryPageLink.classList.toggle('hidden', !isFocused);
+  if(isFocused) trendsCountryPageLink.href = 'country.html?country=' + encodeURIComponent(focusedCountry);
+  trendsNote.textContent = isFocused
+    ? `Year-by-year powertrain mix for ${focusedCountry}. Click "Show all filtered countries" to go back to the aggregate view.`
+    : 'Share of new registrations by powertrain, year by year, summed across every country matching the sidebar filters (only countries/years with a full fuel-type split are included). Click a country — on the map above, or by name in the table below — to focus on just that one instead.';
+
+  trendsLegend.innerHTML = activeKeys.map(k => `
+    <div class="legend-chip" data-fuel="${k}" style="cursor:pointer"><span class="swatch" style="background:${FUEL_COLORS[k]}"></span>${FUEL_LABELS[k]}</div>
+  `).join('');
+
+  trendsSvg.selectAll('*').remove();
+  if(series.length === 0 || activeKeys.length === 0 || series.every(d => d.total === 0)) return;
+
+  const W = 900, H = 300, M = {top:16, right:16, bottom:30, left:38};
+  const innerW = W - M.left - M.right;
+  const innerH = H - M.top - M.bottom;
+
+  const pctSeries = series.map((d,i) => {
+    const pct = {};
+    activeKeys.forEach(k => { pct[k] = d.total ? d[k]/d.total*100 : 0; });
+    return { i, year: d.year, total: d.total, isPartial: d.isPartial, ...pct };
+  });
+
+  const xScale = d3.scalePoint().domain(pctSeries.map(d => d.i)).range([0, innerW]).padding(0.05);
+  const yMax = Math.max(10, d3.max(pctSeries, d => Math.max(...activeKeys.map(k => d[k] || 0))) * 1.15);
+  const yScale = d3.scaleLinear().domain([0, yMax]).range([innerH, 0]);
+
+  const g = trendsSvg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+
+  g.append('g').attr('class', 'bubble-axis').attr('transform', `translate(0,${innerH})`)
+    .call(d3.axisBottom(xScale).tickFormat(i => {
+      const d = pctSeries.find(s => s.i === i);
+      return d.isPartial ? `${d.year} (YTD)` : d.year;
+    }));
+  g.append('g').attr('class', 'bubble-axis').call(d3.axisLeft(yScale).ticks(5).tickFormat(d => d+'%'));
+
+  let trendsIsolatedFuel = null;
+  function applyTrendsIsolation(){
+    g.selectAll('.trend-line').style('opacity', function(){
+      const k = this.getAttribute('data-fuel');
+      return (!trendsIsolatedFuel || k === trendsIsolatedFuel) ? 1 : 0.08;
+    });
+    trendsLegend.querySelectorAll('.legend-chip').forEach(chip => {
+      chip.style.opacity = (!trendsIsolatedFuel || chip.dataset.fuel === trendsIsolatedFuel) ? 1 : 0.4;
+    });
+  }
+  trendsLegend.onclick = (e) => {
+    const chip = e.target.closest('.legend-chip');
+    if(!chip) return;
+    trendsIsolatedFuel = (trendsIsolatedFuel === chip.dataset.fuel) ? null : chip.dataset.fuel;
+    applyTrendsIsolation();
+  };
+
+  const line = key => d3.line().defined(d => d[key] != null).x(d => xScale(d.i)).y(d => yScale(d[key])).curve(d3.curveMonotoneX);
+  activeKeys.forEach(k => {
+    const lastCompleteIdx = pctSeries.reduce((acc, d, idx) => !d.isPartial ? idx : acc, -1);
+    const solidPart = pctSeries.slice(0, lastCompleteIdx + 1);
+    const dashedPart = pctSeries.slice(Math.max(lastCompleteIdx, 0));
+    if(solidPart.length > 1){
+      g.append('path').datum(solidPart).attr('class', 'trend-line').attr('data-fuel', k).attr('stroke', FUEL_COLORS[k]).attr('d', line(k));
+    }
+    if(dashedPart.length > 1){
+      g.append('path').datum(dashedPart).attr('class', 'trend-line').attr('data-fuel', k).attr('stroke', FUEL_COLORS[k]).attr('stroke-dasharray', '5,4').attr('d', line(k));
+    }
+    g.append('path').datum(pctSeries).attr('fill', 'none').attr('stroke', 'transparent').attr('stroke-width', 14).style('cursor', 'pointer').attr('d', line(k))
+      .on('click', () => { trendsIsolatedFuel = (trendsIsolatedFuel === k) ? null : k; applyTrendsIsolation(); });
+    g.selectAll(`.trends-dot-${k}`).data(pctSeries.filter(d => d[k] != null)).join('circle')
+      .attr('class', `trends-dot-${k} trend-dot`).attr('cx', d => xScale(d.i)).attr('cy', d => yScale(d[k])).attr('r', 3.5).attr('fill', FUEL_COLORS[k]);
+  });
+
+  const guide = g.append('line').attr('class', 'trend-guideline').attr('y1', 0).attr('y2', innerH).style('opacity', 0);
+  g.append('rect')
+    .attr('width', innerW).attr('height', innerH)
+    .attr('fill', 'transparent')
+    .on('pointermove', (e) => {
+      const [mx] = d3.pointer(e);
+      const d = pctSeries.reduce((best, s) => (best === null || Math.abs(xScale(s.i) - mx) < Math.abs(xScale(best.i) - mx)) ? s : best, null);
+      if(!d) return;
+      guide.attr('x1', xScale(d.i)).attr('x2', xScale(d.i)).style('opacity', 1);
+      const rect = trendsWrap.getBoundingClientRect();
+      trendsTooltip.style.left = (e.clientX - rect.left) + 'px';
+      trendsTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
+      trendsTooltip.style.opacity = 1;
+      trendsTooltip.innerHTML = `<strong>${d.year}${d.isPartial ? ' (YTD)' : ''}</strong><br>` +
+        activeKeys.map(k => d[k] == null ? '' : `${FUEL_LABELS[k]}: <strong>${d[k].toFixed(1)}%</strong>`).filter(Boolean).join('<br>') +
+        `<br>Total: ${d.total.toLocaleString('en-US')}`;
+    })
+    .on('pointerleave', () => { guide.style('opacity', 0); trendsTooltip.style.opacity = 0; });
 }
 
 fetch('assets/countries-50m.json').then(r => r.json()).then(topology => {
@@ -1185,7 +1342,7 @@ document.querySelectorAll('#data-table thead th').forEach(th=>{
 });
 tbody.addEventListener('click', e => {
   const cell = e.target.closest('.country-link');
-  if(cell) location.href = 'country.html?country=' + encodeURIComponent(cell.dataset.country);
+  if(cell) focusCountry(cell.dataset.country);
 });
 
 // --- main recompute ---
@@ -1200,6 +1357,7 @@ function recompute(){
   renderMap();
   renderLegend();
   renderBubbleChart();
+  renderTrendsChart();
 }
 
 // --- filter event wiring ---
