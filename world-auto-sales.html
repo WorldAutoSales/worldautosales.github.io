@@ -323,11 +323,34 @@ let DATA = [];
 const DATA_BY_NAME = {};
 
 // --- stat row ---
+// run-rate projection: for each country, sum its 2026 actual months (Jan through
+// its own latest available month), then scale to a full year — 12/monthsElapsed.
+// Percentages don't need this (the scale factor cancels top and bottom), but a
+// volume total does, which is why this feeds the stat card, not the % trend chart.
+const JAN_2026_IDX = MONTHS.indexOf('2026-01');
+function projected2026Total(countryList){
+  let sum = 0, countries = 0;
+  countryList.forEach(country => {
+    const idx = latestValidIdx(country);
+    if(idx < JAN_2026_IDX) return;
+    let ytd = 0, months = 0;
+    for(let i = JAN_2026_IDX; i <= idx; i++){
+      const row = rowAt(country, i);
+      if(!row) continue;
+      ytd += row[6];
+      months++;
+    }
+    if(months > 0){ sum += ytd * 12 / months; countries++; }
+  });
+  return { total: sum, countries };
+}
+
 function renderStats(){
   const totals = DATA.reduce((acc,d) => { acc.bev += d.bev; acc.total += d.total; return acc; }, {bev:0, total:0});
   const worldEvPct = totals.total ? +(totals.bev/totals.total*100).toFixed(1) : 0;
   const sortedByEv = [...DATA].sort((a,b) => b.evPct - a.evPct);
   const topCountry = sortedByEv[0], bottomCountry = sortedByEv[sortedByEv.length-1];
+  const proj = projected2026Total(DATA.map(d => d.country));
 
   const stats = [
     {label:'Markets Shown', value:DATA.length, small:`of ${COUNTRIES.length}`},
@@ -335,6 +358,7 @@ function renderStats(){
     {label:'Highest', value: topCountry ? topCountry.evPct+'%' : '—', small: topCountry ? topCountry.country : ''},
     {label:'Lowest', value: bottomCountry ? bottomCountry.evPct+'%' : '—', small: bottomCountry ? bottomCountry.country : ''},
     {label:'Total Registrations', value:totals.total.toLocaleString('en-US'), small:'latest per market'},
+    {label:'2026 Proj. (full year)', value: proj.countries ? Math.round(proj.total).toLocaleString('en-US') : '—', small: proj.countries ? `run-rate, ${proj.countries} markets` : 'no 2026 data'},
   ];
   document.getElementById('stat-row').innerHTML = stats.map(s => `
     <div class="stat">
@@ -394,7 +418,8 @@ function renderMap(){
       mapTooltip.style.opacity = 1;
       mapTooltip.innerHTML = entry
         ? `${entry.country}<br><strong>${entry.evPct}%</strong> BEV share · ${entry.total.toLocaleString('en-US')} registrations` +
-          (entry.asOf !== LATEST_MONTH ? `<br><span style="opacity:.7">as of ${entry.asOf}</span>` : '')
+          (entry.asOf !== LATEST_MONTH ? `<br><span style="opacity:.7">as of ${entry.asOf}</span>` : '') +
+          (entry.country === 'Canada' ? `<br><span style="opacity:.7">quarterly StatCan data spread evenly across months</span>` : '')
         : `${d.properties.name}<br>No data yet, or filtered out`;
     })
     .on('pointerleave', () => { mapTooltip.style.opacity = 0; })
@@ -469,7 +494,8 @@ rankRows.addEventListener('pointermove', e => {
   barTooltip.style.left = (e.clientX - cardRect.left) + 'px';
   barTooltip.style.top = (e.clientY - cardRect.top - 10) + 'px';
   barTooltip.style.opacity = 1;
-  barTooltip.innerHTML = `${seg.dataset.country} — ${FUEL_LABELS[key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)`;
+  barTooltip.innerHTML = `${seg.dataset.country} — ${FUEL_LABELS[key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)` +
+    (seg.dataset.country === 'Canada' ? `<br><span style="opacity:.7">quarterly StatCan data spread evenly across months</span>` : '');
 });
 rankRows.addEventListener('pointerleave', () => { barTooltip.style.opacity = 0; });
 
@@ -615,7 +641,8 @@ function renderTrendChart(country){
       const keys = isolatedFuel ? [isolatedFuel] : FUEL_KEYS;
       trendTooltip.innerHTML = `<strong>${d.month}</strong><br>` +
         keys.map(k => `${FUEL_LABELS[k]}: <strong>${d[k].toFixed(1)}%</strong>`).join('<br>') +
-        `<br>Total: ${d.total.toLocaleString('en-US')}`;
+        `<br>Total: ${d.total.toLocaleString('en-US')}` +
+        (country === 'Canada' ? `<br><span style="opacity:.7">quarterly StatCan data spread evenly across months</span>` : '');
     })
     .on('pointerleave', () => { guide.style('opacity', 0); trendTooltip.style.opacity = 0; });
 }
