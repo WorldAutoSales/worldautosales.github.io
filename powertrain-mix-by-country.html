@@ -212,6 +212,7 @@
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
 <script src="assets/country-yearly-data.js"></script>
+<script src="assets/country-monthly-data.js"></script>
 <script>
 // month key -> { label, raw: { country: [BEV, PHEV, HEV, OTHERS, PETROL, DIESEL, TOTAL] } } — source: ACEA
 const MONTHLY_DATA = {
@@ -986,11 +987,17 @@ trendsClearBtn.addEventListener('click', (e) => {
 });
 
 function trendsSeriesForCountry(name){
-  const rows = COUNTRY_YEARLY[name];
-  return rows ? rows.map(r => ({
-    year: r.year, isPartial: r.period_type === 'YTD', total: r.total,
+  if(typeof COUNTRY_MONTHLY !== 'undefined' && COUNTRY_MONTHLY[name]){
+    return { granularity: 'monthly', points: COUNTRY_MONTHLY[name].map(r => ({
+      label: r.ym, isPartial: false, total: r.total,
+      bev: r.bev, phev: r.phev, hev: r.hev, petrol: r.petrol, diesel: r.diesel, others: r.others
+    })) };
+  }
+  const rows = COUNTRY_YEARLY[name] || [];
+  return { granularity: 'annual', points: rows.map(r => ({
+    label: String(r.year), isPartial: r.period_type === 'YTD', total: r.total,
     bev: r.bev, phev: r.phev, hev: r.hev, petrol: r.petrol, diesel: r.diesel, others: r.others
-  })) : [];
+  })) };
 }
 
 // only countries/years with a full fuel-type split are summed, so the aggregate never silently understates ICE
@@ -1011,37 +1018,44 @@ function trendsSeriesAggregate(){
       if(r.period_type === 'YTD') y.isPartial = true;
     });
   });
-  return Object.values(byYear).sort((a,b) => a.year - b.year);
+  const years = Object.values(byYear).sort((a,b) => a.year - b.year);
+  return { granularity: 'annual', points: years.map(y => ({
+    label: String(y.year), isPartial: y.isPartial, total: y.total,
+    bev: y.bev, phev: y.phev, hev: y.hev, petrol: y.petrol, diesel: y.diesel, others: y.others
+  })) };
 }
 
 function renderTrendsChart(){
-  const isFocused = focusedCountry && COUNTRY_YEARLY[focusedCountry];
-  const series = isFocused ? trendsSeriesForCountry(focusedCountry) : trendsSeriesAggregate();
+  const isFocused = focusedCountry && (COUNTRY_YEARLY[focusedCountry] || (typeof COUNTRY_MONTHLY !== 'undefined' && COUNTRY_MONTHLY[focusedCountry]));
+  const { granularity, points } = isFocused ? trendsSeriesForCountry(focusedCountry) : trendsSeriesAggregate();
   const activeKeys = FUEL_KEYS.filter(k => selectedFuels.has(k));
+  const isMonthly = granularity === 'monthly';
 
   trendsTitle.textContent = isFocused ? `Motorisation Trend — ${focusedCountry}` : 'Motorisation Trends';
   trendsClearBtn.classList.toggle('hidden', !isFocused);
   trendsCountryPageLink.classList.toggle('hidden', !isFocused);
   if(isFocused) trendsCountryPageLink.href = 'country.html?country=' + encodeURIComponent(focusedCountry);
   trendsNote.textContent = isFocused
-    ? `Year-by-year powertrain mix for ${focusedCountry}. Click "Show all filtered countries" to go back to the aggregate view.`
-    : 'Share of new registrations by powertrain, year by year, summed across every country matching the sidebar filters (only countries/years with a full fuel-type split are included). Click a country — on the map above, or by name in the table below — to focus on just that one instead.';
+    ? (isMonthly
+        ? `Monthly powertrain mix for ${focusedCountry}${focusedCountry === 'Canada' ? ' (Statistics Canada reports quarterly — one point per quarter, not per month)' : ''}. Click "Show all filtered countries" to go back to the aggregate view.`
+        : `Year-by-year powertrain mix for ${focusedCountry}. Click "Show all filtered countries" to go back to the aggregate view.`)
+    : 'Share of new registrations by powertrain, year by year, summed across every country matching the sidebar filters (only countries/years with a full fuel-type split are included). Click a country — on the map above, or by name in the table below — to focus on it: European countries and Canada switch to monthly/quarterly points once focused, since real data at that granularity exists for them.';
 
   trendsLegend.innerHTML = activeKeys.map(k => `
     <div class="legend-chip" data-fuel="${k}" style="cursor:pointer"><span class="swatch" style="background:${FUEL_COLORS[k]}"></span>${FUEL_LABELS[k]}</div>
   `).join('');
 
   trendsSvg.selectAll('*').remove();
-  if(series.length === 0 || activeKeys.length === 0 || series.every(d => d.total === 0)) return;
+  if(points.length === 0 || activeKeys.length === 0 || points.every(d => d.total === 0)) return;
 
   const W = 900, H = 300, M = {top:16, right:16, bottom:30, left:38};
   const innerW = W - M.left - M.right;
   const innerH = H - M.top - M.bottom;
 
-  const pctSeries = series.map((d,i) => {
+  const pctSeries = points.map((d,i) => {
     const pct = {};
     activeKeys.forEach(k => { pct[k] = d.total ? d[k]/d.total*100 : 0; });
-    return { i, year: d.year, total: d.total, isPartial: d.isPartial, ...pct };
+    return { i, label: d.label, total: d.total, isPartial: d.isPartial, ...pct };
   });
 
   const xScale = d3.scalePoint().domain(pctSeries.map(d => d.i)).range([0, innerW]).padding(0.05);
@@ -1050,10 +1064,14 @@ function renderTrendsChart(){
 
   const g = trendsSvg.append('g').attr('transform', `translate(${M.left},${M.top})`);
 
+  const tickValues = isMonthly
+    ? pctSeries.filter(d => d.label.endsWith('-01') || d.i === pctSeries.length - 1).map(d => d.i)
+    : pctSeries.map(d => d.i);
   g.append('g').attr('class', 'bubble-axis').attr('transform', `translate(0,${innerH})`)
-    .call(d3.axisBottom(xScale).tickFormat(i => {
+    .call(d3.axisBottom(xScale).tickValues(tickValues).tickFormat(i => {
       const d = pctSeries.find(s => s.i === i);
-      return d.isPartial ? `${d.year} (YTD)` : d.year;
+      if(isMonthly) return d.label.endsWith('-01') ? d.label.slice(0,4) : d.label;
+      return d.isPartial ? `${d.label} (YTD)` : d.label;
     }));
   g.append('g').attr('class', 'bubble-axis').call(d3.axisLeft(yScale).ticks(5).tickFormat(d => d+'%'));
 
@@ -1076,19 +1094,25 @@ function renderTrendsChart(){
 
   const line = key => d3.line().defined(d => d[key] != null).x(d => xScale(d.i)).y(d => yScale(d[key])).curve(d3.curveMonotoneX);
   activeKeys.forEach(k => {
-    const lastCompleteIdx = pctSeries.reduce((acc, d, idx) => !d.isPartial ? idx : acc, -1);
-    const solidPart = pctSeries.slice(0, lastCompleteIdx + 1);
-    const dashedPart = pctSeries.slice(Math.max(lastCompleteIdx, 0));
-    if(solidPart.length > 1){
-      g.append('path').datum(solidPart).attr('class', 'trend-line').attr('data-fuel', k).attr('stroke', FUEL_COLORS[k]).attr('d', line(k));
+    if(isMonthly){
+      g.append('path').datum(pctSeries).attr('class', 'trend-line').attr('data-fuel', k).attr('stroke', FUEL_COLORS[k]).attr('d', line(k));
+    } else {
+      const lastCompleteIdx = pctSeries.reduce((acc, d, idx) => !d.isPartial ? idx : acc, -1);
+      const solidPart = pctSeries.slice(0, lastCompleteIdx + 1);
+      const dashedPart = pctSeries.slice(Math.max(lastCompleteIdx, 0));
+      if(solidPart.length > 1){
+        g.append('path').datum(solidPart).attr('class', 'trend-line').attr('data-fuel', k).attr('stroke', FUEL_COLORS[k]).attr('d', line(k));
+      }
+      if(dashedPart.length > 1){
+        g.append('path').datum(dashedPart).attr('class', 'trend-line').attr('data-fuel', k).attr('stroke', FUEL_COLORS[k]).attr('stroke-dasharray', '5,4').attr('d', line(k));
+      }
     }
-    if(dashedPart.length > 1){
-      g.append('path').datum(dashedPart).attr('class', 'trend-line').attr('data-fuel', k).attr('stroke', FUEL_COLORS[k]).attr('stroke-dasharray', '5,4').attr('d', line(k));
-    }
-    g.append('path').datum(pctSeries).attr('fill', 'none').attr('stroke', 'transparent').attr('stroke-width', 14).style('cursor', 'pointer').attr('d', line(k))
+    g.append('path').datum(pctSeries).attr('fill', 'none').attr('stroke', 'transparent').attr('stroke-width', isMonthly ? 6 : 14).style('cursor', 'pointer').attr('d', line(k))
       .on('click', () => { trendsIsolatedFuel = (trendsIsolatedFuel === k) ? null : k; applyTrendsIsolation(); });
-    g.selectAll(`.trends-dot-${k}`).data(pctSeries.filter(d => d[k] != null)).join('circle')
-      .attr('class', `trends-dot-${k} trend-dot`).attr('cx', d => xScale(d.i)).attr('cy', d => yScale(d[k])).attr('r', 3.5).attr('fill', FUEL_COLORS[k]);
+    if(!isMonthly){
+      g.selectAll(`.trends-dot-${k}`).data(pctSeries.filter(d => d[k] != null)).join('circle')
+        .attr('class', `trends-dot-${k} trend-dot`).attr('cx', d => xScale(d.i)).attr('cy', d => yScale(d[k])).attr('r', 3.5).attr('fill', FUEL_COLORS[k]);
+    }
   });
 
   const guide = g.append('line').attr('class', 'trend-guideline').attr('y1', 0).attr('y2', innerH).style('opacity', 0);
@@ -1104,7 +1128,7 @@ function renderTrendsChart(){
       trendsTooltip.style.left = (e.clientX - rect.left) + 'px';
       trendsTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
       trendsTooltip.style.opacity = 1;
-      trendsTooltip.innerHTML = `<strong>${d.year}${d.isPartial ? ' (YTD)' : ''}</strong><br>` +
+      trendsTooltip.innerHTML = `<strong>${d.label}${d.isPartial ? ' (YTD)' : ''}</strong><br>` +
         activeKeys.map(k => d[k] == null ? '' : `${FUEL_LABELS[k]}: <strong>${d[k].toFixed(1)}%</strong>`).filter(Boolean).join('<br>') +
         `<br>Total: ${d.total.toLocaleString('en-US')}`;
     })
