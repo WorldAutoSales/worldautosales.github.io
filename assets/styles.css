@@ -328,6 +328,46 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
 }
 .chart-mode-toggle.lg .mode-btn.active{ box-shadow: inset 0 0 0 1.5px var(--accent); }
 
+/* ---------- clickable rank rows (isolate a country) ---------- */
+.rank-row.isolatable{ cursor:pointer; border-radius:6px; padding:2px 4px; margin:-2px -4px; transition:background .1s ease; }
+.rank-row.isolatable:hover{ background:var(--surface-alt); }
+.rank-row.isolatable.active-isolate{ background: color-mix(in srgb, var(--accent) 12%, transparent); }
+
+/* ---------- momentum small-multiples grid ---------- */
+.momentum-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap:10px;
+}
+.momentum-card{
+  background:var(--surface-alt);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px 12px;
+  cursor:pointer;
+}
+.momentum-card:hover{ border-color:var(--accent); }
+.momentum-card .mc-name{
+  font-size:12.5px; font-weight:700; color:var(--text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.momentum-card .mc-row{ display:flex; align-items:baseline; justify-content:space-between; gap:6px; margin-top:2px; }
+.momentum-card .mc-pct{
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size:15px; font-weight:700; color:var(--text);
+}
+.momentum-card .mc-delta{
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size:11px; font-weight:700; padding:1px 6px; border-radius:999px;
+}
+.momentum-card .mc-delta.up{ color:#1e8f5f; background:color-mix(in srgb, #1e8f5f 14%, transparent); }
+.momentum-card .mc-delta.down{ color:var(--accent-strong); background:color-mix(in srgb, var(--accent-strong) 12%, transparent); }
+.momentum-card .mc-spark{ width:100%; height:34px; display:block; margin-top:6px; }
+.momentum-card .mc-spark path.spark-line{ fill:none; stroke:var(--accent); stroke-width:1.6px; }
+.momentum-card .mc-spark circle.spark-dot{ fill:var(--accent); }
+
 /* ---------- bubble chart (volume vs BEV share) ---------- */
 .bubble-axis .domain, .bubble-axis .tick line{ stroke:var(--border); }
 .bubble-axis .tick text{
@@ -415,6 +455,15 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
   font-variant-numeric: tabular-nums;
   font-size:12.5px; font-weight:600; color:var(--text-muted);
 }
+
+.country-link{ cursor:pointer; }
+.country-link:hover{ color:var(--accent); text-decoration:underline; }
+.hidden{ display:none !important; }
+.back-link{
+  display:inline-block; margin-bottom:14px;
+  font-size:13px; font-weight:700; color:var(--accent); text-decoration:none;
+}
+.back-link:hover{ text-decoration:underline; }
 
 /* ---------- map country-click drilldown (trend line chart) ---------- */
 .map-svg .country.selected{ stroke:var(--text); stroke-width:2px; }
@@ -919,8 +968,8 @@ svg.map-svg:active{ cursor:grabbing; }
 svg.map-svg{ width:100%; height:auto; display:block; }
 .map-svg .country{ stroke:var(--surface); stroke-width:0.5; }
 .map-svg .country.no-data{ fill:var(--surface-alt); }
-.map-svg .country.has-data{ cursor:pointer; }
-.map-svg .country.has-data:hover{ stroke:var(--text); stroke-width:1.2; }
+.map-svg .country.has-data, .map-svg .country.has-trend{ cursor:pointer; }
+.map-svg .country.has-data:hover, .map-svg .country.has-trend:hover{ stroke:var(--text); stroke-width:1.2; }
 .map-legend{
   display:flex;
   align-items:center;
