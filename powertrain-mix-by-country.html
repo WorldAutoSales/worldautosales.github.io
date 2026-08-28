@@ -82,7 +82,7 @@
             <li>Some of the largest EU markets (Germany, France, Italy) still sit in the middle of the pack once hybrids are counted — hybrid-electric (not battery-electric) is the single most popular powertrain in most of Europe right now.</li>
             <li>Canada joined the mix starting January 2026. Statistics Canada publishes registrations quarterly (not monthly like Europe's ACEA data), so it appears as its own selectable period rather than being blended with Europe's figures — select "January 2026" to see it.</li>
             <li>Select "2026 YTD" to see this year's progress so far — but each country is only summed through its own latest available data (Europe through June, Canada through Q1/March only, Mexico, Japan, Australia, and Brazil through July, India a partial-year snapshot from its live dashboard with no exact cutoff date). Check the "Data Through" column in the Country Detail table below for each country's exact cutoff before comparing totals across countries.</li>
-            <li>Select "2025 (Annual)" to compare full-year 2025 across all 41 markets tracked here at once — the 31 ACEA countries and Canada alongside India, the United States, China, Mexico, Japan, Australia, Brazil, South Korea, and South Africa, which are only available as annual figures since their official sources don't publish a monthly/quarterly powertrain split. Because it mixes a full year with single-month/quarter periods elsewhere in the list, periods still aren't blended together — pick one period at a time. China's and South Africa's splits in particular rely partly on secondary reporting rather than a single official table and should be read as approximate. Japan's figures cover registered passenger cars only and exclude kei-cars (roughly 35-40% of Japan's new-car market) and commercial vehicles; Australia's (FCAI/VFACTS) cover light vehicles only, excluding heavy trucks and buses, and its 2022 BEV figure understates real sales because Tesla — Australia's best-selling EV brand — didn't report to VFACTS for part of that year; Brazil's dominant Flex-fuel (dual gasoline/ethanol) vehicles are folded into Petrol rather than split out; South Korea's national data doesn't separate plug-in hybrids from regular hybrids, so PHEV is folded into HEV there. None of these is directly comparable to other countries' all-vehicle figures. Most of Asia, Africa, South America, and Oceania remain unsourced beyond these nine; those countries aren't at zero, they just haven't been added yet.</li>
+            <li>Select "2025 (Annual)" to compare full-year 2025 across all 43 markets tracked here at once — the 31 ACEA countries and Canada alongside India, the United States, China, Mexico, Japan, Australia, Brazil, South Korea, Indonesia, Thailand, and South Africa, which are only available as annual figures since their official sources don't publish a monthly/quarterly powertrain split. Because it mixes a full year with single-month/quarter periods elsewhere in the list, periods still aren't blended together — pick one period at a time. China's and South Africa's splits in particular rely partly on secondary reporting rather than a single official table and should be read as approximate. Japan's figures cover registered passenger cars only and exclude kei-cars (roughly 35-40% of Japan's new-car market) and commercial vehicles; Australia's (FCAI/VFACTS) cover light vehicles only, excluding heavy trucks and buses, and its 2022 BEV figure understates real sales because Tesla — Australia's best-selling EV brand — didn't report to VFACTS for part of that year; Brazil's dominant Flex-fuel (dual gasoline/ethanol) vehicles are folded into Petrol rather than split out; South Korea's national data doesn't separate plug-in hybrids from regular hybrids, so PHEV is folded into HEV there; Indonesia's source doesn't publish a diesel/petrol split, so all combustion volume is folded into Petrol; Thailand's total includes pickups and other light commercial vehicles (not passenger cars only), and its Petrol/Diesel split is an assumption based on market structure (passenger≈petrol, commercial≈diesel) rather than a fuel-type figure FTI publishes directly. None of these is directly comparable to other countries' all-vehicle figures. Most of Asia, Africa, South America, and Oceania remain unsourced beyond these eleven; those countries aren't at zero, they just haven't been added yet.</li>
             <li>A handful of Eastern European markets (Latvia, Romania, Bulgaria) remain almost entirely petrol/diesel, showing how uneven the EV transition still is within the EU itself.</li>
             <li>However quickly smaller countries move into EVs, overall Europe's progression depends heavily on the Big 5 (Germany, UK, France, Italy, Spain) — they account for <strong>68.6%</strong> of total registrations across the 31 markets tracked here (May 2026), so their pace sets the continent's pace far more than any single fast-moving small market can.</li>
           </ul>
@@ -161,7 +161,7 @@
         </div>
 
         <footer class="page-footer">
-          Sources: ACEA (EU + EFTA + UK, monthly) · Statistics Canada, Table 20-10-0025-01 (quarterly) · Vahan Dashboard, India (annual) · Argonne National Laboratory, USA (annual) · CAAM/CPCA via CnEVPost, China (annual, approximate) · INEGI (RAIAVL), Mexico (monthly) · JADA, Japan (annual, registered passenger cars excl. kei-cars) · FCAI/VFACTS, Australia (annual, light vehicles only) · ANFAVEA, Brazil (annual, Flex-fuel folded into Petrol) · MOLIT, South Korea (annual, PHEV folded into HEV) · naamsa, South Africa (annual, approximate)<br>
+          Sources: ACEA (EU + EFTA + UK, monthly) · Statistics Canada, Table 20-10-0025-01 (quarterly) · Vahan Dashboard, India (annual) · Argonne National Laboratory, USA (annual) · CAAM/CPCA via CnEVPost, China (annual, approximate) · INEGI (RAIAVL), Mexico (monthly) · JADA, Japan (annual, registered passenger cars excl. kei-cars) · FCAI/VFACTS, Australia (annual, light vehicles only) · ANFAVEA, Brazil (annual, Flex-fuel folded into Petrol) · MOLIT, South Korea (annual, PHEV folded into HEV) · GAIKINDO, Indonesia (annual, no diesel split) · FTI Automotive Industry Club, Thailand (annual, includes commercial vehicles) · naamsa, South Africa (annual, approximate)<br>
           Map boundaries: Natural Earth via world-atlas (public domain)
         </footer>
       </div>
@@ -519,6 +519,10 @@ const MONTHLY_DATA = {
       "Brazil": [80381,95236,109819,0,2011856,254909,2552201],
       // source: MOLIT — Korea's national rollup doesn't separate PHEV from HEV (combined in hev); others = LPG+hydrogen+trailers
       "South Korea": [221000,0,592000,148353,648000,86000,1695353],
+      // source: GAIKINDO — no national diesel/petrol split published, so all ICE volume is folded into petrol
+      "Indonesia": [103931,5270,65943,0,628543,0,803687],
+      // source: FTI Automotive Industry Club — includes pickups/commercial; petrol=passenger-segment ICE, diesel=commercial-segment ICE (FTI's own scope, not a published fuel-type split)
+      "Thailand": [121027,8621,146059,990,128893,215576,621166],
       // source: world_auto_sales_annual — aggregated from 12 monthly ACEA press releases per country (Jan-Dec 2025)
       "Austria": [60651,28820,83044,2,79457,33004,284978],
       "Belgium": [143849,39631,46984,3162,168436,12709,414771],
@@ -565,6 +569,8 @@ const MONTHLY_DATA = {
       "Australia": 91292,
       "Brazil": 61535,
       "South Korea": 147000,
+      "Indonesia": 43188,
+      "Thailand": 66732,
       "Austria":44622,"Belgium":127703,"Bulgaria":1719,"Croatia":1793,"Cyprus":1193,"Czechia":11018,
       "Denmark":89199,"Estonia":1320,"Finland":21868,"France":290614,"Germany":380609,"Greece":8707,
       "Hungary":8567,"Iceland":2661,"Ireland":17500,"Italy":65413,"Latvia":1250,"Lithuania":1772,
@@ -592,7 +598,7 @@ const COUNTRY_CONTINENT = {
   "Ireland":"EU","Italy":"EU","Latvia":"EU","Lithuania":"EU","Luxembourg":"EU","Malta":"EU","Netherlands":"EU",
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
-  "Canada":"NA","United States":"NA","China":"ASIA","India":"ASIA","Mexico":"LATAM","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"LATAM","South Korea":"ASIA"
+  "Canada":"NA","United States":"NA","China":"ASIA","India":"ASIA","Mexico":"LATAM","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"LATAM","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA"
 };
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 
@@ -603,7 +609,7 @@ const COUNTRY_ISO2 = {
   "Ireland":"ie","Italy":"it","Latvia":"lv","Lithuania":"lt","Luxembourg":"lu","Malta":"mt","Netherlands":"nl",
   "Norway":"no","Poland":"pl","Portugal":"pt","Romania":"ro","Slovakia":"sk","Slovenia":"si","Spain":"es",
   "Sweden":"se","Switzerland":"ch","United Kingdom":"gb","Canada":"ca",
-  "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr"
+  "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th"
 };
 const ALL_COUNTRIES_SORTED = [...ALL_COUNTRIES].sort((a,b) => {
   const ca = COUNTRY_CONTINENT[a] || 'ZZ', cb = COUNTRY_CONTINENT[b] || 'ZZ';
