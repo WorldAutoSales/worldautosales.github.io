@@ -996,10 +996,15 @@ function trendsSeriesForCountry(name){
 // only countries/years with a full fuel-type split are summed, so the aggregate never silently understates ICE
 function trendsSeriesAggregate(){
   const countries = [...selectedCountries].filter(c => selectedContinents.has(COUNTRY_CONTINENT[c] || "OTHER") && COUNTRY_YEARLY[c]);
+  // the current (latest) year across the whole dataset is the only one allowed to be "partial" —
+  // a single country reporting an early/partial cut of an otherwise-finished past year (e.g. the
+  // Philippines' Jan-Nov-only 2025 row) shouldn't mislabel that whole year's aggregate as YTD
+  const latestYear = Math.max(...countries.flatMap(c => (COUNTRY_YEARLY[c] || []).map(r => r.year)));
   const byYear = {};
   countries.forEach(c => {
     (COUNTRY_YEARLY[c] || []).forEach(r => {
       if(r.petrol == null || r.diesel == null) return;
+      if(r.period_type === 'YTD' && r.year !== latestYear) return;
       const y = byYear[r.year] || (byYear[r.year] = {year:r.year, bev:0, phev:0, hev:0, petrol:0, diesel:0, others:0, total:0, isPartial:false});
       y.bev += r.bev; y.phev += r.phev; y.hev += r.hev;
       y.petrol += r.petrol; y.diesel += r.diesel; y.others += (r.others||0); y.total += r.total;
