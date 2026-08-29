@@ -100,9 +100,9 @@
         <div class="tooltip" id="yearly-trend-tooltip"></div>
       </div>
 
-      <div class="card chart-card">
+      <div class="card chart-card" id="momentum-section">
         <h2>Momentum — Who's Moving Fastest</h2>
-        <p class="note">Every market's BEV-share trajectory since its earliest data, ranked by percentage-point change over the last 12 months (fastest gainers first). Click a card to see it full-size below.</p>
+        <p class="note" title="Momentum is the CHANGE in BEV share over 12 months, in percentage points — not the share itself. A country can have a high BEV share but low momentum (already EV-heavy, growth has plateaued), or the reverse.">Every market's BEV-share trajectory since its earliest data, ranked by percentage-point change over the last 12 months (fastest gainers first). Click a card to see it full-size below.</p>
         <div class="momentum-grid" id="momentum-grid"></div>
       </div>
 
@@ -133,13 +133,13 @@
         <div class="map-wrap">
           <svg class="map-svg" id="map-svg" viewBox="0 0 940 460" role="img" aria-label="World map shaded by battery-electric vehicle share"></svg>
           <div class="tooltip" id="map-tooltip"></div>
+          <button type="button" class="map-clear-btn hidden" id="drilldown-close">✕ Clear Selection</button>
         </div>
         <div class="map-legend" id="map-legend"></div>
         <div class="drilldown-placeholder" id="drilldown-placeholder">Click a country on the map to see its monthly powertrain-mix trend, 2023–2026.</div>
         <div class="country-drilldown hidden" id="country-drilldown">
           <div class="drilldown-header">
             <h3 id="drilldown-title">Monthly trend</h3>
-            <button type="button" class="drilldown-close" id="drilldown-close">✕ Clear Selection</button>
           </div>
           <div class="chart-legend" id="drilldown-legend"></div>
           <svg class="chart" id="trend-svg" viewBox="0 0 900 300" preserveAspectRatio="none"></svg>
@@ -165,6 +165,7 @@
           <li>Canada joined in Q1 2026. Statistics Canada reports quarterly, not monthly like Europe's ACEA source — its quarterly total is split evenly across the quarter's 3 months rather than fabricating a real monthly breakdown, and its "latest month" trails Europe's until a newer quarter is published.</li>
           <li>New Zealand joined in 2023-01 (through July 2026 — the site's most current market). It's not an independently-published monthly series like the others: it's reconstructed from NZTA Waka Kotahi's Motor Vehicle Register snapshot, filtered to new (not used-import) passenger cars/vans and grouped by first-NZ-registration month and fuel type. This can slightly undercount older months as vehicles are later exported or scrapped (checked as negligible over this window) and was cross-checked against MIA's independently reported June 2026 figure (0.3% difference). Most of Asia, Africa, South America, and the rest of Oceania are still unsourced; the grey countries aren't zero, they're just not sourced yet.</li>
           <li>United States joined in 2023-01 (full history through July 2026, no gaps) — source is Argonne National Laboratory's monthly light-duty-vehicle sales updates (Wards Auto-sourced), the same organization behind this site's annual US figures. Argonne doesn't publish a Petrol/Diesel split for the US market, so the entire non-BEV/PHEV/HEV remainder is shown as Petrol (Diesel=0) — diesel's real share of US passenger-vehicle sales is negligible in any case.</li>
+          <li>China joined for 2026-01 through 2026-07 only (no pre-2026 monthly data sourced yet) — figures are CAAM's own monthly wholesale sales (automaker deliveries to dealers, including exports), matching the wholesale basis already used for this site's existing China annual figures, via CnEVPost's monthly CAAM write-ups. China's official "NEV" category is BEV+PHEV only — non-plug-in HEV sales are counted within the conventional/ICE segment, so HEV is shown as 0 and folded into Petrol along with the (unpublished, believed negligible) Diesel share.</li>
         </ul>
       </div>
 
@@ -435,7 +436,7 @@ function renderFocusStats(){
     { label: 'Cars Sold', value: me.total.toLocaleString('en-US'), key: 'total', tag: projTag, dateLabel: me.asOfLabel },
   ];
 
-  body.innerHTML = cards.map(c => {
+  const statCardsHTML = cards.map(c => {
     const cRank = rankWithin(continentList, isolatedCountry, c.key);
     const wRank = rankWithin(stats, isolatedCountry, c.key);
     return `
@@ -449,6 +450,12 @@ function renderFocusStats(){
       </div>
     </div>`;
   }).join('');
+
+  // the country's own momentum card (usually in the separate Momentum grid, hidden while
+  // isolated) moves in here instead, to the right of the other cards
+  const momentumData = DATA_BY_NAME[isolatedCountry] ? momentumCardData(DATA_BY_NAME[isolatedCountry]) : null;
+  body.innerHTML = statCardsHTML + (momentumData ? momentumCardHTML(momentumData) : '');
+  if(momentumData) wireMomentumCardClicks(body);
 }
 
 function renderStats(){
@@ -527,7 +534,8 @@ function renderMap(){
           (entry.asOf !== LATEST_MONTH ? `<br><span style="opacity:.7">as of ${entry.asOf}</span>` : '') +
           (entry.country === 'Canada' ? `<br><span style="opacity:.7">quarterly StatCan data spread evenly across months</span>` : '') +
           (entry.country === 'New Zealand' ? `<br><span style="opacity:.7">reconstructed from NZTA's vehicle register snapshot, not an official monthly series</span>` : '') +
-          (entry.country === 'United States' ? `<br><span style="opacity:.7">no Petrol/Diesel split published — Diesel shown as 0</span>` : '')
+          (entry.country === 'United States' ? `<br><span style="opacity:.7">no Petrol/Diesel split published — Diesel shown as 0</span>` : '') +
+          (entry.country === 'China' ? `<br><span style="opacity:.7">CAAM wholesale data (incl. exports), 2026 only — Diesel shown as 0</span>` : '')
         : `${d.properties.name}<br>No data yet, or filtered out`;
     })
     .on('pointerleave', () => { mapTooltip.style.opacity = 0; })
@@ -605,7 +613,8 @@ rankRows.addEventListener('pointermove', e => {
   barTooltip.innerHTML = `${seg.dataset.country} — ${FUEL_LABELS[key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)` +
     (seg.dataset.country === 'Canada' ? `<br><span style="opacity:.7">quarterly StatCan data spread evenly across months</span>` : '') +
     (seg.dataset.country === 'New Zealand' ? `<br><span style="opacity:.7">reconstructed from NZTA's vehicle register snapshot, not an official monthly series</span>` : '') +
-    (seg.dataset.country === 'United States' ? `<br><span style="opacity:.7">no Petrol/Diesel split published — Diesel shown as 0</span>` : '');
+    (seg.dataset.country === 'United States' ? `<br><span style="opacity:.7">no Petrol/Diesel split published — Diesel shown as 0</span>` : '') +
+    (seg.dataset.country === 'China' ? `<br><span style="opacity:.7">CAAM wholesale data (incl. exports), 2026 only — Diesel shown as 0</span>` : '');
 });
 rankRows.addEventListener('pointerleave', () => { barTooltip.style.opacity = 0; });
 
@@ -673,6 +682,7 @@ document.getElementById('drilldown-close').addEventListener('click', () => {
   drilldownPlaceholder.style.display = '';
   if(mapPaths) mapPaths.classed('selected', false);
   isolatedFuel = null;
+  document.getElementById('drilldown-close').classList.add('hidden');
 });
 
 function selectCountry(country){
@@ -681,6 +691,7 @@ function selectCountry(country){
   drilldown.classList.remove('hidden');
   drilldownTitle.textContent = `Monthly trend — ${country}`;
   renderTrendChart(country);
+  document.getElementById('drilldown-close').classList.remove('hidden');
 }
 
 function seriesFor(country){
@@ -758,40 +769,35 @@ function renderTrendChart(country){
         `<br>Total: ${d.total.toLocaleString('en-US')}` +
         (country === 'Canada' ? `<br><span style="opacity:.7">quarterly StatCan data spread evenly across months</span>` : '') +
         (country === 'New Zealand' ? `<br><span style="opacity:.7">reconstructed from NZTA's vehicle register snapshot, not an official monthly series</span>` : '') +
-        (country === 'United States' ? `<br><span style="opacity:.7">no Petrol/Diesel split published — Diesel shown as 0</span>` : '');
+        (country === 'United States' ? `<br><span style="opacity:.7">no Petrol/Diesel split published — Diesel shown as 0</span>` : '') +
+        (country === 'China' ? `<br><span style="opacity:.7">CAAM wholesale data (incl. exports), 2026 only — Diesel shown as 0</span>` : '');
     })
     .on('pointerleave', () => { guide.style('opacity', 0); trendTooltip.style.opacity = 0; });
 }
 
 // --- momentum: small-multiples sparkline, ranked by 12-month BEV pp change ---
-function renderMomentum(){
-  const grid = document.getElementById('momentum-grid');
-  const cards = DATA.map(d => {
-    const series = seriesFor(d.country);
-    if(series.length < 2) return null;
-    const latest = series[series.length-1];
-    // nearest point to ~12 months before the latest real point
-    const targetI = latest.i - 12;
-    const twelveAgo = series.reduce((best, s) => (best === null || Math.abs(s.i - targetI) < Math.abs(best.i - targetI)) ? s : best, null);
-    const hasYoy = twelveAgo && Math.abs(twelveAgo.i - targetI) <= 2;
-    const delta = hasYoy ? +(latest.bev - twelveAgo.bev).toFixed(1) : null;
-    return { country: d.country, evPct: d.evPct, series, delta };
-  }).filter(Boolean).sort((a,b) => {
-    if(a.delta == null) return 1;
-    if(b.delta == null) return -1;
-    return b.delta - a.delta;
-  });
+function momentumCardData(d){
+  const series = seriesFor(d.country);
+  if(series.length < 2) return null;
+  const latest = series[series.length-1];
+  // nearest point to ~12 months before the latest real point
+  const targetI = latest.i - 12;
+  const twelveAgo = series.reduce((best, s) => (best === null || Math.abs(s.i - targetI) < Math.abs(best.i - targetI)) ? s : best, null);
+  const hasYoy = twelveAgo && Math.abs(twelveAgo.i - targetI) <= 2;
+  const delta = hasYoy ? +(latest.bev - twelveAgo.bev).toFixed(1) : null;
+  return { country: d.country, evPct: d.evPct, series, delta };
+}
 
-  grid.innerHTML = cards.map(c => {
-    const yMax = Math.max(5, d3.max(c.series, s => s.bev) * 1.1);
-    const xScale = d3.scaleLinear().domain([0, MONTHS.length-1]).range([2, 148]);
-    const yScale = d3.scaleLinear().domain([0, yMax]).range([30, 2]);
-    const lineGen = d3.line().x(s => xScale(s.i)).y(s => yScale(s.bev));
-    const last = c.series[c.series.length-1];
-    const deltaText = c.delta == null ? 'n/a' : `${c.delta > 0 ? '+' : ''}${c.delta}pp`;
-    const deltaClass = c.delta == null ? '' : (c.delta >= 0 ? 'up' : 'down');
-    return `
-    <div class="momentum-card" data-momentum-country="${c.country}">
+function momentumCardHTML(c){
+  const yMax = Math.max(5, d3.max(c.series, s => s.bev) * 1.1);
+  const xScale = d3.scaleLinear().domain([0, MONTHS.length-1]).range([2, 148]);
+  const yScale = d3.scaleLinear().domain([0, yMax]).range([30, 2]);
+  const lineGen = d3.line().x(s => xScale(s.i)).y(s => yScale(s.bev));
+  const last = c.series[c.series.length-1];
+  const deltaText = c.delta == null ? 'n/a' : `${c.delta > 0 ? '+' : ''}${c.delta}pp`;
+  const deltaClass = c.delta == null ? '' : (c.delta >= 0 ? 'up' : 'down');
+  return `
+    <div class="momentum-card" data-momentum-country="${c.country}" title="Momentum: change in BEV share over the last 12 months, in percentage points — not the share itself.">
       <div class="mc-name">${c.country}</div>
       <div class="mc-row">
         <span class="mc-pct">${c.evPct}%</span>
@@ -802,15 +808,34 @@ function renderMomentum(){
         <circle class="spark-dot" cx="${xScale(last.i)}" cy="${yScale(last.bev)}" r="2.6"></circle>
       </svg>
     </div>`;
-  }).join('');
+}
 
-  grid.querySelectorAll('.momentum-card').forEach(card => {
+function wireMomentumCardClicks(container){
+  container.querySelectorAll('.momentum-card').forEach(card => {
     card.addEventListener('click', () => {
       const country = card.dataset.momentumCountry;
       isolateCountry(country);
       document.getElementById('drilldown-placeholder').closest('.chart-card').scrollIntoView({behavior:'smooth', block:'nearest'});
     });
   });
+}
+
+// hidden while a country is isolated — that country's own momentum card moves into the
+// Country Stats row instead (see renderFocusStats), so a 1-card grid here would be redundant
+function renderMomentum(){
+  const section = document.getElementById('momentum-section');
+  const grid = document.getElementById('momentum-grid');
+  if(isolatedCountry){ section.classList.add('hidden'); return; }
+  section.classList.remove('hidden');
+
+  const cards = DATA.map(momentumCardData).filter(Boolean).sort((a,b) => {
+    if(a.delta == null) return 1;
+    if(b.delta == null) return -1;
+    return b.delta - a.delta;
+  });
+
+  grid.innerHTML = cards.map(momentumCardHTML).join('');
+  wireMomentumCardClicks(grid);
 }
 
 // --- motorisation trends: one line per fuel type, aggregated by year across the filtered markets ---
@@ -974,17 +999,28 @@ countriesBox.addEventListener('change', e => {
   if(!cb.matches('input[type="checkbox"]')) return;
   const c = cb.dataset.country;
   if(cb.checked) selectedCountries.add(c); else selectedCountries.delete(c);
-  isolatedCountry = null;
+  // filtering down to exactly one country is treated the same as clicking it — select it on
+  // the map too, instead of leaving the map in its unfocused multi-country state
+  isolatedCountry = selectedCountries.size === 1 ? [...selectedCountries][0] : null;
   recompute();
+  if(isolatedCountry){
+    selectCountry(isolatedCountry);
+  } else {
+    drilldown.classList.add('hidden');
+    drilldownPlaceholder.style.display = '';
+    if(mapPaths) mapPaths.classed('selected', false);
+    document.getElementById('drilldown-close').classList.add('hidden');
+  }
 });
 countriesBox.addEventListener('click', e => {
   const btn = e.target.closest('.only-btn');
   if(!btn) return;
   const c = btn.dataset.onlyCountry;
   selectedCountries = new Set([c]);
-  isolatedCountry = null;
+  isolatedCountry = c;
   countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = cb.dataset.country === c; });
   recompute();
+  selectCountry(c);
 });
 
 document.querySelectorAll('.filter-bulk-btn').forEach(btn => {

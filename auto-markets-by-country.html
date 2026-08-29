@@ -89,9 +89,9 @@
         <div class="tooltip" id="yearly-trend-tooltip"></div>
       </div>
 
-      <div class="card chart-card">
+      <div class="card chart-card" id="momentum-section">
         <h2>Momentum — Fastest Growing Markets</h2>
-        <p class="note">Each market's registration trend since its earliest data, ranked by percent change over the last 5 available years (fastest growers first). A hollow endpoint and "Proj." tag mean the latest point is a 2026 full-year run-rate estimate, not a raw partial total. Click a card to see it full-size below.</p>
+        <p class="note" title="Momentum is the CHANGE in a market's size over 5 years — not its current size. A market can be huge but flat (low momentum) or small but fast-growing (high momentum).">Each market's registration trend since its earliest data, ranked by percent change over the last 5 available years (fastest growers first). A hollow endpoint and "Proj." tag mean the latest point is a 2026 full-year run-rate estimate, not a raw partial total. Click a card to see it full-size below.</p>
         <div class="momentum-grid" id="momentum-grid"></div>
       </div>
 
@@ -120,13 +120,13 @@
         <div class="map-wrap">
           <svg class="map-svg" id="map-svg" viewBox="0 0 940 460" role="img" aria-label="World map shaded by total vehicle registrations"></svg>
           <div class="tooltip" id="map-tooltip"></div>
+          <button type="button" class="map-clear-btn hidden" id="drilldown-close">✕ Clear Selection</button>
         </div>
         <div class="map-legend" id="map-legend"></div>
         <div class="drilldown-placeholder" id="drilldown-placeholder">Click a country on the map, a rank row, or a momentum card to see its year-by-year trend.</div>
         <div class="country-drilldown hidden" id="country-drilldown">
           <div class="drilldown-header">
             <h3 id="drilldown-title">Yearly trend</h3>
-            <button type="button" class="drilldown-close" id="drilldown-close">✕ Clear Selection</button>
           </div>
           <svg class="chart" id="trend-svg" viewBox="0 0 900 260" preserveAspectRatio="none"></svg>
           <div class="tooltip" id="trend-tooltip"></div>
@@ -604,6 +604,7 @@ document.getElementById('drilldown-close').addEventListener('click', () => {
   drilldown.classList.add('hidden');
   drilldownPlaceholder.style.display = '';
   if(mapPaths) mapPaths.classed('selected', false);
+  document.getElementById('drilldown-close').classList.add('hidden');
 });
 
 function selectCountry(country){
@@ -612,6 +613,7 @@ function selectCountry(country){
   drilldown.classList.remove('hidden');
   drilldownTitle.textContent = `Yearly trend — ${country}`;
   renderTrendChart(country);
+  document.getElementById('drilldown-close').classList.remove('hidden');
 }
 
 function renderTrendChart(country){
@@ -699,32 +701,26 @@ function renderTrendChart(country){
 }
 
 // --- momentum: small-multiples sparkline, ranked by 5-year % change ---
-function renderMomentum(){
-  const grid = document.getElementById('momentum-grid');
-  const cards = DATA.map(d => {
-    const years = yearsOf(d.country);
-    if(years.length < 2) return null;
-    const series = years.map(y => ({
-      year: y,
-      value: (d.isProjected && y === d.latestYear) ? d.total : valueAt(d.country, y)
-    }));
-    return { country: d.country, total: d.total, series, delta: d.fiveYearPct, isProjected: d.isProjected };
-  }).filter(Boolean).sort((a,b) => {
-    if(a.delta == null) return 1;
-    if(b.delta == null) return -1;
-    return b.delta - a.delta;
-  });
+function momentumCardData(d){
+  const years = yearsOf(d.country);
+  if(years.length < 2) return null;
+  const series = years.map(y => ({
+    year: y,
+    value: (d.isProjected && y === d.latestYear) ? d.total : valueAt(d.country, y)
+  }));
+  return { country: d.country, total: d.total, series, delta: d.fiveYearPct, isProjected: d.isProjected };
+}
 
-  grid.innerHTML = cards.map(c => {
-    const xScale = d3.scaleLinear().domain(d3.extent(c.series, s => s.year)).range([2, 148]);
-    const yMax = d3.max(c.series, s => s.value) * 1.1 || 1;
-    const yScale = d3.scaleLinear().domain([0, yMax]).range([30, 2]);
-    const lineGen = d3.line().x(s => xScale(s.year)).y(s => yScale(s.value));
-    const last = c.series[c.series.length-1];
-    const deltaText = c.delta == null ? 'n/a' : `${c.delta > 0 ? '+' : ''}${c.delta}%`;
-    const deltaClass = c.delta == null ? '' : (c.delta >= 0 ? 'up' : 'down');
-    return `
-    <div class="momentum-card" data-momentum-country="${c.country}">
+function momentumCardHTML(c){
+  const xScale = d3.scaleLinear().domain(d3.extent(c.series, s => s.year)).range([2, 148]);
+  const yMax = d3.max(c.series, s => s.value) * 1.1 || 1;
+  const yScale = d3.scaleLinear().domain([0, yMax]).range([30, 2]);
+  const lineGen = d3.line().x(s => xScale(s.year)).y(s => yScale(s.value));
+  const last = c.series[c.series.length-1];
+  const deltaText = c.delta == null ? 'n/a' : `${c.delta > 0 ? '+' : ''}${c.delta}%`;
+  const deltaClass = c.delta == null ? '' : (c.delta >= 0 ? 'up' : 'down');
+  return `
+    <div class="momentum-card" data-momentum-country="${c.country}" title="Momentum: change in total registrations over the last 5 available years (${c.series[0].year}→${last.year}) — not the market's current size.">
       <div class="mc-name${c.isProjected ? ' is-projected' : ''}" title="${c.isProjected ? `${GLOBAL_LATEST_YEAR} point is a full-year run-rate projection` : ''}">${c.country}</div>
       <div class="mc-row">
         <span class="mc-pct">${d3.format('~s')(c.total)}${c.isProjected ? ' <span class="mc-proj-tag">Proj.</span>' : ''}</span>
@@ -735,14 +731,33 @@ function renderMomentum(){
         <circle class="spark-dot${c.isProjected ? ' spark-dot-proj' : ''}" cx="${xScale(last.year)}" cy="${yScale(last.value)}" r="2.6"></circle>
       </svg>
     </div>`;
-  }).join('');
+}
 
-  grid.querySelectorAll('.momentum-card').forEach(card => {
+function wireMomentumCardClicks(container){
+  container.querySelectorAll('.momentum-card').forEach(card => {
     card.addEventListener('click', () => {
       isolateCountry(card.dataset.momentumCountry);
       document.getElementById('drilldown-placeholder').closest('.chart-card').scrollIntoView({behavior:'smooth', block:'nearest'});
     });
   });
+}
+
+// hidden while a country is isolated — that country's own momentum card moves into the
+// Country Stats row instead (see renderFocusStats), so a 1-card grid here would be redundant
+function renderMomentum(){
+  const section = document.getElementById('momentum-section');
+  const grid = document.getElementById('momentum-grid');
+  if(isolatedCountry){ section.classList.add('hidden'); return; }
+  section.classList.remove('hidden');
+
+  const cards = DATA.map(momentumCardData).filter(Boolean).sort((a,b) => {
+    if(a.delta == null) return 1;
+    if(b.delta == null) return -1;
+    return b.delta - a.delta;
+  });
+
+  grid.innerHTML = cards.map(momentumCardHTML).join('');
+  wireMomentumCardClicks(grid);
 }
 
 // --- market size trend: single line, total across filtered markets, by year ---
@@ -894,17 +909,28 @@ countriesBox.addEventListener('change', e => {
   if(!cb.matches('input[type="checkbox"]')) return;
   const c = cb.dataset.country;
   if(cb.checked) selectedCountries.add(c); else selectedCountries.delete(c);
-  isolatedCountry = null;
+  // filtering down to exactly one country is treated the same as clicking it — select it on
+  // the map too, instead of leaving the map in its unfocused multi-country state
+  isolatedCountry = selectedCountries.size === 1 ? [...selectedCountries][0] : null;
   recompute();
+  if(isolatedCountry){
+    selectCountry(isolatedCountry);
+  } else {
+    drilldown.classList.add('hidden');
+    drilldownPlaceholder.style.display = '';
+    if(mapPaths) mapPaths.classed('selected', false);
+    document.getElementById('drilldown-close').classList.add('hidden');
+  }
 });
 countriesBox.addEventListener('click', e => {
   const btn = e.target.closest('.only-btn');
   if(!btn) return;
   const c = btn.dataset.onlyCountry;
   selectedCountries = new Set([c]);
-  isolatedCountry = null;
+  isolatedCountry = c;
   countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = cb.dataset.country === c; });
   recompute();
+  selectCountry(c);
 });
 
 document.querySelectorAll('.filter-bulk-btn').forEach(btn => {
