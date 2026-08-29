@@ -244,6 +244,12 @@ h1{
   flex-direction:column;
   gap:1px;
 }
+.focus-rank .focus-date{
+  margin-top:3px;
+  font-weight:500;
+  font-style:italic;
+  opacity:0.75;
+}
 
 .card{
   background:var(--surface);

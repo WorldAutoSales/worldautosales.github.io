@@ -374,20 +374,31 @@ function buildFocusStats(){
     const idx = latestValidIdx(country);
     const row = rowAt(country, idx);
     let bev, total, yoyPct = null, threeYrPct = null, usedProjected = false;
+    let asOfLabel, yoyDateLabel = null, threeYrDateLabel = null;
 
     if(row){
       bev = row[0]; total = row[6];
+      asOfLabel = MONTHS[idx];
       const priorYear = rowAt(country, idx - 12);
-      yoyPct = (priorYear && priorYear[0]) ? +(((bev - priorYear[0]) / priorYear[0]) * 100).toFixed(1) : null;
+      if(priorYear && priorYear[0]){
+        yoyPct = +(((bev - priorYear[0]) / priorYear[0]) * 100).toFixed(1);
+        yoyDateLabel = `${MONTHS[idx]} vs ${MONTHS[idx - 12]}`;
+      }
       const prior3yr = rowAt(country, idx - 36);
-      threeYrPct = (prior3yr && prior3yr[0]) ? +(((bev - prior3yr[0]) / prior3yr[0]) * 100).toFixed(1) : null;
+      if(prior3yr && prior3yr[0]){
+        threeYrPct = +(((bev - prior3yr[0]) / prior3yr[0]) * 100).toFixed(1);
+        threeYrDateLabel = `${MONTHS[idx]} vs ${MONTHS[idx - 36]}`;
+      }
     } else {
       const proj = projectedForCountry(country);
       if(!proj) return null;
       bev = proj.bev; total = proj.total; usedProjected = true;
+      asOfLabel = '2026 full-year projection';
     }
 
-    return { country, continent: COUNTRY_CONTINENT[country] || "OTHER", bev, total, yoyPct, threeYrPct, usedProjected };
+    const bevPct = total ? +(bev / total * 100).toFixed(1) : null;
+
+    return { country, continent: COUNTRY_CONTINENT[country] || "OTHER", bev, total, bevPct, yoyPct, threeYrPct, usedProjected, asOfLabel, yoyDateLabel, threeYrDateLabel };
   }).filter(Boolean);
 }
 
@@ -416,10 +427,11 @@ function renderFocusStats(){
   const projTag = me.usedProjected ? ' <span class="mc-proj-tag">2026 Proj.</span>' : '';
 
   const cards = [
-    { label: 'YoY Growth (BEV)', value: me.yoyPct == null ? '—' : `${me.yoyPct > 0 ? '+' : ''}${me.yoyPct}%`, key: 'yoyPct' },
-    { label: '3-Year Growth (BEV)', value: me.threeYrPct == null ? '—' : `${me.threeYrPct > 0 ? '+' : ''}${me.threeYrPct}%`, key: 'threeYrPct' },
-    { label: 'BEV Sold', value: me.bev.toLocaleString('en-US'), key: 'bev', tag: projTag },
-    { label: 'Cars Sold', value: me.total.toLocaleString('en-US'), key: 'total', tag: projTag },
+    { label: 'YoY Growth (BEV)', value: me.yoyPct == null ? '—' : `${me.yoyPct > 0 ? '+' : ''}${me.yoyPct}%`, key: 'yoyPct', dateLabel: me.yoyDateLabel },
+    { label: '3-Year Growth (BEV)', value: me.threeYrPct == null ? '—' : `${me.threeYrPct > 0 ? '+' : ''}${me.threeYrPct}%`, key: 'threeYrPct', dateLabel: me.threeYrDateLabel },
+    { label: 'BEV Share', value: me.bevPct == null ? '—' : `${me.bevPct}%`, key: 'bevPct', tag: projTag, dateLabel: me.asOfLabel },
+    { label: 'BEV Sold', value: me.bev.toLocaleString('en-US'), key: 'bev', tag: projTag, dateLabel: me.asOfLabel },
+    { label: 'Cars Sold', value: me.total.toLocaleString('en-US'), key: 'total', tag: projTag, dateLabel: me.asOfLabel },
   ];
 
   body.innerHTML = cards.map(c => {
@@ -432,6 +444,7 @@ function renderFocusStats(){
       <div class="focus-rank">
         ${cRank ? `<div>#${cRank.rank} of ${cRank.of} in ${me.continent}</div>` : '<div>—</div>'}
         ${wRank ? `<div>#${wRank.rank} of ${wRank.of} in World</div>` : ''}
+        ${c.dateLabel ? `<div class="focus-date">${c.dateLabel}</div>` : ''}
       </div>
     </div>`;
   }).join('');
