@@ -147,6 +147,12 @@
         </div>
       </div>
 
+      <div class="card chart-card focus-stats-card hidden" id="focus-stats-card">
+        <h2 id="focus-stats-title">Country Stats</h2>
+        <p class="note">Growth is battery-electric (BEV) registrations, comparing each country's latest available month to 12 and 36 months earlier. "Sold" figures use that same latest month, falling back to the 2026 full-year projection if a country has no valid month at all. Ranks are always against every tracked country, regardless of the sidebar filters.</p>
+        <div class="stat-row" id="focus-stats-body"></div>
+      </div>
+
       <div class="card notes-card is-collapsed">
         <button type="button" class="notes-toggle" aria-expanded="false">
           <span>📝 Notes</span>
@@ -158,11 +164,12 @@
           <li>"EV %" here means battery-electric (BEV) only. Plug-in hybrids (PHEV) and full hybrids (HEV) are shown as their own segments in the stacked bars below, not folded into the map's green.</li>
           <li>Canada joined in Q1 2026. Statistics Canada reports quarterly, not monthly like Europe's ACEA source — its quarterly total is split evenly across the quarter's 3 months rather than fabricating a real monthly breakdown, and its "latest month" trails Europe's until a newer quarter is published.</li>
           <li>New Zealand joined in 2023-01 (through July 2026 — the site's most current market). It's not an independently-published monthly series like the others: it's reconstructed from NZTA Waka Kotahi's Motor Vehicle Register snapshot, filtered to new (not used-import) passenger cars/vans and grouped by first-NZ-registration month and fuel type. This can slightly undercount older months as vehicles are later exported or scrapped (checked as negligible over this window) and was cross-checked against MIA's independently reported June 2026 figure (0.3% difference). Most of Asia, Africa, South America, and the rest of Oceania are still unsourced; the grey countries aren't zero, they're just not sourced yet.</li>
+          <li>United States joined in 2023-01 (full history through July 2026, no gaps) — source is Argonne National Laboratory's monthly light-duty-vehicle sales updates (Wards Auto-sourced), the same organization behind this site's annual US figures. Argonne doesn't publish a Petrol/Diesel split for the US market, so the entire non-BEV/PHEV/HEV remainder is shown as Petrol (Diesel=0) — diesel's real share of US passenger-vehicle sales is negligible in any case.</li>
         </ul>
       </div>
 
       <footer class="page-footer">
-        Sources: ACEA (European Automobile Manufacturers' Association, EU + EFTA + UK, refreshed monthly) · Statistics Canada, Table 20-10-0025-01 (refreshed quarterly)<br>
+        Sources: ACEA (European Automobile Manufacturers' Association, EU + EFTA + UK, refreshed monthly) · Statistics Canada, Table 20-10-0025-01 (refreshed quarterly) · Argonne National Laboratory (United States, refreshed monthly)<br>
         Map boundaries: Natural Earth via world-atlas (public domain)
       </footer>
       </div>
@@ -214,6 +221,12 @@ const HIST = {
 // trailing months are left null rather than guessed.
 "Canada":[[8072,2254,7640,95139,5522,2,118629],[8072,2254,7640,95139,5522,2,118629],[8072,2254,7640,95139,5522,2,118629],[11878,4017,13000,122382,6589,2,157868],[11878,4017,13000,122382,6589,2,157868],[11878,4017,13000,122382,6589,2,157868],[14588,4548,12917,114367,6035,1,152456],[14588,4548,12917,114367,6035,1,152456],[14588,4548,12917,114367,6035,1,152456],[13351,4211,11672,106949,6530,1,142714],[13351,4211,11672,106949,6530,1,142714],[13351,4211,11672,106949,6530,1,142714],[11927,4214,11645,104526,5993,1,138306],[11927,4214,11645,104526,5993,1,138306],[11927,4214,11645,104526,5993,1,138306],[16184,5749,13648,127900,6974,4,170459],[16184,5749,13648,127900,6974,4,170459],[16184,5749,13648,127900,6974,4,170459],[18732,6530,15452,113192,7289,1,161196],[18732,6530,15452,113192,7289,1,161196],[18732,6530,15452,113192,7289,1,161196],[20601,6471,15607,98845,6327,1,147852],[20601,6471,15607,98845,6327,1,147852],[20601,6471,15607,98845,6327,1,147852],[8800,3609,17943,104057,7879,3,142291],[8800,3609,17943,104057,7879,3,142291],[8800,3609,17943,104057,7879,3,142291],[9845,5626,21944,135139,8078,0,180632],[9845,5626,21944,135139,8078,0,180632],[9845,5626,21944,135139,8078,0,180632],[9549,6191,19984,119216,7152,2,162094],[9549,6191,19984,119216,7152,2,162094],[9549,6191,19984,119216,7152,2,162094],[10494,5241,16826,99042,5973,6,137582],[10494,5241,16826,99042,5973,6,137582],[10494,5241,16826,99042,5973,6,137582],[9936,4435,17861,94454,5848,0,132534],[9936,4435,17861,94454,5848,0,132534],[9936,4435,17861,94454,5848,0,132534],null,null,null,null],
 "New Zealand":[[1190,484,2101,4425,868,12,9080],[729,347,1231,3282,539,12,6140],[2599,511,2508,4920,871,16,11425],[1030,556,1751,2932,635,11,6915],[1149,713,2512,4180,838,10,9402],[2566,1277,4089,7627,1358,27,16944],[748,401,1156,1454,489,4,4252],[848,770,2453,2225,582,9,6887],[1999,749,2181,2545,534,8,8016],[1994,918,2888,3291,760,4,9855],[2561,1155,3424,3510,687,5,11342],[3316,982,2598,1313,232,3,8444],[232,201,2397,4273,885,1,7989],[359,166,1861,2848,620,1,5855],[473,224,2584,3628,566,0,7475],[261,180,2417,2741,453,1,6053],[355,175,2164,3014,581,1,6290],[499,227,2124,2624,526,0,6000],[536,228,2027,2978,509,0,6278],[559,230,2449,2996,446,4,6684],[855,414,3265,3355,579,4,8472],[638,341,3334,4150,741,192,9396],[682,323,4138,2731,811,199,8884],[832,687,2674,2282,455,217,7147],[552,280,2774,3654,570,161,7991],[540,502,2373,2896,466,180,6957],[588,297,3122,3696,539,113,8355],[440,196,2183,2719,403,100,6041],[442,294,2380,2898,630,126,6770],[1012,478,2818,3124,598,158,8188],[545,425,2915,2787,682,222,7576],[382,408,3145,3100,866,148,8049],[605,385,3936,4316,905,165,10312],[502,498,4717,3702,1097,160,10676],[635,466,4231,3584,1057,223,10196],[575,405,2623,2191,473,84,6351],[723,616,3256,3519,742,129,8985],[632,557,2294,3038,565,41,7127],[2267,1100,3148,2826,589,95,10025],[1004,854,2843,1935,319,147,7102],[1549,863,2748,2205,610,180,8155],[2601,1164,2965,2530,574,101,9935],[1946,1258,2887,2088,435,122,8736]],
+// United States: Argonne National Laboratory monthly BEV/PHEV/HEV sales (Wards Auto-sourced) plus
+// its own Total LDV (all light-duty vehicles: cars + light trucks/SUVs) figure — full history, no
+// nulls, 2023-01 through 2026-07. No petrol/diesel split is published for the US market (diesel
+// share of US passenger vehicles is negligible), so the non-electrified remainder is folded into
+// Petrol with Diesel=0, same convention used for Indonesia/Philippines/Colombia elsewhere on this site.
+"United States":[[72944,15593,60069,898313,0,0,1046919],[81158,17789,66320,973489,0,0,1138756],[92077,21397,94289,1167229,0,0,1374992],[92880,24165,100528,1140271,0,0,1357844],[95898,25125,103832,1138963,0,0,1363818],[102525,22560,100762,1142866,0,0,1368713],[101234,23194,103757,1071086,0,0,1299271],[96091,27497,107325,1087675,0,0,1318588],[113383,28807,109228,1089562,0,0,1340980],[92478,21778,103699,980207,0,0,1198162],[102323,24530,108549,1000181,0,0,1235583],[121647,41143,117098,1178965,0,0,1458853],[82336,25086,91929,871176,0,0,1070527],[74141,27167,105933,1021755,0,0,1228996],[96743,32728,123870,1178791,0,0,1432132],[99313,26263,118822,1073083,0,0,1317481],[107423,26777,139053,1157828,0,0,1431081],[100242,23635,135609,1049511,0,0,1308997],[113327,23172,134073,1015139,0,0,1285711],[118961,26413,150630,1116341,0,0,1412345],[104977,20789,127486,918414,0,0,1171666],[98289,26264,150683,1056533,0,0,1331769],[114564,29743,160025,1069161,0,0,1373493],[133103,30687,170935,1159495,0,0,1494220],[94035,22160,133489,856436,0,0,1106120],[86040,22804,148162,958068,0,0,1215074],[120820,37376,194998,1239823,0,0,1593017],[96348,32865,190169,1144240,0,0,1463622],[101750,26900,193411,1139006,0,0,1461067],[111577,19507,156246,985139,0,0,1272469],[126356,22998,172269,1068062,0,0,1389685],[148769,26004,181048,1111429,0,0,1467250],[140579,20040,150988,929974,0,0,1241581],[83292,12441,173481,1012401,0,0,1281615],[54634,12346,175814,1036584,0,0,1279378],[75840,13456,199963,1170469,0,0,1459728],[71323,10199,151689,871207,0,0,1104418],[58284,10927,163637,945938,0,0,1178786],[76058,13155,206867,1092574,0,0,1388654],[89113,16791,223384,1057243,0,0,1386531],[101312,18562,255157,1113119,0,0,1488150],[84622,16815,222226,1043772,0,0,1367435],[73443,19769,205949,1064878,0,0,1364039]],
 };
 const FUEL_KEYS = ['bev','phev','hev','petrol','diesel','others'];
 const FUEL_COLORS = {
@@ -234,7 +247,7 @@ const COUNTRY_CONTINENT = {
   "Ireland":"EU","Italy":"EU","Latvia":"EU","Lithuania":"EU","Luxembourg":"EU","Malta":"EU","Netherlands":"EU",
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
-  "Canada":"NA","New Zealand":"OCEANIA"
+  "Canada":"NA","New Zealand":"OCEANIA","United States":"NA"
 };
 const ALL_CONTINENTS = [...new Set(COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 const COUNTRIES_SORTED = [...COUNTRIES].sort((a,b) => {
@@ -336,6 +349,94 @@ function projected2026Total(countryList){
   return { total: sum, countries };
 }
 
+// per-country run-rate projection (same method as projected2026Total, but for one country)
+function projectedForCountry(country){
+  const idx = latestValidIdx(country);
+  if(idx < JAN_2026_IDX) return null;
+  let ytdBev = 0, ytdTotal = 0, months = 0;
+  for(let i = JAN_2026_IDX; i <= idx; i++){
+    const row = rowAt(country, i);
+    if(!row) continue;
+    ytdBev += row[0]; ytdTotal += row[6];
+    months++;
+  }
+  if(months === 0) return null;
+  return { bev: Math.round(ytdBev * 12 / months), total: Math.round(ytdTotal * 12 / months) };
+}
+
+// per-country stats for the focused-country cards + Continent/World ranking — always computed from
+// EVERY country (ignores the continent/country sidebar filters, since a rank is a fact about the
+// country, not about what's currently shown). Every country here has a real latest month by
+// construction (buildData() already filters out ones with none), so the 2026 projection fallback
+// only matters for the rare edge case of a country with no valid row at all.
+function buildFocusStats(){
+  return COUNTRIES.map(country => {
+    const idx = latestValidIdx(country);
+    const row = rowAt(country, idx);
+    let bev, total, yoyPct = null, threeYrPct = null, usedProjected = false;
+
+    if(row){
+      bev = row[0]; total = row[6];
+      const priorYear = rowAt(country, idx - 12);
+      yoyPct = (priorYear && priorYear[0]) ? +(((bev - priorYear[0]) / priorYear[0]) * 100).toFixed(1) : null;
+      const prior3yr = rowAt(country, idx - 36);
+      threeYrPct = (prior3yr && prior3yr[0]) ? +(((bev - prior3yr[0]) / prior3yr[0]) * 100).toFixed(1) : null;
+    } else {
+      const proj = projectedForCountry(country);
+      if(!proj) return null;
+      bev = proj.bev; total = proj.total; usedProjected = true;
+    }
+
+    return { country, continent: COUNTRY_CONTINENT[country] || "OTHER", bev, total, yoyPct, threeYrPct, usedProjected };
+  }).filter(Boolean);
+}
+
+function rankWithin(list, country, key){
+  const ranked = list.filter(d => d[key] != null).sort((a,b) => b[key] - a[key]);
+  const idx = ranked.findIndex(d => d.country === country);
+  return idx === -1 ? null : { rank: idx + 1, of: ranked.length };
+}
+
+function renderFocusStats(){
+  const card = document.getElementById('focus-stats-card');
+  if(!isolatedCountry){ card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+
+  const stats = buildFocusStats();
+  const me = stats.find(d => d.country === isolatedCountry);
+  const body = document.getElementById('focus-stats-body');
+  document.getElementById('focus-stats-title').textContent = `${isolatedCountry} — Country Stats`;
+
+  if(!me){
+    body.innerHTML = `<p class="note">No registration data available for ${isolatedCountry}.</p>`;
+    return;
+  }
+
+  const continentList = stats.filter(d => d.continent === me.continent);
+  const projTag = me.usedProjected ? ' <span class="mc-proj-tag">2026 Proj.</span>' : '';
+
+  const cards = [
+    { label: 'YoY Growth (BEV)', value: me.yoyPct == null ? '—' : `${me.yoyPct > 0 ? '+' : ''}${me.yoyPct}%`, key: 'yoyPct' },
+    { label: '3-Year Growth (BEV)', value: me.threeYrPct == null ? '—' : `${me.threeYrPct > 0 ? '+' : ''}${me.threeYrPct}%`, key: 'threeYrPct' },
+    { label: 'BEV Sold', value: me.bev.toLocaleString('en-US'), key: 'bev', tag: projTag },
+    { label: 'Cars Sold', value: me.total.toLocaleString('en-US'), key: 'total', tag: projTag },
+  ];
+
+  body.innerHTML = cards.map(c => {
+    const cRank = rankWithin(continentList, isolatedCountry, c.key);
+    const wRank = rankWithin(stats, isolatedCountry, c.key);
+    return `
+    <div class="stat">
+      <div class="label">${c.label}</div>
+      <div class="value">${c.value}${c.tag || ''}</div>
+      <div class="focus-rank">
+        ${cRank ? `<div>#${cRank.rank} of ${cRank.of} in ${me.continent}</div>` : '<div>—</div>'}
+        ${wRank ? `<div>#${wRank.rank} of ${wRank.of} in World</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
 function renderStats(){
   const totals = DATA.reduce((acc,d) => { acc.bev += d.bev; acc.total += d.total; return acc; }, {bev:0, total:0});
   const worldEvPct = totals.total ? +(totals.bev/totals.total*100).toFixed(1) : 0;
@@ -411,14 +512,15 @@ function renderMap(){
         ? `${entry.country}<br><strong>${entry.evPct}%</strong> BEV share · ${entry.total.toLocaleString('en-US')} registrations` +
           (entry.asOf !== LATEST_MONTH ? `<br><span style="opacity:.7">as of ${entry.asOf}</span>` : '') +
           (entry.country === 'Canada' ? `<br><span style="opacity:.7">quarterly StatCan data spread evenly across months</span>` : '') +
-          (entry.country === 'New Zealand' ? `<br><span style="opacity:.7">reconstructed from NZTA's vehicle register snapshot, not an official monthly series</span>` : '')
+          (entry.country === 'New Zealand' ? `<br><span style="opacity:.7">reconstructed from NZTA's vehicle register snapshot, not an official monthly series</span>` : '') +
+          (entry.country === 'United States' ? `<br><span style="opacity:.7">no Petrol/Diesel split published — Diesel shown as 0</span>` : '')
         : `${d.properties.name}<br>No data yet, or filtered out`;
     })
     .on('pointerleave', () => { mapTooltip.style.opacity = 0; })
     .on('click', (e, d) => {
       const entry = DATA_BY_NAME[d.properties.name];
       if(!entry) return;
-      selectCountry(entry.country);
+      isolateCountry(entry.country);
     });
 }
 
@@ -488,7 +590,8 @@ rankRows.addEventListener('pointermove', e => {
   barTooltip.style.opacity = 1;
   barTooltip.innerHTML = `${seg.dataset.country} — ${FUEL_LABELS[key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)` +
     (seg.dataset.country === 'Canada' ? `<br><span style="opacity:.7">quarterly StatCan data spread evenly across months</span>` : '') +
-    (seg.dataset.country === 'New Zealand' ? `<br><span style="opacity:.7">reconstructed from NZTA's vehicle register snapshot, not an official monthly series</span>` : '');
+    (seg.dataset.country === 'New Zealand' ? `<br><span style="opacity:.7">reconstructed from NZTA's vehicle register snapshot, not an official monthly series</span>` : '') +
+    (seg.dataset.country === 'United States' ? `<br><span style="opacity:.7">no Petrol/Diesel split published — Diesel shown as 0</span>` : '');
 });
 rankRows.addEventListener('pointerleave', () => { barTooltip.style.opacity = 0; });
 
@@ -636,7 +739,8 @@ function renderTrendChart(country){
         keys.map(k => `${FUEL_LABELS[k]}: <strong>${d[k].toFixed(1)}%</strong>`).join('<br>') +
         `<br>Total: ${d.total.toLocaleString('en-US')}` +
         (country === 'Canada' ? `<br><span style="opacity:.7">quarterly StatCan data spread evenly across months</span>` : '') +
-        (country === 'New Zealand' ? `<br><span style="opacity:.7">reconstructed from NZTA's vehicle register snapshot, not an official monthly series</span>` : '');
+        (country === 'New Zealand' ? `<br><span style="opacity:.7">reconstructed from NZTA's vehicle register snapshot, not an official monthly series</span>` : '') +
+        (country === 'United States' ? `<br><span style="opacity:.7">no Petrol/Diesel split published — Diesel shown as 0</span>` : '');
     })
     .on('pointerleave', () => { guide.style('opacity', 0); trendTooltip.style.opacity = 0; });
 }
@@ -685,7 +789,7 @@ function renderMomentum(){
   grid.querySelectorAll('.momentum-card').forEach(card => {
     card.addEventListener('click', () => {
       const country = card.dataset.momentumCountry;
-      selectCountry(country);
+      isolateCountry(country);
       document.getElementById('drilldown-placeholder').closest('.chart-card').scrollIntoView({behavior:'smooth', block:'nearest'});
     });
   });
@@ -809,6 +913,7 @@ function recompute(){
   renderBars();
   renderMomentum();
   renderYearlyTrend();
+  renderFocusStats();
 }
 
 // --- filter event wiring ---

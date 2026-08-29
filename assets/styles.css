@@ -234,6 +234,17 @@ h1{
 .stat .value small.stat-yoy.yoy-up{ color:#1e8f5f; }
 .stat .value small.stat-yoy.yoy-down{ color:var(--accent-strong); }
 
+.focus-stats-card .stat-row{ margin-top:4px; }
+.focus-rank{
+  margin-top:6px;
+  font-size:11px;
+  font-weight:600;
+  color:var(--text-muted);
+  display:flex;
+  flex-direction:column;
+  gap:1px;
+}
+
 .card{
   background:var(--surface);
   border:1px solid var(--border);
