@@ -97,7 +97,10 @@
         </div>
 
         <div class="card chart-card">
-          <h2>BEV Share Map</h2>
+          <div class="chart-header-row">
+            <h2>BEV Share Map</h2>
+            <a href="#" id="map-clear" class="mode-btn hidden" style="text-decoration:none;">✕ Clear Selection</a>
+          </div>
           <p class="note">Darker green = higher battery-electric share. Scroll/pinch or use the buttons to zoom, drag to pan. Hover a country for exact figures — gray countries with no data for the selected period still show their last available period if one exists. Click any colored or gray-but-tracked country to focus every chart on this page on it.</p>
           <div class="map-wrap">
             <svg class="map-svg" id="map-svg" viewBox="0 0 940 460" role="img" aria-label="World map shaded by battery-electric vehicle share"></svg>
@@ -1054,6 +1057,7 @@ function rankWithin(list, country, key){
 
 function renderFocusStats(){
   const card = document.getElementById('focus-stats-card');
+  document.getElementById('map-clear').classList.toggle('hidden', !focusedCountry);
   if(!focusedCountry){ card.classList.add('hidden'); return; }
   card.classList.remove('hidden');
 
@@ -1216,6 +1220,13 @@ function focusCountry(name){
   recompute();
 }
 trendsClearBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  focusedCountry = null;
+  recompute();
+});
+
+const mapClearBtn = document.getElementById('map-clear');
+mapClearBtn.addEventListener('click', (e) => {
   e.preventDefault();
   focusedCountry = null;
   recompute();

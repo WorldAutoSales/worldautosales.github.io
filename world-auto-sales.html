@@ -87,7 +87,7 @@
       <header class="page-header">
         <div class="eyebrow">World Auto Sales · Overview</div>
         <h1>Electric Vehicle Adoption Around the World</h1>
-        <p class="subtitle">Battery-electric (BEV) share of new car registrations by country. Darker green = more of that market's new cars are fully electric. Coverage today: 31 European markets (June 2026), Canada (Q1 2026, quarterly), and New Zealand (July 2026, monthly) — more regions get added as sources are found.</p>
+        <p class="subtitle">Battery-electric (BEV) share of new car registrations by country. Darker green = more of that market's new cars are fully electric. Coverage today: 31 European markets (June 2026), Canada (Q1 2026, quarterly), New Zealand (July 2026, monthly), United States (July 2026, monthly), and China (July 2026, monthly, wholesale basis, 2026 only) — more regions get added as sources are found.</p>
       </header>
 
       <div class="stat-row" id="stat-row"></div>
@@ -139,7 +139,7 @@
         <div class="country-drilldown hidden" id="country-drilldown">
           <div class="drilldown-header">
             <h3 id="drilldown-title">Monthly trend</h3>
-            <button type="button" class="drilldown-close" id="drilldown-close">✕ Clear</button>
+            <button type="button" class="drilldown-close" id="drilldown-close">✕ Clear Selection</button>
           </div>
           <div class="chart-legend" id="drilldown-legend"></div>
           <svg class="chart" id="trend-svg" viewBox="0 0 900 300" preserveAspectRatio="none"></svg>
@@ -227,6 +227,7 @@ const HIST = {
 // share of US passenger vehicles is negligible), so the non-electrified remainder is folded into
 // Petrol with Diesel=0, same convention used for Indonesia/Philippines/Colombia elsewhere on this site.
 "United States":[[72944,15593,60069,898313,0,0,1046919],[81158,17789,66320,973489,0,0,1138756],[92077,21397,94289,1167229,0,0,1374992],[92880,24165,100528,1140271,0,0,1357844],[95898,25125,103832,1138963,0,0,1363818],[102525,22560,100762,1142866,0,0,1368713],[101234,23194,103757,1071086,0,0,1299271],[96091,27497,107325,1087675,0,0,1318588],[113383,28807,109228,1089562,0,0,1340980],[92478,21778,103699,980207,0,0,1198162],[102323,24530,108549,1000181,0,0,1235583],[121647,41143,117098,1178965,0,0,1458853],[82336,25086,91929,871176,0,0,1070527],[74141,27167,105933,1021755,0,0,1228996],[96743,32728,123870,1178791,0,0,1432132],[99313,26263,118822,1073083,0,0,1317481],[107423,26777,139053,1157828,0,0,1431081],[100242,23635,135609,1049511,0,0,1308997],[113327,23172,134073,1015139,0,0,1285711],[118961,26413,150630,1116341,0,0,1412345],[104977,20789,127486,918414,0,0,1171666],[98289,26264,150683,1056533,0,0,1331769],[114564,29743,160025,1069161,0,0,1373493],[133103,30687,170935,1159495,0,0,1494220],[94035,22160,133489,856436,0,0,1106120],[86040,22804,148162,958068,0,0,1215074],[120820,37376,194998,1239823,0,0,1593017],[96348,32865,190169,1144240,0,0,1463622],[101750,26900,193411,1139006,0,0,1461067],[111577,19507,156246,985139,0,0,1272469],[126356,22998,172269,1068062,0,0,1389685],[148769,26004,181048,1111429,0,0,1467250],[140579,20040,150988,929974,0,0,1241581],[83292,12441,173481,1012401,0,0,1281615],[54634,12346,175814,1036584,0,0,1279378],[75840,13456,199963,1170469,0,0,1459728],[71323,10199,151689,871207,0,0,1104418],[58284,10927,163637,945938,0,0,1178786],[76058,13155,206867,1092574,0,0,1388654],[89113,16791,223384,1057243,0,0,1386531],[101312,18562,255157,1113119,0,0,1488150],[84622,16815,222226,1043772,0,0,1367435],[73443,19769,205949,1064878,0,0,1364039]],
+"China":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,[597000,348000,0,1401000,0,0,2346000],[484000,280000,0,1041000,0,0,1805000],[831000,421000,0,1647000,0,0,2899000],[905000,439000,0,1182000,0,0,2526000],[1026000,470000,0,1133000,0,0,2629000],[1142000,500000,0,1168000,0,0,2810000],[1072000,489000,0,1023000,0,0,2584000]],
 };
 const FUEL_KEYS = ['bev','phev','hev','petrol','diesel','others'];
 const FUEL_COLORS = {
@@ -247,7 +248,7 @@ const COUNTRY_CONTINENT = {
   "Ireland":"EU","Italy":"EU","Latvia":"EU","Lithuania":"EU","Luxembourg":"EU","Malta":"EU","Netherlands":"EU",
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
-  "Canada":"NA","New Zealand":"OCEANIA","United States":"NA"
+  "Canada":"NA","New Zealand":"OCEANIA","United States":"NA","China":"ASIA"
 };
 const ALL_CONTINENTS = [...new Set(COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 const COUNTRIES_SORTED = [...COUNTRIES].sort((a,b) => {
@@ -664,6 +665,10 @@ document.getElementById('drilldown-legend').addEventListener('click', e => {
 });
 
 document.getElementById('drilldown-close').addEventListener('click', () => {
+  isolatedCountry = null;
+  selectedCountries = new Set(COUNTRIES);
+  countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = true; });
+  recompute();
   drilldown.classList.add('hidden');
   drilldownPlaceholder.style.display = '';
   if(mapPaths) mapPaths.classed('selected', false);
