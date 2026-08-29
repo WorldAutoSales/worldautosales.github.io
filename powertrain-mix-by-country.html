@@ -139,9 +139,11 @@
               <button type="button" class="mode-btn" data-sort-key="icePct" title="Sort by combined petrol + diesel share of each country's total registrations.">% ICE</button>
               <button type="button" class="mode-btn" data-sort-key="bev" title="Sort by the raw number of battery-electric registrations.">Nb Reg. BEV</button>
               <button type="button" class="mode-btn" data-sort-key="total" title="Sort by total registrations, all powertrains combined.">Nb Reg. Units</button>
+              <button type="button" class="mode-btn" data-sort-key="bevYoyPct" title="Sort by BEV registration growth vs. the same period last year.">YoY %</button>
+              <button type="button" class="mode-btn" data-sort-key="threeYrPct" title="Sort by BEV registration growth vs. 2023 (full year).">3Y %</button>
             </div>
           </div>
-          <p class="note" id="bars-note">Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments. The number at the right of each bar is that country's BEV year-over-year change (same month, prior year) — hover any segment for exact figures.</p>
+          <p class="note" id="bars-note">Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments (a narrow BEV slice shows its value to the right instead of hiding it). Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that country's BEV registration growth — hover any segment for exact figures.</p>
           <div class="legend-row">
             <div class="chart-legend" id="legend"></div>
             <div class="chart-mode-toggle lg" role="group" aria-label="Bar display mode">
@@ -151,7 +153,8 @@
           </div>
           <div class="rank-rows-header">
             <span class="rrh-spacer"></span>
-            <span class="rrh-yoy" title="Battery-electric registrations vs. the same month last year">YoY %</span>
+            <span class="rrh-yoy" title="BEV registrations vs. the same period last year">YoY %</span>
+            <span class="rrh-yoy" title="BEV registrations vs. 2023 (full year)">3Y %</span>
           </div>
           <div class="rank-rows" id="rank-rows"></div>
           <div class="tooltip" id="tooltip"></div>
@@ -1245,14 +1248,14 @@ function focusCountry(name){
 }
 trendsClearBtn.addEventListener('click', (e) => {
   e.preventDefault();
-  focusedCountry = null;
+  clearSelection();
   recompute();
 });
 
 const mapClearBtn = document.getElementById('map-clear');
 mapClearBtn.addEventListener('click', (e) => {
   e.preventDefault();
-  focusedCountry = null;
+  clearSelection();
   recompute();
 });
 
@@ -1480,10 +1483,22 @@ fetch('assets/countries-50m.json').then(r => r.json()).then(topology => {
   recompute();
 });
 
-// --- legend chips (fuel types) ---
-document.getElementById('legend').innerHTML = FUEL_KEYS.map(k => `
-  <div class="legend-chip"><span class="swatch" style="background:${FUEL_COLORS[k]}"></span>${FUEL_LABELS[k]}</div>
-`).join('');
+// --- legend chips (fuel types) — clickable to isolate, dimmed when filtered out ---
+function renderFuelLegend(){
+  document.getElementById('legend').innerHTML = FUEL_KEYS.map(k => `
+    <div class="legend-chip${selectedFuels.has(k) ? '' : ' dimmed'}" data-fuel="${k}"><span class="swatch" style="background:${FUEL_COLORS[k]}"></span>${FUEL_LABELS[k]}</div>
+  `).join('');
+}
+function toggleFuelIsolation(key){
+  selectedFuels = (selectedFuels.size === 1 && selectedFuels.has(key)) ? new Set(FUEL_KEYS) : new Set([key]);
+  fuelsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = selectedFuels.has(cb.dataset.fuel); });
+  renderBars();
+  updateURL();
+}
+document.getElementById('legend').addEventListener('click', e => {
+  const chip = e.target.closest('.legend-chip');
+  if(chip) toggleFuelIsolation(chip.dataset.fuel);
+});
 
 // --- ranked stacked bars, with in-segment % labels ---
 const rankRows = document.getElementById('rank-rows');
@@ -1492,7 +1507,7 @@ const chartCards = document.querySelectorAll('.chart-card');
 const barChartCard = chartCards[1];
 
 let barMode = 'pct'; // 'pct' or 'raw'
-let barSortKey = 'bevPct'; // 'bevPct' | 'icePct' | 'bev' | 'total'
+let barSortKey = 'bevPct'; // 'bevPct' | 'icePct' | 'bev' | 'total' | 'bevYoyPct' | 'threeYrPct'
 
 function segHTML(d, key, denom, widthDenom){
   const units = d[key];
@@ -1505,7 +1520,14 @@ function segHTML(d, key, denom, widthDenom){
 }
 
 function renderBars(){
-  const sorted = [...DATA].sort((a,b) => b[barSortKey] - a[barSortKey]);
+  const threeYrByCountry = Object.fromEntries(buildFocusStats().map(f => [f.country, f.threeYrPct]));
+  const withGrowth = DATA.map(d => ({ ...d, threeYrPct: threeYrByCountry[d.country] ?? null }));
+  const sorted = [...withGrowth].sort((a,b) => {
+    const av = a[barSortKey], bv = b[barSortKey];
+    if(av == null) return bv == null ? 0 : 1;
+    if(bv == null) return -1;
+    return bv - av;
+  });
   const fuels = FUEL_KEYS.filter(k => selectedFuels.has(k));
   const denoms = sorted.map(d => fuels.reduce((s,k) => s + d[k], 0));
   const globalMax = Math.max(1, ...denoms);
@@ -1515,20 +1537,30 @@ function renderBars(){
     const yoy = d.bevYoyPct;
     const yoyText = yoy == null ? '—' : `${yoy > 0 ? '+' : ''}${yoy}%`;
     const yoyClass = yoy == null ? '' : (yoy >= 0 ? 'yoy-up' : 'yoy-down');
+    const y3 = d.threeYrPct;
+    const y3Text = y3 == null ? '—' : `${y3 > 0 ? '+' : ''}${y3}%`;
+    const y3Class = y3 == null ? '' : (y3 >= 0 ? 'yoy-up' : 'yoy-down');
+    // BEV is the measure we most want visible even when its slice is too thin to hold its own label
+    const bevWidth = (fuels.includes('bev') && denom > 0) ? d.bev / widthDenom * 100 : 0;
+    const bevNarrow = fuels.includes('bev') && d.bev > 0 && denom > 0 && bevWidth < 7;
+    const bevOutsideText = barMode === 'raw' ? d.bev.toLocaleString('en-US') : (d.bev/denom*100).toFixed(1) + '%';
     return `
     <div class="rank-row">
       <div class="country-label">${d.country}</div>
       <div class="bar-track">
         ${fuels.map(k => segHTML(d,k,denom,widthDenom)).join('')}
       </div>
-      <div class="pct-label ${yoyClass}" title="BEV year-over-year change">${yoyText}</div>
+      <span class="bev-outside-label" style="color:${FUEL_COLORS.bev}">${bevNarrow ? `BEV ${bevOutsideText}` : ''}</span>
+      <div class="pct-label ${yoyClass}" title="BEV vs. same period last year">${yoyText}</div>
+      <div class="pct-label ${y3Class}" title="BEV vs. 2023 (full year)">${y3Text}</div>
     </div>`;
   }).join('');
+  renderFuelLegend();
 }
 
 const barsNote = document.getElementById('bars-note');
-const PCT_NOTE = 'Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments. The number at the right of each bar is that country\'s BEV year-over-year change (same month, prior year) — hover any segment for exact figures.';
-const RAW_NOTE = 'Bar length now reflects actual registrations (scaled to the biggest market shown), so countries are comparable by volume, not just mix. Sorted by BEV share, high to low. Segment labels show unit counts — hover any segment for exact figures.';
+const PCT_NOTE = 'Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments (a narrow BEV slice shows its value to the right instead of hiding it). Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that country\'s BEV registration growth — hover any segment for exact figures.';
+const RAW_NOTE = 'Bar length now reflects actual registrations (scaled to the biggest market shown), so countries are comparable by volume, not just mix. Sorted by BEV share, high to low. Segment labels show unit counts (a narrow BEV slice shows its value to the right instead of hiding it) — hover any segment for exact figures.';
 document.querySelectorAll('[data-bar-mode]').forEach(btn => {
   btn.addEventListener('click', () => {
     if(btn.dataset.barMode === barMode) return;
@@ -1546,6 +1578,11 @@ document.querySelectorAll('[data-sort-key]').forEach(btn => {
     document.querySelectorAll('[data-sort-key]').forEach(b => b.classList.toggle('active', b === btn));
     renderBars();
   });
+});
+
+rankRows.addEventListener('click', e => {
+  const seg = e.target.closest('.bar-seg');
+  if(seg) toggleFuelIsolation(seg.dataset.key);
 });
 
 rankRows.addEventListener('pointermove', e => {
@@ -1895,11 +1932,21 @@ fuelsBox.addEventListener('click', e => {
   updateURL();
 });
 
+// resets country focus/selection (map highlight, country checkboxes) without touching the
+// continent filter — shared by the Clear Selection controls and by the continent filter,
+// which also clears any active country selection when it changes
+function clearSelection(){
+  focusedCountry = null;
+  selectedCountries = new Set(ALL_COUNTRIES);
+  countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = true; });
+}
+
 continentsBox.addEventListener('change', e => {
   const cb = e.target;
   if(!cb.matches('input[type="checkbox"]')) return;
   const code = cb.dataset.continent;
   if(cb.checked) selectedContinents.add(code); else selectedContinents.delete(code);
+  if(focusedCountry) clearSelection();
   recompute();
 });
 continentsBox.addEventListener('click', e => {
@@ -1908,6 +1955,7 @@ continentsBox.addEventListener('click', e => {
   const code = btn.dataset.onlyContinent;
   selectedContinents = new Set([code]);
   continentsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = cb.dataset.continent === code; });
+  if(focusedCountry) clearSelection();
   recompute();
 });
 

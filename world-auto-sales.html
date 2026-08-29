@@ -673,16 +673,23 @@ document.getElementById('drilldown-legend').addEventListener('click', e => {
   if(chip) toggleTrendIsolation(chip.dataset.fuel);
 });
 
-document.getElementById('drilldown-close').addEventListener('click', () => {
+// resets country isolation/selection (map highlight, drilldown, checkboxes) without touching
+// the continent filter — shared by the Clear Selection button and by the continent filter,
+// which also clears any active country selection when it changes
+function clearSelection(){
   isolatedCountry = null;
   selectedCountries = new Set(COUNTRIES);
   countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = true; });
-  recompute();
   drilldown.classList.add('hidden');
   drilldownPlaceholder.style.display = '';
   if(mapPaths) mapPaths.classed('selected', false);
   isolatedFuel = null;
   document.getElementById('drilldown-close').classList.add('hidden');
+}
+
+document.getElementById('drilldown-close').addEventListener('click', () => {
+  clearSelection();
+  recompute();
 });
 
 function selectCountry(country){
@@ -983,6 +990,7 @@ continentsBox.addEventListener('change', e => {
   if(!cb.matches('input[type="checkbox"]')) return;
   const code = cb.dataset.continent;
   if(cb.checked) selectedContinents.add(code); else selectedContinents.delete(code);
+  if(isolatedCountry) clearSelection();
   recompute();
 });
 continentsBox.addEventListener('click', e => {
@@ -991,6 +999,7 @@ continentsBox.addEventListener('click', e => {
   const code = btn.dataset.onlyContinent;
   selectedContinents = new Set([code]);
   continentsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = cb.dataset.continent === code; });
+  if(isolatedCountry) clearSelection();
   recompute();
 });
 
