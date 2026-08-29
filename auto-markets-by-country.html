@@ -623,6 +623,16 @@ function selectCountry(country){
   document.getElementById('drilldown-close').classList.remove('hidden');
 }
 
+// naive one-year continuation: apply the SAME growth rate the current-year projection already
+// implies (proj2026 / actual-year-before) one more time — no new data needed, and it's an
+// explicit, easy-to-explain extrapolation rather than a second independent guess
+function nextYearProjection(country){
+  const proj = projectedValueOf(country, GLOBAL_LATEST_YEAR);
+  const priorActual = valueAt(country, GLOBAL_LATEST_YEAR - 1);
+  if(proj == null || !priorActual) return null;
+  return proj * (proj / priorActual);
+}
+
 function renderTrendChart(country){
   const W = 900, H = 260, M = {top:16, right:16, bottom:30, left:56};
   const innerW = W - M.left - M.right;
@@ -635,10 +645,14 @@ function renderTrendChart(country){
   const projValue = projectedValueOf(country, GLOBAL_LATEST_YEAR);
   const hasProjection = years[years.length - 1] === GLOBAL_LATEST_YEAR && projValue != null;
   const projX = GLOBAL_LATEST_YEAR + 0.7;
+  const proj2027Value = hasProjection ? nextYearProjection(country) : null;
+  const hasProjection2027 = hasProjection && proj2027Value != null;
+  const proj2027X = GLOBAL_LATEST_YEAR + 1.7;
 
-  const xScale = d3.scaleLinear().domain([d3.min(years), hasProjection ? projX : d3.max(years)]).range([0, innerW]);
+  const xScale = d3.scaleLinear().domain([d3.min(years), hasProjection2027 ? proj2027X : (hasProjection ? projX : d3.max(years))]).range([0, innerW]);
   const yMaxCandidates = [d3.max(series, d => d.value)];
   if(hasProjection) yMaxCandidates.push(projValue);
+  if(hasProjection2027) yMaxCandidates.push(proj2027Value);
   const yScale = d3.scaleLinear().domain([0, Math.max(...yMaxCandidates) * 1.12]).range([innerH, 0]);
 
   const g = trendSvg.append('g').attr('transform', `translate(${M.left},${M.top})`);
@@ -704,6 +718,33 @@ function renderTrendChart(country){
         trendTooltip.innerHTML = `<strong>${GLOBAL_LATEST_YEAR} Projected (full year)</strong><br>${Math.round(projValue).toLocaleString('en-US')} registrations<br><span style="opacity:.7">run-rate extrapolation from actual ${GLOBAL_LATEST_YEAR} months so far</span>`;
       })
       .on('pointerleave', () => { trendTooltip.style.opacity = 0; });
+
+    if(hasProjection2027){
+      const nextYear = GLOBAL_LATEST_YEAR + 1;
+      g.append('line')
+        .attr('x1', xScale(projX)).attr('y1', yScale(projValue))
+        .attr('x2', xScale(proj2027X)).attr('y2', yScale(proj2027Value))
+        .attr('stroke', ACCENT).attr('stroke-width', 2).attr('stroke-dasharray', '1.5,3.5').attr('opacity', 0.55)
+        .style('pointer-events', 'none');
+      g.append('text')
+        .attr('x', xScale(proj2027X)).attr('y', yScale(proj2027Value) - 10)
+        .attr('text-anchor', 'middle').attr('class', 'bubble-axis-title')
+        .style('font-size', '10px').style('pointer-events', 'none').text(`${nextYear} Proj.`);
+      const proj2027Dot = g.append('circle')
+        .attr('cx', xScale(proj2027X)).attr('cy', yScale(proj2027Value)).attr('r', 4.5)
+        .attr('fill', 'var(--surface)').attr('stroke', ACCENT).attr('stroke-width', 2)
+        .attr('opacity', 0.7).style('cursor', 'help');
+      proj2027Dot
+        .on('pointermove', (e) => {
+          guide.style('opacity', 0);
+          const rect = trendWrap.getBoundingClientRect();
+          trendTooltip.style.left = (e.clientX - rect.left) + 'px';
+          trendTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
+          trendTooltip.style.opacity = 1;
+          trendTooltip.innerHTML = `<strong>${nextYear} Projected (full year)</strong><br>${Math.round(proj2027Value).toLocaleString('en-US')} registrations<br><span style="opacity:.7">naive continuation — applies ${GLOBAL_LATEST_YEAR}'s own projected growth rate one more year, not a new estimate</span>`;
+        })
+        .on('pointerleave', () => { trendTooltip.style.opacity = 0; });
+    }
   }
 }
 
@@ -796,9 +837,18 @@ function renderYearlyTrend(){
   const hasProjection = projCountries > 0;
   const projX = GLOBAL_LATEST_YEAR + 0.7;
 
-  const xScale = d3.scaleLinear().domain([d3.min(years), hasProjection ? projX : d3.max(years)]).range([0, innerW]);
+  // 2027: same naive one-more-year continuation as the per-country drilldown, summed market by
+  // market (each market keeps its own growth rate rather than applying one blended rate to the total)
+  const proj2027Total = countryList.reduce((s,c) => s + (nextYearProjection(c) || 0), 0);
+  const proj2027Countries = countryList.filter(c => nextYearProjection(c) != null).length;
+  const hasProjection2027 = proj2027Countries > 0;
+  const nextYear = GLOBAL_LATEST_YEAR + 1;
+  const proj2027X = GLOBAL_LATEST_YEAR + 1.7;
+
+  const xScale = d3.scaleLinear().domain([d3.min(years), hasProjection2027 ? proj2027X : (hasProjection ? projX : d3.max(years))]).range([0, innerW]);
   const yMaxCandidates = [d3.max(series, d => d.total)];
   if(hasProjection) yMaxCandidates.push(projTotal);
+  if(hasProjection2027) yMaxCandidates.push(proj2027Total);
   const yScale = d3.scaleLinear().domain([0, Math.max(...yMaxCandidates) * 1.12]).range([innerH, 0]);
 
   const g = svgSel.append('g').attr('transform', `translate(${M.left},${M.top})`);
@@ -878,6 +928,32 @@ function renderYearlyTrend(){
         projTooltip.innerHTML = `<strong>${GLOBAL_LATEST_YEAR} Projected (full year)</strong><br>${Math.round(projTotal).toLocaleString('en-US')} registrations<br><span style="opacity:.7">${projCountries} markets, run-rate extrapolation from each market's actual ${GLOBAL_LATEST_YEAR} months</span>`;
       })
       .on('pointerleave', () => { projTooltip.style.opacity = 0; });
+
+    if(hasProjection2027){
+      g.append('line')
+        .attr('x1', xScale(projX)).attr('y1', yScale(projTotal))
+        .attr('x2', xScale(proj2027X)).attr('y2', yScale(proj2027Total))
+        .attr('stroke', ACCENT).attr('stroke-width', 2).attr('stroke-dasharray', '1.5,3.5').attr('opacity', 0.55)
+        .style('pointer-events', 'none');
+      g.append('text')
+        .attr('x', xScale(proj2027X)).attr('y', yScale(proj2027Total) - 10)
+        .attr('text-anchor', 'middle').attr('class', 'bubble-axis-title')
+        .style('font-size', '10px').style('pointer-events', 'none').text(`${nextYear} Proj.`);
+      const proj2027Dot = g.append('circle')
+        .attr('cx', xScale(proj2027X)).attr('cy', yScale(proj2027Total)).attr('r', 4.5)
+        .attr('fill', 'var(--surface)').attr('stroke', ACCENT).attr('stroke-width', 2)
+        .attr('opacity', 0.7).style('cursor', 'help');
+      proj2027Dot
+        .on('pointermove', (e) => {
+          guide.style('opacity', 0);
+          const rect = wrap.getBoundingClientRect();
+          projTooltip.style.left = (e.clientX - rect.left) + 'px';
+          projTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
+          projTooltip.style.opacity = 1;
+          projTooltip.innerHTML = `<strong>${nextYear} Projected (full year)</strong><br>${Math.round(proj2027Total).toLocaleString('en-US')} registrations<br><span style="opacity:.7">${proj2027Countries} markets — naive continuation, applies each market's own ${GLOBAL_LATEST_YEAR} projected growth rate one more year, not a new estimate</span>`;
+        })
+        .on('pointerleave', () => { projTooltip.style.opacity = 0; });
+    }
   }
 }
 
