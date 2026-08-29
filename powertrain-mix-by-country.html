@@ -54,7 +54,7 @@
             Period
           </div>
           <div class="filter-countries" id="filter-months"></div>
-          <p class="filter-note">Pick one period at a time — granularity varies (monthly for Europe, quarterly for Canada, annual for most other countries), so periods aren't combined across countries. Every month of the current year is listed individually; earlier years only get one "(Annual)" period each. "2026 YTD" sums each country only through its own latest available month — check the Country Detail table's "Data Through" column for exactly how far each one goes. More periods get added as sources are found.</p>
+          <p class="filter-note">Pick one period at a time — granularity varies (monthly for Europe, quarterly for Canada, annual for most other countries), so periods aren't combined across countries. Every month of the current year is listed individually; earlier years only get one "(Annual)" period each. "2026 YTD" sums each country only through its own latest available month — check the Country Detail table's "Data Through" column for exactly how far each one goes. "2026 (Projected)" is a simple run-rate estimate (each country's YTD figure scaled up to 12 months) — a projection, not a real measured full year. More periods get added as sources are found.</p>
         </div>
 
         <div class="filter-group">
@@ -83,6 +83,7 @@
             <li>Norway leads the world in EV adoption by a wide margin — battery-electric alone made up over 97% of May 2026 registrations, a market so far along the transition that petrol and diesel are now a rounding error.</li>
             <li>Some of the largest EU markets (Germany, France, Italy) still sit in the middle of the pack once hybrids are counted — hybrid-electric (not battery-electric) is the single most popular powertrain in most of Europe right now.</li>
             <li>Canada joined the mix starting January 2026. Statistics Canada publishes registrations quarterly (not monthly like Europe's ACEA data), so it appears as its own selectable period rather than being blended with Europe's figures — select "January 2026" to see it.</li>
+            <li>"2026 (Projected)" is a straight run-rate extrapolation — each country's actual year-to-date figure scaled up to 12 months (e.g. 6 months × 2, 7 months × 12/7) — not a forecast that accounts for seasonality, incentive changes, or model launches. Read it as "if the rest of the year keeps pace with what's happened so far," nothing more. India is excluded because its dashboard doesn't record an exact cutoff month, so no reliable scaling factor exists for it; the same 39 countries as "2026 YTD" (minus India) are covered.</li>
             <li>Select "2026 YTD" to see this year's progress so far — but each country is only summed through its own latest available data (Europe through June, Canada through Q1/March only, Mexico, Japan, Australia, Brazil, Argentina, Turkey, and the Philippines through July, India a partial-year snapshot from its live dashboard with no exact cutoff date). Check the "Data Through" column in the Country Detail table below for each country's exact cutoff before comparing totals across countries.</li>
             <li>Select "2025 (Annual)" to compare 2025 across all 46 markets tracked here at once — the 31 ACEA countries and Canada alongside India, the United States, China, Mexico, Japan, Australia, Brazil, South Korea, Indonesia, Thailand, Argentina, Turkey, the Philippines, and South Africa, which are only available as annual figures since their official sources don't publish a monthly/quarterly powertrain split. Because it mixes a full year with single-month/quarter periods elsewhere in the list, periods still aren't blended together — pick one period at a time. China's, South Africa's, and Argentina's petrol/diesel splits in particular rely partly on disclosed percentage shares or secondary reporting rather than exact published units and should be read as approximate. Japan's figures cover registered passenger cars only and exclude kei-cars (roughly 35-40% of Japan's new-car market) and commercial vehicles; Australia's (FCAI/VFACTS) cover light vehicles only, excluding heavy trucks and buses, and its 2022 BEV figure understates real sales because Tesla — Australia's best-selling EV brand — didn't report to VFACTS for part of that year; Brazil's dominant Flex-fuel (dual gasoline/ethanol) vehicles are folded into Petrol rather than split out; South Korea's national data doesn't separate plug-in hybrids from regular hybrids, so PHEV is folded into HEV there; Indonesia's and the Philippines' sources don't publish a diesel/petrol split, so all combustion volume is folded into Petrol; Thailand's total includes pickups and other light commercial vehicles (not passenger cars only), and its Petrol/Diesel split is an assumption based on market structure (passenger≈petrol, commercial≈diesel) rather than a fuel-type figure FTI publishes directly; Turkey's figures (like Japan's) cover passenger cars only, excluding light commercial vehicles, and its "Others" bucket is LPG-converted vehicles (Otogaz), a notable category in the Turkish market; the Philippines' 2025 figure covers only Jan-Nov (11 of 12 months) — check "Data Through" for that row. None of these is directly comparable to other countries' all-vehicle figures. Most of Asia, Africa, South America, and Oceania remain unsourced beyond these fourteen; those countries aren't at zero, they just haven't been added yet.</li>
             <li>"2024 (Annual)" and "2023 (Annual)" give the same comparison for earlier years (44 markets each) — a few countries with only a partial fuel-type split for those years (e.g. Argentina, Malaysia) or no matching year at all aren't included, to avoid faking a complete row. Click any country — on the map, or its name in the table below — to open its own page with the full year-by-year trend, including a handful of markets (Malaysia, Colombia, Vietnam) that couldn't go into any comparison period here but still have a real trend to show.</li>
@@ -562,6 +563,58 @@ const MONTHLY_DATA = {
       "Norway":70748,"Poland":14256,"Portugal":25017,"Romania":3201,"Slovakia":2007,"Slovenia":2700,"Spain":46268,
       "Sweden":49667,"Switzerland":23203,"United Kingdom":224841,
       "Canada":26401,"Mexico":10889
+    }
+  },
+  "2026-projection": {
+    label: "2026 (Projected)",
+    raw: {
+      "Argentina": [7697, 0, 76531, 0, 497530, 0, 581758],
+      "Australia": [218102, 110769, 211797, 0, 373455, 315314, 1229436],
+      "Austria": [80120, 36046, 99502, 4, 81018, 32368, 329058],
+      "Belgium": [166564, 25328, 57318, 4288, 195076, 12788, 461362],
+      "Brazil": [199743, 163541, 164052, 0, 2001149, 260745, 2789230],
+      "Bulgaria": [4084, 908, 3130, 132, 37462, 6198, 51914],
+      "Canada": [119232, 53220, 214336, 0, 1133444, 70172, 1590404],
+      "Croatia": [3562, 5414, 34992, 760, 32832, 10768, 88328],
+      "Cyprus": [1822, 822, 7286, 0, 4348, 322, 14600],
+      "Czechia": [17260, 13034, 62120, 5478, 114086, 47638, 259616],
+      "Denmark": [161414, 1412, 23404, 4, 11182, 4654, 202070],
+      "Estonia": [1234, 1728, 11640, 0, 3112, 2244, 19958],
+      "Finland": [35594, 9506, 20750, 0, 6040, 2618, 74508],
+      "France": [483124, 95730, 776566, 58346, 256272, 44292, 1714330],
+      "Germany": [736012, 327586, 855266, 13448, 650160, 386314, 2968786],
+      "Greece": [10572, 10398, 95114, 5066, 42656, 4188, 167994],
+      "Hungary": [14986, 12132, 76866, 784, 30794, 14248, 149810],
+      "Iceland": [6360, 3204, 3676, 0, 936, 828, 15004],
+      "Ireland": [40358, 25072, 47232, 0, 35882, 21928, 170472],
+      "Italy": [158854, 169436, 925436, 118720, 370004, 129624, 1872074],
+      "Japan": [104726, 44424, 1649098, 430, 790877, 115992, 2705547],
+      "Latvia": [1678, 2428, 0, 594, 15280, 2712, 22692],
+      "Lithuania": [3704, 5828, 25304, 892, 7586, 4908, 48222],
+      "Luxembourg": [15490, 3060, 17816, 0, 12280, 4372, 53018],
+      "Malta": [2102, 438, 2282, 0, 2182, 340, 7342],
+      "Mexico": [28466, 32050, 132021, 0, 1325211, 0, 1517748],
+      "Netherlands": [128640, 84330, 106890, 1292, 28280, 4224, 353656],
+      "Norway": [143308, 972, 964, 0, 254, 1294, 146792],
+      "Philippines": [17959, 12161, 35513, 0, 348753, 0, 414386],
+      "Poland": [33114, 53206, 309490, 16076, 174574, 37606, 624066],
+      "Portugal": [69412, 39262, 77858, 16998, 60622, 10008, 274160],
+      "Romania": [11044, 0, 75126, 11260, 23996, 8274, 129700],
+      "Slovakia": [5356, 3772, 30456, 1806, 35064, 10554, 87008],
+      "Slovenia": [12124, 2708, 13854, 868, 34830, 9090, 73474],
+      "Spain": [126440, 156074, 613336, 45098, 306830, 47636, 1295414],
+      "Sweden": [117602, 69860, 25128, 1248, 51986, 17878, 283702],
+      "Switzerland": [55778, 28912, 84976, 10, 50448, 12972, 233096],
+      "Turkey": [160119, 6521, 279022, 6696, 356650, 52783, 861792],
+      "United Kingdom": [569158, 296264, 857998, 4, 511590, 40844, 2275858]
+    },
+    // run-rate extrapolation to a full year from each country's actual 2026 YTD months — an ESTIMATE, not a real annual figure
+    asOf: {
+      "Argentina":"projected from 7 mo.","Australia":"projected from 7 mo.","Austria":"projected from 6 mo.","Belgium":"projected from 6 mo.","Brazil":"projected from 7 mo.","Bulgaria":"projected from 6 mo.","Canada":"projected from 3 mo.","Croatia":"projected from 6 mo.","Cyprus":"projected from 6 mo.","Czechia":"projected from 6 mo.","Denmark":"projected from 6 mo.","Estonia":"projected from 6 mo.","Finland":"projected from 6 mo.","France":"projected from 6 mo.","Germany":"projected from 6 mo.","Greece":"projected from 6 mo.","Hungary":"projected from 6 mo.","Iceland":"projected from 6 mo.","Ireland":"projected from 6 mo.","Italy":"projected from 6 mo.","Japan":"projected from 7 mo.","Latvia":"projected from 6 mo.","Lithuania":"projected from 6 mo.","Luxembourg":"projected from 6 mo.","Malta":"projected from 6 mo.","Mexico":"projected from 7 mo.","Netherlands":"projected from 6 mo.","Norway":"projected from 6 mo.","Philippines":"projected from 7 mo.","Poland":"projected from 6 mo.","Portugal":"projected from 6 mo.","Romania":"projected from 6 mo.","Slovakia":"projected from 6 mo.","Slovenia":"projected from 6 mo.","Spain":"projected from 6 mo.","Sweden":"projected from 6 mo.","Switzerland":"projected from 6 mo.","Turkey":"projected from 7 mo.","United Kingdom":"projected from 6 mo."
+    },
+    // BEV units for full-year 2025 (actual), to compare the projection against real prior-year performance
+    priorYearBev: {
+      "Argentina":1332,"Australia":103270,"Austria":60651,"Belgium":143849,"Brazil":80381,"Bulgaria":2506,"Canada":116067,"Croatia":1266,"Cyprus":1474,"Czechia":13806,"Denmark":126542,"Estonia":868,"Finland":26743,"France":326922,"Germany":545142,"Greece":8892,"Hungary":11003,"Iceland":6066,"Ireland":23616,"Italy":94678,"Japan":39885,"Latvia":1602,"Lithuania":3150,"Luxembourg":12663,"Malta":1711,"Mexico":20923,"Netherlands":156931,"Norway":172230,"Poland":43310,"Portugal":52256,"Romania":8849,"Slovakia":4376,"Slovenia":6419,"Spain":101661,"Sweden":99723,"Switzerland":53250,"Turkey":189868,"United Kingdom":473348
     }
   },
   "2025-annual": {
