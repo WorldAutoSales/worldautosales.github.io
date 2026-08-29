@@ -83,7 +83,7 @@
             <li>Norway leads the world in EV adoption by a wide margin — battery-electric alone made up over 97% of May 2026 registrations, a market so far along the transition that petrol and diesel are now a rounding error.</li>
             <li>Some of the largest EU markets (Germany, France, Italy) still sit in the middle of the pack once hybrids are counted — hybrid-electric (not battery-electric) is the single most popular powertrain in most of Europe right now.</li>
             <li>Canada joined the mix starting January 2026. Statistics Canada publishes registrations quarterly (not monthly like Europe's ACEA data), so it appears as its own selectable period rather than being blended with Europe's figures — select "January 2026" to see it.</li>
-            <li>"2026 (Projected)" is a straight run-rate extrapolation — each country's actual year-to-date figure scaled up to 12 months (e.g. 6 months × 2, 7 months × 12/7) — not a forecast that accounts for seasonality, incentive changes, or model launches. Read it as "if the rest of the year keeps pace with what's happened so far," nothing more. India is excluded because its dashboard doesn't record an exact cutoff month, so no reliable scaling factor exists for it; the same 39 countries as "2026 YTD" (minus India) are covered.</li>
+            <li>"2026 (Projected)" is an estimate, not a real annual measurement. For the 31 ACEA countries and Canada — the only ones with a real monthly/quarterly breakdown — the powertrain <em>mix</em> is trended forward from each fuel's share of registrations over the last 3 actual periods, so a fuel that's genuinely gaining or losing ground keeps doing so; total volume still uses simple run-rate, since Europe's monthly registrations are seasonal (a well-known June spike, for instance) and trending raw volume produced implausible totals when tried. The other 7 projected countries (Argentina, Australia, Brazil, Japan, Mexico, Philippines, Turkey) only have a single year-to-date figure in the database — no monthly breakdown to read a trend from — so they stay on plain run-rate. India is excluded entirely because its dashboard doesn't record an exact cutoff month, so no reliable scaling factor exists for it. Check the "Data Through" column for which method applies to each row.</li>
             <li>Select "2026 YTD" to see this year's progress so far — but each country is only summed through its own latest available data (Europe through June, Canada through Q1/March only, Mexico, Japan, Australia, Brazil, Argentina, Turkey, and the Philippines through July, India a partial-year snapshot from its live dashboard with no exact cutoff date). Check the "Data Through" column in the Country Detail table below for each country's exact cutoff before comparing totals across countries.</li>
             <li>Select "2025 (Annual)" to compare 2025 across all 46 markets tracked here at once — the 31 ACEA countries and Canada alongside India, the United States, China, Mexico, Japan, Australia, Brazil, South Korea, Indonesia, Thailand, Argentina, Turkey, the Philippines, and South Africa, which are only available as annual figures since their official sources don't publish a monthly/quarterly powertrain split. Because it mixes a full year with single-month/quarter periods elsewhere in the list, periods still aren't blended together — pick one period at a time. China's, South Africa's, and Argentina's petrol/diesel splits in particular rely partly on disclosed percentage shares or secondary reporting rather than exact published units and should be read as approximate. Japan's figures cover registered passenger cars only and exclude kei-cars (roughly 35-40% of Japan's new-car market) and commercial vehicles; Australia's (FCAI/VFACTS) cover light vehicles only, excluding heavy trucks and buses, and its 2022 BEV figure understates real sales because Tesla — Australia's best-selling EV brand — didn't report to VFACTS for part of that year; Brazil's dominant Flex-fuel (dual gasoline/ethanol) vehicles are folded into Petrol rather than split out; South Korea's national data doesn't separate plug-in hybrids from regular hybrids, so PHEV is folded into HEV there; Indonesia's and the Philippines' sources don't publish a diesel/petrol split, so all combustion volume is folded into Petrol; Thailand's total includes pickups and other light commercial vehicles (not passenger cars only), and its Petrol/Diesel split is an assumption based on market structure (passenger≈petrol, commercial≈diesel) rather than a fuel-type figure FTI publishes directly; Turkey's figures (like Japan's) cover passenger cars only, excluding light commercial vehicles, and its "Others" bucket is LPG-converted vehicles (Otogaz), a notable category in the Turkish market; the Philippines' 2025 figure covers only Jan-Nov (11 of 12 months) — check "Data Through" for that row. None of these is directly comparable to other countries' all-vehicle figures. Most of Asia, Africa, South America, and Oceania remain unsourced beyond these fourteen; those countries aren't at zero, they just haven't been added yet.</li>
             <li>"2024 (Annual)" and "2023 (Annual)" give the same comparison for earlier years (44 markets each) — a few countries with only a partial fuel-type split for those years (e.g. Argentina, Malaysia) or no matching year at all aren't included, to avoid faking a complete row. Click any country — on the map, or its name in the table below — to open its own page with the full year-by-year trend, including a handful of markets (Malaysia, Colombia, Vietnam) that couldn't go into any comparison period here but still have a real trend to show.</li>
@@ -570,47 +570,54 @@ const MONTHLY_DATA = {
     raw: {
       "Argentina": [7697, 0, 76531, 0, 497530, 0, 581758],
       "Australia": [218102, 110769, 211797, 0, 373455, 315314, 1229436],
-      "Austria": [80120, 36046, 99502, 4, 81018, 32368, 329058],
-      "Belgium": [166564, 25328, 57318, 4288, 195076, 12788, 461362],
+      "Austria": [84294, 40014, 100499, 2, 73933, 30317, 329059],
+      "Belgium": [174942, 32036, 63379, 7283, 169954, 13769, 461363],
       "Brazil": [199743, 163541, 164052, 0, 2001149, 260745, 2789230],
-      "Bulgaria": [4084, 908, 3130, 132, 37462, 6198, 51914],
-      "Canada": [119232, 53220, 214336, 0, 1133444, 70172, 1590404],
-      "Croatia": [3562, 5414, 34992, 760, 32832, 10768, 88328],
-      "Cyprus": [1822, 822, 7286, 0, 4348, 322, 14600],
-      "Czechia": [17260, 13034, 62120, 5478, 114086, 47638, 259616],
-      "Denmark": [161414, 1412, 23404, 4, 11182, 4654, 202070],
-      "Estonia": [1234, 1728, 11640, 0, 3112, 2244, 19958],
-      "Finland": [35594, 9506, 20750, 0, 6040, 2618, 74508],
-      "France": [483124, 95730, 776566, 58346, 256272, 44292, 1714330],
-      "Germany": [736012, 327586, 855266, 13448, 650160, 386314, 2968786],
-      "Greece": [10572, 10398, 95114, 5066, 42656, 4188, 167994],
-      "Hungary": [14986, 12132, 76866, 784, 30794, 14248, 149810],
-      "Iceland": [6360, 3204, 3676, 0, 936, 828, 15004],
-      "Ireland": [40358, 25072, 47232, 0, 35882, 21928, 170472],
-      "Italy": [158854, 169436, 925436, 118720, 370004, 129624, 1872074],
+      "Bulgaria": [3926, 1333, 3357, 93, 33844, 9360, 51913],
+      "Canada": [66001, 24729, 111729, 0, 557657, 35089, 795205],
+      "Croatia": [3469, 5831, 30351, 549, 36376, 11752, 88328],
+      "Cyprus": [1972, 974, 8053, 0, 3195, 407, 14601],
+      "Czechia": [20637, 16368, 64019, 7766, 104725, 46102, 259617],
+      "Denmark": [155569, 766, 28512, 2, 10950, 6271, 202070],
+      "Estonia": [1642, 1746, 9680, 0, 4641, 2250, 19959],
+      "Finland": [35322, 9801, 20458, 0, 5901, 3026, 74508],
+      "France": [546223, 111087, 701134, 63772, 249672, 42442, 1714330],
+      "Germany": [854851, 320271, 843195, 23602, 605498, 321369, 2968786],
+      "Greece": [14497, 9367, 89594, 11740, 40681, 2116, 167995],
+      "Hungary": [13061, 12680, 77272, 1392, 33073, 12332, 149810],
+      "Iceland": [8562, 1780, 2609, 0, 1591, 462, 15004],
+      "Ireland": [87285, 20667, 29746, 0, 18019, 14756, 170473],
+      "Italy": [201592, 212360, 843682, 183550, 315972, 114917, 1872073],
       "Japan": [104726, 44424, 1649098, 430, 790877, 115992, 2705547],
-      "Latvia": [1678, 2428, 0, 594, 15280, 2712, 22692],
-      "Lithuania": [3704, 5828, 25304, 892, 7586, 4908, 48222],
-      "Luxembourg": [15490, 3060, 17816, 0, 12280, 4372, 53018],
-      "Malta": [2102, 438, 2282, 0, 2182, 340, 7342],
+      "Latvia": [3303, 4275, 0, 1018, 12346, 1750, 22692],
+      "Lithuania": [5069, 6180, 23564, 884, 9666, 2859, 48222],
+      "Luxembourg": [15872, 3472, 19344, 0, 11604, 2726, 53018],
+      "Malta": [3228, 885, 1367, 0, 1254, 608, 7342],
       "Mexico": [28466, 32050, 132021, 0, 1325211, 0, 1517748],
-      "Netherlands": [128640, 84330, 106890, 1292, 28280, 4224, 353656],
-      "Norway": [143308, 972, 964, 0, 254, 1294, 146792],
+      "Netherlands": [162517, 69266, 98941, 1490, 19250, 2192, 353656],
+      "Norway": [139634, 2000, 3829, 0, 132, 1198, 146793],
       "Philippines": [17959, 12161, 35513, 0, 348753, 0, 414386],
-      "Poland": [33114, 53206, 309490, 16076, 174574, 37606, 624066],
-      "Portugal": [69412, 39262, 77858, 16998, 60622, 10008, 274160],
-      "Romania": [11044, 0, 75126, 11260, 23996, 8274, 129700],
-      "Slovakia": [5356, 3772, 30456, 1806, 35064, 10554, 87008],
-      "Slovenia": [12124, 2708, 13854, 868, 34830, 9090, 73474],
-      "Spain": [126440, 156074, 613336, 45098, 306830, 47636, 1295414],
-      "Sweden": [117602, 69860, 25128, 1248, 51986, 17878, 283702],
-      "Switzerland": [55778, 28912, 84976, 10, 50448, 12972, 233096],
+      "Poland": [32999, 51602, 292278, 17844, 189087, 40257, 624067],
+      "Portugal": [87375, 39741, 67321, 21755, 50421, 7548, 274161],
+      "Romania": [14944, 0, 65149, 17360, 25643, 6604, 129700],
+      "Slovakia": [6141, 4745, 26940, 3101, 30618, 15464, 87009],
+      "Slovenia": [20194, 2043, 7327, 1450, 34762, 7697, 73473],
+      "Spain": [157367, 155680, 590573, 42588, 315229, 33978, 1295415],
+      "Sweden": [127537, 73294, 14627, 642, 53016, 14586, 283702],
+      "Switzerland": [61167, 32908, 79528, 7, 45012, 14474, 233096],
       "Turkey": [160119, 6521, 279022, 6696, 356650, 52783, 861792],
-      "United Kingdom": [569158, 296264, 857998, 4, 511590, 40844, 2275858]
+      "United Kingdom": [701883, 265299, 811644, 2, 460521, 36509, 2275858]
     },
-    // run-rate extrapolation to a full year from each country's actual 2026 YTD months — an ESTIMATE, not a real annual figure
+    // 32 countries (all ACEA/Europe + Canada) trend the powertrain MIX forward from each fuel's share of
+    // registrations over the last 3 actual reporting periods (so a fuel genuinely gaining or losing share
+    // keeps doing so), while total volume still uses simple run-rate — trending raw volume was tried and
+    // discarded, since Europe's monthly registrations are seasonal (e.g. a known June spike) and a naive
+    // linear trend on volume alone produced implausible full-year totals. The remaining 7 countries
+    // (Argentina, Australia, Brazil, Japan, Mexico, Philippines, Turkey) have only a single cumulative
+    // year-to-date figure in the database — no monthly breakdown exists to read a trend from — so they
+    // stay on plain run-rate. Every figure here is an ESTIMATE, not a real annual measurement.
     asOf: {
-      "Argentina":"projected from 7 mo.","Australia":"projected from 7 mo.","Austria":"projected from 6 mo.","Belgium":"projected from 6 mo.","Brazil":"projected from 7 mo.","Bulgaria":"projected from 6 mo.","Canada":"projected from 3 mo.","Croatia":"projected from 6 mo.","Cyprus":"projected from 6 mo.","Czechia":"projected from 6 mo.","Denmark":"projected from 6 mo.","Estonia":"projected from 6 mo.","Finland":"projected from 6 mo.","France":"projected from 6 mo.","Germany":"projected from 6 mo.","Greece":"projected from 6 mo.","Hungary":"projected from 6 mo.","Iceland":"projected from 6 mo.","Ireland":"projected from 6 mo.","Italy":"projected from 6 mo.","Japan":"projected from 7 mo.","Latvia":"projected from 6 mo.","Lithuania":"projected from 6 mo.","Luxembourg":"projected from 6 mo.","Malta":"projected from 6 mo.","Mexico":"projected from 7 mo.","Netherlands":"projected from 6 mo.","Norway":"projected from 6 mo.","Philippines":"projected from 7 mo.","Poland":"projected from 6 mo.","Portugal":"projected from 6 mo.","Romania":"projected from 6 mo.","Slovakia":"projected from 6 mo.","Slovenia":"projected from 6 mo.","Spain":"projected from 6 mo.","Sweden":"projected from 6 mo.","Switzerland":"projected from 6 mo.","Turkey":"projected from 7 mo.","United Kingdom":"projected from 6 mo."
+      "Argentina":"run-rate projected from 7 mo.","Australia":"run-rate projected from 7 mo.","Austria":"trend-projected from 6 mo.","Belgium":"trend-projected from 6 mo.","Brazil":"run-rate projected from 7 mo.","Bulgaria":"trend-projected from 6 mo.","Canada":"trend-projected from 3 mo.","Croatia":"trend-projected from 6 mo.","Cyprus":"trend-projected from 6 mo.","Czechia":"trend-projected from 6 mo.","Denmark":"trend-projected from 6 mo.","Estonia":"trend-projected from 6 mo.","Finland":"trend-projected from 6 mo.","France":"trend-projected from 6 mo.","Germany":"trend-projected from 6 mo.","Greece":"trend-projected from 6 mo.","Hungary":"trend-projected from 6 mo.","Iceland":"trend-projected from 6 mo.","Ireland":"trend-projected from 6 mo.","Italy":"trend-projected from 6 mo.","Japan":"run-rate projected from 7 mo.","Latvia":"trend-projected from 6 mo.","Lithuania":"trend-projected from 6 mo.","Luxembourg":"trend-projected from 6 mo.","Malta":"trend-projected from 6 mo.","Mexico":"run-rate projected from 7 mo.","Netherlands":"trend-projected from 6 mo.","Norway":"trend-projected from 6 mo.","Philippines":"run-rate projected from 7 mo.","Poland":"trend-projected from 6 mo.","Portugal":"trend-projected from 6 mo.","Romania":"trend-projected from 6 mo.","Slovakia":"trend-projected from 6 mo.","Slovenia":"trend-projected from 6 mo.","Spain":"trend-projected from 6 mo.","Sweden":"trend-projected from 6 mo.","Switzerland":"trend-projected from 6 mo.","Turkey":"run-rate projected from 7 mo.","United Kingdom":"trend-projected from 6 mo."
     },
     // BEV units for full-year 2025 (actual), to compare the projection against real prior-year performance
     priorYearBev: {
