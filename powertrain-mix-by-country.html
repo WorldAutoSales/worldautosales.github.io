@@ -1381,7 +1381,9 @@ function monthsBeforeLabel(ym, n){
 
 function renderMomentum(){
   const grid = document.getElementById('momentum-grid');
-  const countries = ALL_COUNTRIES.filter(c => selectedCountries.has(c) && selectedContinents.has(COUNTRY_CONTINENT[c] || "OTHER"));
+  const countries = ALL_COUNTRIES
+    .filter(c => selectedCountries.has(c) && selectedContinents.has(COUNTRY_CONTINENT[c] || "OTHER"))
+    .filter(c => !focusedCountry || c === focusedCountry);
   const cards = countries.map(c => {
     const { granularity, points } = trendsSeriesForCountry(c);
     if(!points || points.length < 2) return null;
