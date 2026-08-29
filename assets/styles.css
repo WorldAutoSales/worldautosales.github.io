@@ -367,9 +367,17 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
 .momentum-card .mc-spark{ width:100%; height:34px; display:block; margin-top:6px; }
 .momentum-card .mc-spark path.spark-line{ fill:none; stroke:var(--accent); stroke-width:1.6px; }
 .momentum-card .mc-spark circle.spark-dot{ fill:var(--accent); }
+.momentum-card .mc-spark circle.spark-dot-proj{ fill:var(--surface); stroke:var(--accent); stroke-width:1.6px; }
+.momentum-card .mc-name.is-projected{ color:var(--accent); }
+.mc-proj-tag{
+  font-size:8.5px; font-weight:700; letter-spacing:0.03em;
+  color:var(--accent); border:1px solid var(--accent); border-radius:20px;
+  padding:0 4px; vertical-align:middle; margin-left:2px;
+}
 
 /* ---------- bubble chart (volume vs BEV share) ---------- */
 .bubble-axis .domain, .bubble-axis .tick line{ stroke:var(--border); }
+.bubble-axis-break{ stroke:var(--surface); stroke-width:2.5px; }
 .bubble-axis .tick text{
   fill:var(--text-muted);
   font-size:10px;
@@ -444,6 +452,7 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
 }
 .rank-row .pct-label.yoy-up{ color:#1e8f5f; }
 .rank-row .pct-label.yoy-down{ color:var(--accent-strong); }
+.rank-row .country-label.is-projected{ color:var(--accent); }
 .rank-rows-header .rrh-total{
   width:100px; flex-shrink:0; text-align:right;
   font-size:10.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase;
@@ -596,6 +605,43 @@ footer.page-footer{
   color:var(--accent);
   margin-bottom:8px;
 }
+.notes-toggle{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  width:100%;
+  border:none;
+  background:none;
+  padding:0;
+  margin:0 0 8px;
+  font:inherit;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--accent);
+  cursor:pointer;
+  text-align:left;
+}
+.notes-hint{
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:0.02em;
+  text-transform:none;
+  color:var(--text-muted);
+}
+.notes-arrow{
+  margin-left:auto;
+  font-size:12px;
+  line-height:1;
+  color:var(--accent);
+  transition:transform .15s ease;
+}
+.notes-card.is-collapsed .notes-toggle{ margin-bottom:0; }
+.notes-card.is-collapsed .notes-body{ display:none; }
+.notes-card.is-collapsed .notes-arrow{ transform:rotate(0deg); }
+.notes-card:not(.is-collapsed) .notes-arrow{ transform:rotate(90deg); }
+.notes-card:not(.is-collapsed) .notes-hint{ display:none; }
 .notes-body{
   margin:0;
   font-size:14.5px;
@@ -908,6 +954,20 @@ nav.sidebar-nav a.nav-link-alert:hover{
   padding:0;
 }
 .filter-reset:hover{ text-decoration:underline; }
+.filter-actions{ display:flex; flex-direction:column; align-items:flex-start; gap:10px; }
+.copy-link-btn{
+  background:var(--accent);
+  color:#fff;
+  border:none;
+  font-size:12.5px;
+  font-weight:700;
+  cursor:pointer;
+  padding:7px 12px;
+  border-radius:6px;
+  font-family:inherit;
+}
+.copy-link-btn:hover{ opacity:0.88; }
+.copy-link-btn.copied{ background:#16a34a; }
 .filter-note{ font-size:11.5px; color:var(--text-muted); line-height:1.5; margin:0; }
 
 @media (max-width: 1000px){

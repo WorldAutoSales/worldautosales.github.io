@@ -83,7 +83,7 @@
             <li>Norway leads the world in EV adoption by a wide margin — battery-electric alone made up over 97% of May 2026 registrations, a market so far along the transition that petrol and diesel are now a rounding error.</li>
             <li>Some of the largest EU markets (Germany, France, Italy) still sit in the middle of the pack once hybrids are counted — hybrid-electric (not battery-electric) is the single most popular powertrain in most of Europe right now.</li>
             <li>Canada joined the mix starting January 2026. Statistics Canada publishes registrations quarterly (not monthly like Europe's ACEA data), so it appears as its own selectable period rather than being blended with Europe's figures — select "January 2026" to see it.</li>
-            <li>"2026 (Projected)" is an estimate, not a real annual measurement. For the 31 ACEA countries and Canada — the only ones with a real monthly/quarterly breakdown — the powertrain <em>mix</em> is trended forward from each fuel's share of registrations over the last 3 actual periods, so a fuel that's genuinely gaining or losing ground keeps doing so; total volume still uses simple run-rate, since Europe's monthly registrations are seasonal (a well-known June spike, for instance) and trending raw volume produced implausible totals when tried. The other 7 projected countries (Argentina, Australia, Brazil, Japan, Mexico, Philippines, Turkey) only have a single year-to-date figure in the database — no monthly breakdown to read a trend from — so they stay on plain run-rate. India is excluded entirely because its dashboard doesn't record an exact cutoff month, so no reliable scaling factor exists for it. Check the "Data Through" column for which method applies to each row.</li>
+            <li>"2026 (Projected)" is an estimate, not a real annual measurement. For the 31 ACEA countries, Canada, and New Zealand — the only ones with a real monthly/quarterly breakdown — the powertrain <em>mix</em> is trended forward from each fuel's share of registrations over the last 3 actual periods, so a fuel that's genuinely gaining or losing ground keeps doing so; total volume still uses simple run-rate, since Europe's monthly registrations are seasonal (a well-known June spike, for instance) and trending raw volume produced implausible totals when tried. The other 7 projected countries (Argentina, Australia, Brazil, Japan, Mexico, Philippines, Turkey) only have a single year-to-date figure in the database — no monthly breakdown to read a trend from — so they stay on plain run-rate. India is excluded entirely because its dashboard doesn't record an exact cutoff month, so no reliable scaling factor exists for it. Check the "Data Through" column for which method applies to each row.</li>
             <li>Select "2026 YTD" to see this year's progress so far — but each country is only summed through its own latest available data (Europe through June, Canada through Q1/March only, Mexico, Japan, Australia, Brazil, Argentina, Turkey, the Philippines, and New Zealand through July, India a partial-year snapshot from its live dashboard with no exact cutoff date). Check the "Data Through" column in the Country Detail table below for each country's exact cutoff before comparing totals across countries.</li>
             <li>Select "2025 (Annual)" to compare 2025 across all 47 markets tracked here at once — the 31 ACEA countries and Canada alongside India, the United States, China, Mexico, Japan, Australia, Brazil, South Korea, Indonesia, Thailand, Argentina, Turkey, the Philippines, New Zealand, and South Africa, which are only available as annual figures since their official sources don't publish a monthly/quarterly powertrain split. Because it mixes a full year with single-month/quarter periods elsewhere in the list, periods still aren't blended together — pick one period at a time. China's, South Africa's, and Argentina's petrol/diesel splits in particular rely partly on disclosed percentage shares or secondary reporting rather than exact published units and should be read as approximate. Japan's figures cover registered passenger cars only and exclude kei-cars (roughly 35-40% of Japan's new-car market) and commercial vehicles; Australia's (FCAI/VFACTS) cover light vehicles only, excluding heavy trucks and buses, and its 2022 BEV figure understates real sales because Tesla — Australia's best-selling EV brand — didn't report to VFACTS for part of that year; Brazil's dominant Flex-fuel (dual gasoline/ethanol) vehicles are folded into Petrol rather than split out; South Korea's national data doesn't separate plug-in hybrids from regular hybrids, so PHEV is folded into HEV there; Indonesia's and the Philippines' sources don't publish a diesel/petrol split, so all combustion volume is folded into Petrol; Thailand's total includes pickups and other light commercial vehicles (not passenger cars only), and its Petrol/Diesel split is an assumption based on market structure (passenger≈petrol, commercial≈diesel) rather than a fuel-type figure FTI publishes directly; Turkey's figures (like Japan's) cover passenger cars only, excluding light commercial vehicles, and its "Others" bucket is LPG-converted vehicles (Otogaz), a notable category in the Turkish market; New Zealand's figures (like Japan's and Turkey's) cover light passenger vehicles only, excluding commercial vehicles (utes/trucks, a large diesel-heavy segment of NZ's market); the Philippines' 2025 figure covers only Jan-Nov (11 of 12 months) — check "Data Through" for that row. None of these is directly comparable to other countries' all-vehicle figures. Most of Asia, Africa, South America, and Oceania remain unsourced beyond these fifteen; those countries aren't at zero, they just haven't been added yet.</li>
             <li>"2024 (Annual)" and "2023 (Annual)" give the same comparison for earlier years (45 markets each) — a few countries with only a partial fuel-type split for those years (e.g. Argentina, Malaysia) or no matching year at all aren't included, to avoid faking a complete row. Click any country — on the map, or its name in the table below — to open its own page with the full year-by-year trend, including a handful of markets (Malaysia, Colombia, Vietnam, Peru) that couldn't go into any comparison period here but still have a real trend to show.</li>
@@ -210,7 +210,10 @@
           <p class="filter-note">Sorted by continent, then country — makes it easier to zero in as more regions get added.</p>
         </div>
 
-        <button class="filter-reset" id="filter-reset">Reset all filters</button>
+        <div class="filter-actions">
+          <button class="filter-reset" id="filter-reset">Reset all filters</button>
+          <button class="copy-link-btn" id="copy-link-btn" type="button" title="Copies a link that reproduces the current period, country focus, and filters">🔗 Copy link to this view</button>
+        </div>
       </aside>
     </div>
   </main>
@@ -256,7 +259,9 @@ const MONTHLY_DATA = {
       "Iceland": [809,145,259,0,132,94,1439],
       "Norway": [18875,175,334,0,23,151,19558],
       "Switzerland": [6652,3432,8609,1,5037,1476,25207],
-      "United Kingdom": [63950,26702,74830,0,44205,3479,213166]
+      "United Kingdom": [63950,26702,74830,0,44205,3479,213166],
+      // source: NZTA Waka Kotahi (monthly, light vehicles only)
+      "New Zealand": [2601,1164,2965,101,2530,574,9935]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-06), for YoY %
     priorYearBev: {
@@ -264,7 +269,7 @@ const MONTHLY_DATA = {
       "Estonia":89,"Finland":2491,"France":28857,"Germany":47163,"Greece":869,"Hungary":1308,"Iceland":619,
       "Ireland":1244,"Italy":7973,"Latvia":152,"Lithuania":280,"Luxembourg":939,"Malta":128,"Netherlands":12220,
       "Norway":17799,"Poland":3779,"Portugal":4642,"Romania":390,"Slovakia":481,"Slovenia":551,"Spain":11243,
-      "Sweden":10725,"Switzerland":4813,"United Kingdom":47354
+      "Sweden":10725,"Switzerland":4813,"United Kingdom":47354,"New Zealand":1012
     }
   },
   "2026-05": {
@@ -300,7 +305,8 @@ const MONTHLY_DATA = {
       "Iceland": [789,229,337,0,148,44,1547],
       "Norway": [15210,97,103,0,32,118,15560],
       "Switzerland": [5140,2293,6818,2,4466,1022,19741],
-      "United Kingdom": [43931,22167,56321,0,35068,3175,160662]
+      "United Kingdom": [43931,22167,56321,0,35068,3175,160662],
+      "New Zealand": [1549,863,2748,180,2205,610,8155]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-05), for YoY %
     priorYearBev: {
@@ -308,7 +314,7 @@ const MONTHLY_DATA = {
       "Estonia":59,"Finland":2296,"France":19414,"Germany":43060,"Greece":746,"Hungary":799,"Iceland":418,
       "Ireland":1086,"Italy":7118,"Latvia":161,"Lithuania":222,"Luxembourg":888,"Malta":165,"Netherlands":10459,
       "Norway":13384,"Poland":2818,"Portugal":4478,"Romania":432,"Slovakia":376,"Slovenia":460,"Spain":8965,
-      "Sweden":9469,"Switzerland":4177,"United Kingdom":32738
+      "Sweden":9469,"Switzerland":4177,"United Kingdom":32738,"New Zealand":442
     }
   },
   "2026-04": {
@@ -344,14 +350,15 @@ const MONTHLY_DATA = {
       "Iceland": [460,159,229,0,54,131,1033],
       "Norway": [10952,25,8,0,31,87,11103],
       "Switzerland": [4683,2299,6611,1,4040,984,18618],
-      "United Kingdom": [39084,20597,53652,0,33292,2622,149247]
+      "United Kingdom": [39084,20597,53652,0,33292,2622,149247],
+      "New Zealand": [1004,854,2843,147,1935,319,7102]
     },
     priorYearBev: {
       "Austria":5690,"Belgium":12469,"Bulgaria":144,"Croatia":60,"Cyprus":90,"Czechia":1229,"Denmark":9567,
       "Estonia":72,"Finland":2301,"France":25542,"Germany":45535,"Greece":630,"Hungary":704,"Iceland":364,
       "Ireland":1335,"Italy":6643,"Latvia":136,"Lithuania":218,"Luxembourg":999,"Malta":140,"Netherlands":9235,
       "Norway":10942,"Poland":2552,"Portugal":3722,"Romania":218,"Slovakia":320,"Slovenia":400,"Spain":6835,
-      "Sweden":8555,"Switzerland":3480,"United Kingdom":24558
+      "Sweden":8555,"Switzerland":3480,"United Kingdom":24558,"New Zealand":440
     }
   },
   "2026-03": {
@@ -387,14 +394,15 @@ const MONTHLY_DATA = {
       "Iceland": [618,272,317,0,30,46,1283],
       "Norway": [17406,126,5,0,22,126,17685],
       "Switzerland": [5388,2894,8884,0,4894,1198,23258],
-      "United Kingdom": [86120,49671,153785,0,85137,5914,380627]
+      "United Kingdom": [86120,49671,153785,0,85137,5914,380627],
+      "New Zealand": [2267,1100,3148,95,2826,589,10025]
     },
     priorYearBev: {
       "Austria":6122,"Belgium":13650,"Bulgaria":226,"Croatia":82,"Cyprus":105,"Czechia":1395,"Denmark":9855,
       "Estonia":82,"Finland":2434,"France":29261,"Germany":42521,"Greece":775,"Hungary":1155,"Iceland":482,
       "Ireland":2537,"Italy":9369,"Latvia":130,"Lithuania":223,"Luxembourg":1432,"Malta":90,"Netherlands":11195,
       "Norway":11192,"Poland":2311,"Portugal":4964,"Romania":273,"Slovakia":351,"Slovenia":480,"Spain":8101,
-      "Sweden":8386,"Switzerland":4421,"United Kingdom":69313
+      "Sweden":8386,"Switzerland":4421,"United Kingdom":69313,"New Zealand":588
     }
   },
   "2026-02": {
@@ -430,14 +438,15 @@ const MONTHLY_DATA = {
       "Iceland": [323,167,284,0,36,5,815],
       "Norway": [7127,46,20,0,12,67,7272],
       "Switzerland": [3113,1829,6009,1,3812,933,15697],
-      "United Kingdom": [21840,10438,34758,0,20984,2080,90100]
+      "United Kingdom": [21840,10438,34758,0,20984,2080,90100],
+      "New Zealand": [632,557,2294,41,3038,565,7127]
     },
     priorYearBev: {
       "Austria":4233,"Belgium":13040,"Bulgaria":126,"Croatia":53,"Cyprus":107,"Czechia":737,"Denmark":7724,
       "Estonia":59,"Finland":1563,"France":25335,"Germany":35949,"Greece":718,"Hungary":690,"Iceland":248,
       "Ireland":2512,"Italy":6922,"Latvia":80,"Lithuania":101,"Luxembourg":1134,"Malta":46,"Netherlands":10174,
       "Norway":8477,"Poland":1675,"Portugal":3946,"Romania":724,"Slovakia":276,"Slovenia":367,"Spain":6112,
-      "Sweden":6872,"Switzerland":3402,"United Kingdom":21244
+      "Sweden":6872,"Switzerland":3402,"United Kingdom":21244,"New Zealand":540
     }
   },
   "2026-01": {
@@ -475,7 +484,9 @@ const MONTHLY_DATA = {
       "Switzerland": [2913,1709,5557,0,2975,873,14027],
       "United Kingdom": [29654,18557,55653,2,37109,3152,144127],
       // source: Statistics Canada, Table 20-10-0025-01 (quarterly; Q1 2026 = Jan/Feb/Mar, filed under its first month)
-      "Canada": [29808,13305,53584,0,283361,17543,397601]
+      "Canada": [29808,13305,53584,0,283361,17543,397601],
+      // source: NZTA Waka Kotahi (monthly, light vehicles only)
+      "New Zealand": [723,616,3256,129,3519,742,8985]
     },
     // BEV units for the same month/quarter a year prior — source: ACEA (world_auto_sales, 2025-01) / same StatCan table for Canada, for YoY %
     priorYearBev: {
@@ -484,7 +495,8 @@ const MONTHLY_DATA = {
       "Ireland":4923,"Italy":6702,"Latvia":84,"Lithuania":161,"Luxembourg":1167,"Malta":211,"Netherlands":11157,
       "Norway":8954,"Poland":1121,"Portugal":3265,"Romania":1164,"Slovakia":203,"Slovenia":442,"Spain":5012,
       "Sweden":5660,"Switzerland":2910,"United Kingdom":29634,
-      "Canada": 26401
+      "Canada": 26401,
+      "New Zealand": 552
     }
   },
   "2026-ytd": {
@@ -927,8 +939,8 @@ monthsBox.innerHTML = ALL_MONTHS.map(m => `
     <span class="fc-label">${MONTHLY_DATA[m].label}</span>
   </label>`).join('');
 
-// --- aggregate raw data across selected months, per country ---
-function buildData(){
+// --- aggregate raw data across selected months, per country (no continent/country/focus filters applied) ---
+function aggregateByCountry(){
   const byCountry = {};
   ALL_COUNTRIES.forEach(c => { byCountry[c] = { country:c, bev:0, phev:0, hev:0, others:0, petrol:0, diesel:0, total:0, bevPrior:0, asOf:'' }; });
   [...selectedMonths].forEach(m => {
@@ -942,7 +954,11 @@ function buildData(){
       d.asOf = (month.asOf && month.asOf[country]) || month.label;
     });
   });
-  return Object.values(byCountry)
+  return byCountry;
+}
+
+function buildData(){
+  return Object.values(aggregateByCountry())
     .filter(d => selectedCountries.has(d.country) && selectedContinents.has(COUNTRY_CONTINENT[d.country] || "OTHER") && d.total > 0)
     .filter(d => !focusedCountry || d.country === focusedCountry)
     .map(d => ({
@@ -959,14 +975,18 @@ let DATA = [];
 const DATA_BY_NAME = {};
 
 // --- color scale for the map: continuous, pale -> dark green by BEV% (0% = palest) ---
+// Domain is the true worldwide BEV% range for the selected period, independent of the continent/
+// country/focus filters — so darkest green always means "highest BEV share among all tracked
+// countries," and filtering down to a region with uniformly low BEV share correctly shows pale
+// green everywhere rather than rescaling that region's own top country to look "maxed out."
 function makeColorScale(){
-  const maxPct = d3.max(DATA, d => d.bevPct) || 1;
+  const maxPct = d3.max(Object.values(aggregateByCountry()), d => d.total ? d.bev/d.total*100 : 0) || 1;
   return d3.scaleSequential().domain([0, maxPct]).interpolator(d3.interpolate("#EAF3DE", "#173404"));
 }
 let colorScale = null;
 
 function renderLegend(){
-  const maxPct = d3.max(DATA, d => d.bevPct) || 0;
+  const maxPct = colorScale ? colorScale.domain()[1] : 0;
   const steps = 6;
   document.getElementById('map-legend').innerHTML = `
     <div class="legend-label">BEV share</div>
@@ -1271,6 +1291,7 @@ fetch('assets/countries-50m.json').then(r => r.json()).then(topology => {
   const geo = topojson.feature(topology, topology.objects.countries);
   geoFeatures = geo.features;
   projection.fitExtent([[10,10],[930,450]], geo);
+  applyURLState();
   recompute();
 });
 
@@ -1360,6 +1381,59 @@ const bubbleTooltip = document.getElementById('bubble-tooltip');
 const bubbleWrap = document.getElementById('bubble-svg').closest('.chart-card');
 
 const BUBBLE_R = 16; // fixed radius for every country — size no longer encodes a metric
+const BUBBLE_BREAK_FRACTION = 0.74; // share of the axis width given to the "normal" (non-outlier) zone
+
+// every country's BEV total for the currently selected period(s), ignoring the continent/country
+// filters (but not the period selector) — used to compute a fixed X-axis domain so bubbles don't
+// shift position when the user toggles which countries are shown, only when the period changes
+function buildFullBevValues(){
+  const totals = {};
+  ALL_COUNTRIES.forEach(c => { totals[c] = 0; });
+  [...selectedMonths].forEach(m => {
+    const month = MONTHLY_DATA[m];
+    Object.entries(month.raw).forEach(([country, v]) => {
+      totals[country] = (totals[country] || 0) + v[0]; // v[0] = bev
+    });
+  });
+  return Object.values(totals).filter(v => v > 0);
+}
+
+// walks down from the top, comparing each value to the average of the next few — as long as a
+// value is still dramatically bigger than its neighborhood (not just the single next value), it
+// joins the outlier zone. This is what lets both China AND the USA end up isolated together even
+// though the USA/Germany gap alone isn't as extreme as the China/USA gap — a single-neighbor
+// comparison would only catch China. No country name is hardcoded; it's purely shape-of-distribution.
+function computeBrokenXDomain(values){
+  const sorted = [...values].filter(v => v > 0).sort((a,b) => b-a);
+  const maxVal = sorted[0] || 1;
+  if(sorted.length < 4) return { breakVal: maxVal, maxVal, hasBreak: false };
+  const WINDOW = 3, RATIO_THRESHOLD = 2.0;
+  let outlierCount = 0;
+  for(let i = 0; i < Math.min(sorted.length - 1, 6); i++){
+    const windowVals = sorted.slice(i+1, i+1+WINDOW);
+    if(!windowVals.length) break;
+    const localAvg = windowVals.reduce((a,b) => a+b, 0) / windowVals.length;
+    if(sorted[i] / localAvg > RATIO_THRESHOLD){ outlierCount = i + 1; } else { break; }
+  }
+  const hasBreak = outlierCount >= 1 && outlierCount < sorted.length;
+  const breakVal = hasBreak ? sorted[outlierCount] : maxVal;
+  return { breakVal, maxVal, hasBreak };
+}
+
+// builds a piecewise position function: linear from 0->breakVal across most of the width,
+// then a separate compressed linear segment from breakVal->maxVal across the rest, with a
+// visual gap/break marker at the seam
+function makeBrokenXScale(breakVal, maxVal, innerW, hasBreak){
+  if(!hasBreak){
+    const scale = d3.scaleLinear().domain([0, maxVal * 1.08]).range([0, innerW]);
+    return { pos: v => scale(v), normalScale: scale, compressedScale: null, breakPx: null, breakVal, maxVal, hasBreak };
+  }
+  const breakPx = innerW * BUBBLE_BREAK_FRACTION;
+  const normalScale = d3.scaleLinear().domain([0, breakVal]).range([0, breakPx - 10]);
+  const compressedScale = d3.scaleLinear().domain([breakVal, maxVal * 1.06]).range([breakPx + 10, innerW]);
+  const pos = v => v <= breakVal ? normalScale(v) : compressedScale(v);
+  return { pos, normalScale, compressedScale, breakPx, breakVal, maxVal, hasBreak };
+}
 
 function renderBubbleChart(){
   const W = 900, H = 460, M = {top:20, right:30, bottom:50, left:70};
@@ -1369,18 +1443,41 @@ function renderBubbleChart(){
   bubbleSvg.selectAll('*').remove();
   if(!DATA.length) return;
 
-  const xMax = d3.max(DATA, d => d.bev) || 1;
-  const yMax = d3.max(DATA, d => d.bevPct) || 1;
-
-  const xScale = d3.scaleLinear().domain([0, xMax * 1.08]).range([0, innerW]);
-  const yScale = d3.scaleLinear().domain([0, yMax * 1.12]).range([innerH, 0]);
+  // fixed, filter-independent X domain — computed from every country for the current period(s),
+  // not just the ones currently shown, so bubbles never shift position as filters are toggled
+  const { breakVal, maxVal, hasBreak } = computeBrokenXDomain(buildFullBevValues());
+  const { pos: xPos, normalScale, compressedScale, breakPx } = makeBrokenXScale(breakVal, maxVal, innerW, hasBreak);
+  const xScale = xPos; // callable position function, used everywhere below like a normal d3 scale
+  const yScale = d3.scaleLinear().domain([0, 100]).range([innerH, 0]); // fixed 0-100% — BEV share is always a percentage
 
   const g = bubbleSvg.append('g').attr('transform', `translate(${M.left},${M.top})`);
 
-  g.append('g')
+  const xAxisG = g.append('g')
     .attr('class', 'bubble-axis')
-    .attr('transform', `translate(0,${innerH})`)
-    .call(d3.axisBottom(xScale).ticks(6).tickFormat(d3.format('~s')));
+    .attr('transform', `translate(0,${innerH})`);
+
+  if(!hasBreak){
+    xAxisG.call(d3.axisBottom(normalScale).ticks(6).tickFormat(d3.format('~s')));
+  } else {
+    xAxisG.call(d3.axisBottom(normalScale).ticks(5).tickFormat(d3.format('~s')));
+    // compressed zone gets its own sparse tick set on the same visual axis line
+    const compressedTicks = compressedScale.ticks(2).filter(t => t > breakVal);
+    const compG = g.append('g')
+      .attr('class', 'bubble-axis')
+      .attr('transform', `translate(0,${innerH})`)
+      .call(d3.axisBottom(compressedScale).tickValues(compressedTicks).tickFormat(d3.format('~s')));
+    compG.select('.domain').remove(); // avoid a second overlapping axis line
+    // extend the main axis line across the compressed zone too
+    xAxisG.select('.domain').attr('d', `M0.5,0H${innerW}`);
+    // break marker: two short diagonal strokes at the seam, standard "axis break" convention
+    const bY = 0;
+    [-4, 4].forEach(dx => {
+      xAxisG.append('line')
+        .attr('class', 'bubble-axis-break')
+        .attr('x1', breakPx + dx - 4).attr('y1', bY + 7)
+        .attr('x2', breakPx + dx + 4).attr('y2', bY - 7);
+    });
+  }
 
   g.append('g')
     .attr('class', 'bubble-axis')
@@ -1520,7 +1617,78 @@ function recompute(){
   renderBubbleChart();
   renderTrendsChart();
   renderMomentum();
+  updateURL();
 }
+
+// --- URL state sync: keeps the current period, country focus, and filters in the address bar
+// so copying the URL reproduces the same view for whoever opens it ---
+function updateURL(){
+  const params = new URLSearchParams();
+  const period = [...selectedMonths][0];
+  if(period !== DEFAULT_MONTH) params.set('period', period);
+  if(focusedCountry) params.set('country', focusedCountry);
+  if(selectedFuels.size !== FUEL_KEYS.length) params.set('fuels', [...selectedFuels].join(','));
+  if(selectedContinents.size !== ALL_CONTINENTS.length) params.set('continents', [...selectedContinents].join(','));
+  if(selectedCountries.size !== ALL_COUNTRIES.length) params.set('countries', [...selectedCountries].join(','));
+  const qs = params.toString();
+  history.replaceState(null, '', window.location.pathname + (qs ? '?' + qs : ''));
+}
+
+function applyURLState(){
+  const params = new URLSearchParams(window.location.search);
+  const period = params.get('period');
+  if(period && MONTHLY_DATA[period]) selectedMonths = new Set([period]);
+  const country = params.get('country');
+  if(country && COUNTRIES_WITH_TREND.has(country)) focusedCountry = country;
+  const fuels = params.get('fuels');
+  if(fuels){
+    const set = new Set(fuels.split(',').filter(f => FUEL_KEYS.includes(f)));
+    if(set.size) selectedFuels = set;
+  }
+  const continents = params.get('continents');
+  if(continents){
+    const set = new Set(continents.split(',').filter(c => ALL_CONTINENTS.includes(c)));
+    if(set.size) selectedContinents = set;
+  }
+  const countries = params.get('countries');
+  if(countries){
+    const set = new Set(countries.split(',').filter(c => ALL_COUNTRIES.includes(c)));
+    if(set.size) selectedCountries = set;
+  }
+  fuelsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = selectedFuels.has(cb.dataset.fuel); });
+  continentsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = selectedContinents.has(cb.dataset.continent); });
+  countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = selectedCountries.has(cb.dataset.country); });
+  const currentPeriod = [...selectedMonths][0];
+  monthsBox.querySelectorAll('input[type="radio"]').forEach(rb => { rb.checked = rb.dataset.month === currentPeriod; });
+}
+
+const copyLinkBtn = document.getElementById('copy-link-btn');
+copyLinkBtn.addEventListener('click', async () => {
+  const url = window.location.href;
+  let copied = false;
+  try{
+    await navigator.clipboard.writeText(url);
+    copied = true;
+  }catch(err){
+    try{
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      copied = document.execCommand('copy');
+      document.body.removeChild(ta);
+    }catch(err2){ copied = false; }
+  }
+  const original = copyLinkBtn.textContent;
+  copyLinkBtn.classList.add(copied ? 'copied' : 'copy-failed');
+  copyLinkBtn.textContent = copied ? '✓ Link copied' : '⚠ Copy failed — select the address bar';
+  setTimeout(() => {
+    copyLinkBtn.classList.remove('copied', 'copy-failed');
+    copyLinkBtn.textContent = original;
+  }, 1600);
+});
 
 // --- filter event wiring ---
 fuelsBox.addEventListener('change', e => {
@@ -1529,6 +1697,7 @@ fuelsBox.addEventListener('change', e => {
   const key = cb.dataset.fuel;
   if(cb.checked) selectedFuels.add(key); else selectedFuels.delete(key);
   renderBars();
+  updateURL();
 });
 fuelsBox.addEventListener('click', e => {
   const btn = e.target.closest('.only-btn');
@@ -1537,6 +1706,7 @@ fuelsBox.addEventListener('click', e => {
   selectedFuels = new Set([key]);
   fuelsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = cb.dataset.fuel === key; });
   renderBars();
+  updateURL();
 });
 
 continentsBox.addEventListener('change', e => {
@@ -1586,6 +1756,7 @@ document.querySelectorAll('.filter-bulk-btn').forEach(btn => {
       selectedFuels = check ? new Set(FUEL_KEYS) : new Set();
       fuelsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = check);
       renderBars();
+      updateURL();
     } else if(target === 'continents'){
       selectedContinents = check ? new Set(ALL_CONTINENTS) : new Set();
       continentsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = check);
