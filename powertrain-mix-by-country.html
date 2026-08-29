@@ -92,6 +92,7 @@
             <li>Select "2025 (Annual)" to compare 2025 across all 47 markets tracked here at once — the 31 ACEA countries and Canada alongside India, the United States, China, Mexico, Japan, Australia, Brazil, South Korea, Indonesia, Thailand, Argentina, Turkey, the Philippines, New Zealand, and South Africa, which are only available as annual figures since their official sources don't publish a monthly/quarterly powertrain split. Because it mixes a full year with single-month/quarter periods elsewhere in the list, periods still aren't blended together — pick one period at a time. China's, South Africa's, and Argentina's petrol/diesel splits in particular rely partly on disclosed percentage shares or secondary reporting rather than exact published units and should be read as approximate. Japan's figures cover registered passenger cars only and exclude kei-cars (roughly 35-40% of Japan's new-car market) and commercial vehicles; Australia's (FCAI/VFACTS) cover light vehicles only, excluding heavy trucks and buses, and its 2022 BEV figure understates real sales because Tesla — Australia's best-selling EV brand — didn't report to VFACTS for part of that year; Brazil's dominant Flex-fuel (dual gasoline/ethanol) vehicles are folded into Petrol rather than split out; South Korea's national data doesn't separate plug-in hybrids from regular hybrids, so PHEV is folded into HEV there; Indonesia's and the Philippines' sources don't publish a diesel/petrol split, so all combustion volume is folded into Petrol; Thailand's total includes pickups and other light commercial vehicles (not passenger cars only), and its Petrol/Diesel split is an assumption based on market structure (passenger≈petrol, commercial≈diesel) rather than a fuel-type figure FTI publishes directly; Turkey's figures (like Japan's) cover passenger cars only, excluding light commercial vehicles, and its "Others" bucket is LPG-converted vehicles (Otogaz), a notable category in the Turkish market; New Zealand's figures (like Japan's and Turkey's) cover light passenger vehicles only, excluding commercial vehicles (utes/trucks, a large diesel-heavy segment of NZ's market); the Philippines' 2025 figure covers only Jan-Nov (11 of 12 months) — check "Data Through" for that row. None of these is directly comparable to other countries' all-vehicle figures. Most of Asia, Africa, South America, and Oceania remain unsourced beyond these fifteen; those countries aren't at zero, they just haven't been added yet.</li>
             <li>China gained a real monthly breakdown for 2026 (January-July, selectable as individual months, "2026 YTD", and "2026 (Projected)") — source: CAAM (China Association of Automobile Manufacturers)'s own monthly wholesale figures via CnEVPost, i.e. automaker deliveries to dealers including exports, the same basis this page's pre-existing 2021-2025 annual China rows already use (their totals match OICA's whole-market figures exactly). This is a different, more exact source than the percentage-derived annual splits flagged in the "2025 (Annual)" note above — China's 2026 BEV/PHEV figures are CAAM's own exact published units, not derived from disclosed shares. HEV is 0 throughout because China's official "NEV" (New Energy Vehicle) classification covers BEV+PHEV only; non-plug-in hybrids sell in China but are counted within the conventional/ICE segment, so they're folded into Petrol along with the (unpublished, believed small) Diesel share.</li>
             <li>"2024 (Annual)" and "2023 (Annual)" give the same comparison for earlier years (45 markets each) — a few countries with only a partial fuel-type split for those years (e.g. Argentina, Malaysia) or no matching year at all aren't included, to avoid faking a complete row. Click any country — on the map, or its name in the table below — to open its own page with the full year-by-year trend, including a handful of markets (Malaysia, Colombia, Vietnam, Peru) that couldn't go into any comparison period here but still have a real trend to show.</li>
+            <li>"2022 (Annual)" through "2020 (Annual)" extend the same comparison further back (42/35/28 markets respectively — coverage thins going backward since fewer countries' sources published a complete fuel-type split in earlier years). Where a country's data for one of these years reconciles to less than 99.5% of its published total (a field the source genuinely didn't report, not just a zero), that country is excluded from that specific year rather than guessed — this is more common the further back the year, which is why the market count drops faster than for 2023-2025.</li>
             <li>A handful of Eastern European markets (Latvia, Romania, Bulgaria) remain almost entirely petrol/diesel, showing how uneven the EV transition still is within the EU itself.</li>
             <li>However quickly smaller countries move into EVs, overall Europe's progression depends heavily on the Big 5 (Germany, UK, France, Italy, Spain) — they account for <strong>68.6%</strong> of total registrations across the 31 markets tracked here (May 2026), so their pace sets the continent's pace far more than any single fast-moving small market can.</li>
           </ul>
@@ -894,6 +895,135 @@ const MONTHLY_DATA = {
     // BEV units for full-year 2022, for YoY %
     priorYearBev: {
       "Australia":33410,"Brazil":8440,"Canada":98620,"India":40825,"Japan":31592,"Mexico":5631,"Turkey":7733,"United States":747982
+    }
+  },
+    "2022-annual": {
+    label: "2022 (Annual)",
+    raw: {
+      "Australia": [33410,5937,81786,15,551556,361366,1034070],
+      "Austria": [34165,13268,40858,77,78567,48115,215050],
+      "Belgium": [37760,59269,73915,2896,145998,54759,374597],
+      "Brazil": [8440,0,40822,0,1682086,229114,1960462],
+      "Bulgaria": [1021,141,386,21,21669,5330,28568],
+      "Canada": [98620,24990,81049,18,1233181,75247,1513105],
+      "China": [5365000,1518000,0,3000,19977745,0,26863745],
+      "Colombia": [3278,0,24556,0,234504,0,262338],
+      "Croatia": [1062,689,6780,1576,19149,7788,37044],
+      "Cyprus": [401,231,4022,2,6380,541,11577],
+      "Czechia": [3786,3447,13997,4826,106597,44991,177644],
+      "Denmark": [30799,26443,29278,6,52655,10104,149285],
+      "Estonia": [693,391,6824,285,9029,3336,20558],
+      "Finland": [14531,16171,25709,623,19246,5420,81700],
+      "France": [207171,127436,342237,47144,611179,241783,1576950],
+      "Germany": [470559,362092,465225,17762,863445,472274,2651357],
+      "Greece": [2826,5322,29162,3710,47152,17047,105219],
+      "Hungary": [4707,4876,42500,896,44330,14322,111631],
+      "Iceland": [5567,3752,2987,0,1985,2385,16673],
+      "India": [40825,0,189919,433913,2144789,678761,3488207],
+      "Ireland": [15872,7835,21290,725,32095,29803,107620],
+      "Italy": [48960,64632,454981,129166,376485,261466,1335690],
+      "Japan": [31592,37772,1089077,912,938750,125200,2223303],
+      "Latvia": [1069,301,5371,344,7024,2606,16715],
+      "Lithuania": [1507,740,8803,353,10323,2389,24115],
+      "Luxembourg": [6391,3854,8028,26,14559,9236,42094],
+      "Malaysia": [2631,0,19988,0,637079,61479,721177],
+      "Malta": [990,1216,1397,9,2411,406,6429],
+      "Mexico": [5631,4575,40859,0,1043663,0,1094728],
+      "Netherlands": [73250,34742,77648,2391,119401,4638,312070],
+      "Norway": [142504,16176,12906,26,2284,6968,180864],
+      "Poland": [11293,9664,65617,12241,262875,59875,421565],
+      "Portugal": [18426,16167,24014,5712,66058,27881,158258],
+      "Romania": [11638,3309,31101,13565,53298,16413,129324],
+      "Slovakia": [1508,1556,17355,1399,43903,12938,78659],
+      "Slovenia": [2293,602,6275,2781,25989,7739,45679],
+      "Spain": [31737,48077,240539,15899,344341,170932,851525],
+      "Sweden": [95371,66531,57947,4589,46962,18379,289779],
+      "Switzerland": [40518,17813,58050,212,86309,33849,236751],
+      "Turkey": [7733,0,64387,8309,408920,103311,592660],
+      "United Kingdom": [263197,99248,322676,3599,801434,122987,1613141],
+      "United States": [747982,183411,766412,0,12056534,0,13754339]
+    },
+    priorYearBev: {
+      "India":13921,"United States":459474,"China":2734000,"Mexico":1140,"Canada":59133,"Japan":21139,"Brazil":2860,"Turkey":2846,"Malaysia":278,"Colombia":1329,"Belgium":22774,"Bulgaria":321,"Czechia":3172,"Denmark":24876,"Germany":355961,"Estonia":487,"Ireland":9199,"Greece":2174,"Spain":24400,"France":165566,"Croatia":1121,"Italy":69178,"Cyprus":78,"Latvia":480,"Lithuania":1277,"Luxembourg":4649,"Hungary":4313,"Malta":416,"Netherlands":63658,"Austria":33366,"Poland":7092,"Portugal":13546,"Romania":6344,"Slovenia":1742,"Slovakia":1105,"Finland":10153,"Sweden":57590,"Iceland":4246,"Norway":116399,"Switzerland":32025,"United Kingdom":188143
+    }
+  },
+    "2021-annual": {
+    label: "2021 (Annual)",
+    raw: {
+      "Austria": [33366,14626,41970,100,91478,58263,239803],
+      "Brazil": [2860,0,32130,0,1677935,264185,1977110],
+      "Canada": [59133,27324,79314,5,1415193,65843,1646812],
+      "China": [2734000,600000,0,0,22941000,0,26275000],
+      "Colombia": [1329,0,16366,0,232577,0,250272],
+      "Cyprus": [78,84,2990,2,5997,1460,10611],
+      "Denmark": [24876,40445,10155,75,87137,23904,186592],
+      "Estonia": [487,240,6349,466,10817,4251,22610],
+      "Finland": [10153,20144,28109,922,30760,8397,98485],
+      "France": [165566,141242,299476,46523,700919,354949,1708675],
+      "Germany": [355961,325437,429132,14568,972588,524446,2622132],
+      "Hungary": [4313,4236,48151,727,45561,19092,122080],
+      "Iceland": [4246,4897,2463,8,2250,1923,15787],
+      "India": [13921,0,127026,283652,2030812,555350,3010761],
+      "Ireland": [9199,7969,19359,316,34000,37772,108615],
+      "Italy": [69178,69834,414373,139793,481746,343952,1518876],
+      "Japan": [21139,22777,1027104,2625,1183129,143088,2399862],
+      "Lithuania": [1277,400,9985,334,12407,3806,28209],
+      "Luxembourg": [4649,4444,7224,22,16839,11194,44372],
+      "Malaysia": [278,0,7875,0,459425,41333,508911],
+      "Malta": [416,673,939,8,2686,528,5250],
+      "Mexico": [1140,3492,42447,0,967656,0,1014735],
+      "Netherlands": [63658,30991,71538,2390,146821,6920,322318],
+      "Norway": [116399,38384,14461,38,3760,9576,182618],
+      "Poland": [7092,9138,58097,13579,291872,71053,450831],
+      "Portugal": [13546,15677,19120,3649,62883,31766,146641],
+      "Romania": [6344,2630,28078,15952,47813,20393,121210],
+      "Slovakia": [1105,1166,15148,1096,42184,14909,75608],
+      "Slovenia": [1742,191,5783,2724,31245,11743,53428],
+      "Spain": [24400,43096,220855,15691,390081,224708,918831],
+      "Sweden": [57590,77827,70074,2826,68405,27184,303906],
+      "Switzerland": [32025,21803,54433,369,100865,41406,250901],
+      "Turkey": [2846,0,49493,25583,373406,110525,561853],
+      "United Kingdom": [188143,112721,257308,2328,891232,188492,1640224],
+      "United States": [459474,176117,799046,0,13512336,0,14946973]
+    },
+    priorYearBev: {
+      "India":4399,"United States":238540,"Canada":39046,"Brazil":0,"Turkey":844,"Colombia":1307,"Denmark":14218,"Germany":194163,"Estonia":344,"Ireland":4075,"Spain":18217,"France":112499,"Italy":30930,"Cyprus":42,"Lithuania":480,"Luxembourg":2473,"Hungary":3047,"Malta":178,"Netherlands":72859,"Austria":15972,"Poland":3679,"Portugal":7908,"Romania":2844,"Slovenia":1720,"Slovakia":918,"Finland":4245,"Sweden":27981,"Iceland":2551,"Norway":82212,"Switzerland":19753
+    }
+  },
+    "2020-annual": {
+    label: "2020 (Annual)",
+    raw: {
+      "Austria": [15972,7641,26026,421,107771,90909,248740],
+      "Brazil": [0,0,0,19745,1723929,211154,1954828],
+      "Bulgaria": [139,41,429,164,17021,2635,20429],
+      "Canada": [39046,15364,41543,58,1384875,64739,1545625],
+      "Colombia": [1307,0,4697,0,182387,0,188391],
+      "Croatia": [639,143,2180,397,19803,12885,36047],
+      "Cyprus": [42,0,1424,0,5706,3065,10237],
+      "Denmark": [14218,18235,10513,45,111259,44709,198979],
+      "Finland": [4245,13231,18727,1841,45596,12778,96418],
+      "France": [112499,74961,173316,16868,802718,513168,1693530],
+      "Germany": [194163,200394,327394,14108,1361723,819896,2917678],
+      "Hungary": [3047,2996,31775,366,62301,27711,128196],
+      "India": [4399,0,89630,206334,1629318,525237,2454918],
+      "Ireland": [4075,2516,11073,0,33595,41134,92393],
+      "Latvia": [351,0,78,141,8285,4870,13725],
+      "Luxembourg": [2473,2685,3797,17,19589,16628,45189],
+      "Malta": [178,215,452,20,2701,1036,4602],
+      "Norway": [82212,28162,15058,2987,11753,17331,157503],
+      "Poland": [3679,4499,36788,9331,292487,85610,432394],
+      "Portugal": [7908,11930,12038,1914,63916,47564,145270],
+      "Romania": [2844,1036,13235,9278,66110,33826,126329],
+      "Slovakia": [918,863,7263,911,47263,19082,76300],
+      "Slovenia": [1720,39,1719,1442,31529,16918,53367],
+      "Spain": [18217,22602,138703,15343,427645,305013,927523],
+      "Sweden": [27981,65924,47742,3544,94448,54132,293771],
+      "Switzerland": [19753,14293,32880,625,119012,58947,245510],
+      "Turkey": [844,0,24131,26685,317630,240819,610109],
+      "United States": [238540,69049,455067,0,13709376,0,14472032]
+    },
+    priorYearBev: {
+      "India":1875,"United States":233822,"Canada":35550,"Brazil":0,"Turkey":222,"Colombia":926,"Bulgaria":188,"Denmark":5501,"Germany":63281,"Ireland":3665,"Spain":10415,"France":43564,"Croatia":279,"Latvia":116,"Luxembourg":986,"Hungary":1834,"Malta":281,"Austria":9242,"Poland":1464,"Portugal":6880,"Romania":1506,"Slovenia":695,"Slovakia":166,"Finland":1897,"Sweden":15795,"Norway":60271,"Switzerland":13177,"Cyprus":58
     }
   }
 };
