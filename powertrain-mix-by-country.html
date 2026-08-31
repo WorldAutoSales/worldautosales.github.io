@@ -199,7 +199,7 @@
         </div>
 
         <footer class="page-footer">
-          Sources: ACEA (EU + EFTA + UK, monthly) · Statistics Canada, Table 20-10-0025-01 (quarterly) · Vahan Dashboard, India (annual) · Argonne National Laboratory, USA (monthly + annual, no diesel split) · CAAM/CPCA via CnEVPost, China (annual 2021-2025 approximate; monthly + YTD + projected 2026, wholesale basis incl. exports, no diesel split) · INEGI (RAIAVL), Mexico (monthly) · JADA, Japan (annual, registered passenger cars excl. kei-cars) · FCAI/VFACTS, Australia (annual, light vehicles only) · ANFAVEA, Brazil (annual, Flex-fuel folded into Petrol) · MOLIT, South Korea (annual, PHEV folded into HEV) · GAIKINDO, Indonesia (annual, no diesel split) · FTI Automotive Industry Club, Thailand (annual, includes commercial vehicles) · ACARA/SIOMAA, Argentina (annual + YTD, petrol/diesel approximate) · ODMD, Turkey (annual + YTD, passenger cars only) · CAMPI-TMA, Philippines (annual + YTD, no diesel split) · ANAC, Chile (annual, petrol/diesel approximate) · AIVAM, Morocco (annual, full split 2024 only) · NZTA Waka Kotahi, New Zealand (monthly, light vehicles only) · naamsa, South Africa (annual, approximate)<br>
+          Sources: ACEA (EU + EFTA + UK, monthly) · Statistics Canada, Table 20-10-0025-01 (quarterly) · Vahan Dashboard, India (monthly) · Argonne National Laboratory, USA (monthly + annual, no diesel split) · CAAM/CPCA via CnEVPost, China (annual 2021-2025 approximate; monthly + YTD + projected 2026, wholesale basis incl. exports, no diesel split) · INEGI (RAIAVL), Mexico (monthly) · JADA, Japan (monthly, registered passenger cars excl. kei-cars) · FCAI/VFACTS, Australia (annual, light vehicles only) · ANFAVEA, Brazil (monthly, Flex-fuel folded into Petrol) · MOLIT, South Korea (annual, PHEV folded into HEV) · GAIKINDO, Indonesia (monthly, no diesel split) · FTI Automotive Industry Club, Thailand (annual, includes commercial vehicles) · ACARA/SIOMAA, Argentina (annual + YTD + monthly from March 2026, petrol/diesel approximate) · MAA + JPJ vehicle registrations (data.gov.my), Malaysia (monthly, Petrol/Diesel derived from JPJ's ratio) · ODMD, Turkey (annual + YTD, passenger cars only) · CAMPI-TMA, Philippines (annual + YTD, no diesel split) · ANAC, Chile (annual, petrol/diesel approximate) · AIVAM, Morocco (annual, full split 2024 only) · NZTA Waka Kotahi, New Zealand (monthly, light vehicles only) · naamsa, South Africa (annual, approximate)<br>
           Map boundaries: Natural Earth via world-atlas (public domain)
         </footer>
       </div>
@@ -281,7 +281,21 @@ const MONTHLY_DATA = {
       // source: Argonne National Laboratory (Wards Auto), monthly — Total = all light-duty vehicles; no Petrol/Diesel split published, Diesel=0
       "United States": [84622,16815,222226,0,1043772,0,1367435],
       // source: CAAM (China Association of Automobile Manufacturers), monthly wholesale via CnEVPost — Total = all vehicle wholesale sales, incl. exports; HEV not part of China's official NEV classification (folded into Petrol, HEV=0); no Petrol/Diesel split published, Diesel=0
-      "China": [1142000,500000,0,0,1168000,0,2810000]
+      "China": [1142000,500000,0,0,1168000,0,2810000],
+      // source: ANFAVEA, Brazil (monthly)
+      "Brazil": [21148,18065,15308,0,182493,23399,260413],
+      // source: Vahan Dashboard, India (monthly)
+      "India": [33683,1,35136,103762,182021,69548,424151],
+      // source: JADA, Japan (monthly)
+      "Japan": [12225,4558,150345,33,71942,8853,247956],
+      // source: MAA (BEV/Hybrid/total) + JPJ vehicle registrations (data.gov.my, Petrol/Diesel), Malaysia (monthly)
+      "Malaysia": [6215,0,5650,0,58314,2916,73095],
+      // source: INEGI (RAIAVL), Mexico (monthly) — no Petrol/Diesel split published, Diesel=0
+      "Mexico": [2202,3401,11732,0,109567,0,126902],
+      // source: GAIKINDO, Indonesia (monthly) — no Petrol/Diesel split published, Diesel=0
+      "Indonesia": [12653,2402,8218,0,54277,0,77550],
+      // source: ACARA, Argentina (monthly) — no Petrol/Diesel split published, Diesel=0
+      "Argentina": [882,0,6605,0,39928,0,47415]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-06), for YoY %
     priorYearBev: {
@@ -289,7 +303,8 @@ const MONTHLY_DATA = {
       "Estonia":89,"Finland":2491,"France":28857,"Germany":47163,"Greece":869,"Hungary":1308,"Iceland":619,
       "Ireland":1244,"Italy":7973,"Latvia":152,"Lithuania":280,"Luxembourg":939,"Malta":128,"Netherlands":12220,
       "Norway":17799,"Poland":3779,"Portugal":4642,"Romania":390,"Slovakia":481,"Slovenia":551,"Spain":11243,
-      "Sweden":10725,"Switzerland":4813,"United Kingdom":47354,"New Zealand":1012,"United States":111577
+      "Sweden":10725,"Switzerland":4813,"United Kingdom":47354,"New Zealand":1012,"United States":111577,
+      "Brazil":5943,"India":15310,"Japan":4264,"Malaysia":3272,"Mexico":1662
     }
   },
   "2026-05": {
@@ -329,7 +344,14 @@ const MONTHLY_DATA = {
       "New Zealand": [1549,863,2748,180,2205,610,8155],
       "United States": [101312,18562,255157,0,1113119,0,1488150],
       // source: CAAM, monthly wholesale via CnEVPost — Total = all vehicle wholesale sales, incl. exports; Diesel=0, HEV=0 (see June note)
-      "China": [1026000,470000,0,0,1133000,0,2629000]
+      "China": [1026000,470000,0,0,1133000,0,2629000],
+      "Brazil": [21002,15838,14874,0,189341,23599,264654],
+      "India": [28552,1,33563,97603,187010,69013,415742],
+      "Japan": [8957,3733,110251,32,57033,7480,187486],
+      "Malaysia": [5038,0,5103,0,53078,2870,66089],
+      "Mexico": [2479,2770,12051,0,109807,0,127107],
+      "Indonesia": [9290,512,7815,0,51602,0,69219],
+      "Argentina": [647,0,6392,0,34882,0,41921]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-05), for YoY %
     priorYearBev: {
@@ -337,7 +359,8 @@ const MONTHLY_DATA = {
       "Estonia":59,"Finland":2296,"France":19414,"Germany":43060,"Greece":746,"Hungary":799,"Iceland":418,
       "Ireland":1086,"Italy":7118,"Latvia":161,"Lithuania":222,"Luxembourg":888,"Malta":165,"Netherlands":10459,
       "Norway":13384,"Poland":2818,"Portugal":4478,"Romania":432,"Slovakia":376,"Slovenia":460,"Spain":8965,
-      "Sweden":9469,"Switzerland":4177,"United Kingdom":32738,"New Zealand":442,"United States":101750
+      "Sweden":9469,"Switzerland":4177,"United Kingdom":32738,"New Zealand":442,"United States":101750,
+      "Brazil":6989,"India":14712,"Japan":2848,"Malaysia":4152,"Mexico":1768,"Argentina":91
     }
   },
   "2026-04": {
@@ -377,14 +400,22 @@ const MONTHLY_DATA = {
       "New Zealand": [1004,854,2843,147,1935,319,7102],
       "United States": [89113,16791,223384,0,1057243,0,1386531],
       // source: CAAM, monthly wholesale via CnEVPost — Total = all vehicle wholesale sales, incl. exports; Diesel=0, HEV=0 (see June note)
-      "China": [905000,439000,0,0,1182000,0,2526000]
+      "China": [905000,439000,0,0,1182000,0,2526000],
+      "Brazil": [17500,13215,12742,0,171929,22071,237457],
+      "India": [26272,1,35604,96752,194218,76912,429759],
+      "Japan": [6937,2748,115054,14,85583,13033,223369],
+      "Malaysia": [5894,0,4942,0,63821,3212,77869],
+      "Mexico": [2396,2644,11179,0,102640,0,118859],
+      "Indonesia": [14825,569,8414,0,56968,0,80776],
+      "Argentina": [724,0,6983,0,40023,0,47730]
     },
     priorYearBev: {
       "Austria":5690,"Belgium":12469,"Bulgaria":144,"Croatia":60,"Cyprus":90,"Czechia":1229,"Denmark":9567,
       "Estonia":72,"Finland":2301,"France":25542,"Germany":45535,"Greece":630,"Hungary":704,"Iceland":364,
       "Ireland":1335,"Italy":6643,"Latvia":136,"Lithuania":218,"Luxembourg":999,"Malta":140,"Netherlands":9235,
       "Norway":10942,"Poland":2552,"Portugal":3722,"Romania":218,"Slovakia":320,"Slovenia":400,"Spain":6835,
-      "Sweden":8555,"Switzerland":3480,"United Kingdom":24558,"New Zealand":440,"United States":96348
+      "Sweden":8555,"Switzerland":3480,"United Kingdom":24558,"New Zealand":440,"United States":96348,
+      "Brazil":4716,"India":14818,"Japan":2111,"Malaysia":2892,"Mexico":1693
     }
   },
   "2026-03": {
@@ -424,14 +455,22 @@ const MONTHLY_DATA = {
       "New Zealand": [2267,1100,3148,95,2826,589,10025],
       "United States": [76058,13155,206867,0,1092574,0,1388654],
       // source: CAAM, monthly wholesale via CnEVPost — Total = all vehicle wholesale sales, incl. exports; Diesel=0, HEV=0 (see June note)
-      "China": [831000,421000,0,0,1647000,0,2899000]
+      "China": [831000,421000,0,0,1647000,0,2899000],
+      "Brazil": [14089,12362,13595,0,195245,23406,258697],
+      "India": [26088,3,36866,110699,207137,89362,470155],
+      "Japan": [11245,4266,178423,29,59374,12101,265438],
+      "Malaysia": [4717,0,4093,0,55960,3076,67846],
+      "Mexico": [3112,2714,10548,0,115192,0,131566],
+      "Indonesia": [10572,355,6947,0,43394,0,61268],
+      "Argentina": [534,0,6733,0,41933,0,49200]
     },
     priorYearBev: {
       "Austria":6122,"Belgium":13650,"Bulgaria":226,"Croatia":82,"Cyprus":105,"Czechia":1395,"Denmark":9855,
       "Estonia":82,"Finland":2434,"France":29261,"Germany":42521,"Greece":775,"Hungary":1155,"Iceland":482,
       "Ireland":2537,"Italy":9369,"Latvia":130,"Lithuania":223,"Luxembourg":1432,"Malta":90,"Netherlands":11195,
       "Norway":11192,"Poland":2311,"Portugal":4964,"Romania":273,"Slovakia":351,"Slovenia":480,"Spain":8101,
-      "Sweden":8386,"Switzerland":4421,"United Kingdom":69313,"New Zealand":588,"United States":120820
+      "Sweden":8386,"Switzerland":4421,"United Kingdom":69313,"New Zealand":588,"United States":120820,
+      "Brazil":4804,"India":14425,"Japan":4010,"Malaysia":2976,"Mexico":1655
     }
   },
   "2026-02": {
@@ -471,14 +510,21 @@ const MONTHLY_DATA = {
       "New Zealand": [632,557,2294,41,3038,565,7127],
       "United States": [58284,10927,163637,0,945938,0,1178786],
       // source: CAAM, monthly wholesale via CnEVPost — Total = all vehicle wholesale sales, incl. exports; Diesel=0, HEV=0 (see June note)
-      "China": [484000,280000,0,0,1041000,0,1805000]
+      "China": [484000,280000,0,0,1041000,0,1805000],
+      "Brazil": [8707,8390,11023,0,132173,16873,177166],
+      "India": [16496,2,33803,98161,187264,81301,417027],
+      "Japan": [6245,3334,134040,29,57368,10346,211362],
+      "Malaysia": [3635,0,2208,0,47775,3072,56690],
+      "Mexico": [2178,1640,9530,0,104957,0,118305],
+      "Indonesia": [12314,651,5798,0,62487,0,81250]
     },
     priorYearBev: {
       "Austria":4233,"Belgium":13040,"Bulgaria":126,"Croatia":53,"Cyprus":107,"Czechia":737,"Denmark":7724,
       "Estonia":59,"Finland":1563,"France":25335,"Germany":35949,"Greece":718,"Hungary":690,"Iceland":248,
       "Ireland":2512,"Italy":6922,"Latvia":80,"Lithuania":101,"Luxembourg":1134,"Malta":46,"Netherlands":10174,
       "Norway":8477,"Poland":1675,"Portugal":3946,"Romania":724,"Slovakia":276,"Slovenia":367,"Spain":6112,
-      "Sweden":6872,"Switzerland":3402,"United Kingdom":21244,"New Zealand":540,"United States":86040
+      "Sweden":6872,"Switzerland":3402,"United Kingdom":21244,"New Zealand":540,"United States":86040,
+      "Brazil":4508,"India":10508,"Japan":2380,"Malaysia":2160,"Mexico":1307
     }
   },
   "2026-01": {
@@ -522,7 +568,13 @@ const MONTHLY_DATA = {
       // source: Argonne National Laboratory (Wards Auto), monthly — Total = all light-duty vehicles; no Petrol/Diesel split published, Diesel=0
       "United States": [71323,10199,151689,0,871207,0,1104418],
       // source: CAAM, monthly wholesale via CnEVPost — Total = all vehicle wholesale sales, incl. exports; Diesel=0, HEV=0 (see June note)
-      "China": [597000,348000,0,0,1401000,0,2346000]
+      "China": [597000,348000,0,0,1401000,0,2346000],
+      "Brazil": [8284,8391,10780,0,116473,18944,162872],
+      "India": [21652,6,47402,125013,256012,94905,544990],
+      "Japan": [5419,3582,121955,80,59876,9135,200047],
+      "Malaysia": [6239,0,2155,0,56863,2738,67995],
+      "Mexico": [1401,2295,10765,0,117318,0,131779],
+      "Indonesia": [10211,502,4195,0,51539,0,66447]
     },
     // BEV units for the same month/quarter a year prior — source: ACEA (world_auto_sales, 2025-01) / same StatCan table for Canada, for YoY %
     priorYearBev: {
@@ -533,7 +585,8 @@ const MONTHLY_DATA = {
       "Sweden":5660,"Switzerland":2910,"United Kingdom":29634,
       "Canada": 26401,
       "New Zealand": 552,
-      "United States": 94035
+      "United States": 94035,
+      "Brazil": 3716, "India": 13348, "Japan": 2014, "Malaysia": 1691, "Mexico": 1362
     }
   },
   "2026-ytd": {
@@ -1079,7 +1132,7 @@ const COUNTRY_CONTINENT = {
   "Ireland":"EU","Italy":"EU","Latvia":"EU","Lithuania":"EU","Luxembourg":"EU","Malta":"EU","Netherlands":"EU",
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
-  "Canada":"NA","United States":"NA","China":"ASIA","India":"ASIA","Mexico":"LATAM","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"LATAM","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"LATAM","Turkey":"EU","Philippines":"ASIA","Chile":"LATAM","Morocco":"AFRICA","New Zealand":"OCEANIA"
+  "Canada":"NA","United States":"NA","China":"ASIA","India":"ASIA","Mexico":"LATAM","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"LATAM","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"LATAM","Turkey":"EU","Philippines":"ASIA","Chile":"LATAM","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA"
 };
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 
@@ -1090,7 +1143,7 @@ const COUNTRY_ISO2 = {
   "Ireland":"ie","Italy":"it","Latvia":"lv","Lithuania":"lt","Luxembourg":"lu","Malta":"mt","Netherlands":"nl",
   "Norway":"no","Poland":"pl","Portugal":"pt","Romania":"ro","Slovakia":"sk","Slovenia":"si","Spain":"es",
   "Sweden":"se","Switzerland":"ch","United Kingdom":"gb","Canada":"ca",
-  "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th","Argentina":"ar","Turkey":"tr","Philippines":"ph","Chile":"cl","Morocco":"ma","New Zealand":"nz"
+  "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th","Argentina":"ar","Turkey":"tr","Philippines":"ph","Chile":"cl","Morocco":"ma","New Zealand":"nz","Malaysia":"my"
 };
 const ALL_COUNTRIES_SORTED = [...ALL_COUNTRIES].sort((a,b) => {
   const ca = COUNTRY_CONTINENT[a] || 'ZZ', cb = COUNTRY_CONTINENT[b] || 'ZZ';
