@@ -493,9 +493,12 @@ const MONTHLY_DATA = {
       "Malaysia": [4717,0,4093,0,55960,3076,67846],
       "Mexico": [3112,2714,10548,0,115192,0,131566],
       "Indonesia": [10572,355,6947,0,43394,0,61268],
-      "Argentina": [534,0,6733,0,41933,0,49200]
+      "Argentina": [534,0,6733,0,41933,0,49200],
+      // source: Statistics Canada, Table 20-10-0025-01 — reports quarterly, not monthly; Q1 2026's total is divided evenly across Jan/Feb/Mar (same figure repeated each month)
+      "Canada": [9936,4435,17861,0,94454,5848,132534]
     },
     priorYearBev: {
+      "Canada":8800,
       "Austria":6122,"Belgium":13650,"Bulgaria":226,"Croatia":82,"Cyprus":105,"Czechia":1395,"Denmark":9855,
       "Estonia":82,"Finland":2434,"France":29261,"Germany":42521,"Greece":775,"Hungary":1155,"Iceland":482,
       "Ireland":2537,"Italy":9369,"Latvia":130,"Lithuania":223,"Luxembourg":1432,"Malta":90,"Netherlands":11195,
@@ -547,9 +550,12 @@ const MONTHLY_DATA = {
       "Japan": [6245,3334,134040,29,57368,10346,211362],
       "Malaysia": [3635,0,2208,0,47775,3072,56690],
       "Mexico": [2178,1640,9530,0,104957,0,118305],
-      "Indonesia": [12314,651,5798,0,62487,0,81250]
+      "Indonesia": [12314,651,5798,0,62487,0,81250],
+      // source: Statistics Canada, Table 20-10-0025-01 — reports quarterly, not monthly; Q1 2026's total is divided evenly across Jan/Feb/Mar (same figure repeated each month)
+      "Canada": [9936,4435,17861,0,94454,5848,132534]
     },
     priorYearBev: {
+      "Canada":8800,
       "Austria":4233,"Belgium":13040,"Bulgaria":126,"Croatia":53,"Cyprus":107,"Czechia":737,"Denmark":7724,
       "Estonia":59,"Finland":1563,"France":25335,"Germany":35949,"Greece":718,"Hungary":690,"Iceland":248,
       "Ireland":2512,"Italy":6922,"Latvia":80,"Lithuania":101,"Luxembourg":1134,"Malta":46,"Netherlands":10174,
@@ -592,8 +598,11 @@ const MONTHLY_DATA = {
       "Sweden": [6710,3582,2135,99,2693,822,16041],
       "Switzerland": [2913,1709,5557,0,2975,873,14027],
       "United Kingdom": [29654,18557,55653,2,37109,3152,144127],
-      // source: Statistics Canada, Table 20-10-0025-01 (quarterly; Q1 2026 = Jan/Feb/Mar, filed under its first month)
-      "Canada": [29808,13305,53584,0,283361,17543,397601],
+      // source: Statistics Canada, Table 20-10-0025-01 — reports quarterly, not monthly; Q1 2026's
+      // total is divided evenly across Jan/Feb/Mar (same figure repeated each month) rather than
+      // filed entirely under January, so month-over-month comparisons involving Canada aren't
+      // artificially skewed by a whole quarter landing in one month
+      "Canada": [9936,4435,17861,0,94454,5848,132534],
       // source: NZTA Waka Kotahi (monthly, light vehicles only)
       "New Zealand": [723,616,3256,129,3519,742,8985],
       // source: Argonne National Laboratory (Wards Auto), monthly — Total = all light-duty vehicles; no Petrol/Diesel split published, Diesel=0
@@ -609,6 +618,7 @@ const MONTHLY_DATA = {
     },
     // BEV units for the same month/quarter a year prior — source: ACEA (world_auto_sales, 2025-01) / same StatCan table for Canada, for YoY %
     priorYearBev: {
+      "Canada":8800,
       "Austria":3822,"Belgium":13712,"Bulgaria":142,"Croatia":69,"Cyprus":149,"Czechia":981,"Denmark":6961,
       "Estonia":83,"Finland":1639,"France":19923,"Germany":34498,"Greece":527,"Hungary":563,"Iceland":226,
       "Ireland":4923,"Italy":6702,"Latvia":84,"Lithuania":161,"Luxembourg":1167,"Malta":211,"Netherlands":11157,
@@ -1472,6 +1482,7 @@ function renderMap(){
       mapTooltip.style.opacity = 1;
       if(entry){
         mapTooltip.innerHTML = `${entry.country}<br><strong>${entry.bevPct}%</strong> BEV share · ${entry.total.toLocaleString('en-US')} registrations${entry.bevYoyPct == null ? '' : `<br>BEV YoY: <strong>${entry.bevYoyPct > 0 ? '+' : ''}${entry.bevYoyPct}%</strong>`}` +
+          (entry.country === 'Canada' ? `<br><span style="opacity:.7">quarterly StatCan data spread evenly across months</span>` : '') +
           (COUNTRIES_WITH_TREND.has(name) ? `<br><span style="opacity:.75">Click to focus trend →</span>` : '');
       } else if(LAST_AVAILABLE_PERIOD[name]){
         mapTooltip.innerHTML = `${name}<br>No data for this period<br><span style="opacity:.75">Last available: ${LAST_AVAILABLE_PERIOD[name]}</span><br><span style="opacity:.75">Click to focus trend →</span>`;
@@ -1696,7 +1707,8 @@ function renderTrendsChart(){
       trendsTooltip.style.opacity = 1;
       trendsTooltip.innerHTML = `<strong>${d.label}${d.isPartial ? ' (YTD)' : d.isProjected ? ' (Projected — not a measurement)' : ''}</strong><br>` +
         activeKeys.map(k => d[k] == null || isNaN(d[k]) ? '' : `${FUEL_LABELS[k]}: <strong>${d[k].toFixed(1)}%</strong> <span style="opacity:.7">(${d.raw[k] == null ? '—' : d.raw[k].toLocaleString('en-US')})</span>`).filter(Boolean).join('<br>') +
-        `<br>Total: ${d.total.toLocaleString('en-US')}`;
+        `<br>Total: ${d.total.toLocaleString('en-US')}` +
+        (focusedCountry === 'Canada' && granularity === 'monthly' ? `<br><span style="opacity:.7">quarterly StatCan data spread evenly across months</span>` : '');
     })
     .on('pointerleave', () => { guide.style('opacity', 0); trendsTooltip.style.opacity = 0; });
 }
@@ -1886,7 +1898,8 @@ rankRows.addEventListener('pointermove', e => {
   tooltip.style.left = (e.clientX - cardRect.left) + 'px';
   tooltip.style.top = (e.clientY - cardRect.top - 10) + 'px';
   tooltip.style.opacity = 1;
-  tooltip.innerHTML = `${seg.dataset.country} — ${FUEL_LABELS[key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)`;
+  tooltip.innerHTML = `${seg.dataset.country} — ${FUEL_LABELS[key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)` +
+    (seg.dataset.country === 'Canada' ? `<br><span style="opacity:.7">quarterly StatCan data spread evenly across months</span>` : '');
 });
 rankRows.addEventListener('pointerleave', () => { tooltip.style.opacity = 0; });
 
