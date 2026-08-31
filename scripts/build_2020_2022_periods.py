@@ -29,28 +29,12 @@ def has_split(r):
     return r['source'] != 'OICA' and r['bev'] is not None
 
 
-def reconciles(r):
-    # None is used two different ways in this DB: a deliberate "folded into Petrol, this is
-    # genuinely zero" (diesel, for many non-European countries) vs. "the source just didn't
-    # publish this category for this country/year" (seen for HEV on a handful of Eurostat rows).
-    # Treating None as 0 and checking against total_units tells them apart: if it reconciles,
-    # the zeros were real; if it doesn't, something's actually missing — exclude that
-    # country-year rather than fabricate it, matching this project's established convention
-    # (see the existing "2023/2024 (Annual)" periods' documented Argentina/Malaysia exclusions)
-    s = sum(r[k] or 0 for k in FUELS)
-    gap = r['total_units'] - s
-    return abs(gap) <= max(r['total_units'] * 0.005, 50)
-
-
 by_year = defaultdict(dict)
-skipped = defaultdict(list)
+gap_notes = defaultdict(list)
 for r in d:
     if not has_split(r):
         continue
-    if reconciles(r):
-        by_year[r['year']][r['country']] = r
-    else:
-        skipped[r['year']].append(r['country'])
+    by_year[r['year']][r['country']] = r
 
 all_rows_by_year_country = defaultdict(dict)
 for r in d + d2019:
@@ -69,6 +53,17 @@ for year in [2020, 2021, 2022]:
         r = countries[c]
         bev, phev, hev, petrol, diesel, others = (r[k] or 0 for k in FUELS)
         total = r['total_units']
+        # None is used two different ways in this DB: a deliberate "folded into Petrol, this is
+        # genuinely zero" (diesel, for many non-European countries) vs. "the source just didn't
+        # publish this category for this country/year" (seen for HEV on a handful of Eurostat
+        # rows, e.g. Iceland 2020). Per the user's explicit call: treat every None as 0 and put
+        # whatever gap remains into "others" (clipped at 0, never negative) rather than excluding
+        # the country — every tracked country stays visible, at the cost of a slightly fuzzy
+        # "others" bucket for the handful of rows with a real gap.
+        gap = total - (bev + phev + hev + petrol + diesel + others)
+        if gap != 0:
+            others = max(0, others + gap)
+            gap_notes[year].append((c, gap))
         raw_parts.append('%s: [%d,%d,%d,%d,%d,%d,%d]' % (esc(c), bev, phev, hev, others, petrol, diesel, total))
     raw_str = ",\n      ".join(raw_parts)
 
@@ -85,7 +80,7 @@ for year in [2020, 2021, 2022]:
         year, year, raw_str, prior_str)
     blocks.append((year, len(countries), block))
     print(year, "countries with split:", len(countries), "priorYearBev entries:", len(prior_parts),
-          "skipped (didn't reconcile):", skipped[year])
+          "had a gap folded into others:", gap_notes[year])
 
 for year, n, block in blocks:
     open('block_%d.txt' % year, 'w', encoding='utf8').write(block)
