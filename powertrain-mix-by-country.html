@@ -1474,8 +1474,9 @@ function renderTrendsChart(){
 
   const pctSeries = points.map((d,i) => {
     const pct = {};
-    activeKeys.forEach(k => { pct[k] = d.total ? d[k]/d.total*100 : 0; });
-    return { i, label: d.label, total: d.total, isPartial: d.isPartial, ...pct };
+    const raw = {};
+    activeKeys.forEach(k => { pct[k] = d.total ? d[k]/d.total*100 : 0; raw[k] = d[k]; });
+    return { i, label: d.label, total: d.total, isPartial: d.isPartial, raw, ...pct };
   });
 
   const xScale = d3.scalePoint().domain(pctSeries.map(d => d.i)).range([0, innerW]).padding(0.05);
@@ -1549,7 +1550,7 @@ function renderTrendsChart(){
       trendsTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
       trendsTooltip.style.opacity = 1;
       trendsTooltip.innerHTML = `<strong>${d.label}${d.isPartial ? ' (YTD)' : ''}</strong><br>` +
-        activeKeys.map(k => d[k] == null ? '' : `${FUEL_LABELS[k]}: <strong>${d[k].toFixed(1)}%</strong>`).filter(Boolean).join('<br>') +
+        activeKeys.map(k => d[k] == null || isNaN(d[k]) ? '' : `${FUEL_LABELS[k]}: <strong>${d[k].toFixed(1)}%</strong> <span style="opacity:.7">(${d.raw[k] == null ? '—' : d.raw[k].toLocaleString('en-US')})</span>`).filter(Boolean).join('<br>') +
         `<br>Total: ${d.total.toLocaleString('en-US')}`;
     })
     .on('pointerleave', () => { guide.style('opacity', 0); trendsTooltip.style.opacity = 0; });
@@ -1934,7 +1935,38 @@ function renderStats(){
 // --- table ---
 const tbody = document.getElementById('table-body');
 let sortKey = 'bevPct', sortDir = -1;
+// a single focused country shows its full year-by-year history instead of one row for the
+// currently-selected period — the period selector still controls every other chart, but here
+// there's more value in seeing the whole trend than in repeating the one-row-per-country table
+// for a table that, once focused, only ever had one country in it anyway
+function renderFocusedCountryTable(){
+  const rows = (typeof COUNTRY_YEARLY !== 'undefined' && COUNTRY_YEARLY[focusedCountry]) || [];
+  const sorted = [...rows].sort((a,b) => b.year - a.year);
+  const fmt = v => (v == null ? '—' : v.toLocaleString('en-US'));
+  tbody.innerHTML = sorted.map(r => {
+    const bevPct = (r.total && r.bev != null) ? +(r.bev / r.total * 100).toFixed(1) : null;
+    const yearLabel = r.period_type === 'ANNUAL' ? String(r.year) : `${r.year} (${r.period_type === 'YTD' ? 'YTD' : 'Proj.'})`;
+    return `
+    <tr>
+      <td class="country-link" data-country="${focusedCountry}">${focusedCountry}</td>
+      <td>${fmt(r.bev)}</td>
+      <td>${fmt(r.phev)}</td>
+      <td>${fmt(r.hev)}</td>
+      <td>${fmt(r.petrol)}</td>
+      <td>${fmt(r.diesel)}</td>
+      <td>${fmt(r.others)}</td>
+      <td>${fmt(r.total)}</td>
+      <td>${bevPct == null ? '—' : bevPct + '%'}</td>
+      <td class="as-of-cell">${yearLabel}</td>
+    </tr>`;
+  }).join('');
+}
+
 function renderTable(){
+  if(focusedCountry){
+    renderFocusedCountryTable();
+    return;
+  }
   const avgPct = DATA.length ? DATA.reduce((s,d)=>s+d.bev,0) / DATA.reduce((s,d)=>s+d.total,0) * 100 : 0;
   const sorted = [...DATA].sort((a,b) => {
     const av = a[sortKey], bv = b[sortKey];
@@ -2155,6 +2187,7 @@ document.querySelectorAll('.filter-bulk-btn').forEach(btn => {
 });
 
 document.getElementById('filter-reset').addEventListener('click', () => {
+  focusedCountry = null;
   selectedFuels = new Set(FUEL_KEYS);
   selectedContinents = new Set(ALL_CONTINENTS);
   selectedCountries = new Set(ALL_COUNTRIES);
