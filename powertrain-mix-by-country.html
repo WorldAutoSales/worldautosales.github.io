@@ -154,7 +154,6 @@
           </div>
           <div class="rank-rows-header">
             <span class="rrh-spacer"></span>
-            <span class="rrh-bev-spacer"></span>
             <span class="rrh-yoy" title="BEV registrations vs. the same period last year">YoY %</span>
             <span class="rrh-yoy" title="BEV registrations vs. 2023 (full year)">3Y %</span>
           </div>
@@ -1678,10 +1677,10 @@ function renderBars(){
     return `
     <div class="rank-row">
       <div class="country-label">${d.country}</div>
+      <span class="bev-outside-label" style="color:${FUEL_COLORS.bev}">${bevNarrow ? `BEV ${bevOutsideText}` : ''}</span>
       <div class="bar-track">
         ${fuels.map(k => segHTML(d,k,denom,widthDenom)).join('')}
       </div>
-      <span class="bev-outside-label" style="color:${FUEL_COLORS.bev}">${bevNarrow ? `BEV ${bevOutsideText}` : ''}</span>
       <div class="pct-label ${yoyClass}" title="BEV vs. same period last year">${yoyText}</div>
       <div class="pct-label ${y3Class}" title="BEV vs. 2023 (full year)">${y3Text}</div>
     </div>`;

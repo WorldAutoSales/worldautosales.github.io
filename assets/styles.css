@@ -434,7 +434,6 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
   margin-bottom:6px;
 }
 .rank-rows-header .rrh-spacer{ flex:1; }
-.rank-rows-header .rrh-bev-spacer{ width:56px; flex-shrink:0; }
 .rank-rows-header .rrh-yoy{
   width:52px; flex-shrink:0;
   font-size:10.5px;
@@ -465,6 +464,7 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
 .rank-row .bar-seg{ height:100%; cursor:pointer; }
 .rank-row .bev-outside-label{
   width:56px; flex-shrink:0;
+  text-align:right;
   font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
   font-variant-numeric: tabular-nums;
   font-size:11px;
