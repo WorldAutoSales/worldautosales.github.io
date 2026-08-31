@@ -136,7 +136,16 @@ const CAVEATS = {
 
 const params = new URLSearchParams(location.search);
 const country = params.get('country') || '';
-const data = COUNTRY_YEARLY[country];
+const rawData = COUNTRY_YEARLY[country];
+// within the same year, show/plot the actual-so-far figure (YTD) before the full-year estimate
+// derived from it (PROJECTED) — the underlying array's insertion order doesn't guarantee this,
+// and the chart below uses array position for its x-axis, so an unsorted PROJECTED-before-YTD
+// tie would draw the line doubling back on itself
+const data = rawData ? rawData.slice().sort((a, b) => {
+  if(a.year !== b.year) return a.year - b.year;
+  const order = { ANNUAL: 0, YTD: 0, PROJECTED: 1 };
+  return (order[a.period_type] ?? 0) - (order[b.period_type] ?? 0);
+}) : rawData;
 
 if(!data){
   document.getElementById('not-found-card').classList.remove('hidden');

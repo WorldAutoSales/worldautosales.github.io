@@ -280,8 +280,8 @@ const COUNTRY_CONTINENT = {
   "Ireland":"EU","Italy":"EU","Latvia":"EU","Lithuania":"EU","Luxembourg":"EU","Malta":"EU","Netherlands":"EU",
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
-  "Canada":"NA","New Zealand":"OCEANIA","United States":"NA","China":"ASIA",
-  "Mexico":"LATAM","Brazil":"LATAM","Argentina":"LATAM","Japan":"ASIA","Indonesia":"ASIA","Malaysia":"ASIA","India":"ASIA"
+  "Canada":"NA","New Zealand":"OCEANIA","United States":"NA","China":"ASIA","Mexico":"NA",
+  "Brazil":"LATAM","Argentina":"LATAM","Japan":"ASIA","Indonesia":"ASIA","Malaysia":"ASIA","India":"ASIA"
 };
 const ALL_CONTINENTS = [...new Set(COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 const COUNTRIES_SORTED = [...COUNTRIES].sort((a,b) => {

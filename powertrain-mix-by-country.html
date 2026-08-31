@@ -1132,7 +1132,7 @@ const COUNTRY_CONTINENT = {
   "Ireland":"EU","Italy":"EU","Latvia":"EU","Lithuania":"EU","Luxembourg":"EU","Malta":"EU","Netherlands":"EU",
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
-  "Canada":"NA","United States":"NA","China":"ASIA","India":"ASIA","Mexico":"LATAM","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"LATAM","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"LATAM","Turkey":"EU","Philippines":"ASIA","Chile":"LATAM","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA"
+  "Canada":"NA","United States":"NA","China":"ASIA","India":"ASIA","Mexico":"NA","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"LATAM","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"LATAM","Turkey":"EU","Philippines":"ASIA","Chile":"LATAM","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA"
 };
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 
@@ -1491,7 +1491,10 @@ function trendsSeriesForCountry(name){
   }
   const rows = COUNTRY_YEARLY[name] || [];
   const next = nextYearRow(rows);
-  const allRows = next ? [...rows, next] : rows;
+  const allRows = (next ? [...rows, next] : rows).slice().sort((a, b) => {
+    if(a.year !== b.year) return a.year - b.year;
+    return (PERIOD_DISPLAY_ORDER[a.period_type] ?? 0) - (PERIOD_DISPLAY_ORDER[b.period_type] ?? 0);
+  });
   return { granularity: 'annual', points: allRows.map(r => ({
     label: String(r.year), isPartial: r.period_type === 'YTD', isProjected: r.period_type === 'PROJECTED' || r.period_type === 'NEXT_YEAR_PROJECTED', total: r.total,
     bev: r.bev, phev: r.phev, hev: r.hev, petrol: r.petrol, diesel: r.diesel, others: r.others
@@ -2026,9 +2029,15 @@ let sortKey = 'bevPct', sortDir = -1;
 // currently-selected period — the period selector still controls every other chart, but here
 // there's more value in seeing the whole trend than in repeating the one-row-per-country table
 // for a table that, once focused, only ever had one country in it anyway
+// within the same year, show the actual-so-far figure (YTD) before the full-year estimate
+// derived from it (PROJECTED) — reads top-to-bottom as "what we know, then what we project"
+const PERIOD_DISPLAY_ORDER = { ANNUAL: 0, YTD: 0, PROJECTED: 1, NEXT_YEAR_PROJECTED: 1 };
 function renderFocusedCountryTable(){
   const rows = (typeof COUNTRY_YEARLY !== 'undefined' && COUNTRY_YEARLY[focusedCountry]) || [];
-  const sorted = [...rows].sort((a,b) => b.year - a.year);
+  const sorted = [...rows].sort((a,b) => {
+    if(b.year !== a.year) return b.year - a.year;
+    return (PERIOD_DISPLAY_ORDER[a.period_type] ?? 0) - (PERIOD_DISPLAY_ORDER[b.period_type] ?? 0);
+  });
   const fmt = v => (v == null ? '—' : v.toLocaleString('en-US'));
   tbody.innerHTML = sorted.map(r => {
     const bevPct = (r.total && r.bev != null) ? +(r.bev / r.total * 100).toFixed(1) : null;
