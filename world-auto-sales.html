@@ -369,16 +369,10 @@ const JAN_2026_IDX = MONTHS.indexOf('2026-01');
 function projected2026Total(countryList){
   let sum = 0, countries = 0;
   countryList.forEach(country => {
-    const idx = latestValidIdx(country);
-    if(idx < JAN_2026_IDX) return;
-    let ytd = 0, months = 0;
-    for(let i = JAN_2026_IDX; i <= idx; i++){
-      const row = rowAt(country, i);
-      if(!row) continue;
-      ytd += row[6];
-      months++;
-    }
-    if(months > 0){ sum += ytd * 12 / months; countries++; }
+    const proj = projectedForCountry(country);
+    if(!proj) return;
+    sum += proj.total;
+    countries++;
   });
   return { total: sum, countries };
 }
@@ -408,19 +402,31 @@ function projected2027Total(countryList){
   return { total: sum, countries };
 }
 
-// per-country run-rate projection (same method as projected2026Total, but for one country)
+// per-country 2026 projection: rate = max(average of the last 3 actual months, the YTD average),
+// applied to the remaining months and added onto the actual YTD total. A flat x(12/months) rule of
+// three flattens out any recent acceleration; this keeps an accelerating market accelerating, while
+// the YTD floor guarantees a recently-cooled market is never projected below plain run-rate.
 function projectedForCountry(country){
   const idx = latestValidIdx(country);
   if(idx < JAN_2026_IDX) return null;
   let ytdBev = 0, ytdTotal = 0, months = 0;
+  const last3 = [];
   for(let i = JAN_2026_IDX; i <= idx; i++){
     const row = rowAt(country, i);
     if(!row) continue;
     ytdBev += row[0]; ytdTotal += row[6];
     months++;
+    last3.push(row);
+    if(last3.length > 3) last3.shift();
   }
   if(months === 0) return null;
-  return { bev: Math.round(ytdBev * 12 / months), total: Math.round(ytdTotal * 12 / months) };
+  const remaining = 12 - months;
+  if(remaining <= 0 || last3.length === 0){
+    return { bev: Math.round(ytdBev), total: Math.round(ytdTotal) };
+  }
+  const rateBev = Math.max(last3.reduce((s,r) => s + r[0], 0) / last3.length, ytdBev / months);
+  const rateTotal = Math.max(last3.reduce((s,r) => s + r[6], 0) / last3.length, ytdTotal / months);
+  return { bev: Math.round(ytdBev + rateBev * remaining), total: Math.round(ytdTotal + rateTotal * remaining) };
 }
 
 // per-country stats for the focused-country cards + Continent/World ranking — always computed from
@@ -529,7 +535,7 @@ function renderStats(){
     {label:'Highest', value: topCountry ? topCountry.evPct+'%' : '—', small: topCountry ? topCountry.country : ''},
     {label:'Lowest', value: bottomCountry ? bottomCountry.evPct+'%' : '—', small: bottomCountry ? bottomCountry.country : ''},
     {label:'Total Registrations', value:totals.total.toLocaleString('en-US'), small:'latest per market'},
-    {label:'2026 Proj. (full year)', value: proj.countries ? Math.round(proj.total).toLocaleString('en-US') : '—', small: proj.countries ? `run-rate, ${proj.countries} markets` : 'no 2026 data'},
+    {label:'2026 Proj. (full year)', value: proj.countries ? Math.round(proj.total).toLocaleString('en-US') : '—', small: proj.countries ? `trended from last 3 mo., ${proj.countries} markets` : 'no 2026 data'},
     {label:'2027 Proj. (full year)', value: proj2027.countries ? Math.round(proj2027.total).toLocaleString('en-US') : '—', small: proj2027.countries ? `naive continuation, ${proj2027.countries} markets` : 'no basis yet'},
   ];
   document.getElementById('stat-row').innerHTML = stats.map(s => `
