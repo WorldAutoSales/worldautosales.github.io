@@ -1406,6 +1406,29 @@ mapClearBtn.addEventListener('click', (e) => {
   recompute();
 });
 
+const FUEL_TOTAL_KEYS = ['bev','phev','hev','petrol','diesel','others','total'];
+
+// synthesizes one more year beyond an existing PROJECTED point — applies that point's own
+// implied growth rate (vs. the actual year before it) one more time, per fuel column, so the
+// resulting share is just derived from the projected volumes rather than needing separate
+// share-specific math. Never written back to COUNTRY_YEARLY — purely a client-side display point,
+// same "naive continuation" method as the 2027 point on the other 2 pages.
+function nextYearRow(rows){
+  const proj = rows.find(r => r.period_type === 'PROJECTED');
+  if(!proj) return null;
+  const actual = rows.find(r => r.year === proj.year - 1 && r.period_type === 'ANNUAL');
+  if(!actual || !actual.total) return null;
+  const out = { year: proj.year + 1, period_type: 'NEXT_YEAR_PROJECTED' };
+  FUEL_TOTAL_KEYS.forEach(k => {
+    const p = proj[k], a = actual[k];
+    if(p == null){ out[k] = null; return; }
+    // a genuine 0 base (not null) has no rate to extrapolate from — carry the projected
+    // value forward unchanged rather than divide by zero or drop the field
+    out[k] = a ? p * (p / a) : p;
+  });
+  return out;
+}
+
 function trendsSeriesForCountry(name){
   if(typeof COUNTRY_MONTHLY !== 'undefined' && COUNTRY_MONTHLY[name]){
     return { granularity: 'monthly', points: COUNTRY_MONTHLY[name].map(r => ({
@@ -1414,8 +1437,10 @@ function trendsSeriesForCountry(name){
     })) };
   }
   const rows = COUNTRY_YEARLY[name] || [];
-  return { granularity: 'annual', points: rows.map(r => ({
-    label: String(r.year), isPartial: r.period_type === 'YTD', total: r.total,
+  const next = nextYearRow(rows);
+  const allRows = next ? [...rows, next] : rows;
+  return { granularity: 'annual', points: allRows.map(r => ({
+    label: String(r.year), isPartial: r.period_type === 'YTD', isProjected: r.period_type === 'PROJECTED' || r.period_type === 'NEXT_YEAR_PROJECTED', total: r.total,
     bev: r.bev, phev: r.phev, hev: r.hev, petrol: r.petrol, diesel: r.diesel, others: r.others
   })) };
 }
@@ -1432,15 +1457,24 @@ function trendsSeriesAggregate(){
     (COUNTRY_YEARLY[c] || []).forEach(r => {
       if(r.petrol == null || r.diesel == null) return;
       if(r.period_type === 'YTD' && r.year !== latestYear) return;
-      const y = byYear[r.year] || (byYear[r.year] = {year:r.year, bev:0, phev:0, hev:0, petrol:0, diesel:0, others:0, total:0, isPartial:false});
+      const y = byYear[r.year] || (byYear[r.year] = {year:r.year, bev:0, phev:0, hev:0, petrol:0, diesel:0, others:0, total:0, isPartial:false, isProjected: r.period_type === 'PROJECTED'});
       y.bev += r.bev; y.phev += r.phev; y.hev += r.hev;
       y.petrol += r.petrol; y.diesel += r.diesel; y.others += (r.others||0); y.total += r.total;
       if(r.period_type === 'YTD') y.isPartial = true;
     });
+
+    // each country's own next-year continuation, summed the same way as its PROJECTED year —
+    // every market keeps its own growth rate rather than one blended rate applied to the total
+    const next = nextYearRow(COUNTRY_YEARLY[c]);
+    if(next && FUEL_TOTAL_KEYS.every(k => next[k] != null)){
+      const y = byYear[next.year] || (byYear[next.year] = {year:next.year, bev:0, phev:0, hev:0, petrol:0, diesel:0, others:0, total:0, isPartial:false, isProjected:true});
+      y.bev += next.bev; y.phev += next.phev; y.hev += next.hev;
+      y.petrol += next.petrol; y.diesel += next.diesel; y.others += next.others; y.total += next.total;
+    }
   });
   const years = Object.values(byYear).sort((a,b) => a.year - b.year);
   return { granularity: 'annual', points: years.map(y => ({
-    label: String(y.year), isPartial: y.isPartial, total: y.total,
+    label: String(y.year), isPartial: y.isPartial, isProjected: y.isProjected, total: y.total,
     bev: y.bev, phev: y.phev, hev: y.hev, petrol: y.petrol, diesel: y.diesel, others: y.others
   })) };
 }
@@ -1476,7 +1510,7 @@ function renderTrendsChart(){
     const pct = {};
     const raw = {};
     activeKeys.forEach(k => { pct[k] = d.total ? d[k]/d.total*100 : 0; raw[k] = d[k]; });
-    return { i, label: d.label, total: d.total, isPartial: d.isPartial, raw, ...pct };
+    return { i, label: d.label, total: d.total, isPartial: d.isPartial, isProjected: d.isProjected, raw, ...pct };
   });
 
   const xScale = d3.scalePoint().domain(pctSeries.map(d => d.i)).range([0, innerW]).padding(0.05);
@@ -1492,7 +1526,7 @@ function renderTrendsChart(){
     .call(d3.axisBottom(xScale).tickValues(tickValues).tickFormat(i => {
       const d = pctSeries.find(s => s.i === i);
       if(isMonthly) return d.label.endsWith('-01') ? d.label.slice(0,4) : d.label;
-      return d.isPartial ? `${d.label} (YTD)` : d.label;
+      return d.isPartial ? `${d.label} (YTD)` : d.isProjected ? `${d.label} (Proj.)` : d.label;
     }));
   g.append('g').attr('class', 'bubble-axis').call(d3.axisLeft(yScale).ticks(5).tickFormat(d => d+'%'));
 
@@ -1518,7 +1552,7 @@ function renderTrendsChart(){
     if(isMonthly){
       g.append('path').datum(pctSeries).attr('class', 'trend-line').attr('data-fuel', k).attr('stroke', FUEL_COLORS[k]).attr('d', line(k));
     } else {
-      const lastCompleteIdx = pctSeries.reduce((acc, d, idx) => !d.isPartial ? idx : acc, -1);
+      const lastCompleteIdx = pctSeries.reduce((acc, d, idx) => (!d.isPartial && !d.isProjected) ? idx : acc, -1);
       const solidPart = pctSeries.slice(0, lastCompleteIdx + 1);
       const dashedPart = pctSeries.slice(Math.max(lastCompleteIdx, 0));
       if(solidPart.length > 1){
@@ -1549,7 +1583,7 @@ function renderTrendsChart(){
       trendsTooltip.style.left = (e.clientX - rect.left) + 'px';
       trendsTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
       trendsTooltip.style.opacity = 1;
-      trendsTooltip.innerHTML = `<strong>${d.label}${d.isPartial ? ' (YTD)' : ''}</strong><br>` +
+      trendsTooltip.innerHTML = `<strong>${d.label}${d.isPartial ? ' (YTD)' : d.isProjected ? ' (Projected — not a measurement)' : ''}</strong><br>` +
         activeKeys.map(k => d[k] == null || isNaN(d[k]) ? '' : `${FUEL_LABELS[k]}: <strong>${d[k].toFixed(1)}%</strong> <span style="opacity:.7">(${d.raw[k] == null ? '—' : d.raw[k].toLocaleString('en-US')})</span>`).filter(Boolean).join('<br>') +
         `<br>Total: ${d.total.toLocaleString('en-US')}`;
     })
