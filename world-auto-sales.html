@@ -380,6 +380,31 @@ function projected2026Total(countryList){
   return { total: sum, countries };
 }
 
+function actualYearTotal(country, year){
+  let sum = 0, found = false;
+  MONTHS.forEach((m, i) => {
+    if(!m.startsWith(String(year))) return;
+    const row = rowAt(country, i);
+    if(row){ sum += row[6]; found = true; }
+  });
+  return found ? sum : null;
+}
+
+// naive one-year continuation: apply each market's own 2026-vs-2025 implied growth rate one
+// more time — same method as the "2027 Proj." point on Auto Markets by Country, no new data needed
+function projected2027Total(countryList){
+  let sum = 0, countries = 0;
+  countryList.forEach(country => {
+    const proj2026 = projectedForCountry(country);
+    if(!proj2026) return;
+    const actual2025 = actualYearTotal(country, 2025);
+    if(!actual2025) return;
+    sum += proj2026.total * (proj2026.total / actual2025);
+    countries++;
+  });
+  return { total: sum, countries };
+}
+
 // per-country run-rate projection (same method as projected2026Total, but for one country)
 function projectedForCountry(country){
   const idx = latestValidIdx(country);
@@ -493,6 +518,7 @@ function renderStats(){
   const sortedByEv = [...DATA].sort((a,b) => b.evPct - a.evPct);
   const topCountry = sortedByEv[0], bottomCountry = sortedByEv[sortedByEv.length-1];
   const proj = projected2026Total(DATA.map(d => d.country));
+  const proj2027 = projected2027Total(DATA.map(d => d.country));
 
   const stats = [
     {label:'Markets Shown', value:DATA.length, small:`of ${COUNTRIES.length}`},
@@ -501,6 +527,7 @@ function renderStats(){
     {label:'Lowest', value: bottomCountry ? bottomCountry.evPct+'%' : '—', small: bottomCountry ? bottomCountry.country : ''},
     {label:'Total Registrations', value:totals.total.toLocaleString('en-US'), small:'latest per market'},
     {label:'2026 Proj. (full year)', value: proj.countries ? Math.round(proj.total).toLocaleString('en-US') : '—', small: proj.countries ? `run-rate, ${proj.countries} markets` : 'no 2026 data'},
+    {label:'2027 Proj. (full year)', value: proj2027.countries ? Math.round(proj2027.total).toLocaleString('en-US') : '—', small: proj2027.countries ? `naive continuation, ${proj2027.countries} markets` : 'no basis yet'},
   ];
   document.getElementById('stat-row').innerHTML = stats.map(s => `
     <div class="stat">
