@@ -87,6 +87,7 @@
             <li>Norway leads the world in EV adoption by a wide margin — battery-electric alone made up over 97% of May 2026 registrations, a market so far along the transition that petrol and diesel are now a rounding error.</li>
             <li>Some of the largest EU markets (Germany, France, Italy) still sit in the middle of the pack once hybrids are counted — hybrid-electric (not battery-electric) is the single most popular powertrain in most of Europe right now.</li>
             <li>Canada joined the mix starting January 2026. Statistics Canada publishes registrations quarterly (not monthly like Europe's ACEA data), so it appears as its own selectable period rather than being blended with Europe's figures — select "January 2026" to see it.</li>
+            <li>"July 2026" only covers 10 markets (Argentina, Brazil, China, India, Indonesia, Japan, Malaysia, Mexico, New Zealand, United States) — ACEA hasn't published Europe's July figures yet (their calendar skips a standalone July release; the next one, due late September, covers August). The page still defaults to "June 2026" for that reason, since it's the most recent period with Europe included; switch to July manually if you want the smaller, more current set.</li>
             <li>"2026 (Projected)" is an estimate, not a real annual measurement, built with one of three methods depending on what data exists. For the 31 ACEA countries, Canada, and New Zealand — the powertrain <em>mix</em> is trended forward from each fuel's share of registrations over the last 3 actual periods, so a fuel that's genuinely gaining or losing ground keeps doing so; total volume still uses simple run-rate, since Europe's monthly registrations are seasonal (a well-known June spike, for instance) and trending raw volume produced implausible totals when tried. For Argentina, Brazil, China, India, Japan, Mexico, and the United States — countries with a real monthly breakdown — each fuel's own volume is trended instead: the rate is the higher of (the average of the last 3 actual months) or (the year-to-date average), applied to the remaining months and added onto the actual year-to-date total; the "YTD floor" means a fuel that's cooled off recently is never projected below plain run-rate, while one that's accelerating keeps accelerating rather than flattening out. This is recalculated from scratch every time a new month of actuals arrives. Australia, the Philippines, and Turkey have only a single year-to-date figure in the database — no monthly breakdown exists to read a recent trend from — so they stay on plain run-rate. Check the "Data Through" column for which method applies to each row.</li>
             <li>Select "2026 YTD" to see this year's progress so far — but each country is only summed through its own latest available data (Europe through June, Canada through Q1/March only, Mexico, Japan, Australia, Brazil, Argentina, Turkey, the Philippines, New Zealand, China, and the United States through July, India a partial-year snapshot from its live dashboard with no exact cutoff date). Check the "Data Through" column in the Country Detail table below for each country's exact cutoff before comparing totals across countries.</li>
             <li>Select "2025 (Annual)" to compare 2025 across all 47 markets tracked here at once — the 31 ACEA countries and Canada alongside India, the United States, China, Mexico, Japan, Australia, Brazil, South Korea, Indonesia, Thailand, Argentina, Turkey, the Philippines, New Zealand, and South Africa, which are only available as annual figures since their official sources don't publish a monthly/quarterly powertrain split. Because it mixes a full year with single-month/quarter periods elsewhere in the list, periods still aren't blended together — pick one period at a time. China's, South Africa's, and Argentina's petrol/diesel splits in particular rely partly on disclosed percentage shares or secondary reporting rather than exact published units and should be read as approximate. Japan's figures cover registered passenger cars only and exclude kei-cars (roughly 35-40% of Japan's new-car market) and commercial vehicles; Australia's (FCAI/VFACTS) cover light vehicles only, excluding heavy trucks and buses, and its 2022 BEV figure understates real sales because Tesla — Australia's best-selling EV brand — didn't report to VFACTS for part of that year; Brazil's dominant Flex-fuel (dual gasoline/ethanol) vehicles are folded into Petrol rather than split out; South Korea's national data doesn't separate plug-in hybrids from regular hybrids, so PHEV is folded into HEV there; Indonesia's and the Philippines' sources don't publish a diesel/petrol split, so all combustion volume is folded into Petrol; Thailand's total includes pickups and other light commercial vehicles (not passenger cars only), and its Petrol/Diesel split is an assumption based on market structure (passenger≈petrol, commercial≈diesel) rather than a fuel-type figure FTI publishes directly; Turkey's figures (like Japan's) cover passenger cars only, excluding light commercial vehicles, and its "Others" bucket is LPG-converted vehicles (Otogaz), a notable category in the Turkish market; New Zealand's figures (like Japan's and Turkey's) cover light passenger vehicles only, excluding commercial vehicles (utes/trucks, a large diesel-heavy segment of NZ's market); the Philippines' 2025 figure covers only Jan-Nov (11 of 12 months) — check "Data Through" for that row. None of these is directly comparable to other countries' all-vehicle figures. Most of Asia, Africa, South America, and Oceania remain unsourced beyond these fifteen; those countries aren't at zero, they just haven't been added yet.</li>
@@ -242,6 +243,36 @@
 <script>
 // month key -> { label, raw: { country: [BEV, PHEV, HEV, OTHERS, PETROL, DIESEL, TOTAL] } } — source: ACEA
 const MONTHLY_DATA = {
+  "2026-07": {
+    label: "July 2026",
+    raw: {
+      // source: NZTA Waka Kotahi (monthly, light vehicles only)
+      "New Zealand": [1946,1258,2887,122,2088,435,8736],
+      // source: Argonne National Laboratory (Wards Auto), monthly — Total = all light-duty vehicles; no Petrol/Diesel split published, Diesel=0
+      "United States": [73443,19769,205949,0,1064878,0,1364039],
+      // source: CAAM (China Association of Automobile Manufacturers), monthly wholesale via CnEVPost — Total = all vehicle wholesale sales, incl. exports; HEV not part of China's official NEV classification (folded into Petrol, HEV=0); no Petrol/Diesel split published, Diesel=0
+      "China": [1072000,489000,0,0,1023000,0,2584000],
+      // source: ANFAVEA, Brazil (monthly)
+      "Brazil": [25787,19138,17375,0,179029,23809,265138],
+      // source: Vahan Dashboard, India (monthly)
+      "India": [34514,2,34383,105351,175906,76808,426964],
+      // source: JADA, Japan (monthly)
+      "Japan": [10062,3693,151906,34,70169,6714,242578],
+      // source: MAA (BEV/Hybrid/total) + JPJ vehicle registrations (data.gov.my, Petrol/Diesel), Malaysia (monthly)
+      "Malaysia": [6937,0,5625,0,63977,3717,80256],
+      // source: INEGI (RAIAVL), Mexico (monthly) — no Petrol/Diesel split published, Diesel=0
+      "Mexico": [2837,3232,11207,0,113559,0,130835],
+      // source: GAIKINDO, Indonesia (monthly) — no Petrol/Diesel split published, Diesel=0
+      "Indonesia": [13972,1973,7769,0,57401,0,81115],
+      // source: ACARA, Argentina (monthly) — no Petrol/Diesel split published, Diesel=0
+      "Argentina": [611,0,6265,0,36882,0,43758]
+    },
+    // BEV units for the same month a year prior — source: world_auto_sales, for YoY % (Argentina, China,
+    // Indonesia omitted — no matching July 2025 monthly figure sourced for those three)
+    priorYearBev: {
+      "Brazil":7007,"India":17970,"Japan":2908,"Malaysia":2792,"Mexico":1442,"New Zealand":545,"United States":126356
+    }
+  },
   "2026-06": {
     label: "June 2026",
     raw: {
@@ -1169,7 +1200,10 @@ const ALL_COUNTRIES_SORTED = [...ALL_COUNTRIES].sort((a,b) => {
 let selectedFuels = new Set(FUEL_KEYS);
 let selectedContinents = new Set(ALL_CONTINENTS);
 let selectedCountries = new Set(ALL_COUNTRIES);
-const DEFAULT_MONTH = ALL_MONTHS[0];
+// prefer the newest month with full (Europe-included) coverage as the default — "2026-07" sorts
+// first chronologically but only has 10 non-European countries so far (ACEA's own calendar has
+// no July release; it's still listed as an option, just not what loads by default)
+const DEFAULT_MONTH = MONTHLY_DATA['2026-06'] ? '2026-06' : ALL_MONTHS[0];
 let selectedMonths = new Set([DEFAULT_MONTH]); // single-select (radio), always exactly one entry
 
 // --- build filter panel ---
