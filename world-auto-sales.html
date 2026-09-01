@@ -87,7 +87,7 @@
       <header class="page-header">
         <div class="eyebrow">World Auto Sales · Overview</div>
         <h1>Electric Vehicle Adoption Around the World</h1>
-        <p class="subtitle">Battery-electric (BEV) share of new car registrations by country. Darker green = more of that market's new cars are fully electric. Coverage today: 31 European markets (June 2026), Canada (Q1 2026, quarterly), New Zealand (July 2026, monthly), United States (July 2026, monthly), China (July 2026, monthly, wholesale basis, 2026 only), Mexico (July 2026, monthly, full history since 2023), Brazil (July 2026, monthly, full history since 2023), Argentina (scattered 2025-2026 months only), Japan (July 2026, monthly, full history since 2023), Indonesia (July 2026, monthly, 2026 only), Malaysia (July 2026, monthly, full history since 2023), India (July 2026, monthly, full history since 2011), and Thailand (July 2026, monthly, since 2025-01) — more regions get added as sources are found.</p>
+        <p class="subtitle">Battery-electric (BEV) share of new car registrations by country. Darker green = more of that market's new cars are fully electric. Coverage today: 31 European markets (June 2026), Canada (Q1 2026, quarterly), New Zealand (July 2026, monthly), United States (July 2026, monthly), China (July 2026, monthly, wholesale basis, 2026 only), Mexico (July 2026, monthly, full history since 2023), Brazil (July 2026, monthly, full history since 2023), Argentina (scattered 2025-2026 months only), Japan (July 2026, monthly, full history since 2023), Indonesia (July 2026, monthly, 2026 only), Malaysia (July 2026, monthly, full history since 2023), India (July 2026, monthly, full history since 2011), Thailand (July 2026, monthly, since 2025-01), and Singapore (July 2026, monthly, 2026 only) — more regions get added as sources are found.</p>
       </header>
 
       <div class="stat-row" id="stat-row"></div>
@@ -175,11 +175,12 @@
           <li>India joined with full history 2023-01 through 2026-07 (real monthly data actually reaches back to 2011 and forward through August 2026, beyond this page's current MONTHS window), no gaps — source is the Vahan Dashboard (Ministry of Road Transport and Highways), filtered to the Four Wheeler category via its public analytics API. India has a large CNG passenger-car segment; since the schema has no dedicated CNG column, it's folded into Others along with LPG, ethanol, and other minor fuel types.</li>
           <li>Turkey joined for full-year 2024, May 2025, and 2026-01 through 2026-07 — 2023 and most of 2025 are real gaps, not fabricated. Source is ODMD's (Otomotiv Distribütörleri ve Mobilite Derneği) monthly "Basın Bülteni" press bulletins, using each bulletin's own single-month fuel-type table (not its year-to-date column). Scope is passenger cars (Otomobil) only, excluding light commercial vehicles, so Turkey's totals aren't directly comparable to other countries' whole-market figures. Others is Otogaz (LPG-converted vehicles), a real and non-trivial category in the Turkish market.</li>
           <li>Thailand joined for 2025-01 through 2026-07 (no pre-2025 monthly powertrain split sourced yet) — source is the FTI Automotive Industry Club's (สภาอุตสาหกรรมแห่งประเทศไทย) monthly domestic sales briefings via mreport.co.th. Total is the light+medium vehicle market (passenger cars/SUVs/MPVs plus pickup trucks/PPV/5-10 ton medium trucks), not passenger-cars-only, so Thailand's totals aren't directly comparable to other countries' whole-market figures. Diesel is a residual (commercial-segment total minus explicitly-reported electrified commercial units each month), so a small amount of unreported commercial BEV/HEV/REEV volume in any given month is folded into it undetected.</li>
+          <li>Singapore joined for 2026-01 through 2026-07 only, no pre-2026 monthly data sourced yet — source is LTA's (Land Transport Authority) own "New Registration of Cars by Make" open workbook, aggregated across every make/importer type/car type. Singapore's new-car market is small and deliberately capped by its COE (Certificate of Entitlement) quota system, so volumes aren't comparable in scale to other countries' whole markets. Figures include COE and tax-exempted cars but exclude taxis.</li>
         </ul>
       </div>
 
       <footer class="page-footer">
-        Sources: ACEA (European Automobile Manufacturers' Association, EU + EFTA + UK, refreshed monthly) · Statistics Canada, Table 20-10-0025-01 (refreshed quarterly) · Argonne National Laboratory (United States, refreshed monthly) · CAAM/CPCA via CnEVPost (China, refreshed monthly, 2026 only) · INEGI RAIAVL (Mexico, refreshed monthly) · ANFAVEA (Brazil, refreshed monthly) · ACARA/SIOMAA (Argentina, scattered months only) · JADA (Japan, refreshed monthly) · GAIKINDO via press outlets (Indonesia, 2026 only) · data.gov.my / JPJ (Malaysia, refreshed monthly) · Vahan Dashboard / MoRTH (India, refreshed monthly) · ODMD (Turkey, passenger cars only, 2024 + May 2025 + 2026 YTD) · FTI Automotive Industry Club via mreport.co.th (Thailand, refreshed monthly, 2025-01 onward)<br>
+        Sources: ACEA (European Automobile Manufacturers' Association, EU + EFTA + UK, refreshed monthly) · Statistics Canada, Table 20-10-0025-01 (refreshed quarterly) · Argonne National Laboratory (United States, refreshed monthly) · CAAM/CPCA via CnEVPost (China, refreshed monthly, 2026 only) · INEGI RAIAVL (Mexico, refreshed monthly) · ANFAVEA (Brazil, refreshed monthly) · ACARA/SIOMAA (Argentina, scattered months only) · JADA (Japan, refreshed monthly) · GAIKINDO via press outlets (Indonesia, 2026 only) · data.gov.my / JPJ (Malaysia, refreshed monthly) · Vahan Dashboard / MoRTH (India, refreshed monthly) · ODMD (Turkey, passenger cars only, 2024 + May 2025 + 2026 YTD) · FTI Automotive Industry Club via mreport.co.th (Thailand, refreshed monthly, 2025-01 onward) · LTA (Land Transport Authority) (Singapore, refreshed monthly, 2026 only)<br>
         Map boundaries: Natural Earth via world-atlas (public domain)
       </footer>
       </div>
@@ -274,7 +275,12 @@ const HIST = {
 // Diesel is a residual (commercial-segment total minus explicitly-reported electrified commercial
 // units each month), so any commercial BEV/HEV/REEV volume FTI didn't break out that month is folded
 // into diesel undetected.
-"Thailand":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,[7022,965,10613,12010,17482,0,48092],[7539,788,10679,11782,18525,0,49313],[8233,705,12031,13770,21059,0,55798],[10981,1083,7904,11227,15998,0,47193],[11274,743,9860,13769,16583,0,52229],[9373,557,10190,12242,17711,6,50079],[9304,667,10337,11547,17060,187,49102],[9309,465,11231,9611,16762,244,47622],[9155,637,12764,9065,16573,156,48350],[8517,787,12354,9504,15802,68,47032],[10643,584,11628,10446,17666,77,51044],[19828,601,19707,11656,23077,252,75121],[31938,899,12654,10485,17897,63,73936],[6274,352,12711,9330,19496,79,48242],[12224,704,14896,11007,20901,133,59865],[14007,1023,11207,7109,14608,440,48394],[18270,1663,12706,8435,16613,78,57765],[22550,1469,10509,8114,16019,63,58724],[21464,1225,12907,7554,15909,137,59196]]
+"Thailand":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,[7022,965,10613,12010,17482,0,48092],[7539,788,10679,11782,18525,0,49313],[8233,705,12031,13770,21059,0,55798],[10981,1083,7904,11227,15998,0,47193],[11274,743,9860,13769,16583,0,52229],[9373,557,10190,12242,17711,6,50079],[9304,667,10337,11547,17060,187,49102],[9309,465,11231,9611,16762,244,47622],[9155,637,12764,9065,16573,156,48350],[8517,787,12354,9504,15802,68,47032],[10643,584,11628,10446,17666,77,51044],[19828,601,19707,11656,23077,252,75121],[31938,899,12654,10485,17897,63,73936],[6274,352,12711,9330,19496,79,48242],[12224,704,14896,11007,20901,133,59865],[14007,1023,11207,7109,14608,440,48394],[18270,1663,12706,8435,16613,78,57765],[22550,1469,10509,8114,16019,63,58724],[21464,1225,12907,7554,15909,137,59196]],
+// Singapore: LTA (Land Transport Authority) "New Registration of Cars by Make" monthly workbook,
+// aggregated across all makes/importer/car types, 2026-01 through 2026-07 only, no pre-2026 monthly
+// data sourced yet. Figures include COE and Tax Exempted Cars but exclude taxis. Singapore's new-car
+// volume is small and policy-capped (COE quota system), not comparable in scale to other markets.
+"Singapore":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,[2355,106,1548,257,0,0,4266],[2237,75,1369,326,0,0,4007],[3087,84,1583,295,0,0,5049],[2982,97,1243,230,1,0,4553],[2930,121,1230,196,1,0,4478],[3357,126,1126,181,1,0,4791],[3200,154,1327,272,0,0,4953]]
 };
 const FUEL_KEYS = ['bev','phev','hev','petrol','diesel','others'];
 const FUEL_COLORS = {
@@ -297,7 +303,7 @@ const COUNTRY_CONTINENT = {
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
   "Canada":"NA","New Zealand":"OCEANIA","United States":"NA","China":"ASIA","Mexico":"NA",
   "Brazil":"LATAM","Argentina":"LATAM","Japan":"ASIA","Indonesia":"ASIA","Malaysia":"ASIA","India":"ASIA",
-  "Turkey":"EU","Thailand":"ASIA"
+  "Turkey":"EU","Thailand":"ASIA","Singapore":"ASIA"
 };
 const ALL_CONTINENTS = [...new Set(COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 const COUNTRIES_SORTED = [...COUNTRIES].sort((a,b) => {
@@ -624,7 +630,8 @@ function renderMap(){
           (entry.country === 'Indonesia' ? `<br><span style="opacity:.7">2026 only — cross-assembled from press outlets citing GAIKINDO, Diesel/Others shown as 0</span>` : '') +
           (entry.country === 'Malaysia' ? `<br><span style="opacity:.7">PHEV folded into HEV — not separated in this source</span>` : '') +
           (entry.country === 'Turkey' ? `<br><span style="opacity:.7">passenger cars only, excludes commercial vehicles — Others is LPG (Otogaz)</span>` : '') +
-          (entry.country === 'Thailand' ? `<br><span style="opacity:.7">2025-01 onward only — includes pickup trucks/PPV, not passenger-cars-only</span>` : '')
+          (entry.country === 'Thailand' ? `<br><span style="opacity:.7">2025-01 onward only — includes pickup trucks/PPV, not passenger-cars-only</span>` : '') +
+          (entry.country === 'Singapore' ? `<br><span style="opacity:.7">2026 only — COE quota-capped market, small volumes</span>` : '')
         : `${d.properties.name}<br>No data yet, or filtered out`;
     })
     .on('pointerleave', () => { mapTooltip.style.opacity = 0; })
@@ -711,7 +718,8 @@ rankRows.addEventListener('pointermove', e => {
     (seg.dataset.country === 'Indonesia' ? `<br><span style="opacity:.7">2026 only — cross-assembled from press outlets citing GAIKINDO, Diesel/Others shown as 0</span>` : '') +
     (seg.dataset.country === 'Malaysia' ? `<br><span style="opacity:.7">PHEV folded into HEV — not separated in this source</span>` : '') +
     (seg.dataset.country === 'Turkey' ? `<br><span style="opacity:.7">passenger cars only, excludes commercial vehicles — Others is LPG (Otogaz)</span>` : '') +
-    (seg.dataset.country === 'Thailand' ? `<br><span style="opacity:.7">2025-01 onward only — includes pickup trucks/PPV, not passenger-cars-only</span>` : '');
+    (seg.dataset.country === 'Thailand' ? `<br><span style="opacity:.7">2025-01 onward only — includes pickup trucks/PPV, not passenger-cars-only</span>` : '') +
+    (seg.dataset.country === 'Singapore' ? `<br><span style="opacity:.7">2026 only — COE quota-capped market, small volumes</span>` : '');
 });
 rankRows.addEventListener('pointerleave', () => { barTooltip.style.opacity = 0; });
 
@@ -882,7 +890,8 @@ function renderTrendChart(country){
         (country === 'Indonesia' ? `<br><span style="opacity:.7">2026 only — cross-assembled from press outlets citing GAIKINDO, Diesel/Others shown as 0</span>` : '') +
         (country === 'Malaysia' ? `<br><span style="opacity:.7">PHEV folded into HEV — not separated in this source</span>` : '') +
         (country === 'Turkey' ? `<br><span style="opacity:.7">passenger cars only, excludes commercial vehicles — Others is LPG (Otogaz)</span>` : '') +
-        (country === 'Thailand' ? `<br><span style="opacity:.7">2025-01 onward only — includes pickup trucks/PPV, not passenger-cars-only</span>` : '');
+        (country === 'Thailand' ? `<br><span style="opacity:.7">2025-01 onward only — includes pickup trucks/PPV, not passenger-cars-only</span>` : '') +
+        (country === 'Singapore' ? `<br><span style="opacity:.7">2026 only — COE quota-capped market, small volumes</span>` : '');
     })
     .on('pointerleave', () => { guide.style('opacity', 0); trendTooltip.style.opacity = 0; });
 }

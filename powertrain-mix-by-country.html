@@ -287,12 +287,16 @@ const MONTHLY_DATA = {
       // source: ODMD, Turkey (monthly) — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
       "Turkey": [12694,313,19828,784,25554,3305,62478],
       // source: FCAI (VFACTS) via CarExpert, Australia (monthly) — light vehicles only, excludes heavy commercial; others=0 (no LPG/hydrogen/CNG reported)
-      "Australia": [23510,10359,18684,0,27894,24773,105220]
+      "Australia": [23510,10359,18684,0,27894,24773,105220],
+      // source: LTA (Land Transport Authority), Singapore (monthly) — COE quota-capped market, small volumes
+      "Singapore": [3200,154,1327,0,272,0,4953],
+      // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw), Taiwan (monthly) — passenger cars only, PHEV folded into HEV
+      "Taiwan": [1592,0,15668,0,16526,402,34188]
     },
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY % (Argentina, China,
-    // Indonesia, Australia omitted — no matching July 2025 monthly figure sourced for those four)
+    // Indonesia, Australia, Singapore omitted — no matching July 2025 monthly figure sourced for those five)
     priorYearBev: {
-      "Brazil":7007,"India":17970,"Japan":2908,"Malaysia":2792,"Mexico":1442,"New Zealand":545,"United States":126356,"Thailand":9304,"South Korea":25192
+      "Brazil":7007,"India":17970,"Japan":2908,"Malaysia":2792,"Mexico":1442,"New Zealand":545,"United States":126356,"Thailand":9304,"South Korea":25192,"Taiwan":2501
     }
   },
   "2026-06": {
@@ -355,7 +359,11 @@ const MONTHLY_DATA = {
       // source: ODMD, Turkey (monthly) — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
       "Turkey": [14904,390,26466,999,34417,6802,83978],
       // source: FCAI (VFACTS) via CarExpert, Australia (monthly) — light vehicles only, excludes heavy commercial; others=0 (no LPG/hydrogen/CNG reported)
-      "Australia": [32570,16068,20741,0,34717,31789,135885]
+      "Australia": [32570,16068,20741,0,34717,31789,135885],
+      // source: LTA (Land Transport Authority), Singapore (monthly) — COE quota-capped market, small volumes
+      "Singapore": [3357,126,1126,0,181,1,4791],
+      // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw), Taiwan (monthly) — passenger cars only, PHEV folded into HEV
+      "Taiwan": [5777,0,15561,0,15300,413,37051]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-06), for YoY %
     priorYearBev: {
@@ -364,7 +372,7 @@ const MONTHLY_DATA = {
       "Ireland":1244,"Italy":7973,"Latvia":152,"Lithuania":280,"Luxembourg":939,"Malta":128,"Netherlands":12220,
       "Norway":17799,"Poland":3779,"Portugal":4642,"Romania":390,"Slovakia":481,"Slovenia":551,"Spain":11243,
       "Sweden":10725,"Switzerland":4813,"United Kingdom":47354,"New Zealand":1012,"United States":111577,
-      "Brazil":5943,"India":15310,"Japan":4264,"Malaysia":3272,"Mexico":1662,"Thailand":9373,"South Korea":21185
+      "Brazil":5943,"India":15310,"Japan":4264,"Malaysia":3272,"Mexico":1662,"Thailand":9373,"South Korea":21185,"Taiwan":2835
     }
   },
   "2026-05": {
@@ -419,7 +427,11 @@ const MONTHLY_DATA = {
       // source: ODMD, Turkey (monthly) — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
       "Turkey": [11342,393,20497,792,29076,3286,65386],
       // source: FCAI (VFACTS) via Zecar (fuller breakdown than the FCAI/CarExpert press summary this month), Australia (monthly) — light vehicles only, excludes heavy commercial; others=0
-      "Australia": [21303,9315,19024,0,28692,25191,103525]
+      "Australia": [21303,9315,19024,0,28692,25191,103525],
+      // source: LTA (Land Transport Authority), Singapore (monthly) — COE quota-capped market, small volumes
+      "Singapore": [2930,121,1230,0,196,1,4478],
+      // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw), Taiwan (monthly) — passenger cars only, PHEV folded into HEV
+      "Taiwan": [3093,0,12345,0,13200,401,29039]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-05), for YoY %
     priorYearBev: {
@@ -428,7 +440,7 @@ const MONTHLY_DATA = {
       "Ireland":1086,"Italy":7118,"Latvia":161,"Lithuania":222,"Luxembourg":888,"Malta":165,"Netherlands":10459,
       "Norway":13384,"Poland":2818,"Portugal":4478,"Romania":432,"Slovakia":376,"Slovenia":460,"Spain":8965,
       "Sweden":9469,"Switzerland":4177,"United Kingdom":32738,"New Zealand":442,"United States":101750,
-      "Brazil":6989,"India":14712,"Japan":2848,"Malaysia":4152,"Mexico":1768,"Argentina":91,"Thailand":11274,"South Korea":21760,"Turkey":16802
+      "Brazil":6989,"India":14712,"Japan":2848,"Malaysia":4152,"Mexico":1768,"Argentina":91,"Thailand":11274,"South Korea":21760,"Turkey":16802,"Taiwan":1482
     }
   },
   "2026-04": {
@@ -483,7 +495,11 @@ const MONTHLY_DATA = {
       // source: ODMD, Turkey (monthly) — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
       "Turkey": [16435,697,24189,581,34208,4072,80182],
       // source: FCAI (VFACTS) via CarExpert, Australia (monthly) — light vehicles only, excludes heavy commercial; others=0 (no LPG/hydrogen/CNG reported)
-      "Australia": [15459,9628,18162,0,25399,22414,91062]
+      "Australia": [15459,9628,18162,0,25399,22414,91062],
+      // source: LTA (Land Transport Authority), Singapore (monthly) — COE quota-capped market, small volumes
+      "Singapore": [2982,97,1243,0,230,1,4553],
+      // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw), Taiwan (monthly) — passenger cars only, PHEV folded into HEV
+      "Taiwan": [1667,0,12380,0,12864,455,27366]
     },
     priorYearBev: {
       "Austria":5690,"Belgium":12469,"Bulgaria":144,"Croatia":60,"Cyprus":90,"Czechia":1229,"Denmark":9567,
@@ -491,7 +507,7 @@ const MONTHLY_DATA = {
       "Ireland":1335,"Italy":6643,"Latvia":136,"Lithuania":218,"Luxembourg":999,"Malta":140,"Netherlands":9235,
       "Norway":10942,"Poland":2552,"Portugal":3722,"Romania":218,"Slovakia":320,"Slovenia":400,"Spain":6835,
       "Sweden":8555,"Switzerland":3480,"United Kingdom":24558,"New Zealand":440,"United States":96348,
-      "Brazil":4716,"India":14818,"Japan":2111,"Malaysia":2892,"Mexico":1693,"Thailand":10981,"South Korea":17263
+      "Brazil":4716,"India":14818,"Japan":2111,"Malaysia":2892,"Mexico":1693,"Thailand":10981,"South Korea":17263,"Taiwan":1470
     }
   },
   "2026-03": {
@@ -548,7 +564,11 @@ const MONTHLY_DATA = {
       // source: ODMD, Turkey (monthly) — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
       "Turkey": [15028,940,26215,430,32769,4475,79857],
       // source: FCAI (VFACTS) via CarExpert, Australia (monthly) — light vehicles only, excludes heavy commercial; others=0 (no LPG/hydrogen/CNG reported)
-      "Australia": [15839,8215,17953,0,34694,28364,105065]
+      "Australia": [15839,8215,17953,0,34694,28364,105065],
+      // source: LTA (Land Transport Authority), Singapore (monthly) — COE quota-capped market, small volumes
+      "Singapore": [3087,84,1583,0,295,0,5049],
+      // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw), Taiwan (monthly) — passenger cars only, PHEV folded into HEV
+      "Taiwan": [6976,0,12276,0,15233,444,34929]
     },
     priorYearBev: {
       "Canada":8800,
@@ -557,7 +577,7 @@ const MONTHLY_DATA = {
       "Ireland":2537,"Italy":9369,"Latvia":130,"Lithuania":223,"Luxembourg":1432,"Malta":90,"Netherlands":11195,
       "Norway":11192,"Poland":2311,"Portugal":4964,"Romania":273,"Slovakia":351,"Slovenia":480,"Spain":8101,
       "Sweden":8386,"Switzerland":4421,"United Kingdom":69313,"New Zealand":588,"United States":120820,
-      "Brazil":4804,"India":14425,"Japan":4010,"Malaysia":2976,"Mexico":1655,"Thailand":8233,"South Korea":17909
+      "Brazil":4804,"India":14425,"Japan":4010,"Malaysia":2976,"Mexico":1655,"Thailand":8233,"South Korea":17909,"Taiwan":2727
     }
   },
   "2026-02": {
@@ -613,7 +633,11 @@ const MONTHLY_DATA = {
       // source: ODMD, Turkey (monthly) — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
       "Turkey": [11842,552,23269,217,29248,4648,69776],
       // source: FCAI (VFACTS) via CarExpert, Australia (monthly) — light vehicles only, excludes heavy commercial; others=0 (no LPG/hydrogen/CNG reported)
-      "Australia": [11134,5854,13868,0,33309,26963,91128]
+      "Australia": [11134,5854,13868,0,33309,26963,91128],
+      // source: LTA (Land Transport Authority), Singapore (monthly) — COE quota-capped market, small volumes
+      "Singapore": [2237,75,1369,0,326,0,4007],
+      // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw), Taiwan (monthly) — passenger cars only, PHEV folded into HEV
+      "Taiwan": [1343,0,9259,0,8753,321,19676]
     },
     priorYearBev: {
       "Canada":8800,
@@ -622,7 +646,7 @@ const MONTHLY_DATA = {
       "Ireland":2512,"Italy":6922,"Latvia":80,"Lithuania":101,"Luxembourg":1134,"Malta":46,"Netherlands":10174,
       "Norway":8477,"Poland":1675,"Portugal":3946,"Romania":724,"Slovakia":276,"Slovenia":367,"Spain":6112,
       "Sweden":6872,"Switzerland":3402,"United Kingdom":21244,"New Zealand":540,"United States":86040,
-      "Brazil":4508,"India":10508,"Japan":2380,"Malaysia":2160,"Mexico":1307,"Thailand":7539,"South Korea":13284
+      "Brazil":4508,"India":10508,"Japan":2380,"Malaysia":2160,"Mexico":1307,"Thailand":7539,"South Korea":13284,"Taiwan":2006
     }
   },
   "2026-01": {
@@ -683,7 +707,11 @@ const MONTHLY_DATA = {
       // source: ODMD, Turkey (monthly) — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
       "Turkey": [11158,518,18402,103,26671,4203,61055],
       // source: FCAI (VFACTS) via CarExpert, Australia (monthly) — light vehicles only, excludes heavy commercial; others=0 (no LPG/hydrogen/CNG reported)
-      "Australia": [7409,5161,15131,0,33144,24439,85284]
+      "Australia": [7409,5161,15131,0,33144,24439,85284],
+      // source: LTA (Land Transport Authority), Singapore (monthly) — COE quota-capped market, small volumes
+      "Singapore": [2355,106,1548,0,257,0,4266],
+      // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw), Taiwan (monthly) — passenger cars only, PHEV folded into HEV
+      "Taiwan": [1093,0,13597,0,16265,406,31361]
     },
     // BEV units for the same month/quarter a year prior — source: ACEA (world_auto_sales, 2025-01) / same StatCan table for Canada, for YoY %
     priorYearBev: {
@@ -696,7 +724,7 @@ const MONTHLY_DATA = {
       "Canada": 26401,
       "New Zealand": 552,
       "United States": 94035,
-      "Brazil": 3716, "India": 13348, "Japan": 2014, "Malaysia": 1691, "Mexico": 1362, "Thailand": 7022, "South Korea": 2411
+      "Brazil": 3716, "India": 13348, "Japan": 2014, "Malaysia": 1691, "Mexico": 1362, "Thailand": 7022, "South Korea": 2411, "Taiwan": 2207
     }
   },
   "2026-ytd": {
@@ -764,7 +792,11 @@ const MONTHLY_DATA = {
       // source: TS/KOTSA new-registration API, Jan-Aug 2026 summed — PHEV folded into HEV
       "South Korea": [266172,0,370315,99944,351406,28773,1116610],
       // source: world_auto_sales_annual, period_type='YTD' — GAIKINDO, Jan-Jul 2026 summed; no diesel split published (Diesel=0)
-      "Indonesia": [83837,6964,49156,0,377668,0,517625]
+      "Indonesia": [83837,6964,49156,0,377668,0,517625],
+      // source: LTA (Land Transport Authority), Jan-Jul 2026 summed — COE quota-capped market, small volumes
+      "Singapore": [20148,763,9426,0,1757,3,32097],
+      // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw), Jan-Jul 2026 summed — passenger cars only, PHEV folded into HEV
+      "Taiwan": [21541,0,91086,0,98141,2842,213610]
     },
     // per-country "as of" coverage, since cutoffs differ by source — surfaced in the Country Detail table's "Data Through" column
     asOf: {
@@ -788,7 +820,9 @@ const MONTHLY_DATA = {
       "New Zealand":"through Jul 2026",
       "United States":"through Jul 2026",
       "China":"through Jul 2026",
-      "South Korea":"through Aug 2026"
+      "South Korea":"through Aug 2026",
+      "Singapore":"through Jul 2026",
+      "Taiwan":"through Jul 2026"
     },
     // BEV units for the matching prior-year period (same months)
     priorYearBev: {
@@ -797,7 +831,7 @@ const MONTHLY_DATA = {
       "Ireland":13637,"Italy":44727,"Latvia":743,"Lithuania":1205,"Luxembourg":6559,"Malta":780,"Netherlands":64440,
       "Norway":70748,"Poland":14256,"Portugal":25017,"Romania":3201,"Slovakia":2007,"Slovenia":2700,"Spain":46268,
       "Sweden":49667,"Switzerland":23203,"United Kingdom":224841,
-      "Canada":26401,"Mexico":10889,"New Zealand":4119,"United States":736926,"India":121295,"South Korea":142319
+      "Canada":26401,"Mexico":10889,"New Zealand":4119,"United States":736926,"India":121295,"South Korea":142319,"Taiwan":15228
     }
     // note: China omitted from priorYearBev — no matching Jan-Jul 2025 monthly data sourced (world_auto_sales has no pre-2026 China rows)
   },
@@ -857,11 +891,15 @@ const MONTHLY_DATA = {
       // source: TS/KOTSA — each fuel trended from the last 3 actual months' average (or the 8-mo YTD average if higher), applied to the remaining 4 months; PHEV folded into HEV
       "South Korea": [411865, 0, 555472, 149916, 527109, 43160, 1687522],
       // source: world_auto_sales_annual, period_type='PROJECTED' — plain run-rate (YTD x 12/7) from GAIKINDO data; no diesel split published (Diesel=0)
-      "Indonesia": [143721, 11938, 84267, 0, 647431, 0, 887357]
+      "Indonesia": [143721, 11938, 84267, 0, 647431, 0, 887357],
+      // source: world_auto_sales_annual, period_type='PROJECTED' — plain run-rate (YTD x 12/7) from LTA data; COE quota-capped market
+      "Singapore": [34539, 1308, 16159, 0, 3012, 5, 55023],
+      // source: THB via Taiwan Stats (stats.tw) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; PHEV folded into HEV
+      "Taiwan": [38978, 0, 163709, 0, 173184, 4872, 380743]
     },
     // Two projection methods, depending on what data exists per country:
     // (1) Every country with a real monthly breakdown — the 31 ACEA/Europe countries, New Zealand, Argentina,
-    // Australia, Brazil, China, India, Japan, Mexico, South Korea, and the United States (41 total) — trends each fuel's own ABSOLUTE
+    // Australia, Brazil, China, India, Japan, Mexico, South Korea, Taiwan, and the United States (42 total) — trends each fuel's own ABSOLUTE
     // VOLUME independently: rate = max(average of the last 3 actual months, the YTD average), applied to the
     // remaining months and added to the YTD actual. The max-with-YTD floor means a fuel that's cooled off
     // recently never gets projected below plain run-rate, while a fuel that's accelerating (the normal case)
@@ -877,11 +915,11 @@ const MONTHLY_DATA = {
     // been switched over to method (1) yet.
     // Every figure here is an ESTIMATE, not a real annual measurement.
     asOf: {
-      "Argentina":"trended from last 3 mo. (YTD floor)","Australia":"trended from last 3 mo. (YTD floor)","Austria":"trended from last 3 mo. (YTD floor)","Belgium":"trended from last 3 mo. (YTD floor)","Brazil":"trended from last 3 mo. (YTD floor)","Bulgaria":"trended from last 3 mo. (YTD floor)","Canada":"trend-projected from 3 mo.","China":"trended from last 3 mo. (YTD floor)","Croatia":"trended from last 3 mo. (YTD floor)","Cyprus":"trended from last 3 mo. (YTD floor)","Czechia":"trended from last 3 mo. (YTD floor)","Denmark":"trended from last 3 mo. (YTD floor)","Estonia":"trended from last 3 mo. (YTD floor)","Finland":"trended from last 3 mo. (YTD floor)","France":"trended from last 3 mo. (YTD floor)","Germany":"trended from last 3 mo. (YTD floor)","Greece":"trended from last 3 mo. (YTD floor)","Hungary":"trended from last 3 mo. (YTD floor)","Iceland":"trended from last 3 mo. (YTD floor)","Ireland":"trended from last 3 mo. (YTD floor)","Italy":"trended from last 3 mo. (YTD floor)","Japan":"trended from last 3 mo. (YTD floor)","Latvia":"trended from last 3 mo. (YTD floor)","Lithuania":"trended from last 3 mo. (YTD floor)","Luxembourg":"trended from last 3 mo. (YTD floor)","Malta":"trended from last 3 mo. (YTD floor)","Mexico":"trended from last 3 mo. (YTD floor)","Netherlands":"trended from last 3 mo. (YTD floor)","New Zealand":"trended from last 3 mo. (YTD floor)","Norway":"trended from last 3 mo. (YTD floor)","Philippines":"run-rate projected from 7 mo.","Poland":"trended from last 3 mo. (YTD floor)","Portugal":"trended from last 3 mo. (YTD floor)","Romania":"trended from last 3 mo. (YTD floor)","Slovakia":"trended from last 3 mo. (YTD floor)","Slovenia":"trended from last 3 mo. (YTD floor)","Spain":"trended from last 3 mo. (YTD floor)","Sweden":"trended from last 3 mo. (YTD floor)","Switzerland":"trended from last 3 mo. (YTD floor)","Turkey":"run-rate projected from 7 mo.","United Kingdom":"trended from last 3 mo. (YTD floor)","United States":"trended from last 3 mo. (YTD floor)","India":"trended from last 3 mo. (YTD floor)","South Korea":"trended from last 3 mo. (YTD floor)"
+      "Argentina":"trended from last 3 mo. (YTD floor)","Australia":"trended from last 3 mo. (YTD floor)","Austria":"trended from last 3 mo. (YTD floor)","Belgium":"trended from last 3 mo. (YTD floor)","Brazil":"trended from last 3 mo. (YTD floor)","Bulgaria":"trended from last 3 mo. (YTD floor)","Canada":"trend-projected from 3 mo.","China":"trended from last 3 mo. (YTD floor)","Croatia":"trended from last 3 mo. (YTD floor)","Cyprus":"trended from last 3 mo. (YTD floor)","Czechia":"trended from last 3 mo. (YTD floor)","Denmark":"trended from last 3 mo. (YTD floor)","Estonia":"trended from last 3 mo. (YTD floor)","Finland":"trended from last 3 mo. (YTD floor)","France":"trended from last 3 mo. (YTD floor)","Germany":"trended from last 3 mo. (YTD floor)","Greece":"trended from last 3 mo. (YTD floor)","Hungary":"trended from last 3 mo. (YTD floor)","Iceland":"trended from last 3 mo. (YTD floor)","Ireland":"trended from last 3 mo. (YTD floor)","Italy":"trended from last 3 mo. (YTD floor)","Japan":"trended from last 3 mo. (YTD floor)","Latvia":"trended from last 3 mo. (YTD floor)","Lithuania":"trended from last 3 mo. (YTD floor)","Luxembourg":"trended from last 3 mo. (YTD floor)","Malta":"trended from last 3 mo. (YTD floor)","Mexico":"trended from last 3 mo. (YTD floor)","Netherlands":"trended from last 3 mo. (YTD floor)","New Zealand":"trended from last 3 mo. (YTD floor)","Norway":"trended from last 3 mo. (YTD floor)","Philippines":"run-rate projected from 7 mo.","Poland":"trended from last 3 mo. (YTD floor)","Portugal":"trended from last 3 mo. (YTD floor)","Romania":"trended from last 3 mo. (YTD floor)","Slovakia":"trended from last 3 mo. (YTD floor)","Slovenia":"trended from last 3 mo. (YTD floor)","Spain":"trended from last 3 mo. (YTD floor)","Sweden":"trended from last 3 mo. (YTD floor)","Switzerland":"trended from last 3 mo. (YTD floor)","Turkey":"run-rate projected from 7 mo.","United Kingdom":"trended from last 3 mo. (YTD floor)","United States":"trended from last 3 mo. (YTD floor)","India":"trended from last 3 mo. (YTD floor)","South Korea":"trended from last 3 mo. (YTD floor)","Taiwan":"trended from last 3 mo. (YTD floor)"
     },
     // BEV units for full-year 2025 (actual), to compare the projection against real prior-year performance
     priorYearBev: {
-      "Argentina":1332,"Australia":103270,"Austria":60651,"Belgium":143849,"Brazil":80381,"Bulgaria":2506,"Canada":116067,"China":10603000,"Croatia":1266,"Cyprus":1474,"Czechia":13806,"Denmark":126542,"Estonia":868,"Finland":26743,"France":326922,"Germany":545142,"Greece":8892,"Hungary":11003,"Iceland":6066,"India":196237,"Ireland":23616,"Italy":94678,"Japan":39885,"Latvia":1602,"Lithuania":3150,"Luxembourg":12663,"Malta":1711,"Mexico":20923,"Netherlands":156931,"New Zealand":6818,"Norway":172230,"Poland":43310,"Portugal":52256,"Romania":8849,"Slovakia":4376,"Slovenia":6419,"Spain":101661,"Sweden":99723,"Switzerland":53250,"Turkey":189868,"United Kingdom":473348,"United States":1240040,"South Korea":221389
+      "Argentina":1332,"Australia":103270,"Austria":60651,"Belgium":143849,"Brazil":80381,"Bulgaria":2506,"Canada":116067,"China":10603000,"Croatia":1266,"Cyprus":1474,"Czechia":13806,"Denmark":126542,"Estonia":868,"Finland":26743,"France":326922,"Germany":545142,"Greece":8892,"Hungary":11003,"Iceland":6066,"India":196237,"Ireland":23616,"Italy":94678,"Japan":39885,"Latvia":1602,"Lithuania":3150,"Luxembourg":12663,"Malta":1711,"Mexico":20923,"Netherlands":156931,"New Zealand":6818,"Norway":172230,"Poland":43310,"Portugal":52256,"Romania":8849,"Slovakia":4376,"Slovenia":6419,"Spain":101661,"Sweden":99723,"Switzerland":53250,"Turkey":189868,"United Kingdom":473348,"United States":1240040,"South Korea":221389,"Taiwan":32358
     }
   },
   "2025-annual": {
@@ -947,7 +985,9 @@ const MONTHLY_DATA = {
       "Switzerland": [53250,26174,82618,13,55732,15953,233740],
       "United Kingdom": [473348,225143,745388,0,529285,47359,2020523],
       // source: world_auto_sales_annual — aggregated from 4 quarterly StatCan 20-10-0025-01 figures (Canada 2025)
-      "Canada": [116067,62001,230090,33,1372360,87246,1867797]
+      "Canada": [116067,62001,230090,33,1372360,87246,1867797],
+      // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw) — passenger cars only, PHEV folded into HEV
+      "Taiwan": [32358,0,131648,0,192270,7377,363653]
     },
     // per-country "as of" override — every country here is a genuine full year except Philippines (11 of 12 months)
     asOf: {
@@ -974,7 +1014,7 @@ const MONTHLY_DATA = {
       "Hungary":8567,"Iceland":2661,"Ireland":17500,"Italy":65413,"Latvia":1250,"Lithuania":1772,
       "Luxembourg":12780,"Malta":2130,"Netherlands":132422,"Norway":114396,"Poland":16571,"Portugal":41914,
       "Romania":9795,"Slovakia":2270,"Slovenia":3166,"Spain":57377,"Sweden":94366,"Switzerland":46147,
-      "United Kingdom":381970,"Canada":202333
+      "United Kingdom":381970,"Canada":202333,"Taiwan":37629
     }
   },
   "2024-annual": {
@@ -1027,12 +1067,14 @@ const MONTHLY_DATA = {
       "Thailand": [66732, 2391, 117789, 0, 155044, 230719, 572675],
       "Turkey": [99489, 15747, 174256, 5950, 588914, 95985, 980341],
       "United Kingdom": [381970, 167178, 689973, 0, 658853, 54804, 1952778],
-      "United States": [1243419, 318724, 1609048, 0, 12687227, 0, 15858418]
+      "United States": [1243419, 318724, 1609048, 0, 12687227, 0, 15858418],
+      // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw) — passenger cars only, PHEV folded into HEV
+      "Taiwan": [37629, 0, 118553, 0, 240079, 7441, 403702]
     },
     // BEV units for full-year 2023, for YoY %
     priorYearBev: {
       "Malaysia":10159,
-      "Australia":87212,"Austria":47621,"Belgium":93285,"Brazil":19277,"Bulgaria":1467,"Canada":143666,"Chile":1588,"China":6685000,"Croatia":1624,"Cyprus":788,"Czechia":6702,"Denmark":62759,"Estonia":1445,"Finland":29534,"France":298219,"Germany":524219,"Greece":6379,"Hungary":5748,"Iceland":8781,"India":89227,"Indonesia":17058,"Ireland":22842,"Italy":66278,"Japan":43991,"Latvia":1790,"Lithuania":2060,"Luxembourg":11052,"Malta":982,"Mexico":14172,"Morocco":463,"Netherlands":114455,"New Zealand":20729,"Norway":104587,"Poland":17081,"Portugal":36390,"Romania":15368,"Slovakia":2346,"Slovenia":4332,"South Korea":163000,"Spain":51714,"Sweden":112208,"Switzerland":52728,"Thailand":73567,"Turkey":65562,"United Kingdom":314684,"United States":1164638
+      "Australia":87212,"Austria":47621,"Belgium":93285,"Brazil":19277,"Bulgaria":1467,"Canada":143666,"Chile":1588,"China":6685000,"Croatia":1624,"Cyprus":788,"Czechia":6702,"Denmark":62759,"Estonia":1445,"Finland":29534,"France":298219,"Germany":524219,"Greece":6379,"Hungary":5748,"Iceland":8781,"India":89227,"Indonesia":17058,"Ireland":22842,"Italy":66278,"Japan":43991,"Latvia":1790,"Lithuania":2060,"Luxembourg":11052,"Malta":982,"Mexico":14172,"Morocco":463,"Netherlands":114455,"New Zealand":20729,"Norway":104587,"Poland":17081,"Portugal":36390,"Romania":15368,"Slovakia":2346,"Slovenia":4332,"South Korea":163000,"Spain":51714,"Sweden":112208,"Switzerland":52728,"Thailand":73567,"Turkey":65562,"United Kingdom":314684,"United States":1164638,"Taiwan":24706
     }
   },
   "2023-annual": {
@@ -1085,12 +1127,14 @@ const MONTHLY_DATA = {
       "Thailand": [73567, 1895, 92970, 0, 238590, 368758, 775780],
       "Turkey": [65562, 9094, 102327, 10599, 646385, 133374, 967341],
       "United Kingdom": [314684, 141311, 601071, 0, 774487, 71501, 1903054],
-      "United States": [1164638, 293578, 1175456, 0, 12868807, 0, 15502479]
+      "United States": [1164638, 293578, 1175456, 0, 12868807, 0, 15502479],
+      // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw) — passenger cars only, PHEV folded into HEV
+      "Taiwan": [24706, 0, 99179, 0, 282906, 9499, 416290]
     },
     // BEV units for full-year 2022, for YoY %
     priorYearBev: {
       "Malaysia":2631,
-      "Australia":33410,"Brazil":8440,"Canada":98620,"China":5365000,"India":40825,"Japan":31592,"Mexico":5631,"Turkey":7733,"United States":747982
+      "Australia":33410,"Brazil":8440,"Canada":98620,"China":5365000,"India":40825,"Japan":31592,"Mexico":5631,"Turkey":7733,"United States":747982,"Taiwan":16106
     }
   },
     "2022-annual": {
@@ -1138,10 +1182,12 @@ const MONTHLY_DATA = {
       "Switzerland": [40518,17813,58050,212,86309,33849,236751],
       "Turkey": [7733,0,64387,8309,408920,103311,592660],
       "United Kingdom": [263197,99248,322676,3599,801434,122987,1613141],
-      "United States": [747982,183411,766412,0,12056534,0,13754339]
+      "United States": [747982,183411,766412,0,12056534,0,13754339],
+      // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw) — passenger cars only, PHEV folded into HEV
+      "Taiwan": [16106,0,78945,0,262072,7108,364231]
     },
     priorYearBev: {
-      "India":13921,"United States":459474,"China":2734000,"Mexico":1140,"Canada":59133,"Japan":21139,"Brazil":2860,"Morocco":267,"Turkey":2846,"Malaysia":278,"Colombia":1329,"Belgium":22774,"Bulgaria":321,"Czechia":3172,"Denmark":24876,"Germany":355961,"Estonia":487,"Ireland":9199,"Greece":2174,"Spain":24400,"France":165566,"Croatia":1121,"Italy":69178,"Cyprus":78,"Latvia":480,"Lithuania":1277,"Luxembourg":4649,"Hungary":4313,"Malta":416,"Netherlands":63658,"Austria":33366,"Poland":7092,"Portugal":13546,"Romania":6344,"Slovenia":1742,"Slovakia":1105,"Finland":10153,"Sweden":57590,"Iceland":4246,"Norway":116399,"Switzerland":32025,"United Kingdom":188143
+      "India":13921,"United States":459474,"China":2734000,"Mexico":1140,"Canada":59133,"Japan":21139,"Brazil":2860,"Morocco":267,"Turkey":2846,"Malaysia":278,"Colombia":1329,"Belgium":22774,"Bulgaria":321,"Czechia":3172,"Denmark":24876,"Germany":355961,"Estonia":487,"Ireland":9199,"Greece":2174,"Spain":24400,"France":165566,"Croatia":1121,"Italy":69178,"Cyprus":78,"Latvia":480,"Lithuania":1277,"Luxembourg":4649,"Hungary":4313,"Malta":416,"Netherlands":63658,"Austria":33366,"Poland":7092,"Portugal":13546,"Romania":6344,"Slovenia":1742,"Slovakia":1105,"Finland":10153,"Sweden":57590,"Iceland":4246,"Norway":116399,"Switzerland":32025,"United Kingdom":188143,"Taiwan":6997
     }
   },
     "2021-annual": {
@@ -1188,10 +1234,12 @@ const MONTHLY_DATA = {
       "Switzerland": [32025,21803,54433,369,100865,41406,250901],
       "Turkey": [2846,0,49493,25583,373406,110525,561853],
       "United Kingdom": [188143,112721,257308,2328,891232,188492,1640224],
-      "United States": [459474,176117,799046,0,13512336,0,14946973]
+      "United States": [459474,176117,799046,0,13512336,0,14946973],
+      // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw) — passenger cars only, PHEV folded into HEV
+      "Taiwan": [6997,0,60996,0,306980,7945,382918]
     },
     priorYearBev: {
-      "India":4399,"United States":238540,"Canada":39046,"Brazil":0,"Morocco":16,"Turkey":844,"Colombia":1307,"Bulgaria":139,"Denmark":14218,"Germany":194163,"Estonia":344,"Ireland":4075,"Spain":18217,"France":112499,"Italy":30930,"Cyprus":42,"Lithuania":480,"Luxembourg":2473,"Hungary":3047,"Malta":178,"Netherlands":72859,"Austria":15972,"Poland":3679,"Portugal":7908,"Romania":2844,"Slovenia":1720,"Slovakia":918,"Finland":4245,"Sweden":27981,"Iceland":2551,"Norway":82212,"Switzerland":19753,"Belgium":15044,"Czechia":3284,"Greece":678,"Croatia":639,"Latvia":351
+      "India":4399,"United States":238540,"Canada":39046,"Brazil":0,"Morocco":16,"Turkey":844,"Colombia":1307,"Bulgaria":139,"Denmark":14218,"Germany":194163,"Estonia":344,"Ireland":4075,"Spain":18217,"France":112499,"Italy":30930,"Cyprus":42,"Lithuania":480,"Luxembourg":2473,"Hungary":3047,"Malta":178,"Netherlands":72859,"Austria":15972,"Poland":3679,"Portugal":7908,"Romania":2844,"Slovenia":1720,"Slovakia":918,"Finland":4245,"Sweden":27981,"Iceland":2551,"Norway":82212,"Switzerland":19753,"Belgium":15044,"Czechia":3284,"Greece":678,"Croatia":639,"Latvia":351,"Taiwan":6243
     }
   },
     "2020-annual": {
@@ -1233,7 +1281,9 @@ const MONTHLY_DATA = {
       "Sweden": [27981,65924,47742,3544,94448,54132,293771],
       "Switzerland": [19753,14293,32880,625,119012,58947,245510],
       "Turkey": [844,0,24131,26685,317630,240819,610109],
-      "United States": [238540,69049,455067,0,13709376,0,14472032]
+      "United States": [238540,69049,455067,0,13709376,0,14472032],
+      // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw) — passenger cars only, PHEV folded into HEV
+      "Taiwan": [6243,0,41629,0,340349,8124,396345]
     },
     priorYearBev: {
       "India":1875,"United States":233822,"Canada":35550,"Brazil":0,"Morocco":12,"Turkey":222,"Colombia":926,"Bulgaria":188,"Czechia":778,"Denmark":5501,"Germany":63281,"Ireland":3665,"Spain":10415,"France":43564,"Croatia":279,"Latvia":116,"Luxembourg":986,"Hungary":1834,"Malta":281,"Austria":9242,"Poland":1464,"Portugal":6880,"Romania":1506,"Slovenia":695,"Slovakia":166,"Finland":1897,"Sweden":15795,"Norway":60271,"Switzerland":13177,"Belgium":8892,"Estonia":77,"Greece":188,"Italy":10612,"Cyprus":58,"Lithuania":175,"Netherlands":61547,"Iceland":1090
@@ -1275,7 +1325,7 @@ const COUNTRY_CONTINENT = {
   "Ireland":"EU","Italy":"EU","Latvia":"EU","Lithuania":"EU","Luxembourg":"EU","Malta":"EU","Netherlands":"EU",
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
-  "Canada":"NA","United States":"NA","China":"ASIA","India":"ASIA","Mexico":"NA","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"LATAM","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"LATAM","Turkey":"EU","Philippines":"ASIA","Chile":"LATAM","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA"
+  "Canada":"NA","United States":"NA","China":"ASIA","India":"ASIA","Mexico":"NA","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"LATAM","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"LATAM","Turkey":"EU","Philippines":"ASIA","Chile":"LATAM","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA","Taiwan":"ASIA","Singapore":"ASIA"
 };
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 
@@ -1286,7 +1336,7 @@ const COUNTRY_ISO2 = {
   "Ireland":"ie","Italy":"it","Latvia":"lv","Lithuania":"lt","Luxembourg":"lu","Malta":"mt","Netherlands":"nl",
   "Norway":"no","Poland":"pl","Portugal":"pt","Romania":"ro","Slovakia":"sk","Slovenia":"si","Spain":"es",
   "Sweden":"se","Switzerland":"ch","United Kingdom":"gb","Canada":"ca",
-  "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th","Argentina":"ar","Turkey":"tr","Philippines":"ph","Chile":"cl","Morocco":"ma","New Zealand":"nz","Malaysia":"my"
+  "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th","Argentina":"ar","Turkey":"tr","Philippines":"ph","Chile":"cl","Morocco":"ma","New Zealand":"nz","Malaysia":"my","Taiwan":"tw","Singapore":"sg"
 };
 const ALL_COUNTRIES_SORTED = [...ALL_COUNTRIES].sort((a,b) => {
   const ca = COUNTRY_CONTINENT[a] || 'ZZ', cb = COUNTRY_CONTINENT[b] || 'ZZ';
