@@ -371,7 +371,9 @@ const MONTHLY_DATA = {
       // source: LTA (Land Transport Authority), Singapore (monthly) — COE quota-capped market, small volumes
       "Singapore": [3357,126,1126,0,181,1,4791],
       // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw), Taiwan (monthly) — passenger cars only, PHEV folded into HEV
-      "Taiwan": [5777,0,15561,0,15300,413,37051]
+      "Taiwan": [5777,0,15561,0,15300,413,37051],
+      // source: naamsa, South Africa (monthly) — Total is naamsa's "Industry Total" (all vehicle types, local sales only); genuine standalone naamsa-reported NEV split; diesel folded into petrol (no separate split published)
+      "South Africa": [419,990,1488,0,51585,0,54482]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-06), for YoY %
     priorYearBev: {
@@ -443,7 +445,9 @@ const MONTHLY_DATA = {
       // source: LTA (Land Transport Authority), Singapore (monthly) — COE quota-capped market, small volumes
       "Singapore": [2930,121,1230,0,196,1,4478],
       // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw), Taiwan (monthly) — passenger cars only, PHEV folded into HEV
-      "Taiwan": [3093,0,12345,0,13200,401,29039]
+      "Taiwan": [3093,0,12345,0,13200,401,29039],
+      // source: naamsa, South Africa (monthly) — Total is naamsa's "Industry Total" (all vehicle types, local sales only); BEV/PHEV/HEV are an even 50/50 split of a derived April+May combined figure (naamsa doesn't publish a standalone May powertrain breakdown), not an independently measured month; diesel folded into petrol
+      "South Africa": [470,1178,1207,0,48216,0,51071]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-05), for YoY %
     priorYearBev: {
@@ -515,7 +519,9 @@ const MONTHLY_DATA = {
       // source: LTA (Land Transport Authority), Singapore (monthly) — COE quota-capped market, small volumes
       "Singapore": [2982,97,1243,0,230,1,4553],
       // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw), Taiwan (monthly) — passenger cars only, PHEV folded into HEV
-      "Taiwan": [1667,0,12380,0,12864,455,27366]
+      "Taiwan": [1667,0,12380,0,12864,455,27366],
+      // source: naamsa, South Africa (monthly) — Total is naamsa's "Industry Total" (all vehicle types, local sales only); BEV/PHEV/HEV are an even 50/50 split of a derived April+May combined figure (naamsa doesn't publish a standalone April powertrain breakdown), not an independently measured month; diesel folded into petrol
+      "South Africa": [470,1178,1208,0,45123,0,47979]
     },
     priorYearBev: {
       "Austria":5690,"Belgium":12469,"Bulgaria":144,"Croatia":60,"Cyprus":90,"Czechia":1229,"Denmark":9567,
@@ -577,6 +583,8 @@ const MONTHLY_DATA = {
       "Argentina": [534,0,6733,0,41933,0,49200],
       // source: Statistics Canada, Table 20-10-0025-01 — reports quarterly, not monthly; Q1 2026's total is divided evenly across Jan/Feb/Mar (same figure repeated each month)
       "Canada": [9936,4435,17861,0,94454,5848,132534],
+      // source: Serbian Association of Importers of Vehicles and Parts (uvoznicivozila.rs), passenger cars only — reports half-year/quarterly cumulative totals, not monthly; Q1 2026's total divided evenly across Jan/Feb/Mar. No PHEV/HEV split published (combined hybrid filed under HEV, PHEV=0)
+      "Serbia": [46,0,1008,29,980,270,2333],
       // source: FTI Automotive Industry Club via mreport.co.th, Thailand (monthly) — Total includes pickups/PPV, not passenger-cars-only; Diesel is a residual
       "Thailand": [12224,704,14896,133,11007,20901,59865],
       // source: TS/KOTSA new-registration API, South Korea (monthly) — PHEV folded into HEV
@@ -650,6 +658,8 @@ const MONTHLY_DATA = {
       "Indonesia": [12314,651,5798,0,62487,0,81250],
       // source: Statistics Canada, Table 20-10-0025-01 — reports quarterly, not monthly; Q1 2026's total is divided evenly across Jan/Feb/Mar (same figure repeated each month)
       "Canada": [9936,4435,17861,0,94454,5848,132534],
+      // source: Serbian Association of Importers of Vehicles and Parts (uvoznicivozila.rs), passenger cars only — reports half-year/quarterly cumulative totals, not monthly; Q1 2026's total divided evenly across Jan/Feb/Mar. No PHEV/HEV split published (combined hybrid filed under HEV, PHEV=0)
+      "Serbia": [46,0,1008,29,980,270,2333],
       // source: FTI Automotive Industry Club via mreport.co.th, Thailand (monthly) — Total includes pickups/PPV, not passenger-cars-only; Diesel is a residual
       "Thailand": [6274,352,12711,79,9330,19496,48242],
       // source: TS/KOTSA new-registration API, South Korea (monthly) — PHEV folded into HEV
@@ -716,6 +726,11 @@ const MONTHLY_DATA = {
       // filed entirely under January, so month-over-month comparisons involving Canada aren't
       // artificially skewed by a whole quarter landing in one month
       "Canada": [9936,4435,17861,0,94454,5848,132534],
+      // source: Serbian Association of Importers of Vehicles and Parts (uvoznicivozila.rs), passenger
+      // cars only — reports half-year/quarterly cumulative totals, not monthly; Q1 2026's total is
+      // divided evenly across Jan/Feb/Mar for the same reason as Canada above. No PHEV/HEV split
+      // published, so the combined hybrid figure is filed entirely under HEV (PHEV=0)
+      "Serbia": [46,0,1008,29,980,270,2333],
       // source: NZTA Waka Kotahi (monthly, light vehicles only)
       "New Zealand": [723,616,3256,129,3519,742,8985],
       // source: Argonne National Laboratory (Wards Auto), monthly — Total = all light-duty vehicles; no Petrol/Diesel split published, Diesel=0
@@ -1397,7 +1412,7 @@ const COUNTRY_CONTINENT = {
   "Ireland":"EU","Italy":"EU","Latvia":"EU","Lithuania":"EU","Luxembourg":"EU","Malta":"EU","Netherlands":"EU",
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
-  "Canada":"NA","United States":"NA","China":"ASIA","India":"ASIA","Mexico":"NA","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"LATAM","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"LATAM","Turkey":"EU","Philippines":"ASIA","Chile":"LATAM","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA","Taiwan":"ASIA","Singapore":"ASIA"
+  "Canada":"NA","United States":"NA","China":"ASIA","India":"ASIA","Mexico":"NA","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"LATAM","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"LATAM","Turkey":"EU","Philippines":"ASIA","Chile":"LATAM","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA","Taiwan":"ASIA","Singapore":"ASIA","Serbia":"EU"
 };
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 
@@ -1408,7 +1423,7 @@ const COUNTRY_ISO2 = {
   "Ireland":"ie","Italy":"it","Latvia":"lv","Lithuania":"lt","Luxembourg":"lu","Malta":"mt","Netherlands":"nl",
   "Norway":"no","Poland":"pl","Portugal":"pt","Romania":"ro","Slovakia":"sk","Slovenia":"si","Spain":"es",
   "Sweden":"se","Switzerland":"ch","United Kingdom":"gb","Canada":"ca",
-  "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th","Argentina":"ar","Turkey":"tr","Philippines":"ph","Chile":"cl","Morocco":"ma","New Zealand":"nz","Malaysia":"my","Taiwan":"tw","Singapore":"sg"
+  "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th","Argentina":"ar","Turkey":"tr","Philippines":"ph","Chile":"cl","Morocco":"ma","New Zealand":"nz","Malaysia":"my","Taiwan":"tw","Singapore":"sg","Serbia":"rs"
 };
 const ALL_COUNTRIES_SORTED = [...ALL_COUNTRIES].sort((a,b) => {
   const ca = COUNTRY_CONTINENT[a] || 'ZZ', cb = COUNTRY_CONTINENT[b] || 'ZZ';

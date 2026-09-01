@@ -280,7 +280,21 @@ const HIST = {
 // aggregated across all makes/importer/car types, 2026-01 through 2026-07 only, no pre-2026 monthly
 // data sourced yet. Figures include COE and Tax Exempted Cars but exclude taxis. Singapore's new-car
 // volume is small and policy-capped (COE quota system), not comparable in scale to other markets.
-"Singapore":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,[2355,106,1548,257,0,0,4266],[2237,75,1369,326,0,0,4007],[3087,84,1583,295,0,0,5049],[2982,97,1243,230,1,0,4553],[2930,121,1230,196,1,0,4478],[3357,126,1126,181,1,0,4791],[3200,154,1327,272,0,0,4953]]
+"Singapore":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,[2355,106,1548,257,0,0,4266],[2237,75,1369,326,0,0,4007],[3087,84,1583,295,0,0,5049],[2982,97,1243,230,1,0,4553],[2930,121,1230,196,1,0,4478],[3357,126,1126,181,1,0,4791],[3200,154,1327,272,0,0,4953]],
+// Serbia: Serbian Association of Importers of Vehicles and Parts (uvoznicivozila.rs), passenger cars
+// (M1) only. Source publishes half-year/quarterly cumulative reports, not true monthly data — each
+// period's total is divided evenly across its months (user's explicit choice). No PHEV/HEV split
+// published; combined hybrid total shown entirely under HEV (PHEV=0), per user direction. "Others"
+// = LPG/CNG variants. No data before 2025 or for Oct-Dec 2025 (report gap) or Jul 2026 onward yet.
+"Serbia":[
+  null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+  [27,0,1006,1306,351,55,2745],[27,0,1006,1306,351,55,2745],[27,0,1006,1306,351,55,2745],[27,0,1006,1306,351,55,2745],[27,0,1006,1306,351,55,2745],[27,0,1006,1306,351,55,2745],
+  [46,0,913,1144,343,52,2498],[46,0,913,1144,343,52,2498],[46,0,913,1144,343,52,2498],
+  null,null,null,
+  [46,0,1008,980,270,29,2333],[46,0,1008,980,270,29,2333],[46,0,1008,980,270,29,2333],
+  [132,0,1829,1742,394,74,4171],[132,0,1829,1742,394,74,4171],[132,0,1829,1742,394,74,4171],
+  null
+]
 };
 const FUEL_KEYS = ['bev','phev','hev','petrol','diesel','others'];
 const FUEL_COLORS = {
@@ -303,7 +317,7 @@ const COUNTRY_CONTINENT = {
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
   "Canada":"NA","New Zealand":"OCEANIA","United States":"NA","China":"ASIA","Mexico":"NA",
   "Brazil":"LATAM","Argentina":"LATAM","Japan":"ASIA","Indonesia":"ASIA","Malaysia":"ASIA","India":"ASIA",
-  "Turkey":"EU","Thailand":"ASIA","Singapore":"ASIA"
+  "Turkey":"EU","Thailand":"ASIA","Singapore":"ASIA","Serbia":"EU"
 };
 const ALL_CONTINENTS = [...new Set(COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 const COUNTRIES_SORTED = [...COUNTRIES].sort((a,b) => {
