@@ -1608,13 +1608,23 @@ function trendsSeriesForCountry(name){
       label: r.ym, isPartial: false, total: r.total,
       bev: r.bev, phev: r.phev, hev: r.hev, petrol: r.petrol, diesel: r.diesel, others: r.others
     }));
-    // append the current year's full-year PROJECTED figure (if we have one) as a dashed
-    // continuation past the last real month, mirroring the annual-granularity branch below
-    const proj = (COUNTRY_YEARLY[name] || []).find(r => r.period_type === 'PROJECTED');
-    if(proj && FUEL_TOTAL_KEYS.every(k => proj[k] != null)){
+    // append the model's IMPLIED RATE for the remaining months of the year (not the full-year
+    // cumulative total) as a dashed continuation past the last real month. The full-year total
+    // is a blend of every month including ones that may look nothing like the recent trend (an
+    // early-year subsidy spike, say) — plotting that blend as "the next point" on a monthly line
+    // makes a stable recent trend look like it reverses. (proj - ytd) / remaining months is the
+    // actual forward-looking rate the projection model computed, which IS comparable to the real
+    // monthly points before it.
+    const yearlyRows = COUNTRY_YEARLY[name];
+    const proj = yearlyRows && yearlyRows.find(r => r.period_type === 'PROJECTED');
+    const ytd = yearlyRows && yearlyRows.find(r => r.period_type === 'YTD');
+    const remaining = ytd && ytd.months_covered ? 12 - ytd.months_covered : 0;
+    if(proj && ytd && remaining > 0 && FUEL_TOTAL_KEYS.every(k => proj[k] != null && ytd[k] != null)){
+      const rate = {};
+      FUEL_TOTAL_KEYS.forEach(k => { rate[k] = (proj[k] - ytd[k]) / remaining; });
       points.push({
-        label: String(proj.year), isPartial: false, isProjected: true, total: proj.total,
-        bev: proj.bev, phev: proj.phev, hev: proj.hev, petrol: proj.petrol, diesel: proj.diesel, others: proj.others
+        label: String(proj.year), isPartial: false, isProjected: true, total: rate.total,
+        bev: rate.bev, phev: rate.phev, hev: rate.hev, petrol: rate.petrol, diesel: rate.diesel, others: rate.others
       });
     }
     return { granularity: 'monthly', points };
@@ -1777,7 +1787,10 @@ function renderTrendsChart(){
       trendsTooltip.style.left = (e.clientX - rect.left) + 'px';
       trendsTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
       trendsTooltip.style.opacity = 1;
-      trendsTooltip.innerHTML = `<strong>${d.label}${d.isPartial ? ' (YTD)' : d.isProjected ? ' (Projected — not a measurement)' : ''}</strong><br>` +
+      const trendsPointTitle = d.isPartial ? `${d.label} (YTD)`
+        : d.isProjected ? (granularity === 'monthly' ? 'Rest of 2026 — implied monthly rate (not a measurement)' : `${d.label} (Projected — not a measurement)`)
+        : d.label;
+      trendsTooltip.innerHTML = `<strong>${trendsPointTitle}</strong><br>` +
         activeKeys.map(k => d[k] == null || isNaN(d[k]) ? '' : `${FUEL_LABELS[k]}: <strong>${d[k].toFixed(1)}%</strong> <span style="opacity:.7">(${d.raw[k] == null ? '—' : d.raw[k].toLocaleString('en-US')})</span>`).filter(Boolean).join('<br>') +
         `<br>Total: ${d.total.toLocaleString('en-US')}` +
         (focusedCountry === 'Canada' && granularity === 'monthly' ? `<br><span style="opacity:.7">quarterly StatCan data spread evenly across months</span>` : '');
