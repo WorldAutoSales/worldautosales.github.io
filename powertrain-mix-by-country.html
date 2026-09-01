@@ -87,13 +87,13 @@
             <li>Norway leads the world in EV adoption by a wide margin — battery-electric alone made up over 97% of May 2026 registrations, a market so far along the transition that petrol and diesel are now a rounding error.</li>
             <li>Some of the largest EU markets (Germany, France, Italy) still sit in the middle of the pack once hybrids are counted — hybrid-electric (not battery-electric) is the single most popular powertrain in most of Europe right now.</li>
             <li>Canada joined the mix starting January 2026. Statistics Canada publishes registrations quarterly (not monthly like Europe's ACEA data), so it appears as its own selectable period rather than being blended with Europe's figures — select "January 2026" to see it.</li>
-            <li>"July 2026" only covers 11 markets (Argentina, Brazil, China, India, Indonesia, Japan, Malaysia, Mexico, New Zealand, Thailand, United States) — ACEA hasn't published Europe's July figures yet (their calendar skips a standalone July release; the next one, due late September, covers August). The page still defaults to "June 2026" for that reason, since it's the most recent period with Europe included; switch to July manually if you want the smaller, more current set.</li>
+            <li>"July 2026" only covers 14 markets (Argentina, Australia, Brazil, China, India, Indonesia, Japan, Malaysia, Mexico, New Zealand, South Korea, Thailand, Turkey, United States) — ACEA hasn't published Europe's July figures yet (their calendar skips a standalone July release; the next one, due late September, covers August). The page still defaults to "June 2026" for that reason, since it's the most recent period with Europe included; switch to July manually if you want the smaller, more current set.</li>
             <li>"August 2026" only covers 2 markets so far (India, South Korea) — it's shown anyway rather than waiting for broader coverage, so the newest available data isn't hidden. More countries join this period as their August figures are published; the page still defaults to "June 2026" in the meantime.</li>
-            <li>"2026 (Projected)" is an estimate, not a real annual measurement. For every country with a real monthly breakdown — the 31 ACEA countries, New Zealand, Argentina, Brazil, China, India, Japan, Mexico, and the United States (39 markets) — each fuel is trended independently: the rate is the higher of (the average of its last 3 actual months) or (its year-to-date average), applied to the remaining months and added onto the actual year-to-date total; the "YTD floor" means a fuel that's cooled off recently is never projected below plain run-rate, while one that's accelerating keeps accelerating rather than flattening out like a simple year-end multiplication would. This is recalculated from scratch every time a new month of actuals arrives. Australia, Canada, the Philippines, and Turkey stay on plain run-rate (YTD figure × 12/months): Australia/the Philippines/Turkey have no monthly breakdown in the database at all, and Canada has only a single real quarterly data point rather than 3 distinct months to trend from. Check the "Data Through" column for which method applies to each row.</li>
+            <li>"2026 (Projected)" is an estimate, not a real annual measurement. For every country with a real monthly breakdown — the 31 ACEA countries, New Zealand, Argentina, Australia, Brazil, China, India, Japan, Mexico, South Korea, and the United States (41 markets) — each fuel is trended independently: the rate is the higher of (the average of its last 3 actual months) or (its year-to-date average), applied to the remaining months and added onto the actual year-to-date total; the "YTD floor" means a fuel that's cooled off recently is never projected below plain run-rate, while one that's accelerating keeps accelerating rather than flattening out like a simple year-end multiplication would. This is recalculated from scratch every time a new month of actuals arrives. Canada, the Philippines, and Turkey stay on plain run-rate (YTD figure × 12/months): the Philippines has no monthly breakdown in the database at all, Canada has only a single real quarterly data point rather than 3 distinct months to trend from, and Turkey's monthly figures haven't been switched over to the trended method yet. Check the "Data Through" column for which method applies to each row.</li>
             <li>Select "2026 YTD" to see this year's progress so far — but each country is only summed through its own latest available data (Europe through June, Canada through Q1/March only, Mexico, Japan, Australia, Brazil, Argentina, Turkey, the Philippines, New Zealand, China, and the United States through July, India a partial-year snapshot from its live dashboard with no exact cutoff date). Check the "Data Through" column in the Country Detail table below for each country's exact cutoff before comparing totals across countries.</li>
             <li>Select "2025 (Annual)" to compare 2025 across all 47 markets tracked here at once — the 31 ACEA countries and Canada alongside India, the United States, China, Mexico, Japan, Australia, Brazil, Indonesia, Thailand, Argentina, Turkey, the Philippines, New Zealand, and South Africa, which are only available as annual figures since their official sources don't publish a monthly/quarterly powertrain split. Because it mixes a full year with single-month/quarter periods elsewhere in the list, periods still aren't blended together — pick one period at a time. China's, South Africa's, and Argentina's petrol/diesel splits in particular rely partly on disclosed percentage shares or secondary reporting rather than exact published units and should be read as approximate. Japan's figures cover registered passenger cars only and exclude kei-cars (roughly 35-40% of Japan's new-car market) and commercial vehicles; Australia's (FCAI/VFACTS) cover light vehicles only, excluding heavy trucks and buses, and its 2022 BEV figure understates real sales because Tesla — Australia's best-selling EV brand — didn't report to VFACTS for part of that year; Brazil's dominant Flex-fuel (dual gasoline/ethanol) vehicles are folded into Petrol rather than split out; South Korea's national data doesn't separate plug-in hybrids from regular hybrids, so PHEV is folded into HEV there; Indonesia's and the Philippines' sources don't publish a diesel/petrol split, so all combustion volume is folded into Petrol; Thailand's total includes pickups and other light commercial vehicles (not passenger cars only), and its Petrol/Diesel split is an assumption based on market structure (passenger≈petrol, commercial≈diesel) rather than a fuel-type figure FTI publishes directly; Turkey's figures (like Japan's) cover passenger cars only, excluding light commercial vehicles, and its "Others" bucket is LPG-converted vehicles (Otogaz), a notable category in the Turkish market; New Zealand's figures (like Japan's and Turkey's) cover light passenger vehicles only, excluding commercial vehicles (utes/trucks, a large diesel-heavy segment of NZ's market); the Philippines' 2025 figure covers only Jan-Nov (11 of 12 months) — check "Data Through" for that row. None of these is directly comparable to other countries' all-vehicle figures. Most of Asia, Africa, South America, and Oceania remain unsourced beyond these fifteen; those countries aren't at zero, they just haven't been added yet.</li>
             <li>China gained a real monthly breakdown for 2026 (January-July, selectable as individual months, "2026 YTD", and "2026 (Projected)") — source: CAAM (China Association of Automobile Manufacturers)'s own monthly wholesale figures via CnEVPost, i.e. automaker deliveries to dealers including exports, the same basis this page's pre-existing 2021-2025 annual China rows already use (their totals match OICA's whole-market figures exactly). This is a different, more exact source than the percentage-derived annual splits flagged in the "2025 (Annual)" note above — China's 2026 BEV/PHEV figures are CAAM's own exact published units, not derived from disclosed shares. HEV is 0 throughout because China's official "NEV" (New Energy Vehicle) classification covers BEV+PHEV only; non-plug-in hybrids sell in China but are counted within the conventional/ICE segment, so they're folded into Petrol along with the (unpublished, believed small) Diesel share.</li>
-            <li>"2024 (Annual)" and "2023 (Annual)" give the same comparison for earlier years (45 markets each) — a few countries with only a partial fuel-type split for those years (e.g. Argentina, Malaysia) or no matching year at all aren't included, to avoid faking a complete row. Click any country — on the map, or its name in the table below — to open its own page with the full year-by-year trend, including a handful of markets (Malaysia, Colombia, Vietnam, Peru) that couldn't go into any comparison period here but still have a real trend to show.</li>
+            <li>"2024 (Annual)" and "2023 (Annual)" give the same comparison for earlier years (47 markets each) — a few countries with only a partial fuel-type split for those years (e.g. Argentina, Malaysia) or no matching year at all aren't included, to avoid faking a complete row. Click any country — on the map, or its name in the table below — to open its own page with the full year-by-year trend, including a handful of markets (Malaysia, Colombia, Vietnam, Peru) that couldn't go into any comparison period here but still have a real trend to show.</li>
             <li>"2022 (Annual)" through "2020 (Annual)" extend the same comparison further back (43/42/37 markets respectively). A handful of country-years in this range had one fuel field genuinely unpublished by the source rather than a real zero (Morocco and Italy 2020 are the largest cases) — rather than drop those countries, the unpublished amount is folded into "Others," so for those specific rows "Others" partly represents an unknown/unpublished category, not just genuine minor fuel types (LPG, CNG, etc.). Every tracked country stays visible in every year as a result.</li>
             <li>A handful of Eastern European markets (Latvia, Romania, Bulgaria) remain almost entirely petrol/diesel, showing how uneven the EV transition still is within the EU itself.</li>
             <li>However quickly smaller countries move into EVs, overall Europe's progression depends heavily on the Big 5 (Germany, UK, France, Italy, Spain) — they account for <strong>68.6%</strong> of total registrations across the 31 markets tracked here (May 2026), so their pace sets the continent's pace far more than any single fast-moving small market can.</li>
@@ -285,10 +285,12 @@ const MONTHLY_DATA = {
       // source: TS/KOTSA new-registration API, South Korea (monthly) — PHEV folded into HEV
       "South Korea": [36898,0,48415,12992,44681,3874,146860],
       // source: ODMD, Turkey (monthly) — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
-      "Turkey": [12694,313,19828,784,25554,3305,62478]
+      "Turkey": [12694,313,19828,784,25554,3305,62478],
+      // source: FCAI (VFACTS) via CarExpert, Australia (monthly) — light vehicles only, excludes heavy commercial; others=0 (no LPG/hydrogen/CNG reported)
+      "Australia": [23510,10359,18684,0,27894,24773,105220]
     },
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY % (Argentina, China,
-    // Indonesia omitted — no matching July 2025 monthly figure sourced for those three)
+    // Indonesia, Australia omitted — no matching July 2025 monthly figure sourced for those four)
     priorYearBev: {
       "Brazil":7007,"India":17970,"Japan":2908,"Malaysia":2792,"Mexico":1442,"New Zealand":545,"United States":126356,"Thailand":9304,"South Korea":25192
     }
@@ -351,7 +353,9 @@ const MONTHLY_DATA = {
       // source: TS/KOTSA new-registration API, South Korea (monthly) — PHEV folded into HEV
       "South Korea": [42251,0,53532,12247,50710,3678,162418],
       // source: ODMD, Turkey (monthly) — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
-      "Turkey": [14904,390,26466,999,34417,6802,83978]
+      "Turkey": [14904,390,26466,999,34417,6802,83978],
+      // source: FCAI (VFACTS) via CarExpert, Australia (monthly) — light vehicles only, excludes heavy commercial; others=0 (no LPG/hydrogen/CNG reported)
+      "Australia": [32570,16068,20741,0,34717,31789,135885]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-06), for YoY %
     priorYearBev: {
@@ -413,7 +417,9 @@ const MONTHLY_DATA = {
       // source: TS/KOTSA new-registration API, South Korea (monthly) — PHEV folded into HEV
       "South Korea": [32811,0,39999,11257,36000,3023,123090],
       // source: ODMD, Turkey (monthly) — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
-      "Turkey": [11342,393,20497,792,29076,3286,65386]
+      "Turkey": [11342,393,20497,792,29076,3286,65386],
+      // source: FCAI (VFACTS) via Zecar (fuller breakdown than the FCAI/CarExpert press summary this month), Australia (monthly) — light vehicles only, excludes heavy commercial; others=0
+      "Australia": [21303,9315,19024,0,28692,25191,103525]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-05), for YoY %
     priorYearBev: {
@@ -475,7 +481,9 @@ const MONTHLY_DATA = {
       // source: TS/KOTSA new-registration API, South Korea (monthly) — PHEV folded into HEV
       "South Korea": [40472,0,51968,14537,47458,3763,158198],
       // source: ODMD, Turkey (monthly) — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
-      "Turkey": [16435,697,24189,581,34208,4072,80182]
+      "Turkey": [16435,697,24189,581,34208,4072,80182],
+      // source: FCAI (VFACTS) via CarExpert, Australia (monthly) — light vehicles only, excludes heavy commercial; others=0 (no LPG/hydrogen/CNG reported)
+      "Australia": [15459,9628,18162,0,25399,22414,91062]
     },
     priorYearBev: {
       "Austria":5690,"Belgium":12469,"Bulgaria":144,"Croatia":60,"Cyprus":90,"Czechia":1229,"Denmark":9567,
@@ -538,7 +546,9 @@ const MONTHLY_DATA = {
       // source: TS/KOTSA new-registration API, South Korea (monthly) — PHEV folded into HEV
       "South Korea": [42063,0,52333,15156,49472,4017,163041],
       // source: ODMD, Turkey (monthly) — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
-      "Turkey": [15028,940,26215,430,32769,4475,79857]
+      "Turkey": [15028,940,26215,430,32769,4475,79857],
+      // source: FCAI (VFACTS) via CarExpert, Australia (monthly) — light vehicles only, excludes heavy commercial; others=0 (no LPG/hydrogen/CNG reported)
+      "Australia": [15839,8215,17953,0,34694,28364,105065]
     },
     priorYearBev: {
       "Canada":8800,
@@ -601,7 +611,9 @@ const MONTHLY_DATA = {
       // source: TS/KOTSA new-registration API, South Korea (monthly) — PHEV folded into HEV
       "South Korea": [35789,0,39294,10080,38938,3620,127721],
       // source: ODMD, Turkey (monthly) — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
-      "Turkey": [11842,552,23269,217,29248,4648,69776]
+      "Turkey": [11842,552,23269,217,29248,4648,69776],
+      // source: FCAI (VFACTS) via CarExpert, Australia (monthly) — light vehicles only, excludes heavy commercial; others=0 (no LPG/hydrogen/CNG reported)
+      "Australia": [11134,5854,13868,0,33309,26963,91128]
     },
     priorYearBev: {
       "Canada":8800,
@@ -669,7 +681,9 @@ const MONTHLY_DATA = {
       // source: TS/KOTSA new-registration API, South Korea (monthly) — PHEV folded into HEV
       "South Korea": [5767,0,48632,12724,53892,3969,124984],
       // source: ODMD, Turkey (monthly) — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
-      "Turkey": [11158,518,18402,103,26671,4203,61055]
+      "Turkey": [11158,518,18402,103,26671,4203,61055],
+      // source: FCAI (VFACTS) via CarExpert, Australia (monthly) — light vehicles only, excludes heavy commercial; others=0 (no LPG/hydrogen/CNG reported)
+      "Australia": [7409,5161,15131,0,33144,24439,85284]
     },
     // BEV units for the same month/quarter a year prior — source: ACEA (world_auto_sales, 2025-01) / same StatCan table for Canada, for YoY %
     priorYearBev: {
@@ -729,8 +743,8 @@ const MONTHLY_DATA = {
       "India": [213571,20,288005,823793,1531561,617958,3474908],
       // source: JADA — registered passenger cars only, excludes kei-cars (~35-40% of Japan's market) and commercial vehicles
       "Japan": [61090,25914,961974,251,461345,67662,1578236],
-      // source: FCAI (VFACTS) — light-vehicle market only (excludes heavy trucks/buses)
-      "Australia": [127226,64615,123548,0,217849,183933,717171],
+      // source: FCAI (VFACTS) — light-vehicle market only (excludes heavy trucks/buses), Jan-Jul 2026 summed from monthly
+      "Australia": [127224,64600,123563,0,217849,183933,717169],
       // source: ANFAVEA — "Carta da Anfavea"; Brazil's dominant Flex-fuel (gasoline/ethanol) vehicles mapped into petrol
       "Brazil": [116517,95399,95697,0,1167337,152101,1627051],
       // source: ACARA/SIOMAA — from the report's own cumulative "Acum 2026" columns, not summed from separately-revised months
@@ -792,7 +806,7 @@ const MONTHLY_DATA = {
     raw: {
       "Malaysia": [66300, 0, 51045, 0, 685351, 37030, 839726],
       "Argentina": [8057, 0, 76746, 0, 497535, 0, 582338],
-      "Australia": [218102, 110769, 211797, 0, 373455, 315314, 1229436],
+      "Australia": [256196, 124170, 220978, 0, 373455, 320188, 1294987],
       "China": [11457000, 5378667, 0, 0, 14734286, 0, 31569953],
       "Austria": [85486, 37961, 101905, 6, 81018, 33090, 339466],
       "Belgium": [170908, 25328, 57801, 5160, 195076, 13940, 468213],
@@ -847,7 +861,7 @@ const MONTHLY_DATA = {
     },
     // Two projection methods, depending on what data exists per country:
     // (1) Every country with a real monthly breakdown — the 31 ACEA/Europe countries, New Zealand, Argentina,
-    // Brazil, China, India, Japan, Mexico, South Korea, and the United States (40 total) — trends each fuel's own ABSOLUTE
+    // Australia, Brazil, China, India, Japan, Mexico, South Korea, and the United States (41 total) — trends each fuel's own ABSOLUTE
     // VOLUME independently: rate = max(average of the last 3 actual months, the YTD average), applied to the
     // remaining months and added to the YTD actual. The max-with-YTD floor means a fuel that's cooled off
     // recently never gets projected below plain run-rate, while a fuel that's accelerating (the normal case)
@@ -856,13 +870,14 @@ const MONTHLY_DATA = {
     // actuals lands. (Earlier versions of this projection trended Europe's powertrain MIX instead of each
     // fuel's own volume, with total volume on plain run-rate — replaced for consistency once every one of
     // these countries had real monthly figures to trend from.)
-    // (2) Australia, Canada, Philippines, Turkey: plain run-rate (YTD figure x 12/months). Australia/
-    // Philippines/Turkey have no monthly breakdown in the database at all. Canada has only a single real
-    // quarterly data point (Q1 2026) rather than 3 distinct months, so there's nothing genuine to trend from —
-    // applying method (1) to it would just reduce to this same run-rate result anyway.
+    // (2) Canada, Philippines, Turkey: plain run-rate (YTD figure x 12/months). Philippines has no monthly
+    // breakdown in the database at all. Canada has only a single real quarterly data point (Q1 2026) rather
+    // than 3 distinct months, so there's nothing genuine to trend from — applying method (1) to it would just
+    // reduce to this same run-rate result anyway. Turkey has monthly figures loaded but its projection hasn't
+    // been switched over to method (1) yet.
     // Every figure here is an ESTIMATE, not a real annual measurement.
     asOf: {
-      "Argentina":"trended from last 3 mo. (YTD floor)","Australia":"run-rate projected from 7 mo.","Austria":"trended from last 3 mo. (YTD floor)","Belgium":"trended from last 3 mo. (YTD floor)","Brazil":"trended from last 3 mo. (YTD floor)","Bulgaria":"trended from last 3 mo. (YTD floor)","Canada":"trend-projected from 3 mo.","China":"trended from last 3 mo. (YTD floor)","Croatia":"trended from last 3 mo. (YTD floor)","Cyprus":"trended from last 3 mo. (YTD floor)","Czechia":"trended from last 3 mo. (YTD floor)","Denmark":"trended from last 3 mo. (YTD floor)","Estonia":"trended from last 3 mo. (YTD floor)","Finland":"trended from last 3 mo. (YTD floor)","France":"trended from last 3 mo. (YTD floor)","Germany":"trended from last 3 mo. (YTD floor)","Greece":"trended from last 3 mo. (YTD floor)","Hungary":"trended from last 3 mo. (YTD floor)","Iceland":"trended from last 3 mo. (YTD floor)","Ireland":"trended from last 3 mo. (YTD floor)","Italy":"trended from last 3 mo. (YTD floor)","Japan":"trended from last 3 mo. (YTD floor)","Latvia":"trended from last 3 mo. (YTD floor)","Lithuania":"trended from last 3 mo. (YTD floor)","Luxembourg":"trended from last 3 mo. (YTD floor)","Malta":"trended from last 3 mo. (YTD floor)","Mexico":"trended from last 3 mo. (YTD floor)","Netherlands":"trended from last 3 mo. (YTD floor)","New Zealand":"trended from last 3 mo. (YTD floor)","Norway":"trended from last 3 mo. (YTD floor)","Philippines":"run-rate projected from 7 mo.","Poland":"trended from last 3 mo. (YTD floor)","Portugal":"trended from last 3 mo. (YTD floor)","Romania":"trended from last 3 mo. (YTD floor)","Slovakia":"trended from last 3 mo. (YTD floor)","Slovenia":"trended from last 3 mo. (YTD floor)","Spain":"trended from last 3 mo. (YTD floor)","Sweden":"trended from last 3 mo. (YTD floor)","Switzerland":"trended from last 3 mo. (YTD floor)","Turkey":"run-rate projected from 7 mo.","United Kingdom":"trended from last 3 mo. (YTD floor)","United States":"trended from last 3 mo. (YTD floor)","India":"trended from last 3 mo. (YTD floor)","South Korea":"trended from last 3 mo. (YTD floor)"
+      "Argentina":"trended from last 3 mo. (YTD floor)","Australia":"trended from last 3 mo. (YTD floor)","Austria":"trended from last 3 mo. (YTD floor)","Belgium":"trended from last 3 mo. (YTD floor)","Brazil":"trended from last 3 mo. (YTD floor)","Bulgaria":"trended from last 3 mo. (YTD floor)","Canada":"trend-projected from 3 mo.","China":"trended from last 3 mo. (YTD floor)","Croatia":"trended from last 3 mo. (YTD floor)","Cyprus":"trended from last 3 mo. (YTD floor)","Czechia":"trended from last 3 mo. (YTD floor)","Denmark":"trended from last 3 mo. (YTD floor)","Estonia":"trended from last 3 mo. (YTD floor)","Finland":"trended from last 3 mo. (YTD floor)","France":"trended from last 3 mo. (YTD floor)","Germany":"trended from last 3 mo. (YTD floor)","Greece":"trended from last 3 mo. (YTD floor)","Hungary":"trended from last 3 mo. (YTD floor)","Iceland":"trended from last 3 mo. (YTD floor)","Ireland":"trended from last 3 mo. (YTD floor)","Italy":"trended from last 3 mo. (YTD floor)","Japan":"trended from last 3 mo. (YTD floor)","Latvia":"trended from last 3 mo. (YTD floor)","Lithuania":"trended from last 3 mo. (YTD floor)","Luxembourg":"trended from last 3 mo. (YTD floor)","Malta":"trended from last 3 mo. (YTD floor)","Mexico":"trended from last 3 mo. (YTD floor)","Netherlands":"trended from last 3 mo. (YTD floor)","New Zealand":"trended from last 3 mo. (YTD floor)","Norway":"trended from last 3 mo. (YTD floor)","Philippines":"run-rate projected from 7 mo.","Poland":"trended from last 3 mo. (YTD floor)","Portugal":"trended from last 3 mo. (YTD floor)","Romania":"trended from last 3 mo. (YTD floor)","Slovakia":"trended from last 3 mo. (YTD floor)","Slovenia":"trended from last 3 mo. (YTD floor)","Spain":"trended from last 3 mo. (YTD floor)","Sweden":"trended from last 3 mo. (YTD floor)","Switzerland":"trended from last 3 mo. (YTD floor)","Turkey":"run-rate projected from 7 mo.","United Kingdom":"trended from last 3 mo. (YTD floor)","United States":"trended from last 3 mo. (YTD floor)","India":"trended from last 3 mo. (YTD floor)","South Korea":"trended from last 3 mo. (YTD floor)"
     },
     // BEV units for full-year 2025 (actual), to compare the projection against real prior-year performance
     priorYearBev: {
@@ -972,6 +987,8 @@ const MONTHLY_DATA = {
       "Brazil": [61535, 59609, 56193, 0, 2069741, 240458, 2487536],
       "Bulgaria": [1719, 454, 1031, 294, 31823, 6865, 42186],
       "Canada": [202333, 68895, 169055, 20, 1333390, 79748, 1853441],
+      // source: CAAM (China Association of Automobile Manufacturers), wholesale via CnEVPost — Total = all vehicle wholesale sales, incl. exports; HEV not part of China's official NEV classification (folded into Petrol, HEV=0); no Petrol/Diesel split published, Diesel=0
+      "China": [7720000, 5146000, 0, 0, 18570193, 0, 31436193],
       "Chile": [4507, 1152, 13442, 0, 201678, 81587, 302366],
       "Croatia": [1793, 1266, 16370, 1404, 31745, 12442, 65020],
       "Cyprus": [1193, 664, 6438, 0, 6394, 368, 15057],
@@ -1015,7 +1032,7 @@ const MONTHLY_DATA = {
     // BEV units for full-year 2023, for YoY %
     priorYearBev: {
       "Malaysia":10159,
-      "Australia":87212,"Austria":47621,"Belgium":93285,"Brazil":19277,"Bulgaria":1467,"Canada":143666,"Chile":1588,"Croatia":1624,"Cyprus":788,"Czechia":6702,"Denmark":62759,"Estonia":1445,"Finland":29534,"France":298219,"Germany":524219,"Greece":6379,"Hungary":5748,"Iceland":8781,"India":89227,"Indonesia":17058,"Ireland":22842,"Italy":66278,"Japan":43991,"Latvia":1790,"Lithuania":2060,"Luxembourg":11052,"Malta":982,"Mexico":14172,"Morocco":463,"Netherlands":114455,"New Zealand":20729,"Norway":104587,"Poland":17081,"Portugal":36390,"Romania":15368,"Slovakia":2346,"Slovenia":4332,"South Korea":163000,"Spain":51714,"Sweden":112208,"Switzerland":52728,"Thailand":73567,"Turkey":65562,"United Kingdom":314684,"United States":1164638
+      "Australia":87212,"Austria":47621,"Belgium":93285,"Brazil":19277,"Bulgaria":1467,"Canada":143666,"Chile":1588,"China":6685000,"Croatia":1624,"Cyprus":788,"Czechia":6702,"Denmark":62759,"Estonia":1445,"Finland":29534,"France":298219,"Germany":524219,"Greece":6379,"Hungary":5748,"Iceland":8781,"India":89227,"Indonesia":17058,"Ireland":22842,"Italy":66278,"Japan":43991,"Latvia":1790,"Lithuania":2060,"Luxembourg":11052,"Malta":982,"Mexico":14172,"Morocco":463,"Netherlands":114455,"New Zealand":20729,"Norway":104587,"Poland":17081,"Portugal":36390,"Romania":15368,"Slovakia":2346,"Slovenia":4332,"South Korea":163000,"Spain":51714,"Sweden":112208,"Switzerland":52728,"Thailand":73567,"Turkey":65562,"United Kingdom":314684,"United States":1164638
     }
   },
   "2023-annual": {
@@ -1028,6 +1045,8 @@ const MONTHLY_DATA = {
       "Brazil": [19277, 32191, 42440, 0, 1870433, 215889, 2180230],
       "Bulgaria": [1467, 281, 671, 18, 26721, 6606, 35764],
       "Canada": [143666, 45090, 135687, 16, 1316512, 74028, 1714999],
+      // source: CAAM (China Association of Automobile Manufacturers), wholesale via CnEVPost — Total = all vehicle wholesale sales, incl. exports; HEV not part of China's official NEV classification (folded into Petrol, HEV=0); no Petrol/Diesel split published, Diesel=0
+      "China": [6685000, 2804000, 0, 6000, 20598698, 0, 30093698],
       "Chile": [1588, 511, 7234, 0, 217508, 87024, 313865],
       "Croatia": [1624, 1119, 13005, 1827, 27806, 10912, 56293],
       "Cyprus": [788, 511, 5653, 0, 7360, 448, 14760],
@@ -1071,7 +1090,7 @@ const MONTHLY_DATA = {
     // BEV units for full-year 2022, for YoY %
     priorYearBev: {
       "Malaysia":2631,
-      "Australia":33410,"Brazil":8440,"Canada":98620,"India":40825,"Japan":31592,"Mexico":5631,"Turkey":7733,"United States":747982
+      "Australia":33410,"Brazil":8440,"Canada":98620,"China":5365000,"India":40825,"Japan":31592,"Mexico":5631,"Turkey":7733,"United States":747982
     }
   },
     "2022-annual": {
