@@ -720,7 +720,9 @@ const MONTHLY_DATA = {
       // source: world_auto_sales_annual, period_type='YTD' — FTI Automotive Industry Club, Jan-Jul 2026 summed; Total includes pickups/PPV, not passenger-cars-only; Diesel is a residual
       "Thailand": [126727,7335,87590,993,62034,121443,406122],
       // source: TS/KOTSA new-registration API, Jan-Aug 2026 summed — PHEV folded into HEV
-      "South Korea": [266172,0,370315,99944,351406,28773,1116610]
+      "South Korea": [266172,0,370315,99944,351406,28773,1116610],
+      // source: world_auto_sales_annual, period_type='YTD' — GAIKINDO, Jan-Jul 2026 summed; no diesel split published (Diesel=0)
+      "Indonesia": [83837,6964,49156,0,377668,0,517625]
     },
     // per-country "as of" coverage, since cutoffs differ by source — surfaced in the Country Detail table's "Data Through" column
     asOf: {
@@ -811,7 +813,9 @@ const MONTHLY_DATA = {
       // source: world_auto_sales_annual, period_type='PROJECTED' — plain run-rate (YTD x 12/7) from FTI Automotive Industry Club data; Total includes pickups/PPV, not passenger-cars-only
       "Thailand": [217246, 12574, 150154, 1702, 106344, 208188, 696209],
       // source: TS/KOTSA — each fuel trended from the last 3 actual months' average (or the 8-mo YTD average if higher), applied to the remaining 4 months; PHEV folded into HEV
-      "South Korea": [411865, 0, 555472, 149916, 527109, 43160, 1687522]
+      "South Korea": [411865, 0, 555472, 149916, 527109, 43160, 1687522],
+      // source: world_auto_sales_annual, period_type='PROJECTED' — plain run-rate (YTD x 12/7) from GAIKINDO data; no diesel split published (Diesel=0)
+      "Indonesia": [143721, 11938, 84267, 0, 647431, 0, 887357]
     },
     // Two projection methods, depending on what data exists per country:
     // (1) Every country with a real monthly breakdown — the 31 ACEA/Europe countries, New Zealand, Argentina,
