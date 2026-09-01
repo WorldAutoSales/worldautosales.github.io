@@ -2332,8 +2332,8 @@ function renderStats(){
     {label:'BEV Share (avg)', value:avgPct+'%', small:monthLabel, yoy:totalYoy},
     {label:'Highest', value: top ? top.bevPct+'%' : '—', small: top ? top.country : ''},
     {label:'Lowest', value: bottom ? bottom.bevPct+'%' : '—', small: bottom ? bottom.country : ''},
-    {label:'Total Car Registrations', value:totals.total.toLocaleString('en-US'), small: monthLabel, yoy:totalRegYoy},
     {label:'Total EV Registrations', value:totals.bev.toLocaleString('en-US'), small: monthLabel, yoy:totalYoy},
+    {label:'Total Car Registrations', value:totals.total.toLocaleString('en-US'), small: monthLabel, yoy:totalRegYoy},
   ];
   document.getElementById('stat-row').innerHTML = stats.map(s => `
     <div class="stat">
