@@ -194,14 +194,14 @@ h1{
 
 .stat-row{
   display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px,1fr));
-  gap:14px;
+  grid-template-columns: repeat(auto-fit, minmax(120px,1fr));
+  gap:10px;
 }
 .stat{
-  background:var(--surface);
+  background:var(--surface-alt);
   border:1px solid var(--border);
   border-radius:10px;
-  padding:16px 18px;
+  padding:14px 14px;
   box-shadow:var(--shadow);
 }
 .stat .label{
@@ -214,15 +214,17 @@ h1{
 .stat .value{
   font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
   font-variant-numeric: tabular-nums;
-  font-size:26px;
+  font-size:24px;
   font-weight:700;
   margin-top:4px;
 }
 .stat .value small{
-  font-size:13px;
+  display:block;
+  font-size:12px;
   font-weight:600;
   color:var(--text-muted);
-  margin-left:6px;
+  margin-left:0;
+  margin-top:3px;
 }
 .stat .value small.stat-yoy{
   display:block;
