@@ -1890,6 +1890,20 @@ function trendsSeriesForCountry(name){
       label: r.ym, isPartial: false, total: r.total,
       bev: r.bev, phev: r.phev, hev: r.hev, petrol: r.petrol, diesel: r.diesel, others: r.others
     }));
+    // prepend any real annual-only years that predate the first monthly month, so the line
+    // doesn't start abruptly wherever the monthly data happens to begin — countries like Nepal
+    // (annual since 2023, monthly only from 2026-01) or Chile (annual since 2020, monthly only
+    // from 2025-01) have real earlier history that would otherwise silently vanish from this
+    // chart even though it's still shown correctly in the Annual-period views and stat cards
+    const firstMonthlyYear = points.length ? parseInt(points[0].label.slice(0,4), 10) : Infinity;
+    const priorAnnual = (COUNTRY_YEARLY[name] || [])
+      .filter(r => r.period_type === 'ANNUAL' && r.year < firstMonthlyYear)
+      .sort((a, b) => a.year - b.year)
+      .map(r => ({
+        label: String(r.year), isPartial: false, total: r.total,
+        bev: r.bev, phev: r.phev, hev: r.hev, petrol: r.petrol, diesel: r.diesel, others: r.others
+      }));
+    points.unshift(...priorAnnual);
     // append the model's IMPLIED RATE for the remaining months of the year (not the full-year
     // cumulative total) as a dashed continuation past the last real month. The full-year total
     // is a blend of every month including ones that may look nothing like the recent trend (an
@@ -1998,7 +2012,7 @@ function renderTrendsChart(){
   const g = trendsSvg.append('g').attr('transform', `translate(${M.left},${M.top})`);
 
   const tickValues = isMonthly
-    ? pctSeries.filter(d => d.label.endsWith('-01') || d.i === pctSeries.length - 1).map(d => d.i)
+    ? pctSeries.filter(d => d.label.endsWith('-01') || d.label.length === 4 || d.i === pctSeries.length - 1).map(d => d.i)
     : pctSeries.map(d => d.i);
   g.append('g').attr('class', 'bubble-axis').attr('transform', `translate(0,${innerH})`)
     .call(d3.axisBottom(xScale).tickValues(tickValues).tickFormat(i => {
@@ -2390,6 +2404,18 @@ function renderBubbleChart(){
     .attr('class', 'bubble-axis-title')
     .attr('transform', `translate(-50,${innerH/2}) rotate(-90)`)
     .text('BEV share (%) →');
+
+  // 40% reference line — a fine dotted guide with its value labeled on the right
+  g.append('line')
+    .attr('class', 'bubble-ref-line')
+    .attr('x1', 0).attr('x2', innerW)
+    .attr('y1', yScale(40)).attr('y2', yScale(40))
+    .attr('stroke', '#999').attr('stroke-width', 1).attr('stroke-dasharray', '1,3');
+  g.append('text')
+    .attr('class', 'bubble-ref-label')
+    .attr('x', innerW + 4).attr('y', yScale(40)).attr('dy', '0.32em')
+    .attr('fill', '#999').style('font-size', '11px')
+    .text('40%');
 
   const defs = bubbleSvg.append('defs');
   defs.selectAll('clipPath').data(DATA, d => d.country).join('clipPath')
