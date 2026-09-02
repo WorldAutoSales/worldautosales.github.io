@@ -414,7 +414,9 @@ const MONTHLY_DATA = {
       // source: KAO (kao.kz) — 2-month cumulative NEV snapshot delta (May-Jun) split evenly; HEV is a floor (top brands only); Diesel=0
       "Kazakhstan": [197,571,257,0,20836,0,21861],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [83,248,1344,0,23890,0,25565]
+      "Peru": [83,248,1344,0,23890,0,25565],
+      // source: CERR (Center for Economic Research and Reforms), Uzbekistan — only BEV tracked (user's explicit choice); rest folded into Others. BEV likely blends primary+secondary market EV sales (confirmed for this month: "на первичном и вторичном рынках")
+      "Uzbekistan": [8400,0,0,15600,0,0,24000]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-06), for YoY %
     priorYearBev: {
@@ -598,7 +600,9 @@ const MONTHLY_DATA = {
       // source: KAO (kao.kz) — 2-month cumulative NEV snapshot delta (Mar-Apr) split evenly; HEV is a floor (top brands only); Diesel=0
       "Kazakhstan": [177,531,101,0,20048,0,20857],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [140,129,1295,0,20877,0,22441]
+      "Peru": [140,129,1295,0,20877,0,22441],
+      // source: CERR (Center for Economic Research and Reforms), Uzbekistan — only BEV tracked (user's explicit choice); rest folded into Others. BEV likely blends primary+secondary market EV sales
+      "Uzbekistan": [8100,0,0,16800,0,0,24900]
     },
     priorYearBev: {
       "Austria":5690,"Belgium":12469,"Bulgaria":144,"Croatia":60,"Cyprus":90,"Czechia":1229,"Denmark":9567,
@@ -691,7 +695,9 @@ const MONTHLY_DATA = {
       // source: KAO (kao.kz) — 2-month cumulative NEV snapshot delta (Mar-Apr) split evenly; HEV is a floor (top brands only); Diesel=0
       "Kazakhstan": [176,530,102,0,16291,0,17099],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [67,93,1039,0,21798,0,22997]
+      "Peru": [67,93,1039,0,21798,0,22997],
+      // source: CERR (Center for Economic Research and Reforms), Uzbekistan — only BEV tracked (user's explicit choice); rest folded into Others. BEV likely blends primary+secondary market EV sales; internally consistent with the separately-sourced Feb figure (-20.3% MoM matches)
+      "Uzbekistan": [5500,0,0,25200,0,0,30700]
     },
     priorYearBev: {
       "Canada":8800,
@@ -885,7 +891,9 @@ const MONTHLY_DATA = {
       // source: KAO (kao.kz) — Jan-Feb cumulative NEV snapshot split evenly; HEV is a genuine market total for this 2-month block; Diesel=0
       "Kazakhstan": [135,219,54,0,13694,0,14102],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [75,100,999,0,21895,0,23069]
+      "Peru": [75,100,999,0,21895,0,23069],
+      // source: CERR (Center for Economic Research and Reforms), Uzbekistan — only BEV tracked (user's explicit choice); rest folded into Others. This month CERR also published a primary-only sub-figure (4,700 of this 6,100 combined total) -- not used, kept consistent with every other month's combined-market basis
+      "Uzbekistan": [6100,0,0,22500,0,0,28600]
     },
     // BEV units for the same month/quarter a year prior — source: ACEA (world_auto_sales, 2025-01) / same StatCan table for Canada, for YoY %
     priorYearBev: {
@@ -1234,7 +1242,9 @@ const MONTHLY_DATA = {
       // source: Israel Ministry of Transport (data.gov.il) vehicle registry, full-year 2025 — BEV/PHEV/Diesel exact; Petrol/HEV split using I-VIA's quarterly Trends Analysis ratios
       "Israel": [58396,34723,78939,10,110667,17396,300131],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry, full-year 2025 summed from monthly figures — HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [751,640,8848,0,201537,0,211776]
+      "Peru": [751,640,8848,0,201537,0,211776],
+      // source: CERR (Center for Economic Research and Reforms), full-year 2025 — only BEV tracked (user's explicit choice); rest folded into Others. IEA's Global EV Outlook 2026 gives an alternate 2025 estimate of 10,000 BEV cars for Uzbekistan (30,000 total EV, 6% share) -- notably lower than CERR's own 40,700; CERR was used for consistency with this project's 2026 monthly rows, which share its methodology
+      "Uzbekistan": [40700,0,0,327600,0,0,368300]
     },
     // per-country "as of" override — every country here is a genuine full year except Philippines (11 of 12 months)
     asOf: {
@@ -1664,7 +1674,7 @@ const COUNTRY_CONTINENT = {
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
   "Canada":"NAC","United States":"NAC","China":"ASIA","India":"ASIA","Mexico":"NAC","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"SA","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"SA","Turkey":"EU","Philippines":"ASIA","Chile":"SA","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA","Taiwan":"ASIA","Singapore":"ASIA","Serbia":"EU","Colombia":"SA","Vietnam":"ASIA","Nepal":"ASIA"
-,"Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA"};
+,"Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA","Uzbekistan":"ASIA"};
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 
 // country -> ISO 3166-1 alpha-2 code, for flag images (flagcdn.com)
@@ -1675,7 +1685,7 @@ const COUNTRY_ISO2 = {
   "Norway":"no","Poland":"pl","Portugal":"pt","Romania":"ro","Slovakia":"sk","Slovenia":"si","Spain":"es",
   "Sweden":"se","Switzerland":"ch","United Kingdom":"gb","Canada":"ca",
   "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th","Argentina":"ar","Turkey":"tr","Philippines":"ph","Chile":"cl","Morocco":"ma","New Zealand":"nz","Malaysia":"my","Taiwan":"tw","Singapore":"sg","Serbia":"rs","Colombia":"co","Vietnam":"vn","Nepal":"np"
-,"Israel":"il","Kazakhstan":"kz","Peru":"pe"};
+,"Israel":"il","Kazakhstan":"kz","Peru":"pe","Uzbekistan":"uz"};
 const ALL_COUNTRIES_SORTED = [...ALL_COUNTRIES].sort((a,b) => {
   const ca = COUNTRY_CONTINENT[a] || 'ZZ', cb = COUNTRY_CONTINENT[b] || 'ZZ';
   return ca !== cb ? ca.localeCompare(cb) : a.localeCompare(b);
