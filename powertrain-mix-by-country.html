@@ -275,6 +275,8 @@ const MONTHLY_DATA = {
   "2026-07": {
     label: "July 2026",
     raw: {
+      // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month, from the "VENTAS DE VEHÍCULOS POR TIPO DE ENERGÍA" table in AEADE's monthly press bulletin; Hibrido = MHEV+HEV+PHEV+EREV combined (AEADE's bulletin gives one Hibrido figure, PHEV folded in)
+      "Ecuador": [910,0,3091,0,6616,4195,14812],
       // source: NZTA Waka Kotahi (monthly, light vehicles only)
       "New Zealand": [1946,1258,2887,122,2088,435,8736],
       // source: Argonne National Laboratory (Wards Auto), monthly — Total = all light-duty vehicles; no Petrol/Diesel split published, Diesel=0
@@ -318,25 +320,31 @@ const MONTHLY_DATA = {
       // source: Israel Ministry of Transport vehicle registry (data.gov.il) — BEV/PHEV/Diesel exact; Petrol/HEV split using I-VIA's quarterly Trends Analysis ratio (see world_auto_sales.data_quality_note for full methodology)
       "Israel": [3019,7107,8488,0,7659,1419,27692],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [66,195,1163,0,20343,0,21767]
+      "Peru": [66,195,1163,0,20343,0,21767],
+      // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
+      "Uruguay": [2646,310,570,0,1481,11,5018]
     },
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY % (Argentina, China,
     // Indonesia, Australia, Singapore omitted — no matching July 2025 monthly figure sourced for those five)
     priorYearBev: {
       "Brazil":7007,"India":17970,"Japan":2908,"Malaysia":2792,"Mexico":1442,"New Zealand":545,"United States":126356,"Thailand":9304,"South Korea":25192,"Taiwan":2501,
       "Israel":5422,
-      "Peru":82
+      "Peru":82,
+      "Uruguay":1195
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Brazil":230266,"India":346348,"Japan":220544,"Malaysia":75663,"Mexico":126541,"New Zealand":7576,"United States":1389685,"Thailand":49102,"South Korea":151549,"Taiwan":30934,
       "Israel":26894,
-      "Peru":16956
+      "Peru":16956,
+      "Uruguay":4170
     }
   },
   "2026-06": {
     label: "June 2026",
     raw: {
+      // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
+      "Ecuador": [1438,0,2693,0,6426,3855,14412],
       "Austria": [8993,4040,10472,0,7577,3174,34256],
       "Belgium": [17256,2788,5935,652,17344,1474,45449],
       "Bulgaria": [478,128,345,5,3613,888,5457],
@@ -414,7 +422,9 @@ const MONTHLY_DATA = {
       // source: KAO (kao.kz) — 2-month cumulative NEV snapshot delta (May-Jun) split evenly; HEV is a floor (top brands only); Diesel=0
       "Kazakhstan": [197,571,257,0,20836,0,21861],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [83,248,1344,0,23890,0,25565]
+      "Peru": [83,248,1344,0,23890,0,25565],
+      // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
+      "Uruguay": [2204,294,513,0,1496,7,4514]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-06), for YoY %
     priorYearBev: {
@@ -425,18 +435,22 @@ const MONTHLY_DATA = {
       "Sweden":10725,"Switzerland":4813,"United Kingdom":47354,"New Zealand":1012,"United States":111577,
       "Brazil":5943,"India":15310,"Japan":4264,"Malaysia":3272,"Mexico":1662,"Thailand":9373,"South Korea":21185,"Taiwan":2835,
       "Israel":4046,
-      "Peru":104
+      "Peru":104,
+      "Uruguay":797
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Austria":27868,"Belgium":41527,"Bulgaria":4614,"Croatia":8945,"Cyprus":1347,"Czechia":22208,"Denmark":19045,"Estonia":1549,"Finland":7449,"France":169505,"Germany":256193,"Greece":14647,"Hungary":11511,"Iceland":2032,"Ireland":2437,"Italy":132320,"Latvia":2244,"Lithuania":3722,"Luxembourg":4168,"Malta":544,"Netherlands":34641,"Norway":18373,"Poland":49587,"Portugal":23184,"Romania":10611,"Slovakia":8800,"Slovenia":4845,"Spain":119125,"Sweden":27565,"Switzerland":21810,"United Kingdom":191316,"New Zealand":8188,"United States":1272469,"Brazil":202458,"India":316921,"Japan":217333,"Malaysia":58858,"Mexico":117780,"Thailand":50079,"South Korea":145683,"Taiwan":29838,
       "Israel":20372,
-      "Peru":16725
+      "Peru":16725,
+      "Uruguay":3214
     }
   },
   "2026-05": {
     label: "May 2026",
     raw: {
+      // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
+      "Ecuador": [927,0,2240,0,6304,3622,13093],
       "Austria": [6598,2932,7239,1,6135,2624,25529],
       "Belgium": [12586,1596,4130,485,13765,1063,33625],
       "Bulgaria": [362,55,292,49,3148,387,4293],
@@ -506,7 +520,9 @@ const MONTHLY_DATA = {
       // source: KAO (kao.kz) — 2-month cumulative NEV snapshot delta (May-Jun) split evenly; HEV is a floor (top brands only); Diesel=0
       "Kazakhstan": [197,570,258,0,17368,0,18393],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [91,145,1184,0,21717,0,23137]
+      "Peru": [91,145,1184,0,21717,0,23137],
+      // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
+      "Uruguay": [2536,198,673,0,1420,6,4833]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-05), for YoY %
     priorYearBev: {
@@ -517,18 +533,22 @@ const MONTHLY_DATA = {
       "Sweden":9469,"Switzerland":4177,"United Kingdom":32738,"New Zealand":442,"United States":101750,
       "Brazil":6989,"India":14712,"Japan":2848,"Malaysia":4152,"Mexico":1768,"Argentina":91,"Thailand":11274,"South Korea":21760,"Turkey":16802,"Taiwan":1482,
       "Israel":4168,
-      "Peru":50
+      "Peru":50,
+      "Uruguay":946
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Austria":24311,"Belgium":34338,"Bulgaria":3857,"Croatia":8791,"Cyprus":1328,"Czechia":19519,"Denmark":17952,"Estonia":1411,"Finland":6851,"France":123918,"Germany":239297,"Greece":15670,"Hungary":10899,"Iceland":2313,"Ireland":5821,"Italy":139484,"Latvia":2149,"Lithuania":4092,"Luxembourg":4058,"Malta":677,"Netherlands":30188,"Norway":14260,"Poland":46641,"Portugal":23545,"Romania":10521,"Slovakia":7651,"Slovenia":5118,"Spain":112820,"Sweden":25675,"Switzerland":19969,"United Kingdom":150070,"New Zealand":6770,"United States":1461067,"Brazil":214617,"India":323571,"Japan":177980,"Malaysia":74393,"Mexico":121110,"Argentina":56319,"Thailand":52229,"South Korea":145387,"Turkey":85123,"Taiwan":27392,
       "Israel":26155,
-      "Peru":16337
+      "Peru":16337,
+      "Uruguay":3623
     }
   },
   "2026-04": {
     label: "April 2026",
     raw: {
+      // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
+      "Ecuador": [894,0,2627,0,6882,3895,14298],
       "Austria": [7122,2997,8366,1,6368,2655,27509],
       "Belgium": [13971,1830,4506,371,15888,1236,37802],
       "Bulgaria": [456,83,284,4,3356,559,4742],
@@ -598,7 +618,9 @@ const MONTHLY_DATA = {
       // source: KAO (kao.kz) — 2-month cumulative NEV snapshot delta (Mar-Apr) split evenly; HEV is a floor (top brands only); Diesel=0
       "Kazakhstan": [177,531,101,0,20048,0,20857],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [140,129,1295,0,20877,0,22441]
+      "Peru": [140,129,1295,0,20877,0,22441],
+      // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
+      "Uruguay": [2055,208,580,0,1795,2,4640]
     },
     priorYearBev: {
       "Austria":5690,"Belgium":12469,"Bulgaria":144,"Croatia":60,"Cyprus":90,"Czechia":1229,"Denmark":9567,
@@ -608,18 +630,22 @@ const MONTHLY_DATA = {
       "Sweden":8555,"Switzerland":3480,"United Kingdom":24558,"New Zealand":440,"United States":96348,
       "Brazil":4716,"India":14818,"Japan":2111,"Malaysia":2892,"Mexico":1693,"Thailand":10981,"South Korea":17263,"Taiwan":1470,
       "Israel":3319,
-      "Peru":50
+      "Peru":50,
+      "Uruguay":890
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Austria":24855,"Belgium":37812,"Bulgaria":4008,"Croatia":9070,"Cyprus":1097,"Czechia":21226,"Denmark":15119,"Estonia":1075,"Finland":6251,"France":138696,"Germany":242728,"Greece":14649,"Hungary":10785,"Iceland":1546,"Ireland":8703,"Italy":139142,"Latvia":2067,"Lithuania":4040,"Luxembourg":4365,"Malta":460,"Netherlands":27157,"Norway":11286,"Poland":46978,"Portugal":18752,"Romania":9996,"Slovakia":8322,"Slovenia":5192,"Spain":98522,"Sweden":24292,"Switzerland":18664,"United Kingdom":120331,"New Zealand":6041,"United States":1463622,"Brazil":197159,"India":374978,"Japan":191066,"Malaysia":65200,"Mexico":109420,"Thailand":47193,"South Korea":153456,"Taiwan":28460,
       "Israel":20182,
-      "Peru":16274
+      "Peru":16274,
+      "Uruguay":3395
     }
   },
   "2026-03": {
     label: "March 2026",
     raw: {
+      // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
+      "Ecuador": [925,0,2628,0,6761,3836,14150],
       "Austria": [8206,3165,10513,0,8181,2953,33018],
       "Belgium": [15661,2417,5221,423,18908,1103,43733],
       "Bulgaria": [349,82,231,0,3310,509,4481],
@@ -691,7 +717,9 @@ const MONTHLY_DATA = {
       // source: KAO (kao.kz) — 2-month cumulative NEV snapshot delta (Mar-Apr) split evenly; HEV is a floor (top brands only); Diesel=0
       "Kazakhstan": [176,530,102,0,16291,0,17099],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [67,93,1039,0,21798,0,22997]
+      "Peru": [67,93,1039,0,21798,0,22997],
+      // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
+      "Uruguay": [1774,211,706,0,2051,10,4752]
     },
     priorYearBev: {
       "Canada":8800,
@@ -702,18 +730,22 @@ const MONTHLY_DATA = {
       "Sweden":8386,"Switzerland":4421,"United Kingdom":69313,"New Zealand":588,"United States":120820,
       "Brazil":4804,"India":14425,"Japan":4010,"Malaysia":2976,"Mexico":1655,"Thailand":8233,"South Korea":17909,"Taiwan":2727,
       "Israel":4767,
-      "Peru":62
+      "Peru":62,
+      "Uruguay":730
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Canada":142291,"Austria":25950,"Belgium":40184,"Bulgaria":4220,"Croatia":6426,"Cyprus":1602,"Czechia":22566,"Denmark":14987,"Estonia":966,"Finland":6173,"France":153842,"Germany":253497,"Greece":12719,"Hungary":13199,"Iceland":1012,"Ireland":17312,"Italy":172303,"Latvia":2036,"Lithuania":3566,"Luxembourg":4839,"Malta":334,"Netherlands":31515,"Norway":13304,"Poland":53062,"Portugal":24578,"Romania":9922,"Slovakia":7507,"Slovenia":5285,"Spain":116725,"Sweden":24204,"Switzerland":21690,"United Kingdom":357103,"New Zealand":8355,"United States":1593017,"Brazil":184371,"India":367639,"Japan":288234,"Malaysia":77121,"Mexico":128434,"Thailand":55798,"South Korea":146448,"Taiwan":32293,
       "Israel":26744,
-      "Peru":16779
+      "Peru":16779,
+      "Uruguay":4256
     }
   },
   "2026-02": {
     label: "February 2026",
     raw: {
+      // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
+      "Ecuador": [661,0,2043,0,5481,2705,10890],
       "Austria": [4439,2151,6665,0,5530,2503,21288],
       "Belgium": [11677,1965,5058,113,17528,734,37075],
       "Bulgaria": [215,61,209,2,2926,353,3766],
@@ -784,7 +816,9 @@ const MONTHLY_DATA = {
       // source: KAO (kao.kz) — Jan-Feb cumulative NEV snapshot split evenly; HEV is a genuine market total for this 2-month block; Diesel=0
       "Kazakhstan": [135,219,53,0,13149,0,13556],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [72,90,1092,0,22258,0,23512]
+      "Peru": [72,90,1092,0,22258,0,23512],
+      // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
+      "Uruguay": [1578,191,716,0,1774,0,4259]
     },
     priorYearBev: {
       "Canada":8800,
@@ -795,18 +829,22 @@ const MONTHLY_DATA = {
       "Sweden":6872,"Switzerland":3402,"United Kingdom":21244,"New Zealand":540,"United States":86040,
       "Brazil":4508,"India":10508,"Japan":2380,"Malaysia":2160,"Mexico":1307,"Thailand":7539,"South Korea":13284,"Taiwan":2006,
       "Israel":3375,
-      "Peru":39
+      "Peru":39,
+      "Uruguay":872
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Canada":142291,"Austria":19619,"Belgium":40161,"Bulgaria":3394,"Croatia":4245,"Cyprus":1284,"Czechia":17773,"Denmark":11617,"Estonia":624,"Finland":4784,"France":141570,"Germany":203434,"Greece":9818,"Hungary":10575,"Iceland":655,"Ireland":13969,"Italy":138020,"Latvia":1398,"Lithuania":2531,"Luxembourg":4111,"Malta":303,"Netherlands":27820,"Norway":8949,"Poland":44795,"Portugal":19463,"Romania":11850,"Slovakia":6205,"Slovenia":4372,"Spain":90327,"Sweden":19608,"Switzerland":16212,"United Kingdom":84054,"New Zealand":6957,"United States":1215074,"Brazil":174041,"India":321898,"Japan":234257,"Malaysia":67327,"Mexico":118602,"Thailand":49313,"South Korea":132762,"Taiwan":24108,
       "Israel":23579,
-      "Peru":15426
+      "Peru":15426,
+      "Uruguay":3688
     }
   },
   "2026-01": {
     label: "January 2026",
     raw: {
+      // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
+      "Ecuador": [612,0,1908,0,5892,2930,11342],
       "Austria": [4702,2738,6496,0,6718,2275,22929],
       "Belgium": [12131,2068,3809,100,14105,784,32997],
       "Bulgaria": [182,45,204,6,2378,403,3218],
@@ -885,7 +923,9 @@ const MONTHLY_DATA = {
       // source: KAO (kao.kz) — Jan-Feb cumulative NEV snapshot split evenly; HEV is a genuine market total for this 2-month block; Diesel=0
       "Kazakhstan": [135,219,54,0,13694,0,14102],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [75,100,999,0,21895,0,23069]
+      "Peru": [75,100,999,0,21895,0,23069],
+      // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
+      "Uruguay": [1582,182,518,0,1504,6,3792]
     },
     // BEV units for the same month/quarter a year prior — source: ACEA (world_auto_sales, 2025-01) / same StatCan table for Canada, for YoY %
     priorYearBev: {
@@ -900,18 +940,22 @@ const MONTHLY_DATA = {
       "United States": 94035,
       "Brazil": 3716, "India": 13348, "Japan": 2014, "Malaysia": 1691, "Mexico": 1362, "Thailand": 7022, "South Korea": 2411, "Taiwan": 2207,
       "Israel":8043,
-      "Peru":50
+      "Peru":50,
+      "Uruguay":400
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Canada":142291,"Austria":20448,"Belgium":40594,"Bulgaria":2780,"Croatia":4472,"Cyprus":1565,"Czechia":19347,"Denmark":10834,"Estonia":531,"Finland":5742,"France":114673,"Germany":207640,"Greece":10659,"Hungary":9125,"Iceland":594,"Ireland":33473,"Italy":133731,"Latvia":1343,"Lithuania":2836,"Luxembourg":3718,"Malta":640,"Netherlands":32804,"Norway":9343,"Poland":44248,"Portugal":14504,"Romania":11920,"Slovakia":6605,"Slovenia":5015,"Spain":72322,"Sweden":19632,"Switzerland":14788,"United Kingdom":139345,"New Zealand":7991,"United States":1106120,"Brazil":160053,"India":496673,"Japan":216664,"Malaysia":53930,"Mexico":120953,"Thailand":48092,"South Korea":124494,"Taiwan":31933,
       "Israel":50757,
-      "Peru":18532
+      "Peru":18532,
+      "Uruguay":2748
     }
   },
   "2026-ytd": {
     label: "2026 YTD",
     raw: {
+      // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — Jan-Jul 2026, from the July bulletin's own "Ene-Jul 26" YTD column, not summed from separately-revised months; Hibrido = MHEV+HEV+PHEV+EREV combined
+      "Ecuador": [6367,0,17230,0,44362,25038,92997],
       "Malaysia": [38675, 0, 29776, 0, 399788, 21601, 489840],
       // source: world_auto_sales_annual, period_type='YTD' — each country summed only through its own latest available month/quarter (see asOf below), not a fixed common cutoff
       "Austria": [40060,18023,49751,2,40509,16184,164529],
@@ -991,10 +1035,13 @@ const MONTHLY_DATA = {
       // source: KAO (kao.kz), Jan-Jun 2026 summed from the bimonthly-derived monthly figures — HEV is a floor from March on; Diesel=0
       "Kazakhstan": [1017,2640,825,0,101386,0,105868],
       // source: AAP (Asociacion Automotriz del Peru), Jan-Jul 2026 summed from the monthly figures — HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [594,1000,8116,0,152778,0,162488]
+      "Peru": [594,1000,8116,0,152778,0,162488],
+      // source: ACAU (Uruguay), Compilado 2026 — Jan-Jul 2026 summed from the monthly figures; HEV includes MHEV combined
+      "Uruguay": [14375,1594,4276,0,11521,42,31808]
     },
     // per-country "as of" coverage, since cutoffs differ by source — surfaced in the Country Detail table's "Data Through" column
     asOf: {
+      "Ecuador":"through Jul 2026",
       "Austria":"through Jun 2026","Belgium":"through Jun 2026","Bulgaria":"through Jun 2026","Croatia":"through Jun 2026",
       "Cyprus":"through Jun 2026","Czechia":"through Jun 2026","Denmark":"through Jun 2026","Estonia":"through Jun 2026",
       "Finland":"through Jun 2026","France":"through Jun 2026","Germany":"through Jun 2026","Greece":"through Jun 2026",
@@ -1024,10 +1071,12 @@ const MONTHLY_DATA = {
       "Nepal":"through Jul 2026",
       "Israel":"through Aug 2026",
       "Kazakhstan":"through Jun 2026",
-      "Peru":"through Jul 2026"
+      "Peru":"through Jul 2026",
+      "Uruguay":"through Jul 2026"
     },
     // BEV units for the matching prior-year period (same months)
     priorYearBev: {
+      "Ecuador":1877,
       "Austria":31534,"Belgium":76980,"Bulgaria":1076,"Croatia":396,"Cyprus":735,"Czechia":6910,"Denmark":57178,
       "Estonia":444,"Finland":12724,"France":148332,"Germany":248726,"Greece":4265,"Hungary":5219,"Iceland":2357,
       "Ireland":13637,"Italy":44727,"Latvia":743,"Lithuania":1205,"Luxembourg":6559,"Malta":780,"Netherlands":64440,
@@ -1035,19 +1084,24 @@ const MONTHLY_DATA = {
       "Sweden":49667,"Switzerland":23203,"United Kingdom":224841,
       "Canada":26401,"Mexico":10889,"New Zealand":4119,"United States":736926,"India":121295,"South Korea":142319,"Taiwan":15228,
       "Israel":40028,
-      "Peru":437
+      "Peru":437,
+      "Uruguay":5830
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
+      "Ecuador":66852,
       "Austria":143051,"Belgium":234616,"Bulgaria":22873,"Croatia":41949,"Cyprus":8223,"Czechia":122639,"Denmark":89554,"Estonia":6156,"Finland":37250,"France":842204,"Germany":1402789,"Greece":78162,"Hungary":66094,"Iceland":8152,"Ireland":81715,"Italy":855000,"Latvia":11237,"Lithuania":20787,"Luxembourg":25259,"Malta":2958,"Netherlands":184125,"Norway":75515,"Poland":285311,"Portugal":124026,"Romania":64820,"Slovakia":45090,"Slovenia":29827,"Spain":609841,"Sweden":140976,"Switzerland":113133,"United Kingdom":1042219,"Canada":426873,"Mexico":842840,"New Zealand":51878,"United States":9501054,"India":2891240,"South Korea":1127726,"Taiwan":204958,
       "Israel":220530,
-      "Peru":117029
+      "Peru":117029,
+      "Uruguay":25094
     }
     // note: China omitted from priorYearBev — no matching Jan-Jul 2025 monthly data sourced (world_auto_sales has no pre-2026 China rows)
   },
   "2026-projection": {
     label: "2026 (Projected)",
     raw: {
+      // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; Hibrido = MHEV+HEV+PHEV+EREV combined
+      "Ecuador": [11825,0,30603,0,76606,44491,163525],
       "Malaysia": [66300, 0, 51045, 0, 685351, 37030, 839726],
       "Argentina": [8057, 0, 76746, 0, 497535, 0, 582338],
       "Australia": [256196, 124170, 220978, 0, 373455, 320188, 1294987],
@@ -1117,7 +1171,9 @@ const MONTHLY_DATA = {
       // source: KAO (kao.kz) — each fuel trended from the last 3 actual months' average (or the 6-mo YTD average if higher), applied to the remaining 6 months; HEV projection inherits the floor bias from Mar-Jun actuals
       "Kazakhstan": [2159,5984,2057,0,217890,0,228090],
       // source: AAP (Asociacion Automotriz del Peru) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; HEV projection inherits the HEV+MHEV combined basis
-      "Peru": [1018,1980,14268,0,262695,0,279961]
+      "Peru": [1018,1980,14268,0,262695,0,279961],
+      // source: ACAU (Uruguay) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
+      "Uruguay": [26685,2931,7330,0,19750,82,56778]
     },
     // Two projection methods, depending on what data exists per country:
     // (1) Every country with a real monthly breakdown — the 31 ACEA/Europe countries, New Zealand, Argentina,
@@ -1137,27 +1193,35 @@ const MONTHLY_DATA = {
     // been switched over to method (1) yet.
     // Every figure here is an ESTIMATE, not a real annual measurement.
     asOf: {
+      "Ecuador":"trended from last 3 mo. (YTD floor)",
       "Argentina":"trended from last 3 mo. (YTD floor)","Australia":"trended from last 3 mo. (YTD floor)","Austria":"trended from last 3 mo. (YTD floor)","Belgium":"trended from last 3 mo. (YTD floor)","Brazil":"trended from last 3 mo. (YTD floor)","Bulgaria":"trended from last 3 mo. (YTD floor)","Canada":"trend-projected from 3 mo.","China":"trended from last 3 mo. (YTD floor)","Croatia":"trended from last 3 mo. (YTD floor)","Cyprus":"trended from last 3 mo. (YTD floor)","Czechia":"trended from last 3 mo. (YTD floor)","Denmark":"trended from last 3 mo. (YTD floor)","Estonia":"trended from last 3 mo. (YTD floor)","Finland":"trended from last 3 mo. (YTD floor)","France":"trended from last 3 mo. (YTD floor)","Germany":"trended from last 3 mo. (YTD floor)","Greece":"trended from last 3 mo. (YTD floor)","Hungary":"trended from last 3 mo. (YTD floor)","Iceland":"trended from last 3 mo. (YTD floor)","Ireland":"trended from last 3 mo. (YTD floor)","Italy":"trended from last 3 mo. (YTD floor)","Japan":"trended from last 3 mo. (YTD floor)","Latvia":"trended from last 3 mo. (YTD floor)","Lithuania":"trended from last 3 mo. (YTD floor)","Luxembourg":"trended from last 3 mo. (YTD floor)","Malta":"trended from last 3 mo. (YTD floor)","Mexico":"trended from last 3 mo. (YTD floor)","Netherlands":"trended from last 3 mo. (YTD floor)","New Zealand":"trended from last 3 mo. (YTD floor)","Norway":"trended from last 3 mo. (YTD floor)","Philippines":"run-rate projected from 7 mo.","Poland":"trended from last 3 mo. (YTD floor)","Portugal":"trended from last 3 mo. (YTD floor)","Romania":"trended from last 3 mo. (YTD floor)","Slovakia":"trended from last 3 mo. (YTD floor)","Slovenia":"trended from last 3 mo. (YTD floor)","Spain":"trended from last 3 mo. (YTD floor)","Sweden":"trended from last 3 mo. (YTD floor)","Switzerland":"trended from last 3 mo. (YTD floor)","Turkey":"run-rate projected from 7 mo.","United Kingdom":"trended from last 3 mo. (YTD floor)","United States":"trended from last 3 mo. (YTD floor)","India":"trended from last 3 mo. (YTD floor)","South Korea":"trended from last 3 mo. (YTD floor)","Taiwan":"trended from last 3 mo. (YTD floor)","Chile":"trended from last 3 mo. (YTD floor)","Vietnam":"trended from last 3 mo. (YTD floor)",
       "Israel":"trended from last 3 mo. (YTD floor)",
       "Kazakhstan":"trended from last 3 mo. (YTD floor)",
-      "Peru":"trended from last 3 mo. (YTD floor)"
+      "Peru":"trended from last 3 mo. (YTD floor)",
+      "Uruguay":"trended from last 3 mo. (YTD floor)"
     },
     // BEV units for full-year 2025 (actual), to compare the projection against real prior-year performance
     priorYearBev: {
+      "Ecuador":4276,
       "Argentina":1332,"Australia":103270,"Austria":60651,"Belgium":143849,"Brazil":80381,"Bulgaria":2506,"Canada":116067,"China":10603000,"Croatia":1266,"Cyprus":1474,"Czechia":13806,"Denmark":126542,"Estonia":868,"Finland":26743,"France":326922,"Germany":545142,"Greece":8892,"Hungary":11003,"Iceland":6066,"India":196237,"Ireland":23616,"Italy":94678,"Japan":39885,"Latvia":1602,"Lithuania":3150,"Luxembourg":12663,"Malta":1711,"Mexico":20923,"Netherlands":156931,"New Zealand":6818,"Norway":172230,"Poland":43310,"Portugal":52256,"Romania":8849,"Slovakia":4376,"Slovenia":6419,"Spain":101661,"Sweden":99723,"Switzerland":53250,"Turkey":189868,"United Kingdom":473348,"United States":1240040,"South Korea":221389,"Taiwan":32358,
       "Israel":58396,
-      "Peru":751
+      "Peru":751,
+      "Uruguay":13788
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
+      "Ecuador":124505,
       "Argentina":612291,"Australia":1195771,"Austria":284978,"Belgium":414771,"Brazil":2552201,"Bulgaria":48294,"Canada":1867797,"China":34399621,"Croatia":69839,"Cyprus":14636,"Czechia":248719,"Denmark":184641,"Estonia":13055,"Finland":71872,"France":1632152,"Germany":2857591,"Greece":144199,"Hungary":129420,"Iceland":14821,"India":4631965,"Ireland":124954,"Italy":1526032,"Japan":2533523,"Latvia":22506,"Lithuania":41968,"Luxembourg":47161,"Malta":6269,"Mexico":1524638,"Netherlands":390883,"New Zealand":97462,"Norway":179631,"Poland":597435,"Portugal":225039,"Romania":156803,"Slovakia":93043,"Slovenia":57250,"Spain":1148581,"Sweden":272998,"Switzerland":233740,"Turkey":1084496,"United Kingdom":2020523,"United States":16230606,"South Korea":1699779,"Taiwan":363653,
       "Israel":300131,
-      "Peru":211776
+      "Peru":211776,
+      "Uruguay":48588
     }
   },
   "2025-annual": {
     label: "2025 (Annual)",
     raw: {
+      // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — full year 2025, real Gasolina/Diesel split (AEADE's monthly "Energía" bulletin table began publishing this breakdown in 2025; prior years only give a combined ICE remainder, see annual comments below)
+      "Ecuador": [4276,0,18370,0,65326,36533,124505],
       "Malaysia": [30848, 0, 38515, 0, 703285, 48104, 820752],
       // source: world_auto_sales_annual — full-year 2025 figures, several different national sources (see footer). Diesel not tracked/negligible for these markets except India.
       "India": [196237,73,368555,980869,2243933,842298,4631965],
@@ -1235,6 +1299,8 @@ const MONTHLY_DATA = {
       "Israel": [58396,34723,78939,10,110667,17396,300131],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry, full-year 2025 summed from monthly figures — HEV includes MHEV combined; Diesel folded into Petrol
       "Peru": [751,640,8848,0,201537,0,211776],
+      // source: ACAU (Uruguay), Compilado 2025 report, full-year summed from monthly figures — HEV includes MHEV combined; PHEV not separately coded in 2025 (folded into HEV)
+      "Uruguay": [13788,0,5723,0,28754,323,48588],
       // source: CERR (Center for Economic Research and Reforms), full-year 2025 — only BEV tracked (user's explicit choice); rest folded into Others. Both Total and BEV here are CERR's own primary-market figures, same scope on both sides (368,300/40,700 = 11.1%, matching CERR's own "~10%" market-share statements and IEA's independent 6% estimate within a plausible range). 2026 monthly rows were built and then REMOVED (2026-09-02): they paired this same primary-market Total against CERR's monthly EV headline, which turned out to blend primary+secondary market sales -- inflating BEV share to 21-35% vs the true ~10-11%. Only this correctly-scoped annual row remains; see country_data_coverage for the full retraction note and what a valid monthly reload would need.
       "Uzbekistan": [40700,0,0,327600,0,0,368300]
     },
@@ -1245,9 +1311,11 @@ const MONTHLY_DATA = {
     },
     // BEV units for full-year 2024, for YoY %
     priorYearBev: {
+      "Ecuador":1416,
       "Malaysia":14766,
       "Nepal":11701,
       "Peru":435,
+      "Uruguay":5367,
       "India": 105461,
       "United States": 1243419,
       "China": 7720000,
@@ -1270,13 +1338,17 @@ const MONTHLY_DATA = {
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
+      "Ecuador":108266,
       "Malaysia":816747,"India":4224368,"United States":15858418,"China":31436193,"Mexico":1504322,"Japan":2523105,"Australia":1185971,"Brazil":2487536,"South Korea":1645998,"Indonesia":865723,"Thailand":572675,"Turkey":980341,"New Zealand":86523,"Austria":253789,"Belgium":448278,"Bulgaria":42186,"Croatia":65020,"Cyprus":15057,"Czechia":231490,"Denmark":173114,"Estonia":25386,"Finland":74056,"France":1718412,"Germany":2817331,"Greece":137075,"Hungary":121597,"Iceland":10238,"Ireland":121307,"Italy":1558225,"Latvia":17191,"Lithuania":30101,"Luxembourg":46693,"Malta":7829,"Netherlands":383602,"Norway":128687,"Poland":551568,"Portugal":209695,"Romania":151105,"Slovakia":95014,"Slovenia":52666,"Spain":1016990,"Sweden":269582,"Switzerland":239803,"United Kingdom":1952778,"Canada":1853441,"Taiwan":403702,"Singapore":43022,"Nepal":15929,
-      "Peru":169309
+      "Peru":169309,
+      "Uruguay":42168
     }
   },
   "2024-annual": {
     label: "2024 (Annual)",
     raw: {
+      // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — full year 2024; no Gasolina/Diesel split published for this year (AEADE's "Energía" breakdown began in 2025), so the full ICE remainder (Total minus BEV minus Hibrido) is placed in petrol with diesel=0 — NOT a claim that Ecuador sells no diesel (~36% of the 2025 ICE remainder was diesel, once AEADE started splitting it)
+      "Ecuador": [1416,0,13088,0,93762,0,108266],
       "Malaysia": [14766, 0, 30796, 0, 718423, 52762, 816747],
       "Australia": [91292, 23163, 172696, 0, 528978, 369842, 1185971],
       "Austria": [44622, 16919, 64099, 13, 84004, 44132, 253789],
@@ -1338,7 +1410,9 @@ const MONTHLY_DATA = {
       // source: Israel Ministry of Transport (data.gov.il) vehicle registry -- CAVEAT: this is a snapshot of vehicles still active as of the 2026-09 pull, so it undercounts historical years (this row is only 96% of OICA's 2024 total, which stays the primary total-market source above); loaded anyway for the powertrain-mix breakdown, which exists nowhere else for this year. Petrol/HEV split via I-VIA's quarterly ratio.
       "Israel": [67719,6695,52414,16,130576,15660,273080],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry, full-year 2024 summed from monthly figures — HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [435,265,5946,0,162663,0,169309]
+      "Peru": [435,265,5946,0,162663,0,169309],
+      // source: ACAU (Uruguay), Compilado 2024 report, full-year summed from monthly figures — HEV includes MHEV combined; PHEV not separately coded in 2024 (folded into HEV)
+      "Uruguay": [5367,0,3675,0,32169,957,42168]
     },
     // per-country "as of" override for a source whose fiscal year doesn't match the calendar year
     asOf: {
@@ -1347,20 +1421,26 @@ const MONTHLY_DATA = {
     },
     // BEV units for full-year 2023, for YoY %
     priorYearBev: {
+      "Ecuador":767,
       "Malaysia":10159,
       "Nepal":4050,
       "Peru":267,
+      "Uruguay":1474,
       "Australia":87212,"Austria":47621,"Belgium":93285,"Brazil":19277,"Bulgaria":1467,"Canada":143666,"Chile":1588,"China":6685000,"Croatia":1624,"Cyprus":788,"Czechia":6702,"Denmark":62759,"Estonia":1445,"Finland":29534,"France":298219,"Germany":524219,"Greece":6379,"Hungary":5748,"Iceland":8781,"India":89227,"Indonesia":17058,"Ireland":22842,"Italy":66278,"Japan":43991,"Latvia":1790,"Lithuania":2060,"Luxembourg":11052,"Malta":982,"Mexico":14172,"Morocco":463,"Netherlands":114455,"New Zealand":20729,"Norway":104587,"Poland":17081,"Portugal":36390,"Romania":15368,"Slovakia":2346,"Slovenia":4332,"South Korea":163000,"Spain":51714,"Sweden":112208,"Switzerland":52728,"Thailand":73567,"Turkey":65562,"United Kingdom":314684,"United States":1164638,"Taiwan":24706,"Singapore":5468
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
+      "Ecuador":132402,
       "Malaysia":799731,"Australia":1165003,"Austria":239150,"Belgium":476675,"Brazil":2180230,"Bulgaria":35764,"Canada":1714999,"Chile":313865,"China":30093698,"Croatia":56293,"Cyprus":14760,"Czechia":221419,"Denmark":172798,"Estonia":22820,"Finland":87496,"France":1774723,"Germany":2844609,"Greece":134485,"Hungary":107601,"Iceland":17543,"India":3892290,"Indonesia":1005802,"Ireland":121824,"Italy":1565596,"Japan":2651397,"Latvia":18989,"Lithuania":27492,"Luxembourg":49151,"Malta":6567,"Mexico":1363714,"Netherlands":372156,"New Zealand":108702,"Norway":126955,"Poland":475030,"Portugal":199623,"Romania":144611,"Slovakia":88003,"Slovenia":48978,"South Korea":1759561,"Spain":949474,"Sweden":289827,"Switzerland":252214,"Thailand":775780,"Turkey":967341,"United Kingdom":1903054,"United States":15502479,"Taiwan":416290,"Singapore":30225,"Nepal":7114,
-      "Peru":181812
+      "Peru":181812,
+      "Uruguay":38245
     }
   },
   "2023-annual": {
     label: "2023 (Annual)",
     raw: {
+      // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — full year 2023; no Gasolina/Diesel split published for this year, full ICE remainder placed in petrol with diesel=0 (see 2024 comment — not a claim diesel=0)
+      "Ecuador": [767,0,11508,0,120127,0,132402],
       "Malaysia": [10159, 0, 28055, 0, 698257, 63260, 799731],
       "Australia": [87212, 11212, 98439, 6, 588622, 379512, 1165003],
       "Austria": [47621, 16956, 50630, 21, 77354, 46568, 239150],
@@ -1422,7 +1502,9 @@ const MONTHLY_DATA = {
       // source: Israel Ministry of Transport (data.gov.il) vehicle registry -- CAVEAT: this is a snapshot of vehicles still active as of the 2026-09 pull, so it undercounts historical years (this row is only 87% of OICA's 2023 total, which stays the primary total-market source above); loaded anyway for the powertrain-mix breakdown, which exists nowhere else for this year. Petrol/HEV split via I-VIA's quarterly ratio.
       "Israel": [47538,16011,38278,48,144875,20555,267305],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry, full-year 2023 summed from monthly figures — HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [267,289,3928,0,177328,0,181812]
+      "Peru": [267,289,3928,0,177328,0,181812],
+      // source: ACAU (Uruguay), Compilado 2023 report, full-year summed from monthly figures — HEV includes MHEV combined; PHEV not separately coded in 2023 (folded into HEV). No priorYear comparison: 2022 is total-only (no fuel-type split available for Uruguay before 2023).
+      "Uruguay": [1474,0,3075,0,32685,1011,38245]
     },
     // per-country "as of" override for a source whose fiscal year doesn't match the calendar year
     asOf: {
@@ -1431,12 +1513,14 @@ const MONTHLY_DATA = {
     },
     // BEV units for full-year 2022, for YoY %
     priorYearBev: {
+      "Ecuador":436,
       "Malaysia":2631,
       "Peru":165,
       "Australia":33410,"Brazil":8440,"Canada":98620,"China":5365000,"India":40825,"Japan":31592,"Mexico":5631,"Turkey":7733,"United States":747982,"Taiwan":16106,"Singapore":3634
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
+      "Ecuador":135250,
       "Malaysia":721177,"Australia":1034070,"Brazil":1960462,"Canada":1513105,"China":26863745,"India":3488207,"Japan":2223303,"Mexico":1094728,"Turkey":592660,"United States":13754339,"Taiwan":364231,"Singapore":30939,
       "Peru":177543
     }
@@ -1444,6 +1528,8 @@ const MONTHLY_DATA = {
     "2022-annual": {
     label: "2022 (Annual)",
     raw: {
+      // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — full year 2022; no Gasolina/Diesel split published for this year, full ICE remainder placed in petrol with diesel=0 (see 2024 comment — not a claim diesel=0)
+      "Ecuador": [436,0,6510,0,128304,0,135250],
       "Australia": [33410,5937,81786,15,551556,361366,1034070],
       "Austria": [34165,13268,40858,77,78567,48115,215050],
       "Belgium": [37760,59269,73915,2896,145998,54759,374597],
@@ -1499,11 +1585,13 @@ const MONTHLY_DATA = {
       "Peru": [165,107,2408,0,174863,0,177543]
     },
     priorYearBev: {
+      "Ecuador":284,
       "India":13921,"United States":459474,"China":2734000,"Mexico":1140,"Canada":59133,"Japan":21139,"Brazil":2860,"Morocco":267,"Turkey":2846,"Malaysia":278,"Colombia":1329,"Belgium":22774,"Bulgaria":321,"Czechia":3172,"Denmark":24876,"Germany":355961,"Estonia":487,"Ireland":9199,"Greece":2174,"Spain":24400,"France":165566,"Croatia":1121,"Italy":69178,"Cyprus":78,"Latvia":480,"Lithuania":1277,"Luxembourg":4649,"Hungary":4313,"Malta":416,"Netherlands":63658,"Austria":33366,"Poland":7092,"Portugal":13546,"Romania":6344,"Slovenia":1742,"Slovakia":1105,"Finland":10153,"Sweden":57590,"Iceland":4246,"Norway":116399,"Switzerland":32025,"United Kingdom":188143,"Taiwan":6997,
       "Peru":33
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
+      "Ecuador":115371,
       "India":3010761,"United States":14946973,"China":26275000,"Mexico":1014735,"Canada":1646812,"Japan":2399862,"Brazil":1977110,"Morocco":175360,"Turkey":561853,"Malaysia":508911,"Colombia":250272,"Belgium":392769,"Bulgaria":24467,"Czechia":205397,"Denmark":186592,"Germany":2622132,"Estonia":22610,"Ireland":108615,"Greece":100274,"Spain":918831,"France":1708675,"Croatia":35246,"Italy":1518876,"Cyprus":10611,"Latvia":14621,"Lithuania":28209,"Luxembourg":44372,"Hungary":122080,"Malta":5250,"Netherlands":322318,"Austria":239803,"Poland":450831,"Portugal":146641,"Romania":121210,"Slovenia":53428,"Slovakia":75608,"Finland":98485,"Sweden":303906,"Iceland":15787,"Norway":182618,"Switzerland":250901,"United Kingdom":1640224,"Taiwan":382918,
       "Peru":174751
     }
@@ -1511,6 +1599,8 @@ const MONTHLY_DATA = {
     "2021-annual": {
     label: "2021 (Annual)",
     raw: {
+      // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — full year 2021; no Gasolina/Diesel split published for this year, full ICE remainder placed in petrol with diesel=0 (see 2024 comment — not a claim diesel=0)
+      "Ecuador": [284,0,3926,0,111161,0,115371],
       "Austria": [33366,14626,41970,100,91478,58263,239803],
       "Belgium": [22774,0,115317,3093,169019,82566,392769],
       "Brazil": [2860,0,32130,0,1677935,264185,1977110],
@@ -1565,11 +1655,13 @@ const MONTHLY_DATA = {
       "Peru": [33,58,1364,0,173296,0,174751]
     },
     priorYearBev: {
+      "Ecuador":134,
       "India":4399,"United States":238540,"Canada":39046,"Brazil":0,"Morocco":16,"Turkey":844,"Colombia":1307,"Bulgaria":139,"Denmark":14218,"Germany":194163,"Estonia":344,"Ireland":4075,"Spain":18217,"France":112499,"Italy":30930,"Cyprus":42,"Lithuania":480,"Luxembourg":2473,"Hungary":3047,"Malta":178,"Netherlands":72859,"Austria":15972,"Poland":3679,"Portugal":7908,"Romania":2844,"Slovenia":1720,"Slovakia":918,"Finland":4245,"Sweden":27981,"Iceland":2551,"Norway":82212,"Switzerland":19753,"Belgium":15044,"Czechia":3284,"Greece":678,"Croatia":639,"Latvia":351,"Taiwan":6243,
       "Peru":26
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
+      "Ecuador":85818,
       "India":2454918,"United States":14472032,"Canada":1545625,"Brazil":1954828,"Morocco":133310,"Turkey":610109,"Colombia":188391,"Bulgaria":20429,"Denmark":198979,"Germany":2917678,"Estonia":19295,"Ireland":92393,"Spain":927523,"France":1693530,"Italy":1437259,"Cyprus":10237,"Lithuania":40878,"Luxembourg":45189,"Hungary":128196,"Malta":4602,"Netherlands":355432,"Austria":248740,"Poland":432394,"Portugal":145270,"Romania":126329,"Slovenia":53367,"Slovakia":76300,"Finland":96418,"Sweden":293771,"Iceland":10622,"Norway":157503,"Switzerland":245510,"Belgium":439038,"Czechia":198400,"Greece":79597,"Croatia":36047,"Latvia":13725,"Taiwan":396345,
       "Peru":125090
     }
@@ -1577,6 +1669,8 @@ const MONTHLY_DATA = {
     "2020-annual": {
     label: "2020 (Annual)",
     raw: {
+      // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — full year 2020; no Gasolina/Diesel split published for this year, full ICE remainder placed in petrol with diesel=0 (see 2024 comment — not a claim diesel=0)
+      "Ecuador": [134,0,1053,0,84631,0,85818],
       "Austria": [15972,7641,26026,421,107771,90909,248740],
       "Belgium": [15044,0,71457,3876,211646,137015,439038],
       "Brazil": [0,0,0,19745,1723929,211154,1954828],
@@ -1626,6 +1720,7 @@ const MONTHLY_DATA = {
       "Peru": [26,10,542,0,124512,0,125090]
     },
     priorYearBev: {
+      "Ecuador":103,
       "India":1875,"United States":233822,"Canada":35550,"Brazil":0,"Morocco":12,"Turkey":222,"Colombia":926,"Bulgaria":188,"Czechia":778,"Denmark":5501,"Germany":63281,"Ireland":3665,"Spain":10415,"France":43564,"Croatia":279,"Latvia":116,"Luxembourg":986,"Hungary":1834,"Malta":281,"Austria":9242,"Poland":1464,"Portugal":6880,"Romania":1506,"Slovenia":695,"Slovakia":166,"Finland":1897,"Sweden":15795,"Norway":60271,"Switzerland":13177,"Belgium":8892,"Estonia":77,"Greece":188,"Italy":10612,"Cyprus":58,"Lithuania":175,"Netherlands":61547,"Iceland":1090
     }
   }
@@ -1666,7 +1761,7 @@ const COUNTRY_CONTINENT = {
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
   "Canada":"NAC","United States":"NAC","China":"ASIA","India":"ASIA","Mexico":"NAC","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"SA","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"SA","Turkey":"EU","Philippines":"ASIA","Chile":"SA","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA","Taiwan":"ASIA","Singapore":"ASIA","Serbia":"EU","Colombia":"SA","Vietnam":"ASIA","Nepal":"ASIA"
-,"Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA","Uzbekistan":"ASIA"};
+,"Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA","Uzbekistan":"ASIA","Uruguay":"SA","Ecuador":"SA"};
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 
 // country -> ISO 3166-1 alpha-2 code, for flag images (flagcdn.com)
@@ -1677,7 +1772,7 @@ const COUNTRY_ISO2 = {
   "Norway":"no","Poland":"pl","Portugal":"pt","Romania":"ro","Slovakia":"sk","Slovenia":"si","Spain":"es",
   "Sweden":"se","Switzerland":"ch","United Kingdom":"gb","Canada":"ca",
   "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th","Argentina":"ar","Turkey":"tr","Philippines":"ph","Chile":"cl","Morocco":"ma","New Zealand":"nz","Malaysia":"my","Taiwan":"tw","Singapore":"sg","Serbia":"rs","Colombia":"co","Vietnam":"vn","Nepal":"np"
-,"Israel":"il","Kazakhstan":"kz","Peru":"pe","Uzbekistan":"uz"};
+,"Israel":"il","Kazakhstan":"kz","Peru":"pe","Uzbekistan":"uz","Uruguay":"uy","Ecuador":"ec"};
 const ALL_COUNTRIES_SORTED = [...ALL_COUNTRIES].sort((a,b) => {
   const ca = COUNTRY_CONTINENT[a] || 'ZZ', cb = COUNTRY_CONTINENT[b] || 'ZZ';
   return ca !== cb ? ca.localeCompare(cb) : a.localeCompare(b);
