@@ -230,6 +230,7 @@
               <button type="button" class="filter-bulk-btn" data-target="countries" data-action="check">Check all</button> / <button type="button" class="filter-bulk-btn" data-target="countries" data-action="uncheck">Uncheck all</button>
             </span>
           </div>
+          <input type="text" id="country-search" class="filter-search" placeholder="Search countries… (3+ letters)" autocomplete="off">
           <div class="filter-countries" id="filter-countries-group"></div>
           <p class="filter-note">Sorted by continent, then country — makes it easier to zero in as more regions get added.</p>
         </div>
@@ -1650,11 +1651,26 @@ continentsBox.innerHTML = ALL_CONTINENTS.map(code => `
 
 const countriesBox = document.getElementById('filter-countries-group');
 countriesBox.innerHTML = ALL_COUNTRIES_SORTED.map(c => `
-  <label class="filter-checkbox">
+  <label class="filter-checkbox" data-country-row="${c}">
     <input type="checkbox" data-country="${c}" checked>
     <span class="fc-label">${COUNTRY_CONTINENT[c] || 'OTHER'} - ${c}</span>
     <button type="button" class="only-btn" data-only-country="${c}">Only</button>
   </label>`).join('');
+
+// country search — only kicks in at 3+ characters, matches on country name only (not continent code)
+const countrySearchInput = document.getElementById('country-search');
+countrySearchInput.addEventListener('input', () => {
+  const q = countrySearchInput.value.trim().toLowerCase();
+  const rows = countriesBox.querySelectorAll('[data-country-row]');
+  if(q.length < 3){
+    rows.forEach(row => row.classList.remove('search-hidden'));
+    return;
+  }
+  rows.forEach(row => {
+    const match = row.dataset.countryRow.toLowerCase().includes(q);
+    row.classList.toggle('search-hidden', !match);
+  });
+});
 
 const monthsBox = document.getElementById('filter-months');
 monthsBox.innerHTML = ALL_MONTHS.map(m => `
@@ -1908,7 +1924,9 @@ function renderMap(){
     .on('pointerleave', () => { mapTooltip.style.opacity = 0; })
     .on('click', (e, d) => {
       const name = mapCountryName(d);
-      if(COUNTRIES_WITH_TREND.has(name)) focusCountry(name);
+      if(!COUNTRIES_WITH_TREND.has(name)) return;
+      if(focusedCountry === name){ clearSelection(); recompute(); }
+      else focusCountry(name);
     });
 }
 
@@ -2373,24 +2391,29 @@ const bubbleWrap = document.getElementById('bubble-svg').closest('.chart-card');
 const BUBBLE_R = 16; // fixed radius for every country — size no longer encodes a metric
 const BUBBLE_BREAK_FRACTION = 0.74; // share of the axis width given to the "normal" (non-outlier) zone
 let bubbleMode = 'snapshot'; // 'snapshot' | 'trend' — see [data-bubble-mode] wiring below renderBubbleChart
+const AUTO_TREND_COUNTRY_LIMIT = 15; // below this many selected countries (or any single focused one), TREND clutters far less than it informs
 
 const BUBBLE_NOTES = {
   snapshot: `X = number of BEV units sold, Y = BEV share of that country's total. Each country is its own flag, same size for every market. Hover a flag for exact figures.`,
-  trend: `Flag = selected period. Paler dots trace up to 4 prior months for the same country, only where monthly history exists — a short trail means a market we've only just started tracking monthly, not a market standing still.`
+  trend: `Flag = selected period, at its real figures. Paler dots trace the 3 preceding full years for the same country — only where annual history exists, so a short trail means a market we've only just started tracking, not one standing still.`
 };
 
-// true calendar-month period keys ("2026-06"), sorted chronologically — excludes the
-// annual/YTD/projection keys that also live in MONTHLY_DATA, since those don't form a sequence
-const ALL_MONTHLY_KEYS = ALL_MONTHS.filter(m => /^\d{4}-\d{2}$/.test(m)).sort();
-
-// the selected period plus up to 4 preceding months, oldest first, ending at the selected period —
-// the walk-back window for TREND mode. A non-monthly period (annual/YTD/projection) has no
-// sequence to walk, so it degenerates to just itself (TREND then renders the same as SNAPSHOT).
+// the selected period plus its 3 preceding full calendar years (annual totals), oldest first —
+// the walk-back window for TREND mode, echoing the site's existing "3-Year Growth" stat, which
+// also anchors comparisons on annual data rather than a rolling window of months. The current
+// point still shows the real, un-normalized selected period (same figure SNAPSHOT would show) —
+// only the trailing history is pulled from full years, skipping any year with no annual data yet.
 function getTrendPeriods(){
   const current = [...selectedMonths][0];
-  const idx = ALL_MONTHLY_KEYS.indexOf(current);
-  if(idx === -1) return [current];
-  return ALL_MONTHLY_KEYS.slice(Math.max(0, idx - 4), idx + 1);
+  const year = parseInt(current.slice(0, 4), 10);
+  if(!year) return [current];
+  const years = [];
+  for(let y = year - 3; y < year; y++){
+    const key = `${y}-annual`;
+    if(MONTHLY_DATA[key]) years.push(key);
+  }
+  years.push(current);
+  return years;
 }
 
 // every country's BEV total for the currently selected period(s), ignoring the continent/country
@@ -2618,6 +2641,16 @@ function renderBubbleChart(){
 }
 
 const bubbleNote = document.getElementById('bubble-note');
+
+// re-decided on every recompute() (filter/focus/period change) — a single focused country or a
+// short enough country list makes TREND read as insight rather than clutter, so default to it
+// there; a manual click still wins until the next filter-changing action re-asserts this.
+function updateBubbleModeAuto(){
+  bubbleMode = (focusedCountry || selectedCountries.size < AUTO_TREND_COUNTRY_LIMIT) ? 'trend' : 'snapshot';
+  document.querySelectorAll('[data-bubble-mode]').forEach(b => b.classList.toggle('active', b.dataset.bubbleMode === bubbleMode));
+  bubbleNote.textContent = BUBBLE_NOTES[bubbleMode];
+}
+
 document.querySelectorAll('[data-bubble-mode]').forEach(btn => {
   btn.addEventListener('click', () => {
     if(btn.dataset.bubbleMode === bubbleMode) return;
@@ -2751,6 +2784,7 @@ function recompute(){
   renderTable();
   renderMap();
   renderLegend();
+  updateBubbleModeAuto();
   renderBubbleChart();
   renderTrendsChart();
   renderMomentum();

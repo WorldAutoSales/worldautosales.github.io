@@ -947,6 +947,19 @@ nav.sidebar-nav a.nav-link-alert:hover{
   font-family:inherit;
 }
 .filter-bulk-btn:hover{ text-decoration:underline; }
+.filter-search{
+  width:100%;
+  box-sizing:border-box;
+  font-family:inherit;
+  font-size:12.5px;
+  color:var(--text);
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:6px 9px;
+  margin-bottom:7px;
+}
+.filter-search:focus{ outline:none; border-color:var(--accent); }
 .filter-countries{
   display:flex;
   flex-direction:column;
@@ -955,6 +968,7 @@ nav.sidebar-nav a.nav-link-alert:hover{
   overflow-y:auto;
   padding-right:4px;
 }
+.filter-checkbox.search-hidden{ display:none; }
 .filter-checkbox{
   display:flex;
   align-items:center;
