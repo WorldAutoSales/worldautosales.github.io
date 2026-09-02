@@ -167,8 +167,8 @@
           <div class="chart-header-row">
             <h2>Volume vs. BEV Share</h2>
             <div class="chart-mode-toggle" role="group" aria-label="Chart view">
-              <button type="button" class="mode-btn active" data-bubble-mode="snapshot" title="One point per country, for the selected period only.">SNAPSHOT</button>
-              <button type="button" class="mode-btn" data-bubble-mode="trend" title="Adds up to 4 prior months as a fading trail, for countries with monthly history.">TREND</button>
+              <button type="button" class="mode-btn active" data-bubble-mode="trend" title="Adds the 3 preceding full years as a fading trail, for countries with annual history.">TREND</button>
+              <button type="button" class="mode-btn" data-bubble-mode="snapshot" title="One point per country, for the selected period only.">SNAPSHOT</button>
             </div>
           </div>
           <p class="note" id="bubble-note">X = number of BEV units sold, Y = BEV share of that country's total. Each country is its own flag, same size for every market. Hover a flag for exact figures.</p>
@@ -2450,8 +2450,7 @@ const bubbleWrap = document.getElementById('bubble-svg').closest('.chart-card');
 
 const BUBBLE_R = 16; // fixed radius for every country — size no longer encodes a metric
 const BUBBLE_BREAK_FRACTION = 0.74; // share of the axis width given to the "normal" (non-outlier) zone
-let bubbleMode = 'snapshot'; // 'snapshot' | 'trend' — see [data-bubble-mode] wiring below renderBubbleChart
-const AUTO_TREND_COUNTRY_LIMIT = 15; // below this many selected countries (or any single focused one), TREND clutters far less than it informs
+let bubbleMode = 'trend'; // 'snapshot' | 'trend' — see [data-bubble-mode] wiring below renderBubbleChart; TREND is the default, see updateBubbleModeAuto
 
 const BUBBLE_NOTES = {
   snapshot: `X = number of BEV units sold, Y = BEV share of that country's total. Each country is its own flag, same size for every market. Hover a flag for exact figures.`,
@@ -2711,11 +2710,10 @@ function renderBubbleChart(){
 
 const bubbleNote = document.getElementById('bubble-note');
 
-// re-decided on every recompute() (filter/focus/period change) — a single focused country or a
-// short enough country list makes TREND read as insight rather than clutter, so default to it
-// there; a manual click still wins until the next filter-changing action re-asserts this.
+// re-asserted on every recompute() (filter/focus/period change) — TREND is the default view; a
+// manual click to SNAPSHOT still wins until the next filter-changing action re-asserts this.
 function updateBubbleModeAuto(){
-  bubbleMode = (focusedCountry || selectedCountries.size < AUTO_TREND_COUNTRY_LIMIT) ? 'trend' : 'snapshot';
+  bubbleMode = 'trend';
   document.querySelectorAll('[data-bubble-mode]').forEach(b => b.classList.toggle('active', b.dataset.bubbleMode === bubbleMode));
   bubbleNote.textContent = BUBBLE_NOTES[bubbleMode];
 }
