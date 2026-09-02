@@ -297,7 +297,9 @@ const MONTHLY_DATA = {
       // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw), Taiwan (monthly) — passenger cars only, PHEV folded into HEV
       "Taiwan": [1592,0,15668,0,16526,402,34188],
       // source: ANAC A.G. (Registro Civil), Chile (monthly) — BEV/PHEV/HEV exact registry units from ANAC's electrified-vehicle report; Petrol/Diesel computed as (total market − electrified) residual, split at ~28.7% diesel share (ANAC doesn't publish Petrol/Diesel directly)
-      "Chile": [781,654,3061,0,14421,5805,24722]
+      "Chile": [781,654,3061,0,14421,5805,24722],
+      // source: FENALCO-ANDI, Colombia — genuine standalone month, directly reported in full; PHEV folded into HEV
+      "Colombia": [4870,0,9410,0,14353,0,28633]
     },
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY % (Argentina, China,
     // Indonesia, Australia, Singapore omitted — no matching July 2025 monthly figure sourced for those five)
@@ -315,6 +317,8 @@ const MONTHLY_DATA = {
       "Austria": [8993,4040,10472,0,7577,3174,34256],
       "Belgium": [17256,2788,5935,652,17344,1474,45449],
       "Bulgaria": [478,128,345,5,3613,888,5457],
+      // source: FENALCO-ANDI, Colombia — derived by subtraction of two exact YTD cumulative snapshots (Jun minus May); PHEV folded into HEV
+      "Colombia": [4935,0,8441,0,15662,0,29038],
       "Croatia": [344,554,3491,49,3432,1146,9016],
       "Cyprus": [170,64,575,0,301,23,1133],
       "Czechia": [2151,1546,6312,671,11154,4564,26398],
@@ -399,6 +403,8 @@ const MONTHLY_DATA = {
       "Austria": [6598,2932,7239,1,6135,2624,25529],
       "Belgium": [12586,1596,4130,485,13765,1063,33625],
       "Bulgaria": [362,55,292,49,3148,387,4293],
+      // source: FENALCO-ANDI, Colombia — genuine standalone month, directly reported in full; PHEV folded into HEV
+      "Colombia": [5001,0,8926,0,14209,0,28136],
       "Croatia": [327,573,3888,68,3693,1046,9595],
       "Cyprus": [135,103,677,0,372,25,1312],
       "Czechia": [1356,1098,5025,531,8722,3731,20463],
@@ -475,6 +481,8 @@ const MONTHLY_DATA = {
       "Austria": [7122,2997,8366,1,6368,2655,27509],
       "Belgium": [13971,1830,4506,371,15888,1236,37802],
       "Bulgaria": [456,83,284,4,3356,559,4742],
+      // source: FENALCO-ANDI, Colombia — genuine standalone month, directly reported in full; PHEV folded into HEV
+      "Colombia": [5192,0,7476,0,14119,0,26787],
       "Croatia": [330,486,3828,55,2943,1016,8658],
       "Cyprus": [181,53,536,0,400,15,1185],
       "Czechia": [1684,1090,5166,399,10170,3888,22397],
@@ -550,6 +558,8 @@ const MONTHLY_DATA = {
       "Austria": [8206,3165,10513,0,8181,2953,33018],
       "Belgium": [15661,2417,5221,423,18908,1103,43733],
       "Bulgaria": [349,82,231,0,3310,509,4481],
+      // source: FENALCO-ANDI, Colombia — Jan-Mar 2026 combined total (no finer breakdown published) divided evenly across the 3 months; PHEV folded into HEV
+      "Colombia": [3116,0,6587,0,14849,0,24552],
       "Croatia": [445,480,3001,69,3144,925,8064],
       "Cyprus": [113,79,622,0,400,18,1232],
       "Czechia": [1541,996,5939,534,10700,4206,23916],
@@ -628,6 +638,8 @@ const MONTHLY_DATA = {
       "Austria": [4439,2151,6665,0,5530,2503,21288],
       "Belgium": [11677,1965,5058,113,17528,734,37075],
       "Bulgaria": [215,61,209,2,2926,353,3766],
+      // source: FENALCO-ANDI, Colombia — Jan-Mar 2026 combined total (no finer breakdown published) divided evenly across the 3 months; PHEV folded into HEV
+      "Colombia": [3116,0,6587,0,14849,0,24552],
       "Croatia": [197,336,1757,88,1743,746,4867],
       "Cyprus": [109,57,600,0,325,54,1145],
       "Czechia": [958,937,4136,373,8543,3644,18591],
@@ -705,6 +717,8 @@ const MONTHLY_DATA = {
       "Austria": [4702,2738,6496,0,6718,2275,22929],
       "Belgium": [12131,2068,3809,100,14105,784,32997],
       "Bulgaria": [182,45,204,6,2378,403,3218],
+      // source: FENALCO-ANDI, Colombia — Jan-Mar 2026 combined total (no finer breakdown published) divided evenly across the 3 months; PHEV folded into HEV
+      "Colombia": [3116,0,6587,0,14849,0,24552],
       "Croatia": [138,278,1531,51,1461,505,3964],
       "Cyprus": [203,55,633,0,376,26,1293],
       "Czechia": [940,850,4482,231,7754,3786,18043],

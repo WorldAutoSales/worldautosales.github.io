@@ -304,6 +304,21 @@ const HIST = {
   [46,0,1008,980,270,29,2333],[46,0,1008,980,270,29,2333],[46,0,1008,980,270,29,2333],
   [132,0,1829,1742,394,74,4171],[132,0,1829,1742,394,74,4171],[132,0,1829,1742,394,74,4171],
   null
+],
+// Colombia: FENALCO-ANDI, passenger + light commercial vehicles combined. Neither FENALCO's monthly
+// EV/Hybrid report nor ANDI's monthly total-market release publishes a standalone single-month figure
+// directly -- each month from Apr 2026 onward is derived by subtracting the previous cumulative
+// snapshot from the new one (Apr/May/Jul happened to be reported standalone too; Jun is a pure
+// subtraction). Jan-Mar 2026 has no finer breakdown available, so that 3-month combined total is
+// divided evenly. PHEV not split from HEV (PHEV=0). No data before 2026.
+"Colombia":[
+  null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+  null,null,null,null,null,null,null,null,null,null,null,null,
+  [3116,0,6587,14849,0,0,24552],[3116,0,6587,14849,0,0,24552],[3116,0,6587,14849,0,0,24552],
+  [5192,0,7476,14119,0,0,26787],
+  [5001,0,8926,14209,0,0,28136],
+  [4935,0,8441,15662,0,0,29038],
+  [4870,0,9410,14353,0,0,28633]
 ]
 };
 const FUEL_KEYS = ['bev','phev','hev','petrol','diesel','others'];
@@ -327,7 +342,7 @@ const COUNTRY_CONTINENT = {
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
   "Canada":"NA","New Zealand":"OCEANIA","United States":"NA","China":"ASIA","Mexico":"NA",
   "Brazil":"LATAM","Argentina":"LATAM","Japan":"ASIA","Indonesia":"ASIA","Malaysia":"ASIA","India":"ASIA",
-  "Turkey":"EU","Thailand":"ASIA","Singapore":"ASIA","Serbia":"EU","South Africa":"AFRICA"
+  "Turkey":"EU","Thailand":"ASIA","Singapore":"ASIA","Serbia":"EU","South Africa":"AFRICA","Colombia":"LATAM"
 };
 const ALL_CONTINENTS = [...new Set(COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 const COUNTRIES_SORTED = [...COUNTRIES].sort((a,b) => {
