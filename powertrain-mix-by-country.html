@@ -316,13 +316,16 @@ const MONTHLY_DATA = {
       // source: VAMA + VinFast + TC Group (merged) — VAMA member-brand sales (PC+Special→Petrol, CV→Diesel) plus VinFast (100% BEV, not a VAMA member) plus TC Group/Hyundai (independent of VAMA, folded into Petrol)
       "Vietnam": [21787,0,1636,0,21326,5821,50570],
       // source: Israel Ministry of Transport vehicle registry (data.gov.il) — BEV/PHEV/Diesel exact; Petrol/HEV split using I-VIA's quarterly Trends Analysis ratio (see world_auto_sales.data_quality_note for full methodology)
-      "Israel": [3019,7107,8488,0,7659,1419,27692]
+      "Israel": [3019,7107,8488,0,7659,1419,27692],
+      // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
+      "Peru": [66,195,1163,0,20343,0,21767]
     },
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY % (Argentina, China,
     // Indonesia, Australia, Singapore omitted — no matching July 2025 monthly figure sourced for those five)
     priorYearBev: {
       "Brazil":7007,"India":17970,"Japan":2908,"Malaysia":2792,"Mexico":1442,"New Zealand":545,"United States":126356,"Thailand":9304,"South Korea":25192,"Taiwan":2501,
-      "Israel":5422
+      "Israel":5422,
+      "Peru":82
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
@@ -408,7 +411,9 @@ const MONTHLY_DATA = {
       // source: Israel Ministry of Transport vehicle registry (data.gov.il) — BEV/PHEV/Diesel exact; Petrol/HEV split using I-VIA's quarterly Trends Analysis ratio (see world_auto_sales.data_quality_note for full methodology)
       "Israel": [5085,6780,8917,0,8045,1568,30395],
       // source: KAO (kao.kz) — 2-month cumulative NEV snapshot delta (May-Jun) split evenly; HEV is a floor (top brands only); Diesel=0
-      "Kazakhstan": [197,571,257,0,20836,0,21861]
+      "Kazakhstan": [197,571,257,0,20836,0,21861],
+      // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
+      "Peru": [83,248,1344,0,23890,0,25565]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-06), for YoY %
     priorYearBev: {
@@ -496,7 +501,9 @@ const MONTHLY_DATA = {
       // source: Israel Ministry of Transport vehicle registry (data.gov.il) — BEV/PHEV/Diesel exact; Petrol/HEV split using I-VIA's quarterly Trends Analysis ratio (see world_auto_sales.data_quality_note for full methodology)
       "Israel": [3567,7451,8222,0,7418,1583,28241],
       // source: KAO (kao.kz) — 2-month cumulative NEV snapshot delta (May-Jun) split evenly; HEV is a floor (top brands only); Diesel=0
-      "Kazakhstan": [197,570,258,0,17368,0,18393]
+      "Kazakhstan": [197,570,258,0,17368,0,18393],
+      // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
+      "Peru": [91,145,1184,0,21717,0,23137]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-05), for YoY %
     priorYearBev: {
@@ -584,7 +591,9 @@ const MONTHLY_DATA = {
       // source: Israel Ministry of Transport vehicle registry (data.gov.il) — BEV/PHEV/Diesel exact; Petrol/HEV split using I-VIA's quarterly Trends Analysis ratio (see world_auto_sales.data_quality_note for full methodology)
       "Israel": [2440,6624,6660,0,6010,949,22683],
       // source: KAO (kao.kz) — 2-month cumulative NEV snapshot delta (Mar-Apr) split evenly; HEV is a floor (top brands only); Diesel=0
-      "Kazakhstan": [177,531,101,0,20048,0,20857]
+      "Kazakhstan": [177,531,101,0,20048,0,20857],
+      // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
+      "Peru": [140,129,1295,0,20877,0,22441]
     },
     priorYearBev: {
       "Austria":5690,"Belgium":12469,"Bulgaria":144,"Croatia":60,"Cyprus":90,"Czechia":1229,"Denmark":9567,
@@ -673,7 +682,9 @@ const MONTHLY_DATA = {
       // source: Israel Ministry of Transport vehicle registry (data.gov.il) — BEV/PHEV/Diesel exact; Petrol/HEV split using I-VIA's quarterly Trends Analysis ratio (see world_auto_sales.data_quality_note for full methodology)
       "Israel": [3927,6994,9213,0,8350,1463,29947],
       // source: KAO (kao.kz) — 2-month cumulative NEV snapshot delta (Mar-Apr) split evenly; HEV is a floor (top brands only); Diesel=0
-      "Kazakhstan": [176,530,102,0,16291,0,17099]
+      "Kazakhstan": [176,530,102,0,16291,0,17099],
+      // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
+      "Peru": [67,93,1039,0,21798,0,22997]
     },
     priorYearBev: {
       "Canada":8800,
@@ -762,7 +773,9 @@ const MONTHLY_DATA = {
       // source: Israel Ministry of Transport vehicle registry (data.gov.il) — BEV/PHEV/Diesel exact; Petrol/HEV split using I-VIA's quarterly Trends Analysis ratio (see world_auto_sales.data_quality_note for full methodology)
       "Israel": [2835,5398,9244,0,8378,1506,27361],
       // source: KAO (kao.kz) — Jan-Feb cumulative NEV snapshot split evenly; HEV is a genuine market total for this 2-month block; Diesel=0
-      "Kazakhstan": [135,219,53,0,13149,0,13556]
+      "Kazakhstan": [135,219,53,0,13149,0,13556],
+      // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
+      "Peru": [72,90,1092,0,22258,0,23512]
     },
     priorYearBev: {
       "Canada":8800,
@@ -859,7 +872,9 @@ const MONTHLY_DATA = {
       // source: Israel Ministry of Transport vehicle registry (data.gov.il) — BEV/PHEV/Diesel exact; Petrol/HEV split using I-VIA's quarterly Trends Analysis ratio (see world_auto_sales.data_quality_note for full methodology)
       "Israel": [4387,9900,14589,1,13221,2391,44489],
       // source: KAO (kao.kz) — Jan-Feb cumulative NEV snapshot split evenly; HEV is a genuine market total for this 2-month block; Diesel=0
-      "Kazakhstan": [135,219,54,0,13694,0,14102]
+      "Kazakhstan": [135,219,54,0,13694,0,14102],
+      // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
+      "Peru": [75,100,999,0,21895,0,23069]
     },
     // BEV units for the same month/quarter a year prior — source: ACEA (world_auto_sales, 2025-01) / same StatCan table for Canada, for YoY %
     priorYearBev: {
@@ -2395,8 +2410,11 @@ const AUTO_TREND_COUNTRY_LIMIT = 15; // below this many selected countries (or a
 
 const BUBBLE_NOTES = {
   snapshot: `X = number of BEV units sold, Y = BEV share of that country's total. Each country is its own flag, same size for every market. Hover a flag for exact figures.`,
-  trend: `Flag = selected period, at its real figures. Paler dots trace the 3 preceding full years for the same country — only where annual history exists, so a short trail means a market we've only just started tracking, not one standing still.`
+  trend: `Flag = selected period, at its real figures. Paler dots trace the 3 preceding full years for the same country — only where annual history exists, so a short trail means a market we've only just started tracking, not one standing still. When the selected period is a single month, those yearly dots show that year's monthly average (÷12), so the trail compares like with like instead of dropping off a cliff at the end.`
 };
+
+const IS_MONTH_KEY = /^\d{4}-\d{2}$/;
+const IS_ANNUAL_KEY = /-annual$/;
 
 // the selected period plus its 3 preceding full calendar years (annual totals), oldest first —
 // the walk-back window for TREND mode, echoing the site's existing "3-Year Growth" stat, which
@@ -2416,9 +2434,24 @@ function getTrendPeriods(){
   return years;
 }
 
-// every country's BEV total for the currently selected period(s), ignoring the continent/country
-// filters (but not the period selector) — used to compute a fixed X-axis domain so bubbles don't
-// shift position when the user toggles which countries are shown, only when the period changes
+// when the selected period is one real month, a trailing year's full-year total would dwarf it
+// and make every trail look like a collapse at the very end — so those trailing annual points get
+// divided by 12 to a monthly average instead, comparable to the current single month. bevPct is a
+// ratio (bev/total), so it's unaffected either way — only the plotted BEV volume needs scaling.
+// A trailing annual point stays a full year when the selected period is itself annual/YTD/projection.
+function trendDivisor(period, current){
+  return (IS_MONTH_KEY.test(current) && IS_ANNUAL_KEY.test(period)) ? 12 : 1;
+}
+
+// every country's BEV total for the currently selected period, ignoring the continent/country/
+// focus filters (but not the period selector) — used to compute a fixed X-axis domain so bubbles
+// don't shift position when the user toggles which countries are shown, only when the period
+// changes. Shared by SNAPSHOT and TREND: since it's keyed off whatever's in selectedMonths, it's
+// already the right scale for either — a monthly selection gives a monthly-scale world domain
+// (China's ~1.1-1.2M/month puts it at the far right), an annual one gives an annual-scale world
+// domain (China's ~10M/year) — and trailing TREND points share that same scale, since the ÷12
+// normalization in trendDivisor() already brings annual history down to monthly-equivalent
+// whenever the current selection is a month.
 function buildFullBevValues(){
   const totals = {};
   ALL_COUNTRIES.forEach(c => { totals[c] = 0; });
@@ -2429,19 +2462,6 @@ function buildFullBevValues(){
     });
   });
   return Object.values(totals).filter(v => v > 0);
-}
-
-// same idea as buildFullBevValues, but for TREND mode: every country's BEV value in each
-// individual period of the trend window (not summed across periods), so the X domain covers
-// every point a trail might visit and trails never get clipped at the chart edge
-function buildFullBevValuesForPeriods(periods){
-  const vals = [];
-  periods.forEach(p => {
-    const month = MONTHLY_DATA[p];
-    if(!month) return;
-    Object.values(month.raw).forEach(v => { if(v[0] > 0) vals.push(v[0]); });
-  });
-  return vals;
 }
 
 // walks down from the top, comparing each value to the average of the next few — as long as a
@@ -2491,13 +2511,11 @@ function renderBubbleChart(){
 
   const trendPeriods = bubbleMode === 'trend' ? getTrendPeriods() : [...selectedMonths];
 
-  // fixed, filter-independent X domain — computed from every country for the current period(s),
-  // not just the ones currently shown, so bubbles never shift position as filters are toggled.
-  // In TREND mode this spans every period in the trail window, not just the selected one, so a
-  // country's trail never runs off the edge of the chart.
-  const { breakVal, maxVal, hasBreak } = computeBrokenXDomain(
-    bubbleMode === 'trend' ? buildFullBevValuesForPeriods(trendPeriods) : buildFullBevValues()
-  );
+  // fixed, filter-independent X domain — same one SNAPSHOT always used, world-wide and scaled to
+  // whatever period is selected (monthly or annual) — see buildFullBevValues for why TREND reuses
+  // it unchanged instead of scoping to the countries currently shown: a stable frame of reference
+  // (China fixed at the far right) matters more here than each single-country view being zoomed in.
+  const { breakVal, maxVal, hasBreak } = computeBrokenXDomain(buildFullBevValues());
   const { pos: xPos, normalScale, compressedScale, breakPx } = makeBrokenXScale(breakVal, maxVal, innerW, hasBreak);
   const xScale = xPos; // callable position function, used everywhere below like a normal d3 scale
   const yScale = d3.scaleLinear().domain([0, 100]).range([innerH, 0]); // fixed 0-100% — BEV share is always a percentage
@@ -2567,12 +2585,18 @@ function renderBubbleChart(){
   // Only countries with at least 2 data points in the window get a trail; a country only just
   // added to monthly tracking simply shows its single current-period flag, same as SNAPSHOT.
   if(bubbleMode === 'trend'){
-    const periodData = trendPeriods.map(p => ({ period: p, label: MONTHLY_DATA[p] ? MONTHLY_DATA[p].label : p, byCountry: aggregateByCountry([p]) }));
+    const trendCurrent = [...selectedMonths][0];
+    const periodData = trendPeriods.map(p => ({
+      period: p,
+      label: MONTHLY_DATA[p] ? MONTHLY_DATA[p].label : p,
+      byCountry: aggregateByCountry([p]),
+      divisor: trendDivisor(p, trendCurrent)
+    }));
     const trails = DATA.map(d => {
       const points = periodData.map(pd => {
         const rec = pd.byCountry[d.country];
         if(!rec || rec.total <= 0) return null;
-        return { period: pd.period, label: pd.label, bev: rec.bev, bevPct: +(rec.bev/rec.total*100).toFixed(1) };
+        return { period: pd.period, label: pd.label, bev: rec.bev / pd.divisor, bevPct: +(rec.bev/rec.total*100).toFixed(1), isAvg: pd.divisor !== 1 };
       }).filter(Boolean);
       return { country: d.country, points };
     });
@@ -2597,7 +2621,7 @@ function renderBubbleChart(){
         bubbleTooltip.style.left = (e.clientX - rect.left) + 'px';
         bubbleTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
         bubbleTooltip.style.opacity = 1;
-        bubbleTooltip.innerHTML = `${p.country} — ${p.label}<br><span style="color:#1e8f5f">●</span> BEV: <strong>${p.bev.toLocaleString('en-US')}</strong> (${p.bevPct}%)`;
+        bubbleTooltip.innerHTML = `${p.country} — ${p.label}${p.isAvg ? ' (monthly avg)' : ''}<br><span style="color:#1e8f5f">●</span> BEV: <strong>${Math.round(p.bev).toLocaleString('en-US')}</strong>${p.isAvg ? '/mo' : ''} (${p.bevPct}%)`;
       })
       .on('pointerleave', () => { bubbleTooltip.style.opacity = 0; });
   }
