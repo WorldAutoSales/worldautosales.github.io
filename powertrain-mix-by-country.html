@@ -782,6 +782,8 @@ const MONTHLY_DATA = {
       "Austria": [40060,18023,49751,2,40509,16184,164529],
       "Belgium": [83282,12664,28659,2144,97538,6394,230681],
       "Bulgaria": [2042,454,1565,66,18731,3099,25957],
+      // source: FENALCO-ANDI, Colombia — Jan-Jul 2026 cumulative (dedicated monthly EV/Hybrid reports + ANDI July total); PHEV folded into HEV; Petrol is the undifferentiated combustion remainder (Diesel=0)
+      "Colombia": [29347,0,54015,0,83315,0,166677],
       "Croatia": [1781,2707,17496,380,16416,5384,44164],
       "Cyprus": [911,411,3643,0,2174,161,7300],
       "Czechia": [8630,6517,31060,2739,57043,23819,129808],
@@ -856,6 +858,7 @@ const MONTHLY_DATA = {
       "Romania":"through Jun 2026","Slovakia":"through Jun 2026","Slovenia":"through Jun 2026","Spain":"through Jun 2026",
       "Sweden":"through Jun 2026","Switzerland":"through Jun 2026","United Kingdom":"through Jun 2026",
       "Canada":"through Mar 2026 (Q1 only)",
+      "Colombia":"through Jul 2026",
       "Mexico":"through Jul 2026",
       "India":"through Aug 2026",
       "Japan":"through Jul 2026",
@@ -1011,6 +1014,8 @@ const MONTHLY_DATA = {
       "Austria": [60651,28820,83044,2,79457,33004,284978],
       "Belgium": [143849,39631,46984,3162,168436,12709,414771],
       "Bulgaria": [2506,567,2038,51,38765,4367,48294],
+      // source: FENALCO-ANDI, Colombia (annual) — PHEV folded into HEV; Petrol is the undifferentiated combustion remainder (Diesel=0), no independent Petrol/Diesel split published
+      "Colombia": [19724,0,67899,0,166582,0,254205],
       "Croatia": [1266,2529,22538,1280,32365,9861,69839],
       "Cyprus": [1474,773,6899,0,5094,396,14636],
       "Czechia": [13806,11033,57120,6487,117692,42581,248719],
@@ -1091,6 +1096,8 @@ const MONTHLY_DATA = {
       // source: CAAM (China Association of Automobile Manufacturers), wholesale via CnEVPost — Total = all vehicle wholesale sales, incl. exports; HEV not part of China's official NEV classification (folded into Petrol, HEV=0); no Petrol/Diesel split published, Diesel=0
       "China": [7720000, 5146000, 0, 0, 18570193, 0, 31436193],
       "Chile": [4507, 1152, 13442, 0, 201678, 81587, 302366],
+      // source: FENALCO-ANDI, Colombia (annual) — PHEV folded into HEV; Petrol is the undifferentiated combustion remainder (Diesel=0), no independent Petrol/Diesel split published
+      "Colombia": [9178, 0, 42668, 0, 149107, 0, 200953],
       "Croatia": [1793, 1266, 16370, 1404, 31745, 12442, 65020],
       "Cyprus": [1193, 664, 6438, 0, 6394, 368, 15057],
       "Czechia": [11018, 5055, 50444, 4723, 110062, 50188, 231490],
@@ -1157,6 +1164,8 @@ const MONTHLY_DATA = {
       // source: CAAM (China Association of Automobile Manufacturers), wholesale via CnEVPost — Total = all vehicle wholesale sales, incl. exports; HEV not part of China's official NEV classification (folded into Petrol, HEV=0); no Petrol/Diesel split published, Diesel=0
       "China": [6685000, 2804000, 0, 6000, 20598698, 0, 30093698],
       "Chile": [1588, 511, 7234, 0, 217508, 87024, 313865],
+      // source: FENALCO-ANDI, Colombia (annual) — PHEV folded into HEV; Petrol is the undifferentiated combustion remainder (Diesel=0), no independent Petrol/Diesel split published
+      "Colombia": [3677, 0, 27813, 0, 154732, 0, 186222],
       "Croatia": [1624, 1119, 13005, 1827, 27806, 10912, 56293],
       "Cyprus": [788, 511, 5653, 0, 7360, 448, 14760],
       "Czechia": [6702, 5303, 40231, 4017, 115152, 50014, 221419],
@@ -1412,7 +1421,7 @@ const COUNTRY_CONTINENT = {
   "Ireland":"EU","Italy":"EU","Latvia":"EU","Lithuania":"EU","Luxembourg":"EU","Malta":"EU","Netherlands":"EU",
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
-  "Canada":"NA","United States":"NA","China":"ASIA","India":"ASIA","Mexico":"NA","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"LATAM","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"LATAM","Turkey":"EU","Philippines":"ASIA","Chile":"LATAM","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA","Taiwan":"ASIA","Singapore":"ASIA","Serbia":"EU"
+  "Canada":"NA","United States":"NA","China":"ASIA","India":"ASIA","Mexico":"NA","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"LATAM","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"LATAM","Turkey":"EU","Philippines":"ASIA","Chile":"LATAM","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA","Taiwan":"ASIA","Singapore":"ASIA","Serbia":"EU","Colombia":"LATAM"
 };
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 
@@ -1423,7 +1432,7 @@ const COUNTRY_ISO2 = {
   "Ireland":"ie","Italy":"it","Latvia":"lv","Lithuania":"lt","Luxembourg":"lu","Malta":"mt","Netherlands":"nl",
   "Norway":"no","Poland":"pl","Portugal":"pt","Romania":"ro","Slovakia":"sk","Slovenia":"si","Spain":"es",
   "Sweden":"se","Switzerland":"ch","United Kingdom":"gb","Canada":"ca",
-  "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th","Argentina":"ar","Turkey":"tr","Philippines":"ph","Chile":"cl","Morocco":"ma","New Zealand":"nz","Malaysia":"my","Taiwan":"tw","Singapore":"sg","Serbia":"rs"
+  "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th","Argentina":"ar","Turkey":"tr","Philippines":"ph","Chile":"cl","Morocco":"ma","New Zealand":"nz","Malaysia":"my","Taiwan":"tw","Singapore":"sg","Serbia":"rs","Colombia":"co"
 };
 const ALL_COUNTRIES_SORTED = [...ALL_COUNTRIES].sort((a,b) => {
   const ca = COUNTRY_CONTINENT[a] || 'ZZ', cb = COUNTRY_CONTINENT[b] || 'ZZ';
