@@ -259,17 +259,21 @@ const MONTHLY_DATA = {
       // source: TS/KOTSA new-registration API, South Korea (monthly) — PHEV folded into HEV
       "South Korea": [30121,0,36142,10951,30255,2829,110298],
       // source: Israel Ministry of Transport vehicle registry (data.gov.il) — BEV/PHEV/Diesel exact; Petrol/HEV split using I-VIA's quarterly Trends Analysis ratio (see world_auto_sales.data_quality_note for full methodology)
-      "Israel": [2488,7454,8230,0,7426,1325,26923]
+      "Israel": [2488,7454,8230,0,7426,1325,26923],
+      // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
+      "Albania": [615,0,127,359,1300,4177,6578]
     },
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY %
     priorYearBev: {
       "India": 20204, "South Korea": 23315,
-      "Israel":6888
+      "Israel":6888,
+      "Albania":490
     },
     // Total (all powertrains) units for the same month a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "India": 343212, "South Korea": 127947,
-      "Israel":25847
+      "Israel":25847,
+      "Albania":7658
     }
   },
   "2026-07": {
@@ -324,7 +328,9 @@ const MONTHLY_DATA = {
       // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
       "Uruguay": [2646,310,570,0,1481,11,5018],
       // source: ICMR/Eauto (eauto.org.ua/en/news/101129) — genuine standalone month, the richest single article found for Ukraine; NEW PASSENGER CARS ONLY (a small fraction of the total market — domestic resales ~77k/mo and used imports ~23k/mo dwarf this segment); Hybrid = MHEV+HEV+PHEV combined (source gives one Hybrid figure, PHEV folded in); Others = LPG
-      "Ukraine": [421,0,1805,9,2115,1146,5496]
+      "Ukraine": [421,0,1805,9,2115,1146,5496],
+      // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
+      "Albania": [615,0,133,427,1803,4752,7730]
     },
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY % (Argentina, China,
     // Indonesia, Australia, Singapore omitted — no matching July 2025 monthly figure sourced for those five)
@@ -332,14 +338,16 @@ const MONTHLY_DATA = {
       "Brazil":7007,"India":17970,"Japan":2908,"Malaysia":2792,"Mexico":1442,"New Zealand":545,"United States":126356,"Thailand":9304,"South Korea":25192,"Taiwan":2501,
       "Israel":5422,
       "Peru":82,
-      "Uruguay":1195
+      "Uruguay":1195,
+      "Albania":475
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Brazil":230266,"India":346348,"Japan":220544,"Malaysia":75663,"Mexico":126541,"New Zealand":7576,"United States":1389685,"Thailand":49102,"South Korea":151549,"Taiwan":30934,
       "Israel":26894,
       "Peru":16956,
-      "Uruguay":4170
+      "Uruguay":4170,
+      "Albania":8295
     }
   },
   "2026-06": {
@@ -426,7 +434,9 @@ const MONTHLY_DATA = {
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
       "Peru": [83,248,1344,0,23890,0,25565],
       // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
-      "Uruguay": [2204,294,513,0,1496,7,4514]
+      "Uruguay": [2204,294,513,0,1496,7,4514],
+      // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
+      "Albania": [728,0,177,486,1883,4671,7945]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-06), for YoY %
     priorYearBev: {
@@ -438,14 +448,16 @@ const MONTHLY_DATA = {
       "Brazil":5943,"India":15310,"Japan":4264,"Malaysia":3272,"Mexico":1662,"Thailand":9373,"South Korea":21185,"Taiwan":2835,
       "Israel":4046,
       "Peru":104,
-      "Uruguay":797
+      "Uruguay":797,
+      "Albania":602
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Austria":27868,"Belgium":41527,"Bulgaria":4614,"Croatia":8945,"Cyprus":1347,"Czechia":22208,"Denmark":19045,"Estonia":1549,"Finland":7449,"France":169505,"Germany":256193,"Greece":14647,"Hungary":11511,"Iceland":2032,"Ireland":2437,"Italy":132320,"Latvia":2244,"Lithuania":3722,"Luxembourg":4168,"Malta":544,"Netherlands":34641,"Norway":18373,"Poland":49587,"Portugal":23184,"Romania":10611,"Slovakia":8800,"Slovenia":4845,"Spain":119125,"Sweden":27565,"Switzerland":21810,"United Kingdom":191316,"New Zealand":8188,"United States":1272469,"Brazil":202458,"India":316921,"Japan":217333,"Malaysia":58858,"Mexico":117780,"Thailand":50079,"South Korea":145683,"Taiwan":29838,
       "Israel":20372,
       "Peru":16725,
-      "Uruguay":3214
+      "Uruguay":3214,
+      "Albania":7808
     }
   },
   "2026-05": {
@@ -524,7 +536,9 @@ const MONTHLY_DATA = {
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
       "Peru": [91,145,1184,0,21717,0,23137],
       // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
-      "Uruguay": [2536,198,673,0,1420,6,4833]
+      "Uruguay": [2536,198,673,0,1420,6,4833],
+      // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
+      "Albania": [723,0,251,327,1454,3603,6358]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-05), for YoY %
     priorYearBev: {
@@ -536,14 +550,16 @@ const MONTHLY_DATA = {
       "Brazil":6989,"India":14712,"Japan":2848,"Malaysia":4152,"Mexico":1768,"Argentina":91,"Thailand":11274,"South Korea":21760,"Turkey":16802,"Taiwan":1482,
       "Israel":4168,
       "Peru":50,
-      "Uruguay":946
+      "Uruguay":946,
+      "Albania":277
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Austria":24311,"Belgium":34338,"Bulgaria":3857,"Croatia":8791,"Cyprus":1328,"Czechia":19519,"Denmark":17952,"Estonia":1411,"Finland":6851,"France":123918,"Germany":239297,"Greece":15670,"Hungary":10899,"Iceland":2313,"Ireland":5821,"Italy":139484,"Latvia":2149,"Lithuania":4092,"Luxembourg":4058,"Malta":677,"Netherlands":30188,"Norway":14260,"Poland":46641,"Portugal":23545,"Romania":10521,"Slovakia":7651,"Slovenia":5118,"Spain":112820,"Sweden":25675,"Switzerland":19969,"United Kingdom":150070,"New Zealand":6770,"United States":1461067,"Brazil":214617,"India":323571,"Japan":177980,"Malaysia":74393,"Mexico":121110,"Argentina":56319,"Thailand":52229,"South Korea":145387,"Turkey":85123,"Taiwan":27392,
       "Israel":26155,
       "Peru":16337,
-      "Uruguay":3623
+      "Uruguay":3623,
+      "Albania":6994
     }
   },
   "2026-04": {
@@ -622,7 +638,9 @@ const MONTHLY_DATA = {
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
       "Peru": [140,129,1295,0,20877,0,22441],
       // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
-      "Uruguay": [2055,208,580,0,1795,2,4640]
+      "Uruguay": [2055,208,580,0,1795,2,4640],
+      // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
+      "Albania": [1115,0,207,366,1381,3663,6732]
     },
     priorYearBev: {
       "Austria":5690,"Belgium":12469,"Bulgaria":144,"Croatia":60,"Cyprus":90,"Czechia":1229,"Denmark":9567,
@@ -633,14 +651,16 @@ const MONTHLY_DATA = {
       "Brazil":4716,"India":14818,"Japan":2111,"Malaysia":2892,"Mexico":1693,"Thailand":10981,"South Korea":17263,"Taiwan":1470,
       "Israel":3319,
       "Peru":50,
-      "Uruguay":890
+      "Uruguay":890,
+      "Albania":268
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Austria":24855,"Belgium":37812,"Bulgaria":4008,"Croatia":9070,"Cyprus":1097,"Czechia":21226,"Denmark":15119,"Estonia":1075,"Finland":6251,"France":138696,"Germany":242728,"Greece":14649,"Hungary":10785,"Iceland":1546,"Ireland":8703,"Italy":139142,"Latvia":2067,"Lithuania":4040,"Luxembourg":4365,"Malta":460,"Netherlands":27157,"Norway":11286,"Poland":46978,"Portugal":18752,"Romania":9996,"Slovakia":8322,"Slovenia":5192,"Spain":98522,"Sweden":24292,"Switzerland":18664,"United Kingdom":120331,"New Zealand":6041,"United States":1463622,"Brazil":197159,"India":374978,"Japan":191066,"Malaysia":65200,"Mexico":109420,"Thailand":47193,"South Korea":153456,"Taiwan":28460,
       "Israel":20182,
       "Peru":16274,
-      "Uruguay":3395
+      "Uruguay":3395,
+      "Albania":7136
     }
   },
   "2026-03": {
@@ -721,7 +741,9 @@ const MONTHLY_DATA = {
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
       "Peru": [67,93,1039,0,21798,0,22997],
       // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
-      "Uruguay": [1774,211,706,0,2051,10,4752]
+      "Uruguay": [1774,211,706,0,2051,10,4752],
+      // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
+      "Albania": [1153,0,194,350,1069,3337,6103]
     },
     priorYearBev: {
       "Canada":8800,
@@ -733,14 +755,16 @@ const MONTHLY_DATA = {
       "Brazil":4804,"India":14425,"Japan":4010,"Malaysia":2976,"Mexico":1655,"Thailand":8233,"South Korea":17909,"Taiwan":2727,
       "Israel":4767,
       "Peru":62,
-      "Uruguay":730
+      "Uruguay":730,
+      "Albania":266
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Canada":142291,"Austria":25950,"Belgium":40184,"Bulgaria":4220,"Croatia":6426,"Cyprus":1602,"Czechia":22566,"Denmark":14987,"Estonia":966,"Finland":6173,"France":153842,"Germany":253497,"Greece":12719,"Hungary":13199,"Iceland":1012,"Ireland":17312,"Italy":172303,"Latvia":2036,"Lithuania":3566,"Luxembourg":4839,"Malta":334,"Netherlands":31515,"Norway":13304,"Poland":53062,"Portugal":24578,"Romania":9922,"Slovakia":7507,"Slovenia":5285,"Spain":116725,"Sweden":24204,"Switzerland":21690,"United Kingdom":357103,"New Zealand":8355,"United States":1593017,"Brazil":184371,"India":367639,"Japan":288234,"Malaysia":77121,"Mexico":128434,"Thailand":55798,"South Korea":146448,"Taiwan":32293,
       "Israel":26744,
       "Peru":16779,
-      "Uruguay":4256
+      "Uruguay":4256,
+      "Albania":5475
     }
   },
   "2026-02": {
@@ -820,7 +844,9 @@ const MONTHLY_DATA = {
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
       "Peru": [72,90,1092,0,22258,0,23512],
       // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
-      "Uruguay": [1578,191,716,0,1774,0,4259]
+      "Uruguay": [1578,191,716,0,1774,0,4259],
+      // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
+      "Albania": [858,0,156,294,1202,3395,5905]
     },
     priorYearBev: {
       "Canada":8800,
@@ -832,14 +858,16 @@ const MONTHLY_DATA = {
       "Brazil":4508,"India":10508,"Japan":2380,"Malaysia":2160,"Mexico":1307,"Thailand":7539,"South Korea":13284,"Taiwan":2006,
       "Israel":3375,
       "Peru":39,
-      "Uruguay":872
+      "Uruguay":872,
+      "Albania":281
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Canada":142291,"Austria":19619,"Belgium":40161,"Bulgaria":3394,"Croatia":4245,"Cyprus":1284,"Czechia":17773,"Denmark":11617,"Estonia":624,"Finland":4784,"France":141570,"Germany":203434,"Greece":9818,"Hungary":10575,"Iceland":655,"Ireland":13969,"Italy":138020,"Latvia":1398,"Lithuania":2531,"Luxembourg":4111,"Malta":303,"Netherlands":27820,"Norway":8949,"Poland":44795,"Portugal":19463,"Romania":11850,"Slovakia":6205,"Slovenia":4372,"Spain":90327,"Sweden":19608,"Switzerland":16212,"United Kingdom":84054,"New Zealand":6957,"United States":1215074,"Brazil":174041,"India":321898,"Japan":234257,"Malaysia":67327,"Mexico":118602,"Thailand":49313,"South Korea":132762,"Taiwan":24108,
       "Israel":23579,
       "Peru":15426,
-      "Uruguay":3688
+      "Uruguay":3688,
+      "Albania":4903
     }
   },
   "2026-01": {
@@ -927,7 +955,9 @@ const MONTHLY_DATA = {
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
       "Peru": [75,100,999,0,21895,0,23069],
       // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
-      "Uruguay": [1582,182,518,0,1504,6,3792]
+      "Uruguay": [1582,182,518,0,1504,6,3792],
+      // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
+      "Albania": [753,0,130,260,958,3572,5673]
     },
     // BEV units for the same month/quarter a year prior — source: ACEA (world_auto_sales, 2025-01) / same StatCan table for Canada, for YoY %
     priorYearBev: {
@@ -943,14 +973,16 @@ const MONTHLY_DATA = {
       "Brazil": 3716, "India": 13348, "Japan": 2014, "Malaysia": 1691, "Mexico": 1362, "Thailand": 7022, "South Korea": 2411, "Taiwan": 2207,
       "Israel":8043,
       "Peru":50,
-      "Uruguay":400
+      "Uruguay":400,
+      "Albania":379
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Canada":142291,"Austria":20448,"Belgium":40594,"Bulgaria":2780,"Croatia":4472,"Cyprus":1565,"Czechia":19347,"Denmark":10834,"Estonia":531,"Finland":5742,"France":114673,"Germany":207640,"Greece":10659,"Hungary":9125,"Iceland":594,"Ireland":33473,"Italy":133731,"Latvia":1343,"Lithuania":2836,"Luxembourg":3718,"Malta":640,"Netherlands":32804,"Norway":9343,"Poland":44248,"Portugal":14504,"Romania":11920,"Slovakia":6605,"Slovenia":5015,"Spain":72322,"Sweden":19632,"Switzerland":14788,"United Kingdom":139345,"New Zealand":7991,"United States":1106120,"Brazil":160053,"India":496673,"Japan":216664,"Malaysia":53930,"Mexico":120953,"Thailand":48092,"South Korea":124494,"Taiwan":31933,
       "Israel":50757,
       "Peru":18532,
-      "Uruguay":2748
+      "Uruguay":2748,
+      "Albania":6355
     }
   },
   "2026-ytd": {
@@ -1039,7 +1071,9 @@ const MONTHLY_DATA = {
       // source: AAP (Asociacion Automotriz del Peru), Jan-Jul 2026 summed from the monthly figures — HEV includes MHEV combined; Diesel folded into Petrol
       "Peru": [594,1000,8116,0,152778,0,162488],
       // source: ACAU (Uruguay), Compilado 2026 — Jan-Jul 2026 summed from the monthly figures; HEV includes MHEV combined
-      "Uruguay": [14375,1594,4276,0,11521,42,31808]
+      "Uruguay": [14375,1594,4276,0,11521,42,31808],
+      // source: DPSHTRR (Albania), Jan-Aug 2026 summed from the monthly figures — HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
+      "Albania": [6560,0,1375,2869,11050,31170,53024]
     },
     // per-country "as of" coverage, since cutoffs differ by source — surfaced in the Country Detail table's "Data Through" column
     asOf: {
@@ -1074,7 +1108,8 @@ const MONTHLY_DATA = {
       "Israel":"through Aug 2026",
       "Kazakhstan":"through Jun 2026",
       "Peru":"through Jul 2026",
-      "Uruguay":"through Jul 2026"
+      "Uruguay":"through Jul 2026",
+      "Albania":"through Aug 2026"
     },
     // BEV units for the matching prior-year period (same months)
     priorYearBev: {
@@ -1087,7 +1122,8 @@ const MONTHLY_DATA = {
       "Canada":26401,"Mexico":10889,"New Zealand":4119,"United States":736926,"India":121295,"South Korea":142319,"Taiwan":15228,
       "Israel":40028,
       "Peru":437,
-      "Uruguay":5830
+      "Uruguay":5830,
+      "Albania":3038
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
@@ -1095,7 +1131,8 @@ const MONTHLY_DATA = {
       "Austria":143051,"Belgium":234616,"Bulgaria":22873,"Croatia":41949,"Cyprus":8223,"Czechia":122639,"Denmark":89554,"Estonia":6156,"Finland":37250,"France":842204,"Germany":1402789,"Greece":78162,"Hungary":66094,"Iceland":8152,"Ireland":81715,"Italy":855000,"Latvia":11237,"Lithuania":20787,"Luxembourg":25259,"Malta":2958,"Netherlands":184125,"Norway":75515,"Poland":285311,"Portugal":124026,"Romania":64820,"Slovakia":45090,"Slovenia":29827,"Spain":609841,"Sweden":140976,"Switzerland":113133,"United Kingdom":1042219,"Canada":426873,"Mexico":842840,"New Zealand":51878,"United States":9501054,"India":2891240,"South Korea":1127726,"Taiwan":204958,
       "Israel":220530,
       "Peru":117029,
-      "Uruguay":25094
+      "Uruguay":25094,
+      "Albania":54624
     }
     // note: China omitted from priorYearBev — no matching Jan-Jul 2025 monthly data sourced (world_auto_sales has no pre-2026 China rows)
   },
@@ -1177,7 +1214,9 @@ const MONTHLY_DATA = {
       // source: ACAU (Uruguay) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
       "Uruguay": [26685,2931,7330,0,19750,82,56778],
       // source: FENALCO-ANDI, Colombia — each fuel trended from the last 3 actual months' average (May-Jul, all genuine/near-genuine single months) or the 7-mo YTD average if higher, applied to the remaining 5 months; PHEV folded into HEV, Petrol is the undifferentiated combustion remainder (Diesel=0)
-      "Colombia": [54024,0,98643,0,176598,0,329265]
+      "Colombia": [54024,0,98643,0,176598,0,329265],
+      // source: DPSHTRR (Albania) — each fuel trended from the last 3 actual months' average (Jun-Aug) or the 8-mo YTD average if higher, applied to the remaining 4 months
+      "Albania": [9840,0,2062,4565,17698,49303,83468]
     },
     // Two projection methods, depending on what data exists per country:
     // (1) Every country with a real monthly breakdown — the 31 ACEA/Europe countries, New Zealand, Argentina,
@@ -1203,7 +1242,8 @@ const MONTHLY_DATA = {
       "Kazakhstan":"trended from last 3 mo. (YTD floor)",
       "Peru":"trended from last 3 mo. (YTD floor)",
       "Uruguay":"trended from last 3 mo. (YTD floor)",
-      "Colombia":"trended from last 3 mo. (YTD floor)"
+      "Colombia":"trended from last 3 mo. (YTD floor)",
+      "Albania":"trended from last 3 mo. (YTD floor)"
     },
     // BEV units for full-year 2025 (actual), to compare the projection against real prior-year performance
     priorYearBev: {
@@ -1212,7 +1252,8 @@ const MONTHLY_DATA = {
       "Israel":58396,
       "Peru":751,
       "Uruguay":13788,
-      "Colombia":19724
+      "Colombia":19724,
+      "Albania":5666
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
@@ -1221,7 +1262,8 @@ const MONTHLY_DATA = {
       "Israel":300131,
       "Peru":211776,
       "Uruguay":48588,
-      "Colombia":254205
+      "Colombia":254205,
+      "Albania":80739
     }
   },
   "2025-annual": {
@@ -1308,6 +1350,8 @@ const MONTHLY_DATA = {
       "Peru": [751,640,8848,0,201537,0,211776],
       // source: ACAU (Uruguay), Compilado 2025 report, full-year summed from monthly figures — HEV includes MHEV combined; PHEV not separately coded in 2025 (folded into HEV)
       "Uruguay": [13788,0,5723,0,28754,323,48588],
+      // source: DPSHTRR (Albania), full-year 2025 (DPSHTRR's own separately-published figure, not summed from monthly) — HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked; no priorYear comparison (2024 not sourced)
+      "Albania": [5666,0,2190,5307,16339,51237,80739],
       // source: CERR (Center for Economic Research and Reforms), full-year 2025 — only BEV tracked (user's explicit choice); rest folded into Others. Both Total and BEV here are CERR's own primary-market figures, same scope on both sides (368,300/40,700 = 11.1%, matching CERR's own "~10%" market-share statements and IEA's independent 6% estimate within a plausible range). 2026 monthly rows were built and then REMOVED (2026-09-02): they paired this same primary-market Total against CERR's monthly EV headline, which turned out to blend primary+secondary market sales -- inflating BEV share to 21-35% vs the true ~10-11%. Only this correctly-scoped annual row remains; see country_data_coverage for the full retraction note and what a valid monthly reload would need.
       "Uzbekistan": [40700,0,0,327600,0,0,368300]
     },
@@ -1768,7 +1812,7 @@ const COUNTRY_CONTINENT = {
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
   "Canada":"NAC","United States":"NAC","China":"ASIA","India":"ASIA","Mexico":"NAC","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"SA","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"SA","Turkey":"EU","Philippines":"ASIA","Chile":"SA","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA","Taiwan":"ASIA","Singapore":"ASIA","Serbia":"EU","Colombia":"SA","Vietnam":"ASIA","Nepal":"ASIA"
-,"Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA","Uzbekistan":"ASIA","Uruguay":"SA","Ecuador":"SA","Ukraine":"EU"};
+,"Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA","Uzbekistan":"ASIA","Uruguay":"SA","Ecuador":"SA","Ukraine":"EU","Albania":"EU"};
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 
 // country -> ISO 3166-1 alpha-2 code, for flag images (flagcdn.com)
@@ -1779,7 +1823,7 @@ const COUNTRY_ISO2 = {
   "Norway":"no","Poland":"pl","Portugal":"pt","Romania":"ro","Slovakia":"sk","Slovenia":"si","Spain":"es",
   "Sweden":"se","Switzerland":"ch","United Kingdom":"gb","Canada":"ca",
   "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th","Argentina":"ar","Turkey":"tr","Philippines":"ph","Chile":"cl","Morocco":"ma","New Zealand":"nz","Malaysia":"my","Taiwan":"tw","Singapore":"sg","Serbia":"rs","Colombia":"co","Vietnam":"vn","Nepal":"np"
-,"Israel":"il","Kazakhstan":"kz","Peru":"pe","Uzbekistan":"uz","Uruguay":"uy","Ecuador":"ec","Ukraine":"ua"};
+,"Israel":"il","Kazakhstan":"kz","Peru":"pe","Uzbekistan":"uz","Uruguay":"uy","Ecuador":"ec","Ukraine":"ua","Albania":"al"};
 const ALL_COUNTRIES_SORTED = [...ALL_COUNTRIES].sort((a,b) => {
   const ca = COUNTRY_CONTINENT[a] || 'ZZ', cb = COUNTRY_CONTINENT[b] || 'ZZ';
   return ca !== cb ? ca.localeCompare(cb) : a.localeCompare(b);
