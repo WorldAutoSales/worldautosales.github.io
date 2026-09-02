@@ -1173,7 +1173,9 @@ const MONTHLY_DATA = {
       // source: AAP (Asociacion Automotriz del Peru) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; HEV projection inherits the HEV+MHEV combined basis
       "Peru": [1018,1980,14268,0,262695,0,279961],
       // source: ACAU (Uruguay) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
-      "Uruguay": [26685,2931,7330,0,19750,82,56778]
+      "Uruguay": [26685,2931,7330,0,19750,82,56778],
+      // source: FENALCO-ANDI, Colombia — each fuel trended from the last 3 actual months' average (May-Jul, all genuine/near-genuine single months) or the 7-mo YTD average if higher, applied to the remaining 5 months; PHEV folded into HEV, Petrol is the undifferentiated combustion remainder (Diesel=0)
+      "Colombia": [54024,0,98643,0,176598,0,329265]
     },
     // Two projection methods, depending on what data exists per country:
     // (1) Every country with a real monthly breakdown — the 31 ACEA/Europe countries, New Zealand, Argentina,
@@ -1198,7 +1200,8 @@ const MONTHLY_DATA = {
       "Israel":"trended from last 3 mo. (YTD floor)",
       "Kazakhstan":"trended from last 3 mo. (YTD floor)",
       "Peru":"trended from last 3 mo. (YTD floor)",
-      "Uruguay":"trended from last 3 mo. (YTD floor)"
+      "Uruguay":"trended from last 3 mo. (YTD floor)",
+      "Colombia":"trended from last 3 mo. (YTD floor)"
     },
     // BEV units for full-year 2025 (actual), to compare the projection against real prior-year performance
     priorYearBev: {
@@ -1206,7 +1209,8 @@ const MONTHLY_DATA = {
       "Argentina":1332,"Australia":103270,"Austria":60651,"Belgium":143849,"Brazil":80381,"Bulgaria":2506,"Canada":116067,"China":10603000,"Croatia":1266,"Cyprus":1474,"Czechia":13806,"Denmark":126542,"Estonia":868,"Finland":26743,"France":326922,"Germany":545142,"Greece":8892,"Hungary":11003,"Iceland":6066,"India":196237,"Ireland":23616,"Italy":94678,"Japan":39885,"Latvia":1602,"Lithuania":3150,"Luxembourg":12663,"Malta":1711,"Mexico":20923,"Netherlands":156931,"New Zealand":6818,"Norway":172230,"Poland":43310,"Portugal":52256,"Romania":8849,"Slovakia":4376,"Slovenia":6419,"Spain":101661,"Sweden":99723,"Switzerland":53250,"Turkey":189868,"United Kingdom":473348,"United States":1240040,"South Korea":221389,"Taiwan":32358,
       "Israel":58396,
       "Peru":751,
-      "Uruguay":13788
+      "Uruguay":13788,
+      "Colombia":19724
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
@@ -1214,7 +1218,8 @@ const MONTHLY_DATA = {
       "Argentina":612291,"Australia":1195771,"Austria":284978,"Belgium":414771,"Brazil":2552201,"Bulgaria":48294,"Canada":1867797,"China":34399621,"Croatia":69839,"Cyprus":14636,"Czechia":248719,"Denmark":184641,"Estonia":13055,"Finland":71872,"France":1632152,"Germany":2857591,"Greece":144199,"Hungary":129420,"Iceland":14821,"India":4631965,"Ireland":124954,"Italy":1526032,"Japan":2533523,"Latvia":22506,"Lithuania":41968,"Luxembourg":47161,"Malta":6269,"Mexico":1524638,"Netherlands":390883,"New Zealand":97462,"Norway":179631,"Poland":597435,"Portugal":225039,"Romania":156803,"Slovakia":93043,"Slovenia":57250,"Spain":1148581,"Sweden":272998,"Switzerland":233740,"Turkey":1084496,"United Kingdom":2020523,"United States":16230606,"South Korea":1699779,"Taiwan":363653,
       "Israel":300131,
       "Peru":211776,
-      "Uruguay":48588
+      "Uruguay":48588,
+      "Colombia":254205
     }
   },
   "2025-annual": {
