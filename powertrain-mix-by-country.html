@@ -2697,7 +2697,12 @@ function renderBubbleChart(){
       const rest = d.total - d.bev - d.phev;
       bubbleTooltip.innerHTML = `${d.country}<br>Total registrations: <strong>${d.total.toLocaleString('en-US')}</strong><br><span style="color:#1e8f5f">●</span> BEV: <strong>${d.bev.toLocaleString('en-US')}</strong> (${d.bevPct}%)<br><span style="color:#2563eb">●</span> PHEV: <strong>${d.phev.toLocaleString('en-US')}</strong> (${(d.phev/d.total*100).toFixed(1)}%)<br><span style="color:#161616">●</span> Rest: <strong>${rest.toLocaleString('en-US')}</strong> (${(rest/d.total*100).toFixed(1)}%)`;
     })
-    .on('pointerleave', () => { bubbleTooltip.style.opacity = 0; });
+    .on('pointerleave', () => { bubbleTooltip.style.opacity = 0; })
+    .on('click', (e, d) => {
+      if(!COUNTRIES_WITH_TREND.has(d.country)) return;
+      if(focusedCountry === d.country){ clearSelection(); recompute(); }
+      else focusCountry(d.country);
+    });
 
   // label the biggest markets only, to avoid clutter
   const topByTotal = new Set([...DATA].sort((a,b) => b.total - a.total).slice(0, 8).map(d => d.country));
