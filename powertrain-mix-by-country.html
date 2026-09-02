@@ -87,7 +87,7 @@
             <li>Norway leads the world in EV adoption by a wide margin — battery-electric alone made up over 97% of May 2026 registrations, a market so far along the transition that petrol and diesel are now a rounding error.</li>
             <li>Some of the largest EU markets (Germany, France, Italy) still sit in the middle of the pack once hybrids are counted — hybrid-electric (not battery-electric) is the single most popular powertrain in most of Europe right now.</li>
             <li>Canada joined the mix starting January 2026. Statistics Canada publishes registrations quarterly (not monthly like Europe's ACEA data), so it appears as its own selectable period rather than being blended with Europe's figures — select "January 2026" to see it.</li>
-            <li>"July 2026" only covers 20 markets (Argentina, Australia, Brazil, Chile, China, Colombia, India, Indonesia, Japan, Malaysia, Mexico, Nepal, New Zealand, Singapore, South Korea, Taiwan, Thailand, Turkey, United States, Vietnam) — ACEA hasn't published Europe's July figures yet (their calendar skips a standalone July release; the next one, due late September, covers August). The page still defaults to "June 2026" for that reason, since it's the most recent period with Europe included; switch to July manually if you want the smaller, more current set.</li>
+            <li>"July 2026" only covers 25 markets (Argentina, Australia, Brazil, Chile, China, Colombia, Ecuador, India, Indonesia, Israel, Japan, Malaysia, Mexico, Nepal, New Zealand, Peru, Singapore, South Korea, Taiwan, Thailand, Turkey, Ukraine, United States, Uruguay, Vietnam) — ACEA hasn't published Europe's July figures yet (their calendar skips a standalone July release; the next one, due late September, covers August). The page still defaults to "June 2026" for that reason, since it's the most recent period with Europe included; switch to July manually if you want the smaller, more current set. Ukraine's figure is new passenger cars only — a small fraction of its total market (see the Country Detail table for the caveat).</li>
             <li>"August 2026" only covers 2 markets so far (India, South Korea) — it's shown anyway rather than waiting for broader coverage, so the newest available data isn't hidden. More countries join this period as their August figures are published; the page still defaults to "June 2026" in the meantime.</li>
             <li>"2026 (Projected)" is an estimate, not a real annual measurement. For every country with a real monthly breakdown — the 31 ACEA countries, New Zealand, Argentina, Australia, Brazil, Chile, China, India, Israel, Japan, Mexico, South Korea, Taiwan, and the United States (44 markets) — each fuel is trended independently: the rate is the higher of (the average of its last 3 actual months) or (its year-to-date average), applied to the remaining months and added onto the actual year-to-date total; the "YTD floor" means a fuel that's cooled off recently is never projected below plain run-rate, while one that's accelerating keeps accelerating rather than flattening out like a simple year-end multiplication would. This is recalculated from scratch every time a new month of actuals arrives. Canada, the Philippines, and Turkey stay on plain run-rate (YTD figure × 12/months): the Philippines has no monthly breakdown in the database at all, Canada has only a single real quarterly data point rather than 3 distinct months to trend from, and Turkey's monthly figures haven't been switched over to the trended method yet. Check the "Data Through" column for which method applies to each row.</li>
             <li>Select "2026 YTD" to see this year's progress so far — but each country is only summed through its own latest available data (Europe through June, Canada through Q1/March only, Mexico, Japan, Australia, Brazil, Argentina, Turkey, the Philippines, New Zealand, China, and the United States through July, India a partial-year snapshot from its live dashboard with no exact cutoff date). Check the "Data Through" column in the Country Detail table below for each country's exact cutoff before comparing totals across countries.</li>
@@ -322,7 +322,9 @@ const MONTHLY_DATA = {
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
       "Peru": [66,195,1163,0,20343,0,21767],
       // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
-      "Uruguay": [2646,310,570,0,1481,11,5018]
+      "Uruguay": [2646,310,570,0,1481,11,5018],
+      // source: ICMR/Eauto (eauto.org.ua/en/news/101129) — genuine standalone month, the richest single article found for Ukraine; NEW PASSENGER CARS ONLY (a small fraction of the total market — domestic resales ~77k/mo and used imports ~23k/mo dwarf this segment); Hybrid = MHEV+HEV+PHEV combined (source gives one Hybrid figure, PHEV folded in); Others = LPG
+      "Ukraine": [421,0,1805,9,2115,1146,5496]
     },
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY % (Argentina, China,
     // Indonesia, Australia, Singapore omitted — no matching July 2025 monthly figure sourced for those five)
@@ -1766,7 +1768,7 @@ const COUNTRY_CONTINENT = {
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
   "Canada":"NAC","United States":"NAC","China":"ASIA","India":"ASIA","Mexico":"NAC","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"SA","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"SA","Turkey":"EU","Philippines":"ASIA","Chile":"SA","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA","Taiwan":"ASIA","Singapore":"ASIA","Serbia":"EU","Colombia":"SA","Vietnam":"ASIA","Nepal":"ASIA"
-,"Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA","Uzbekistan":"ASIA","Uruguay":"SA","Ecuador":"SA"};
+,"Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA","Uzbekistan":"ASIA","Uruguay":"SA","Ecuador":"SA","Ukraine":"EU"};
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 
 // country -> ISO 3166-1 alpha-2 code, for flag images (flagcdn.com)
@@ -1777,7 +1779,7 @@ const COUNTRY_ISO2 = {
   "Norway":"no","Poland":"pl","Portugal":"pt","Romania":"ro","Slovakia":"sk","Slovenia":"si","Spain":"es",
   "Sweden":"se","Switzerland":"ch","United Kingdom":"gb","Canada":"ca",
   "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th","Argentina":"ar","Turkey":"tr","Philippines":"ph","Chile":"cl","Morocco":"ma","New Zealand":"nz","Malaysia":"my","Taiwan":"tw","Singapore":"sg","Serbia":"rs","Colombia":"co","Vietnam":"vn","Nepal":"np"
-,"Israel":"il","Kazakhstan":"kz","Peru":"pe","Uzbekistan":"uz","Uruguay":"uy","Ecuador":"ec"};
+,"Israel":"il","Kazakhstan":"kz","Peru":"pe","Uzbekistan":"uz","Uruguay":"uy","Ecuador":"ec","Ukraine":"ua"};
 const ALL_COUNTRIES_SORTED = [...ALL_COUNTRIES].sort((a,b) => {
   const ca = COUNTRY_CONTINENT[a] || 'ZZ', cb = COUNTRY_CONTINENT[b] || 'ZZ';
   return ca !== cb ? ca.localeCompare(cb) : a.localeCompare(b);
@@ -1788,7 +1790,7 @@ let selectedFuels = new Set(FUEL_KEYS);
 let selectedContinents = new Set(ALL_CONTINENTS);
 let selectedCountries = new Set(ALL_COUNTRIES);
 // prefer the newest month with full (Europe-included) coverage as the default — "2026-07" sorts
-// first chronologically but only has 10 non-European countries so far (ACEA's own calendar has
+// first chronologically but only has 25 non-ACEA countries so far (ACEA's own calendar has
 // no July release; it's still listed as an option, just not what loads by default)
 const DEFAULT_MONTH = MONTHLY_DATA['2026-06'] ? '2026-06' : ALL_MONTHS[0];
 let selectedMonths = new Set([DEFAULT_MONTH]); // single-select (radio), always exactly one entry
