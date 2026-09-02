@@ -414,9 +414,7 @@ const MONTHLY_DATA = {
       // source: KAO (kao.kz) — 2-month cumulative NEV snapshot delta (May-Jun) split evenly; HEV is a floor (top brands only); Diesel=0
       "Kazakhstan": [197,571,257,0,20836,0,21861],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [83,248,1344,0,23890,0,25565],
-      // source: CERR (Center for Economic Research and Reforms), Uzbekistan — only BEV tracked (user's explicit choice); rest folded into Others. BEV likely blends primary+secondary market EV sales (confirmed for this month: "на первичном и вторичном рынках")
-      "Uzbekistan": [8400,0,0,15600,0,0,24000]
+      "Peru": [83,248,1344,0,23890,0,25565]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-06), for YoY %
     priorYearBev: {
@@ -600,9 +598,7 @@ const MONTHLY_DATA = {
       // source: KAO (kao.kz) — 2-month cumulative NEV snapshot delta (Mar-Apr) split evenly; HEV is a floor (top brands only); Diesel=0
       "Kazakhstan": [177,531,101,0,20048,0,20857],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [140,129,1295,0,20877,0,22441],
-      // source: CERR (Center for Economic Research and Reforms), Uzbekistan — only BEV tracked (user's explicit choice); rest folded into Others. BEV likely blends primary+secondary market EV sales
-      "Uzbekistan": [8100,0,0,16800,0,0,24900]
+      "Peru": [140,129,1295,0,20877,0,22441]
     },
     priorYearBev: {
       "Austria":5690,"Belgium":12469,"Bulgaria":144,"Croatia":60,"Cyprus":90,"Czechia":1229,"Denmark":9567,
@@ -695,9 +691,7 @@ const MONTHLY_DATA = {
       // source: KAO (kao.kz) — 2-month cumulative NEV snapshot delta (Mar-Apr) split evenly; HEV is a floor (top brands only); Diesel=0
       "Kazakhstan": [176,530,102,0,16291,0,17099],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [67,93,1039,0,21798,0,22997],
-      // source: CERR (Center for Economic Research and Reforms), Uzbekistan — only BEV tracked (user's explicit choice); rest folded into Others. BEV likely blends primary+secondary market EV sales; internally consistent with the separately-sourced Feb figure (-20.3% MoM matches)
-      "Uzbekistan": [5500,0,0,25200,0,0,30700]
+      "Peru": [67,93,1039,0,21798,0,22997]
     },
     priorYearBev: {
       "Canada":8800,
@@ -891,9 +885,7 @@ const MONTHLY_DATA = {
       // source: KAO (kao.kz) — Jan-Feb cumulative NEV snapshot split evenly; HEV is a genuine market total for this 2-month block; Diesel=0
       "Kazakhstan": [135,219,54,0,13694,0,14102],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry — genuine standalone month, republished in the July 2026 report's full historical chart; HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [75,100,999,0,21895,0,23069],
-      // source: CERR (Center for Economic Research and Reforms), Uzbekistan — only BEV tracked (user's explicit choice); rest folded into Others. This month CERR also published a primary-only sub-figure (4,700 of this 6,100 combined total) -- not used, kept consistent with every other month's combined-market basis
-      "Uzbekistan": [6100,0,0,22500,0,0,28600]
+      "Peru": [75,100,999,0,21895,0,23069]
     },
     // BEV units for the same month/quarter a year prior — source: ACEA (world_auto_sales, 2025-01) / same StatCan table for Canada, for YoY %
     priorYearBev: {
@@ -1243,7 +1235,7 @@ const MONTHLY_DATA = {
       "Israel": [58396,34723,78939,10,110667,17396,300131],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry, full-year 2025 summed from monthly figures — HEV includes MHEV combined; Diesel folded into Petrol
       "Peru": [751,640,8848,0,201537,0,211776],
-      // source: CERR (Center for Economic Research and Reforms), full-year 2025 — only BEV tracked (user's explicit choice); rest folded into Others. IEA's Global EV Outlook 2026 gives an alternate 2025 estimate of 10,000 BEV cars for Uzbekistan (30,000 total EV, 6% share) -- notably lower than CERR's own 40,700; CERR was used for consistency with this project's 2026 monthly rows, which share its methodology
+      // source: CERR (Center for Economic Research and Reforms), full-year 2025 — only BEV tracked (user's explicit choice); rest folded into Others. Both Total and BEV here are CERR's own primary-market figures, same scope on both sides (368,300/40,700 = 11.1%, matching CERR's own "~10%" market-share statements and IEA's independent 6% estimate within a plausible range). 2026 monthly rows were built and then REMOVED (2026-09-02): they paired this same primary-market Total against CERR's monthly EV headline, which turned out to blend primary+secondary market sales -- inflating BEV share to 21-35% vs the true ~10-11%. Only this correctly-scoped annual row remains; see country_data_coverage for the full retraction note and what a valid monthly reload would need.
       "Uzbekistan": [40700,0,0,327600,0,0,368300]
     },
     // per-country "as of" override — every country here is a genuine full year except Philippines (11 of 12 months)
