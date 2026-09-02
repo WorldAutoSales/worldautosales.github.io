@@ -356,17 +356,17 @@ const COUNTRIES = Object.keys(HIST).sort();
 const LATEST_IDX = MONTHS.length - 1;
 const LATEST_MONTH = MONTHS[LATEST_IDX];
 
-const CONTINENT_LABELS = { EU:"Europe", NA:"North America", LATAM:"Latin America", ASIA:"Asia", AFRICA:"Africa", OCEANIA:"Oceania" };
+const CONTINENT_LABELS = { EU:"Europe", NAC:"North America and Central", SA:"South America", ASIA:"Asia", AFRICA:"Africa", OCEANIA:"Oceania", MIDEAST:"Middle East" };
 const COUNTRY_CONTINENT = {
   "Austria":"EU","Belgium":"EU","Bulgaria":"EU","Croatia":"EU","Cyprus":"EU","Czechia":"EU","Denmark":"EU",
   "Estonia":"EU","Finland":"EU","France":"EU","Germany":"EU","Greece":"EU","Hungary":"EU","Iceland":"EU",
   "Ireland":"EU","Italy":"EU","Latvia":"EU","Lithuania":"EU","Luxembourg":"EU","Malta":"EU","Netherlands":"EU",
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
-  "Canada":"NA","New Zealand":"OCEANIA","United States":"NA","China":"ASIA","Mexico":"NA",
-  "Brazil":"LATAM","Argentina":"LATAM","Japan":"ASIA","Indonesia":"ASIA","Malaysia":"ASIA","India":"ASIA",
-  "Turkey":"EU","Thailand":"ASIA","Singapore":"ASIA","Serbia":"EU","South Africa":"AFRICA","Colombia":"LATAM",
-  "Nepal":"ASIA","Kazakhstan":"ASIA"
+  "Canada":"NAC","New Zealand":"OCEANIA","United States":"NAC","China":"ASIA","Mexico":"NAC",
+  "Brazil":"SA","Argentina":"SA","Japan":"ASIA","Indonesia":"ASIA","Malaysia":"ASIA","India":"ASIA",
+  "Turkey":"EU","Thailand":"ASIA","Singapore":"ASIA","Serbia":"EU","South Africa":"AFRICA","Colombia":"SA",
+  "Nepal":"ASIA","Kazakhstan":"ASIA","Israel":"MIDEAST"
 };
 const ALL_CONTINENTS = [...new Set(COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 const COUNTRIES_SORTED = [...COUNTRIES].sort((a,b) => {

@@ -1595,15 +1595,15 @@ LAST_AVAILABLE_PERIOD["Vietnam"] = LAST_AVAILABLE_PERIOD["Vietnam"] || "2025 (An
 LAST_AVAILABLE_PERIOD["Peru"] = LAST_AVAILABLE_PERIOD["Peru"] || "2025 (Annual)";
 
 // country -> short continent code, so the filters stay ready as non-European markets get added
-const CONTINENT_LABELS = { EU:"Europe", NA:"North America", LATAM:"Latin America", ASIA:"Asia", AFRICA:"Africa", OCEANIA:"Oceania" };
+const CONTINENT_LABELS = { EU:"Europe", NAC:"North America and Central", SA:"South America", ASIA:"Asia", AFRICA:"Africa", OCEANIA:"Oceania", MIDEAST:"Middle East" };
 const COUNTRY_CONTINENT = {
   "Austria":"EU","Belgium":"EU","Bulgaria":"EU","Croatia":"EU","Cyprus":"EU","Czechia":"EU","Denmark":"EU",
   "Estonia":"EU","Finland":"EU","France":"EU","Germany":"EU","Greece":"EU","Hungary":"EU","Iceland":"EU",
   "Ireland":"EU","Italy":"EU","Latvia":"EU","Lithuania":"EU","Luxembourg":"EU","Malta":"EU","Netherlands":"EU",
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
-  "Canada":"NA","United States":"NA","China":"ASIA","India":"ASIA","Mexico":"NA","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"LATAM","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"LATAM","Turkey":"EU","Philippines":"ASIA","Chile":"LATAM","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA","Taiwan":"ASIA","Singapore":"ASIA","Serbia":"EU","Colombia":"LATAM","Vietnam":"ASIA","Nepal":"ASIA"
-,"Israel":"ASIA","Kazakhstan":"ASIA"};
+  "Canada":"NAC","United States":"NAC","China":"ASIA","India":"ASIA","Mexico":"NAC","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"SA","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"SA","Turkey":"EU","Philippines":"ASIA","Chile":"SA","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA","Taiwan":"ASIA","Singapore":"ASIA","Serbia":"EU","Colombia":"SA","Vietnam":"ASIA","Nepal":"ASIA"
+,"Israel":"MIDEAST","Kazakhstan":"ASIA"};
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 
 // country -> ISO 3166-1 alpha-2 code, for flag images (flagcdn.com)
