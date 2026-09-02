@@ -427,6 +427,20 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
   pointer-events:none;
   text-anchor:middle;
 }
+.bubble-trend-path{
+  stroke:var(--accent);
+  stroke-width:1.5px;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  opacity:.3;
+  pointer-events:none;
+}
+.bubble-trend-dot{
+  fill:var(--accent);
+  stroke:var(--surface);
+  stroke-width:1px;
+  cursor:pointer;
+}
 
 /* ---------- ranked bar rows (country comparison) ---------- */
 .rank-rows-header{

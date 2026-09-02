@@ -164,8 +164,14 @@
         </div>
 
         <div class="card chart-card">
-          <h2>Volume vs. BEV Share</h2>
-          <p class="note">X = number of BEV units sold, Y = BEV share of that country's total. Each country is its own flag, same size for every market. Hover a flag for exact figures.</p>
+          <div class="chart-header-row">
+            <h2>Volume vs. BEV Share</h2>
+            <div class="chart-mode-toggle" role="group" aria-label="Chart view">
+              <button type="button" class="mode-btn active" data-bubble-mode="snapshot" title="One point per country, for the selected period only.">SNAPSHOT</button>
+              <button type="button" class="mode-btn" data-bubble-mode="trend" title="Adds up to 4 prior months as a fading trail, for countries with monthly history.">TREND</button>
+            </div>
+          </div>
+          <p class="note" id="bubble-note">X = number of BEV units sold, Y = BEV share of that country's total. Each country is its own flag, same size for every market. Hover a flag for exact figures.</p>
           <svg class="chart" id="bubble-svg" viewBox="0 0 900 460" preserveAspectRatio="xMidYMid meet"></svg>
           <div class="tooltip" id="bubble-tooltip"></div>
         </div>
@@ -256,11 +262,13 @@ const MONTHLY_DATA = {
     },
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY %
     priorYearBev: {
-      "India": 20204, "South Korea": 23315
+      "India": 20204, "South Korea": 23315,
+      "Israel":6888
     },
     // Total (all powertrains) units for the same month a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
-      "India": 343212, "South Korea": 127947
+      "India": 343212, "South Korea": 127947,
+      "Israel":25847
     }
   },
   "2026-07": {
@@ -312,11 +320,13 @@ const MONTHLY_DATA = {
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY % (Argentina, China,
     // Indonesia, Australia, Singapore omitted — no matching July 2025 monthly figure sourced for those five)
     priorYearBev: {
-      "Brazil":7007,"India":17970,"Japan":2908,"Malaysia":2792,"Mexico":1442,"New Zealand":545,"United States":126356,"Thailand":9304,"South Korea":25192,"Taiwan":2501
+      "Brazil":7007,"India":17970,"Japan":2908,"Malaysia":2792,"Mexico":1442,"New Zealand":545,"United States":126356,"Thailand":9304,"South Korea":25192,"Taiwan":2501,
+      "Israel":5422
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
-      "Brazil":230266,"India":346348,"Japan":220544,"Malaysia":75663,"Mexico":126541,"New Zealand":7576,"United States":1389685,"Thailand":49102,"South Korea":151549,"Taiwan":30934
+      "Brazil":230266,"India":346348,"Japan":220544,"Malaysia":75663,"Mexico":126541,"New Zealand":7576,"United States":1389685,"Thailand":49102,"South Korea":151549,"Taiwan":30934,
+      "Israel":26894
     }
   },
   "2026-06": {
@@ -406,11 +416,13 @@ const MONTHLY_DATA = {
       "Ireland":1244,"Italy":7973,"Latvia":152,"Lithuania":280,"Luxembourg":939,"Malta":128,"Netherlands":12220,
       "Norway":17799,"Poland":3779,"Portugal":4642,"Romania":390,"Slovakia":481,"Slovenia":551,"Spain":11243,
       "Sweden":10725,"Switzerland":4813,"United Kingdom":47354,"New Zealand":1012,"United States":111577,
-      "Brazil":5943,"India":15310,"Japan":4264,"Malaysia":3272,"Mexico":1662,"Thailand":9373,"South Korea":21185,"Taiwan":2835
+      "Brazil":5943,"India":15310,"Japan":4264,"Malaysia":3272,"Mexico":1662,"Thailand":9373,"South Korea":21185,"Taiwan":2835,
+      "Israel":4046
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
-      "Austria":27868,"Belgium":41527,"Bulgaria":4614,"Croatia":8945,"Cyprus":1347,"Czechia":22208,"Denmark":19045,"Estonia":1549,"Finland":7449,"France":169505,"Germany":256193,"Greece":14647,"Hungary":11511,"Iceland":2032,"Ireland":2437,"Italy":132320,"Latvia":2244,"Lithuania":3722,"Luxembourg":4168,"Malta":544,"Netherlands":34641,"Norway":18373,"Poland":49587,"Portugal":23184,"Romania":10611,"Slovakia":8800,"Slovenia":4845,"Spain":119125,"Sweden":27565,"Switzerland":21810,"United Kingdom":191316,"New Zealand":8188,"United States":1272469,"Brazil":202458,"India":316921,"Japan":217333,"Malaysia":58858,"Mexico":117780,"Thailand":50079,"South Korea":145683,"Taiwan":29838
+      "Austria":27868,"Belgium":41527,"Bulgaria":4614,"Croatia":8945,"Cyprus":1347,"Czechia":22208,"Denmark":19045,"Estonia":1549,"Finland":7449,"France":169505,"Germany":256193,"Greece":14647,"Hungary":11511,"Iceland":2032,"Ireland":2437,"Italy":132320,"Latvia":2244,"Lithuania":3722,"Luxembourg":4168,"Malta":544,"Netherlands":34641,"Norway":18373,"Poland":49587,"Portugal":23184,"Romania":10611,"Slovakia":8800,"Slovenia":4845,"Spain":119125,"Sweden":27565,"Switzerland":21810,"United Kingdom":191316,"New Zealand":8188,"United States":1272469,"Brazil":202458,"India":316921,"Japan":217333,"Malaysia":58858,"Mexico":117780,"Thailand":50079,"South Korea":145683,"Taiwan":29838,
+      "Israel":20372
     }
   },
   "2026-05": {
@@ -492,11 +504,13 @@ const MONTHLY_DATA = {
       "Ireland":1086,"Italy":7118,"Latvia":161,"Lithuania":222,"Luxembourg":888,"Malta":165,"Netherlands":10459,
       "Norway":13384,"Poland":2818,"Portugal":4478,"Romania":432,"Slovakia":376,"Slovenia":460,"Spain":8965,
       "Sweden":9469,"Switzerland":4177,"United Kingdom":32738,"New Zealand":442,"United States":101750,
-      "Brazil":6989,"India":14712,"Japan":2848,"Malaysia":4152,"Mexico":1768,"Argentina":91,"Thailand":11274,"South Korea":21760,"Turkey":16802,"Taiwan":1482
+      "Brazil":6989,"India":14712,"Japan":2848,"Malaysia":4152,"Mexico":1768,"Argentina":91,"Thailand":11274,"South Korea":21760,"Turkey":16802,"Taiwan":1482,
+      "Israel":4168
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
-      "Austria":24311,"Belgium":34338,"Bulgaria":3857,"Croatia":8791,"Cyprus":1328,"Czechia":19519,"Denmark":17952,"Estonia":1411,"Finland":6851,"France":123918,"Germany":239297,"Greece":15670,"Hungary":10899,"Iceland":2313,"Ireland":5821,"Italy":139484,"Latvia":2149,"Lithuania":4092,"Luxembourg":4058,"Malta":677,"Netherlands":30188,"Norway":14260,"Poland":46641,"Portugal":23545,"Romania":10521,"Slovakia":7651,"Slovenia":5118,"Spain":112820,"Sweden":25675,"Switzerland":19969,"United Kingdom":150070,"New Zealand":6770,"United States":1461067,"Brazil":214617,"India":323571,"Japan":177980,"Malaysia":74393,"Mexico":121110,"Argentina":56319,"Thailand":52229,"South Korea":145387,"Turkey":85123,"Taiwan":27392
+      "Austria":24311,"Belgium":34338,"Bulgaria":3857,"Croatia":8791,"Cyprus":1328,"Czechia":19519,"Denmark":17952,"Estonia":1411,"Finland":6851,"France":123918,"Germany":239297,"Greece":15670,"Hungary":10899,"Iceland":2313,"Ireland":5821,"Italy":139484,"Latvia":2149,"Lithuania":4092,"Luxembourg":4058,"Malta":677,"Netherlands":30188,"Norway":14260,"Poland":46641,"Portugal":23545,"Romania":10521,"Slovakia":7651,"Slovenia":5118,"Spain":112820,"Sweden":25675,"Switzerland":19969,"United Kingdom":150070,"New Zealand":6770,"United States":1461067,"Brazil":214617,"India":323571,"Japan":177980,"Malaysia":74393,"Mexico":121110,"Argentina":56319,"Thailand":52229,"South Korea":145387,"Turkey":85123,"Taiwan":27392,
+      "Israel":26155
     }
   },
   "2026-04": {
@@ -577,11 +591,13 @@ const MONTHLY_DATA = {
       "Ireland":1335,"Italy":6643,"Latvia":136,"Lithuania":218,"Luxembourg":999,"Malta":140,"Netherlands":9235,
       "Norway":10942,"Poland":2552,"Portugal":3722,"Romania":218,"Slovakia":320,"Slovenia":400,"Spain":6835,
       "Sweden":8555,"Switzerland":3480,"United Kingdom":24558,"New Zealand":440,"United States":96348,
-      "Brazil":4716,"India":14818,"Japan":2111,"Malaysia":2892,"Mexico":1693,"Thailand":10981,"South Korea":17263,"Taiwan":1470
+      "Brazil":4716,"India":14818,"Japan":2111,"Malaysia":2892,"Mexico":1693,"Thailand":10981,"South Korea":17263,"Taiwan":1470,
+      "Israel":3319
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
-      "Austria":24855,"Belgium":37812,"Bulgaria":4008,"Croatia":9070,"Cyprus":1097,"Czechia":21226,"Denmark":15119,"Estonia":1075,"Finland":6251,"France":138696,"Germany":242728,"Greece":14649,"Hungary":10785,"Iceland":1546,"Ireland":8703,"Italy":139142,"Latvia":2067,"Lithuania":4040,"Luxembourg":4365,"Malta":460,"Netherlands":27157,"Norway":11286,"Poland":46978,"Portugal":18752,"Romania":9996,"Slovakia":8322,"Slovenia":5192,"Spain":98522,"Sweden":24292,"Switzerland":18664,"United Kingdom":120331,"New Zealand":6041,"United States":1463622,"Brazil":197159,"India":374978,"Japan":191066,"Malaysia":65200,"Mexico":109420,"Thailand":47193,"South Korea":153456,"Taiwan":28460
+      "Austria":24855,"Belgium":37812,"Bulgaria":4008,"Croatia":9070,"Cyprus":1097,"Czechia":21226,"Denmark":15119,"Estonia":1075,"Finland":6251,"France":138696,"Germany":242728,"Greece":14649,"Hungary":10785,"Iceland":1546,"Ireland":8703,"Italy":139142,"Latvia":2067,"Lithuania":4040,"Luxembourg":4365,"Malta":460,"Netherlands":27157,"Norway":11286,"Poland":46978,"Portugal":18752,"Romania":9996,"Slovakia":8322,"Slovenia":5192,"Spain":98522,"Sweden":24292,"Switzerland":18664,"United Kingdom":120331,"New Zealand":6041,"United States":1463622,"Brazil":197159,"India":374978,"Japan":191066,"Malaysia":65200,"Mexico":109420,"Thailand":47193,"South Korea":153456,"Taiwan":28460,
+      "Israel":20182
     }
   },
   "2026-03": {
@@ -665,11 +681,13 @@ const MONTHLY_DATA = {
       "Ireland":2537,"Italy":9369,"Latvia":130,"Lithuania":223,"Luxembourg":1432,"Malta":90,"Netherlands":11195,
       "Norway":11192,"Poland":2311,"Portugal":4964,"Romania":273,"Slovakia":351,"Slovenia":480,"Spain":8101,
       "Sweden":8386,"Switzerland":4421,"United Kingdom":69313,"New Zealand":588,"United States":120820,
-      "Brazil":4804,"India":14425,"Japan":4010,"Malaysia":2976,"Mexico":1655,"Thailand":8233,"South Korea":17909,"Taiwan":2727
+      "Brazil":4804,"India":14425,"Japan":4010,"Malaysia":2976,"Mexico":1655,"Thailand":8233,"South Korea":17909,"Taiwan":2727,
+      "Israel":4767
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
-      "Canada":142291,"Austria":25950,"Belgium":40184,"Bulgaria":4220,"Croatia":6426,"Cyprus":1602,"Czechia":22566,"Denmark":14987,"Estonia":966,"Finland":6173,"France":153842,"Germany":253497,"Greece":12719,"Hungary":13199,"Iceland":1012,"Ireland":17312,"Italy":172303,"Latvia":2036,"Lithuania":3566,"Luxembourg":4839,"Malta":334,"Netherlands":31515,"Norway":13304,"Poland":53062,"Portugal":24578,"Romania":9922,"Slovakia":7507,"Slovenia":5285,"Spain":116725,"Sweden":24204,"Switzerland":21690,"United Kingdom":357103,"New Zealand":8355,"United States":1593017,"Brazil":184371,"India":367639,"Japan":288234,"Malaysia":77121,"Mexico":128434,"Thailand":55798,"South Korea":146448,"Taiwan":32293
+      "Canada":142291,"Austria":25950,"Belgium":40184,"Bulgaria":4220,"Croatia":6426,"Cyprus":1602,"Czechia":22566,"Denmark":14987,"Estonia":966,"Finland":6173,"France":153842,"Germany":253497,"Greece":12719,"Hungary":13199,"Iceland":1012,"Ireland":17312,"Italy":172303,"Latvia":2036,"Lithuania":3566,"Luxembourg":4839,"Malta":334,"Netherlands":31515,"Norway":13304,"Poland":53062,"Portugal":24578,"Romania":9922,"Slovakia":7507,"Slovenia":5285,"Spain":116725,"Sweden":24204,"Switzerland":21690,"United Kingdom":357103,"New Zealand":8355,"United States":1593017,"Brazil":184371,"India":367639,"Japan":288234,"Malaysia":77121,"Mexico":128434,"Thailand":55798,"South Korea":146448,"Taiwan":32293,
+      "Israel":26744
     }
   },
   "2026-02": {
@@ -752,11 +770,13 @@ const MONTHLY_DATA = {
       "Ireland":2512,"Italy":6922,"Latvia":80,"Lithuania":101,"Luxembourg":1134,"Malta":46,"Netherlands":10174,
       "Norway":8477,"Poland":1675,"Portugal":3946,"Romania":724,"Slovakia":276,"Slovenia":367,"Spain":6112,
       "Sweden":6872,"Switzerland":3402,"United Kingdom":21244,"New Zealand":540,"United States":86040,
-      "Brazil":4508,"India":10508,"Japan":2380,"Malaysia":2160,"Mexico":1307,"Thailand":7539,"South Korea":13284,"Taiwan":2006
+      "Brazil":4508,"India":10508,"Japan":2380,"Malaysia":2160,"Mexico":1307,"Thailand":7539,"South Korea":13284,"Taiwan":2006,
+      "Israel":3375
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
-      "Canada":142291,"Austria":19619,"Belgium":40161,"Bulgaria":3394,"Croatia":4245,"Cyprus":1284,"Czechia":17773,"Denmark":11617,"Estonia":624,"Finland":4784,"France":141570,"Germany":203434,"Greece":9818,"Hungary":10575,"Iceland":655,"Ireland":13969,"Italy":138020,"Latvia":1398,"Lithuania":2531,"Luxembourg":4111,"Malta":303,"Netherlands":27820,"Norway":8949,"Poland":44795,"Portugal":19463,"Romania":11850,"Slovakia":6205,"Slovenia":4372,"Spain":90327,"Sweden":19608,"Switzerland":16212,"United Kingdom":84054,"New Zealand":6957,"United States":1215074,"Brazil":174041,"India":321898,"Japan":234257,"Malaysia":67327,"Mexico":118602,"Thailand":49313,"South Korea":132762,"Taiwan":24108
+      "Canada":142291,"Austria":19619,"Belgium":40161,"Bulgaria":3394,"Croatia":4245,"Cyprus":1284,"Czechia":17773,"Denmark":11617,"Estonia":624,"Finland":4784,"France":141570,"Germany":203434,"Greece":9818,"Hungary":10575,"Iceland":655,"Ireland":13969,"Italy":138020,"Latvia":1398,"Lithuania":2531,"Luxembourg":4111,"Malta":303,"Netherlands":27820,"Norway":8949,"Poland":44795,"Portugal":19463,"Romania":11850,"Slovakia":6205,"Slovenia":4372,"Spain":90327,"Sweden":19608,"Switzerland":16212,"United Kingdom":84054,"New Zealand":6957,"United States":1215074,"Brazil":174041,"India":321898,"Japan":234257,"Malaysia":67327,"Mexico":118602,"Thailand":49313,"South Korea":132762,"Taiwan":24108,
+      "Israel":23579
     }
   },
   "2026-01": {
@@ -851,11 +871,13 @@ const MONTHLY_DATA = {
       "Canada": 26401,
       "New Zealand": 552,
       "United States": 94035,
-      "Brazil": 3716, "India": 13348, "Japan": 2014, "Malaysia": 1691, "Mexico": 1362, "Thailand": 7022, "South Korea": 2411, "Taiwan": 2207
+      "Brazil": 3716, "India": 13348, "Japan": 2014, "Malaysia": 1691, "Mexico": 1362, "Thailand": 7022, "South Korea": 2411, "Taiwan": 2207,
+      "Israel":8043
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
-      "Canada":142291,"Austria":20448,"Belgium":40594,"Bulgaria":2780,"Croatia":4472,"Cyprus":1565,"Czechia":19347,"Denmark":10834,"Estonia":531,"Finland":5742,"France":114673,"Germany":207640,"Greece":10659,"Hungary":9125,"Iceland":594,"Ireland":33473,"Italy":133731,"Latvia":1343,"Lithuania":2836,"Luxembourg":3718,"Malta":640,"Netherlands":32804,"Norway":9343,"Poland":44248,"Portugal":14504,"Romania":11920,"Slovakia":6605,"Slovenia":5015,"Spain":72322,"Sweden":19632,"Switzerland":14788,"United Kingdom":139345,"New Zealand":7991,"United States":1106120,"Brazil":160053,"India":496673,"Japan":216664,"Malaysia":53930,"Mexico":120953,"Thailand":48092,"South Korea":124494,"Taiwan":31933
+      "Canada":142291,"Austria":20448,"Belgium":40594,"Bulgaria":2780,"Croatia":4472,"Cyprus":1565,"Czechia":19347,"Denmark":10834,"Estonia":531,"Finland":5742,"France":114673,"Germany":207640,"Greece":10659,"Hungary":9125,"Iceland":594,"Ireland":33473,"Italy":133731,"Latvia":1343,"Lithuania":2836,"Luxembourg":3718,"Malta":640,"Netherlands":32804,"Norway":9343,"Poland":44248,"Portugal":14504,"Romania":11920,"Slovakia":6605,"Slovenia":5015,"Spain":72322,"Sweden":19632,"Switzerland":14788,"United Kingdom":139345,"New Zealand":7991,"United States":1106120,"Brazil":160053,"India":496673,"Japan":216664,"Malaysia":53930,"Mexico":120953,"Thailand":48092,"South Korea":124494,"Taiwan":31933,
+      "Israel":50757
     }
   },
   "2026-ytd": {
@@ -2350,6 +2372,26 @@ const bubbleWrap = document.getElementById('bubble-svg').closest('.chart-card');
 
 const BUBBLE_R = 16; // fixed radius for every country — size no longer encodes a metric
 const BUBBLE_BREAK_FRACTION = 0.74; // share of the axis width given to the "normal" (non-outlier) zone
+let bubbleMode = 'snapshot'; // 'snapshot' | 'trend' — see [data-bubble-mode] wiring below renderBubbleChart
+
+const BUBBLE_NOTES = {
+  snapshot: `X = number of BEV units sold, Y = BEV share of that country's total. Each country is its own flag, same size for every market. Hover a flag for exact figures.`,
+  trend: `Flag = selected period. Paler dots trace up to 4 prior months for the same country, only where monthly history exists — a short trail means a market we've only just started tracking monthly, not a market standing still.`
+};
+
+// true calendar-month period keys ("2026-06"), sorted chronologically — excludes the
+// annual/YTD/projection keys that also live in MONTHLY_DATA, since those don't form a sequence
+const ALL_MONTHLY_KEYS = ALL_MONTHS.filter(m => /^\d{4}-\d{2}$/.test(m)).sort();
+
+// the selected period plus up to 4 preceding months, oldest first, ending at the selected period —
+// the walk-back window for TREND mode. A non-monthly period (annual/YTD/projection) has no
+// sequence to walk, so it degenerates to just itself (TREND then renders the same as SNAPSHOT).
+function getTrendPeriods(){
+  const current = [...selectedMonths][0];
+  const idx = ALL_MONTHLY_KEYS.indexOf(current);
+  if(idx === -1) return [current];
+  return ALL_MONTHLY_KEYS.slice(Math.max(0, idx - 4), idx + 1);
+}
 
 // every country's BEV total for the currently selected period(s), ignoring the continent/country
 // filters (but not the period selector) — used to compute a fixed X-axis domain so bubbles don't
@@ -2364,6 +2406,19 @@ function buildFullBevValues(){
     });
   });
   return Object.values(totals).filter(v => v > 0);
+}
+
+// same idea as buildFullBevValues, but for TREND mode: every country's BEV value in each
+// individual period of the trend window (not summed across periods), so the X domain covers
+// every point a trail might visit and trails never get clipped at the chart edge
+function buildFullBevValuesForPeriods(periods){
+  const vals = [];
+  periods.forEach(p => {
+    const month = MONTHLY_DATA[p];
+    if(!month) return;
+    Object.values(month.raw).forEach(v => { if(v[0] > 0) vals.push(v[0]); });
+  });
+  return vals;
 }
 
 // walks down from the top, comparing each value to the average of the next few — as long as a
@@ -2411,9 +2466,15 @@ function renderBubbleChart(){
   bubbleSvg.selectAll('*').remove();
   if(!DATA.length) return;
 
+  const trendPeriods = bubbleMode === 'trend' ? getTrendPeriods() : [...selectedMonths];
+
   // fixed, filter-independent X domain — computed from every country for the current period(s),
-  // not just the ones currently shown, so bubbles never shift position as filters are toggled
-  const { breakVal, maxVal, hasBreak } = computeBrokenXDomain(buildFullBevValues());
+  // not just the ones currently shown, so bubbles never shift position as filters are toggled.
+  // In TREND mode this spans every period in the trail window, not just the selected one, so a
+  // country's trail never runs off the edge of the chart.
+  const { breakVal, maxVal, hasBreak } = computeBrokenXDomain(
+    bubbleMode === 'trend' ? buildFullBevValuesForPeriods(trendPeriods) : buildFullBevValues()
+  );
   const { pos: xPos, normalScale, compressedScale, breakPx } = makeBrokenXScale(breakVal, maxVal, innerW, hasBreak);
   const xScale = xPos; // callable position function, used everywhere below like a normal d3 scale
   const yScale = d3.scaleLinear().domain([0, 100]).range([innerH, 0]); // fixed 0-100% — BEV share is always a percentage
@@ -2479,6 +2540,45 @@ function renderBubbleChart(){
     .attr('id', d => `flag-clip-${COUNTRY_ISO2[d.country] || d.country}`)
     .append('circle').attr('r', BUBBLE_R);
 
+  // TREND mode: draw trails first so the current-period flags (added below) sit on top of them.
+  // Only countries with at least 2 data points in the window get a trail; a country only just
+  // added to monthly tracking simply shows its single current-period flag, same as SNAPSHOT.
+  if(bubbleMode === 'trend'){
+    const periodData = trendPeriods.map(p => ({ period: p, label: MONTHLY_DATA[p] ? MONTHLY_DATA[p].label : p, byCountry: aggregateByCountry([p]) }));
+    const trails = DATA.map(d => {
+      const points = periodData.map(pd => {
+        const rec = pd.byCountry[d.country];
+        if(!rec || rec.total <= 0) return null;
+        return { period: pd.period, label: pd.label, bev: rec.bev, bevPct: +(rec.bev/rec.total*100).toFixed(1) };
+      }).filter(Boolean);
+      return { country: d.country, points };
+    });
+
+    const trailG = g.append('g').attr('class', 'bubble-trails');
+    const lineGen = d3.line().x(p => xScale(p.bev)).y(p => yScale(p.bevPct));
+
+    trailG.selectAll('.bubble-trend-path').data(trails.filter(t => t.points.length >= 2), t => t.country).join('path')
+      .attr('class', 'bubble-trend-path')
+      .attr('fill', 'none')
+      .attr('d', t => lineGen(t.points));
+
+    // every point but the last (the last = the selected period, drawn as the full flag bubble below)
+    const pastPoints = trails.flatMap(t => t.points.slice(0, -1).map((p, i, arr) => ({ ...p, country: t.country, stepsBack: arr.length - i })));
+    trailG.selectAll('.bubble-trend-dot').data(pastPoints, p => `${p.country}-${p.period}`).join('circle')
+      .attr('class', 'bubble-trend-dot')
+      .attr('cx', p => xScale(p.bev)).attr('cy', p => yScale(p.bevPct))
+      .attr('r', 5)
+      .style('opacity', p => Math.max(0.15, 0.6 - p.stepsBack * 0.12))
+      .on('pointermove', (e, p) => {
+        const rect = bubbleWrap.getBoundingClientRect();
+        bubbleTooltip.style.left = (e.clientX - rect.left) + 'px';
+        bubbleTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
+        bubbleTooltip.style.opacity = 1;
+        bubbleTooltip.innerHTML = `${p.country} — ${p.label}<br><span style="color:#1e8f5f">●</span> BEV: <strong>${p.bev.toLocaleString('en-US')}</strong> (${p.bevPct}%)`;
+      })
+      .on('pointerleave', () => { bubbleTooltip.style.opacity = 0; });
+  }
+
   const nodeGroups = g.selectAll('.bubble-node-group').data(DATA, d => d.country).join('g')
     .attr('class', 'bubble-node-group')
     .attr('transform', d => `translate(${xScale(d.bev)},${yScale(d.bevPct)})`);
@@ -2516,6 +2616,17 @@ function renderBubbleChart(){
     .attr('y', d => yScale(d.bevPct) - BUBBLE_R - 4)
     .text(d => d.country);
 }
+
+const bubbleNote = document.getElementById('bubble-note');
+document.querySelectorAll('[data-bubble-mode]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if(btn.dataset.bubbleMode === bubbleMode) return;
+    bubbleMode = btn.dataset.bubbleMode;
+    document.querySelectorAll('[data-bubble-mode]').forEach(b => b.classList.toggle('active', b === btn));
+    bubbleNote.textContent = BUBBLE_NOTES[bubbleMode];
+    renderBubbleChart();
+  });
+});
 
 // --- stat row ---
 function renderStats(){
