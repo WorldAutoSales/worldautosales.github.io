@@ -122,6 +122,14 @@
           <div class="stat-row" id="focus-stats-body"></div>
         </div>
 
+        <div class="card chart-card hidden" id="elec-bars-card">
+          <h2 id="elec-bars-title">Electrification Mix — Recent</h2>
+          <p class="note" id="elec-bars-note"></p>
+          <div class="chart-legend" id="elec-bars-legend"></div>
+          <svg class="chart" id="elec-bars-svg" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
+          <div class="tooltip" id="elec-bars-tooltip"></div>
+        </div>
+
         <div class="card chart-card">
           <div class="chart-header-row">
             <h2 id="trends-title">Motorisation Trends</h2>
@@ -248,6 +256,7 @@
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
 <script src="assets/country-yearly-data.js"></script>
 <script src="assets/country-monthly-data.js"></script>
+<script src="assets/electrification-bars.js"></script>
 <script>
 // month key -> { label, raw: { country: [BEV, PHEV, HEV, OTHERS, PETROL, DIESEL, TOTAL] } } — source: ACEA
 const MONTHLY_DATA = {
@@ -2157,6 +2166,14 @@ function renderFocusStats(){
   if(momentumData) wireMomentumCardClicks(body);
 }
 
+// wraps the shared electrification-bars.js renderer: hidden unless a country is focused,
+// same pattern as renderFocusStats above
+function renderElectrificationBars(){
+  const card = document.getElementById('elec-bars-card');
+  if(!focusedCountry){ card.classList.add('hidden'); return; }
+  renderElectrificationBarsChart(focusedCountry);
+}
+
 function buildData(){
   return Object.values(aggregateByCountry())
     .filter(d => selectedCountries.has(d.country) && selectedContinents.has(COUNTRY_CONTINENT[d.country] || "OTHER") && d.total > 0)
@@ -3211,6 +3228,7 @@ function recompute(){
   renderTrendsChart();
   renderMomentum();
   renderFocusStats();
+  renderElectrificationBars();
   updateURL();
 }
 

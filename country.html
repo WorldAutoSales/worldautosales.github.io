@@ -68,6 +68,14 @@
           <div class="tooltip" id="country-trend-tooltip"></div>
         </div>
 
+        <div class="card chart-card" id="elec-bars-card">
+          <h2 id="elec-bars-title">Electrification Mix — Recent</h2>
+          <p class="note" id="elec-bars-note"></p>
+          <div class="chart-legend" id="elec-bars-legend"></div>
+          <svg class="chart" id="elec-bars-svg" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
+          <div class="tooltip" id="elec-bars-tooltip"></div>
+        </div>
+
         <div class="card notes-card" id="caveat-card" style="display:none">
           <div class="notes-label">📝 About this data</div>
           <ul class="notes-body" id="caveat-body"></ul>
@@ -102,6 +110,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="assets/country-yearly-data.js"></script>
+<script src="assets/country-monthly-data.js"></script>
+<script src="assets/electrification-bars.js"></script>
 <script>
 const FUEL_KEYS = ['bev','phev','hev','petrol','diesel','others'];
 const FUEL_COLORS = {
@@ -168,6 +178,8 @@ if(!data){
   document.getElementById('trend-legend').innerHTML = activeKeys.map(k => `
     <div class="legend-chip"><span class="swatch" style="background:${FUEL_COLORS[k]}"></span>${FUEL_LABELS[k]}</div>
   `).join('');
+
+  renderElectrificationBarsChart(country);
 
   if(CAVEATS[country]){
     document.getElementById('caveat-card').style.display = '';
