@@ -72,7 +72,7 @@
             </span>
           </div>
           <div class="filter-countries" id="filter-rank-tiers"></div>
-          <p class="filter-note">By total 2025 registrations, all powertrains. A country with no 2025 total has no tier to belong to, so it only shows while every tier here is checked — narrowing to any subset (e.g. "Top 10" alone) excludes it.</p>
+          <p class="filter-note">Ranked against the true world market (~150 countries, all powertrains) — not just the countries tracked on this site. Russia, Iran, Saudi Arabia and others occupy real rank slots without ever appearing here, so e.g. "Top 20" can show fewer than 20 countries; that's expected. A country with no 2025 total of any kind only shows while every tier here is checked.</p>
         </div>
 
         <div class="filter-group">
@@ -274,6 +274,7 @@
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
 <script src="assets/country-yearly-data.js"></script>
 <script src="assets/country-monthly-data.js"></script>
+<script src="assets/world-market-totals-2025.js"></script>
 <script src="assets/electrification-bars.js"></script>
 <script>
 // month key -> { label, raw: { country: [BEV, PHEV, HEV, OTHERS, PETROL, DIESEL, TOTAL] } } — source: ACEA
@@ -1980,16 +1981,26 @@ LAST_AVAILABLE_PERIOD["Colombia"] = LAST_AVAILABLE_PERIOD["Colombia"] || "2025 (
 LAST_AVAILABLE_PERIOD["Vietnam"] = LAST_AVAILABLE_PERIOD["Vietnam"] || "2025 (Annual)";
 LAST_AVAILABLE_PERIOD["Peru"] = LAST_AVAILABLE_PERIOD["Peru"] || "2025 (Annual)";
 
-// country -> world rank by TOTAL registrations (all powertrains) for 2025, the last complete
-// year -- independent of the sidebar filters or whatever period is currently selected, so a
-// country's rank is a fixed fact, not something that shifts as you browse. Computed once.
+// country -> TRUE world rank by TOTAL registrations (all powertrains) for 2025, the last
+// complete year -- independent of the sidebar filters or whatever period is currently selected,
+// so a country's rank is a fixed fact, not something that shifts as you browse. Computed once.
+// Ranked against the FULL real world market (WORLD_MARKET_TOTALS_2025, ~150 countries incl. ones
+// this project has zero powertrain data for, like Russia/Iran/Saudi Arabia), not just against the
+// countries this site happens to track -- so a country genuinely 22nd worldwide stays 22nd even
+// though 2 of the 20 slots above it belong to markets that never appear on this site. This is
+// deliberate: it produces real gaps in the Market Rank filter tiers (e.g. "Top 20" can show fewer
+// than 20 tracked countries) rather than silently compacting ranks to hide untracked markets.
 const WORLD_RANK_2025 = {};
 (function(){
-  const totals = aggregateByCountry(['2025-annual']);
-  Object.values(totals)
-    .filter(d => d.total > 0)
-    .sort((a,b) => b.total - a.total)
-    .forEach((d,i) => { WORLD_RANK_2025[d.country] = i + 1; });
+  const ownTotals = aggregateByCountry(['2025-annual']);
+  // prefer this project's own 2025-annual total when we have one sourced (more precise/current
+  // per-country than the shared OICA reference); fall back to the comprehensive reference for
+  // every other real-world market, tracked here or not
+  const merged = { ...WORLD_MARKET_TOTALS_2025 };
+  Object.values(ownTotals).forEach(d => { if(d.total > 0) merged[d.country] = d.total; });
+  Object.entries(merged)
+    .sort((a,b) => b[1] - a[1])
+    .forEach(([country], i) => { WORLD_RANK_2025[country] = i + 1; });
 })();
 function ordinal(n){
   const suffixes = ['th','st','nd','rd'];
