@@ -620,7 +620,9 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
   opacity:0;
   transform:translate(-50%,-100%);
   transition:opacity 0.1s ease;
-  white-space:nowrap;
+  white-space:normal;
+  max-width:300px;
+  width:max-content;
   z-index:10;
 }
 .tooltip strong{
@@ -1099,6 +1101,15 @@ nav.sidebar-nav a.nav-link-alert:hover{
 .copy-link-btn:hover{ opacity:0.88; }
 .copy-link-btn.copied{ background:#16a34a; }
 .filter-note{ font-size:11.5px; color:var(--text-muted); line-height:1.5; margin:0; }
+.filter-notes-card{
+  padding:10px 12px;
+  border-left-width:2px;
+  box-shadow:none;
+  background:var(--surface-alt);
+}
+.filter-notes-card .notes-toggle{ font-size:10px; }
+.filter-notes-card .notes-hint{ font-size:9.5px; }
+.filter-notes-card .notes-body{ font-size:11.5px; line-height:1.5; margin-top:6px; }
 
 @media (max-width: 1000px){
   .content-with-filters{ flex-direction:column; }
