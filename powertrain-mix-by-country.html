@@ -1201,7 +1201,7 @@ const MONTHLY_DATA = {
       "Ecuador": [11825,0,30603,0,76606,44491,163525],
       "Malaysia": [66300, 0, 51045, 0, 685351, 37030, 839726],
       "Argentina": [8057, 0, 76746, 0, 497535, 0, 582338],
-      "Australia": [265063,124548,219674,0,365509,314434,1289228],
+      "Australia": [265063, 124548, 219674, 0, 365509, 314434, 1289228],
       "China": [11457000, 5378667, 0, 0, 14734286, 0, 31569953],
       "Austria": [85486, 37961, 101905, 6, 81018, 33090, 339466],
       "Belgium": [170908, 25328, 57801, 5160, 195076, 13940, 468213],
@@ -1425,7 +1425,13 @@ const MONTHLY_DATA = {
       // source: ATTT (Agence Technique des Transports Terrestres), via automobile.tn's annual "Statistiques des immatriculations" report — real, published Essence/Diesel/Hybride/Électrique split (new for this report vintage). Scope = "Véhicules Légers" = VP+VU+Mixte (passenger cars + light commercial + mixed-use), not passenger-cars-only like most rows here. Figures are "Premières immatriculations" (official dealer network) only — excludes Tunisia's large "réimmatriculations"/marché parallèle of 4-5-year-old European used-vehicle reimports (29,228 units in 2025, tracked separately). PHEV not separately coded (folded into HEV).
       "Tunisia": [539,0,2824,0,40520,20019,63902],
       // source: CERR (Center for Economic Research and Reforms), full-year 2025 — only BEV tracked (user's explicit choice); rest folded into Others. Both Total and BEV here are CERR's own primary-market figures, same scope on both sides (368,300/40,700 = 11.1%, matching CERR's own "~10%" market-share statements and IEA's independent 6% estimate within a plausible range). 2026 monthly rows were built and then REMOVED (2026-09-02): they paired this same primary-market Total against CERR's monthly EV headline, which turned out to blend primary+secondary market sales -- inflating BEV share to 21-35% vs the true ~10-11%. Only this correctly-scoped annual row remains; see country_data_coverage for the full retraction note and what a valid monthly reload would need.
-      "Uzbekistan": [40700,0,0,327600,0,0,368300]
+      "Uzbekistan": [40700,0,0,327600,0,0,368300],
+      // source: SDES (Service des données et études statistiques) via data.gouv.fr — commune-level new-vehicle registrations (SIV), ANNUAL only, French overseas departments (DROM). CARBURANT: Electrique et hydrogène=BEV, Hybride rechargeable=PHEV, Essence+Diesel hybride NR combined=HEV, Gaz et ND=Others, Essence thermique=Petrol, Diesel thermique=Diesel. New passenger cars only (GROUPE=VP).
+      "Guadeloupe": [718,234,5825,46,4853,589,12265],
+      "Martinique": [759,294,5175,30,6287,310,12855],
+      "Guyane": [120,144,2512,0,1861,179,4816],
+      "Reunion": [2350,528,12347,595,8064,2579,26463],
+      "Mayotte": [53,9,1345,10,786,76,2279]
     },
     // per-country "as of" override — every country here is a genuine full year except Philippines (11 of 12 months)
     asOf: {
@@ -1440,6 +1446,11 @@ const MONTHLY_DATA = {
       "Peru":435,
       "Uruguay":5367,
       "Tunisia":226,
+      "Guadeloupe":844,
+      "Martinique":627,
+      "Guyane":132,
+      "Reunion":2832,
+      "Mayotte":40,
       "India": 105461,
       "United States": 1243419,
       "China": 7720000,
@@ -1466,7 +1477,12 @@ const MONTHLY_DATA = {
       "Malaysia":816747,"India":4224368,"United States":15858418,"China":31436193,"Mexico":1504322,"Japan":2523105,"Australia":1185971,"Brazil":2487536,"South Korea":1645998,"Indonesia":865723,"Thailand":572675,"Turkey":980341,"New Zealand":86523,"Austria":253789,"Belgium":448278,"Bulgaria":42186,"Croatia":65020,"Cyprus":15057,"Czechia":231490,"Denmark":173114,"Estonia":25386,"Finland":74056,"France":1718412,"Germany":2817331,"Greece":137075,"Hungary":121597,"Iceland":10238,"Ireland":121307,"Italy":1558225,"Latvia":17191,"Lithuania":30101,"Luxembourg":46693,"Malta":7829,"Netherlands":383602,"Norway":128687,"Poland":551568,"Portugal":209695,"Romania":151105,"Slovakia":95014,"Slovenia":52666,"Spain":1016990,"Sweden":269582,"Switzerland":239803,"United Kingdom":1952778,"Canada":1853441,"Taiwan":403702,"Singapore":43022,"Nepal":15929,
       "Peru":169309,
       "Uruguay":42168,
-      "Tunisia":57137
+      "Tunisia":57137,
+      "Guadeloupe":13962,
+      "Martinique":12874,
+      "Guyane":5115,
+      "Reunion":24740,
+      "Mayotte":1970
     }
   },
   "2024-annual": {
@@ -1539,7 +1555,13 @@ const MONTHLY_DATA = {
       // source: ACAU (Uruguay), Compilado 2024 report, full-year summed from monthly figures — HEV includes MHEV combined; PHEV not separately coded in 2024 (folded into HEV)
       "Uruguay": [5367,0,3675,0,32169,957,42168],
       // source: ATTT, via automobile.tn — real Essence/Diesel/Hybride/Électrique split, scope "Véhicules Légers" (VP+VU+Mixte), official-dealer-network "Premières immatriculations" only. PHEV not separately coded (folded into HEV).
-      "Tunisia": [226,0,2897,0,36674,17340,57137]
+      "Tunisia": [226,0,2897,0,36674,17340,57137],
+      // source: SDES via data.gouv.fr — commune-level new-vehicle registrations (SIV), ANNUAL only, French overseas departments (DROM). See 2025-annual comment for the CARBURANT-to-fuel-type mapping.
+      "Guadeloupe": [844,541,4313,43,7114,1107,13962],
+      "Martinique": [627,440,3111,38,7981,677,12874],
+      "Guyane": [132,120,1404,1,2936,522,5115],
+      "Reunion": [2832,986,7934,467,9059,3462,24740],
+      "Mayotte": [40,11,756,8,918,237,1970]
     },
     // per-country "as of" override for a source whose fiscal year doesn't match the calendar year
     asOf: {
@@ -1554,6 +1576,11 @@ const MONTHLY_DATA = {
       "Peru":267,
       "Uruguay":1474,
       "Tunisia":32,
+      "Guadeloupe":843,
+      "Martinique":684,
+      "Guyane":179,
+      "Reunion":3633,
+      "Mayotte":57,
       "Australia":87212,"Austria":47621,"Belgium":93285,"Brazil":19277,"Bulgaria":1467,"Canada":143666,"Chile":1588,"China":6685000,"Croatia":1624,"Cyprus":788,"Czechia":6702,"Denmark":62759,"Estonia":1445,"Finland":29534,"France":298219,"Germany":524219,"Greece":6379,"Hungary":5748,"Iceland":8781,"India":89227,"Indonesia":17058,"Ireland":22842,"Italy":66278,"Japan":43991,"Latvia":1790,"Lithuania":2060,"Luxembourg":11052,"Malta":982,"Mexico":14172,"Morocco":463,"Netherlands":114455,"New Zealand":20729,"Norway":104587,"Poland":17081,"Portugal":36390,"Romania":15368,"Slovakia":2346,"Slovenia":4332,"South Korea":163000,"Spain":51714,"Sweden":112208,"Switzerland":52728,"Thailand":73567,"Turkey":65562,"United Kingdom":314684,"United States":1164638,"Taiwan":24706,"Singapore":5468
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
@@ -1562,7 +1589,12 @@ const MONTHLY_DATA = {
       "Malaysia":799731,"Australia":1165003,"Austria":239150,"Belgium":476675,"Brazil":2180230,"Bulgaria":35764,"Canada":1714999,"Chile":313865,"China":30093698,"Croatia":56293,"Cyprus":14760,"Czechia":221419,"Denmark":172798,"Estonia":22820,"Finland":87496,"France":1774723,"Germany":2844609,"Greece":134485,"Hungary":107601,"Iceland":17543,"India":3892290,"Indonesia":1005802,"Ireland":121824,"Italy":1565596,"Japan":2651397,"Latvia":18989,"Lithuania":27492,"Luxembourg":49151,"Malta":6567,"Mexico":1363714,"Netherlands":372156,"New Zealand":108702,"Norway":126955,"Poland":475030,"Portugal":199623,"Romania":144611,"Slovakia":88003,"Slovenia":48978,"South Korea":1759561,"Spain":949474,"Sweden":289827,"Switzerland":252214,"Thailand":775780,"Turkey":967341,"United Kingdom":1903054,"United States":15502479,"Taiwan":416290,"Singapore":30225,"Nepal":7114,
       "Peru":181812,
       "Uruguay":38245,
-      "Tunisia":55813
+      "Tunisia":55813,
+      "Guadeloupe":14869,
+      "Martinique":14201,
+      "Guyane":5464,
+      "Reunion":27524,
+      "Mayotte":2066
     }
   },
   "2023-annual": {
@@ -1635,7 +1667,13 @@ const MONTHLY_DATA = {
       // source: ACAU (Uruguay), Compilado 2023 report, full-year summed from monthly figures — HEV includes MHEV combined; PHEV not separately coded in 2023 (folded into HEV). No priorYear comparison: 2022 is total-only (no fuel-type split available for Uruguay before 2023).
       "Uruguay": [1474,0,3075,0,32685,1011,38245],
       // source: ATTT, via WMC (webmanagercenter.com) citing ATTT figures — BEV (32) and Hybride (1015) confirmed by two independent secondary sources; Essence/Diesel NOT separately published for 2023 (automobile.tn's own energy-split table only began with the 2025 report), so the full ICE remainder (Total minus BEV minus Hybride) is placed in petrol with diesel=0 — NOT a claim Tunisia sold no diesel in 2023 (2024/2025 show diesel at ~30-45% of the ICE remainder). No priorYear comparison: 2022 fuel-type split not sourced. Scope "Véhicules Légers" (VP+VU+Mixte), official-dealer-network only, same as 2024/2025.
-      "Tunisia": [32,0,1015,0,54766,0,55813]
+      "Tunisia": [32,0,1015,0,54766,0,55813],
+      // source: SDES via data.gouv.fr — commune-level new-vehicle registrations (SIV), ANNUAL only, French overseas departments (DROM). See 2025-annual comment for the CARBURANT-to-fuel-type mapping. No priorYear comparison: 2022 not separately sourced here (see country-yearly-data.js for the full 2010-2025 series).
+      "Guadeloupe": [843,363,2828,19,9518,1298,14869],
+      "Martinique": [684,370,2365,10,10112,660,14201],
+      "Guyane": [179,142,1026,3,3591,523,5464],
+      "Reunion": [3633,919,6600,120,11418,4834,27524],
+      "Mayotte": [57,15,742,4,1042,206,2066]
     },
     // per-country "as of" override for a source whose fiscal year doesn't match the calendar year
     asOf: {
@@ -1892,7 +1930,7 @@ const COUNTRY_CONTINENT = {
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
   "Canada":"NAC","United States":"NAC","China":"ASIA","India":"ASIA","Mexico":"NAC","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"SA","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"SA","Turkey":"EU","Philippines":"ASIA","Chile":"SA","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA","Taiwan":"ASIA","Singapore":"ASIA","Serbia":"EU","Colombia":"SA","Vietnam":"ASIA","Nepal":"ASIA"
-,"Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA","Uzbekistan":"ASIA","Uruguay":"SA","Ecuador":"SA","Ukraine":"EU","Albania":"EU","Paraguay":"SA","Tunisia":"AFRICA"};
+,"Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA","Uzbekistan":"ASIA","Uruguay":"SA","Ecuador":"SA","Ukraine":"EU","Albania":"EU","Paraguay":"SA","Tunisia":"AFRICA","Guadeloupe":"NAC","Martinique":"NAC","Guyane":"SA","Reunion":"AFRICA","Mayotte":"AFRICA"};
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 
 // country -> ISO 3166-1 alpha-2 code, for flag images (flagcdn.com)
@@ -1903,7 +1941,7 @@ const COUNTRY_ISO2 = {
   "Norway":"no","Poland":"pl","Portugal":"pt","Romania":"ro","Slovakia":"sk","Slovenia":"si","Spain":"es",
   "Sweden":"se","Switzerland":"ch","United Kingdom":"gb","Canada":"ca",
   "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th","Argentina":"ar","Turkey":"tr","Philippines":"ph","Chile":"cl","Morocco":"ma","New Zealand":"nz","Malaysia":"my","Taiwan":"tw","Singapore":"sg","Serbia":"rs","Colombia":"co","Vietnam":"vn","Nepal":"np"
-,"Israel":"il","Kazakhstan":"kz","Peru":"pe","Uzbekistan":"uz","Uruguay":"uy","Ecuador":"ec","Ukraine":"ua","Albania":"al","Paraguay":"py","Tunisia":"tn"};
+,"Israel":"il","Kazakhstan":"kz","Peru":"pe","Uzbekistan":"uz","Uruguay":"uy","Ecuador":"ec","Ukraine":"ua","Albania":"al","Paraguay":"py","Tunisia":"tn","Guadeloupe":"gp","Martinique":"mq","Guyane":"gf","Reunion":"re","Mayotte":"yt"};
 const ALL_COUNTRIES_SORTED = [...ALL_COUNTRIES].sort((a,b) => {
   const ca = COUNTRY_CONTINENT[a] || 'ZZ', cb = COUNTRY_CONTINENT[b] || 'ZZ';
   return ca !== cb ? ca.localeCompare(cb) : a.localeCompare(b);
