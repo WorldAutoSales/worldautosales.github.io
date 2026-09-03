@@ -269,13 +269,15 @@ const MONTHLY_DATA = {
     priorYearBev: {
       "India": 20204, "South Korea": 23315,
       "Israel":6888,
-      "Albania":490
+      "Albania":490,
+      "Paraguay":38
     },
     // Total (all powertrains) units for the same month a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "India": 343212, "South Korea": 127947,
       "Israel":25847,
-      "Albania":7658
+      "Albania":7658,
+      "Paraguay":1987
     }
   },
   "2026-07": {
@@ -283,6 +285,8 @@ const MONTHLY_DATA = {
     raw: {
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month, from the "VENTAS DE VEHÍCULOS POR TIPO DE ENERGÍA" table in AEADE's monthly press bulletin; Hibrido = MHEV+HEV+PHEV+EREV combined (AEADE's bulletin gives one Hibrido figure, PHEV folded in)
       "Ecuador": [910,0,3091,0,6616,4195,14812],
+      // source: ATTT via webdo.tn/kapitalis.com — Jan-Jul 2026 combined total (BEV 1,543 and PHEV 2,177 real; Total 41,690 real, per webdo.tn) divided evenly across the 7 months per user request; HEV (864 for the 7-mo period) is itself an estimate, scaled from Q1 2026's real HEV/Total ratio (442/21,334, Le Temps News/webdo.tn) since no 7-month HEV figure was published; Essence+Diesel combined into Petrol (Diesel=0) per user instruction
+      "Tunisia": [220,311,123,0,5302,0,5956],
       // source: NZTA Waka Kotahi (monthly, light vehicles only)
       "New Zealand": [1946,1258,2887,122,2088,435,8736],
       // source: Argonne National Laboratory (Wards Auto), monthly — Total = all light-duty vehicles; no Petrol/Diesel split published, Diesel=0
@@ -332,7 +336,9 @@ const MONTHLY_DATA = {
       // source: ICMR/Eauto (eauto.org.ua/en/news/101129) — genuine standalone month, the richest single article found for Ukraine; NEW PASSENGER CARS ONLY (a small fraction of the total market — domestic resales ~77k/mo and used imports ~23k/mo dwarf this segment); Hybrid = MHEV+HEV+PHEV combined (source gives one Hybrid figure, PHEV folded in); Others = LPG
       "Ukraine": [421,0,1805,9,2115,1146,5496],
       // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
-      "Albania": [615,0,133,427,1803,4752,7730]
+      "Albania": [615,0,133,427,1803,4752,7730],
+      // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
+      "Paraguay": [198,239,803,177,3776,451,5644]
     },
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY % (Argentina, China,
     // Indonesia, Australia, Singapore omitted — no matching July 2025 monthly figure sourced for those five)
@@ -341,7 +347,8 @@ const MONTHLY_DATA = {
       "Israel":5422,
       "Peru":82,
       "Uruguay":1195,
-      "Albania":475
+      "Albania":475,
+      "Paraguay":79
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
@@ -349,7 +356,8 @@ const MONTHLY_DATA = {
       "Israel":26894,
       "Peru":16956,
       "Uruguay":4170,
-      "Albania":8295
+      "Albania":8295,
+      "Paraguay":3043
     }
   },
   "2026-06": {
@@ -357,6 +365,8 @@ const MONTHLY_DATA = {
     raw: {
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [1438,0,2693,0,6426,3855,14412],
+      // source: ATTT via webdo.tn/kapitalis.com — Jan-Jul 2026 combined total divided evenly across the 7 months per user request; HEV is an estimate scaled from Q1 2026's HEV/Total ratio; Essence+Diesel combined into Petrol (Diesel=0) per user instruction; see 2026-01 comment for full methodology
+      "Tunisia": [220,311,123,0,5302,0,5956],
       "Austria": [8993,4040,10472,0,7577,3174,34256],
       "Belgium": [17256,2788,5935,652,17344,1474,45449],
       "Bulgaria": [478,128,345,5,3613,888,5457],
@@ -438,7 +448,9 @@ const MONTHLY_DATA = {
       // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
       "Uruguay": [2204,294,513,0,1496,7,4514],
       // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
-      "Albania": [728,0,177,486,1883,4671,7945]
+      "Albania": [728,0,177,486,1883,4671,7945],
+      // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
+      "Paraguay": [144,90,721,1,2620,271,3847]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-06), for YoY %
     priorYearBev: {
@@ -451,7 +463,8 @@ const MONTHLY_DATA = {
       "Israel":4046,
       "Peru":104,
       "Uruguay":797,
-      "Albania":602
+      "Albania":602,
+      "Paraguay":54
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
@@ -459,7 +472,8 @@ const MONTHLY_DATA = {
       "Israel":20372,
       "Peru":16725,
       "Uruguay":3214,
-      "Albania":7808
+      "Albania":7808,
+      "Paraguay":2492
     }
   },
   "2026-05": {
@@ -467,6 +481,8 @@ const MONTHLY_DATA = {
     raw: {
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [927,0,2240,0,6304,3622,13093],
+      // source: ATTT via webdo.tn/kapitalis.com — Jan-Jul 2026 combined total divided evenly across the 7 months per user request; HEV is an estimate scaled from Q1 2026's HEV/Total ratio; Essence+Diesel combined into Petrol (Diesel=0) per user instruction; see 2026-01 comment for full methodology
+      "Tunisia": [220,311,123,0,5302,0,5956],
       "Austria": [6598,2932,7239,1,6135,2624,25529],
       "Belgium": [12586,1596,4130,485,13765,1063,33625],
       "Bulgaria": [362,55,292,49,3148,387,4293],
@@ -540,7 +556,9 @@ const MONTHLY_DATA = {
       // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
       "Uruguay": [2536,198,673,0,1420,6,4833],
       // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
-      "Albania": [723,0,251,327,1454,3603,6358]
+      "Albania": [723,0,251,327,1454,3603,6358],
+      // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
+      "Paraguay": [173,176,671,0,2255,223,3498]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-05), for YoY %
     priorYearBev: {
@@ -553,7 +571,8 @@ const MONTHLY_DATA = {
       "Israel":4168,
       "Peru":50,
       "Uruguay":946,
-      "Albania":277
+      "Albania":277,
+      "Paraguay":27
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
@@ -561,7 +580,8 @@ const MONTHLY_DATA = {
       "Israel":26155,
       "Peru":16337,
       "Uruguay":3623,
-      "Albania":6994
+      "Albania":6994,
+      "Paraguay":2300
     }
   },
   "2026-04": {
@@ -569,6 +589,8 @@ const MONTHLY_DATA = {
     raw: {
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [894,0,2627,0,6882,3895,14298],
+      // source: ATTT via webdo.tn/kapitalis.com — Jan-Jul 2026 combined total divided evenly across the 7 months per user request; HEV is an estimate scaled from Q1 2026's HEV/Total ratio; Essence+Diesel combined into Petrol (Diesel=0) per user instruction; see 2026-01 comment for full methodology
+      "Tunisia": [220,311,123,0,5302,0,5956],
       "Austria": [7122,2997,8366,1,6368,2655,27509],
       "Belgium": [13971,1830,4506,371,15888,1236,37802],
       "Bulgaria": [456,83,284,4,3356,559,4742],
@@ -642,7 +664,9 @@ const MONTHLY_DATA = {
       // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
       "Uruguay": [2055,208,580,0,1795,2,4640],
       // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
-      "Albania": [1115,0,207,366,1381,3663,6732]
+      "Albania": [1115,0,207,366,1381,3663,6732],
+      // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
+      "Paraguay": [95,277,497,3,2342,196,3410]
     },
     priorYearBev: {
       "Austria":5690,"Belgium":12469,"Bulgaria":144,"Croatia":60,"Cyprus":90,"Czechia":1229,"Denmark":9567,
@@ -654,7 +678,8 @@ const MONTHLY_DATA = {
       "Israel":3319,
       "Peru":50,
       "Uruguay":890,
-      "Albania":268
+      "Albania":268,
+      "Paraguay":47
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
@@ -662,7 +687,8 @@ const MONTHLY_DATA = {
       "Israel":20182,
       "Peru":16274,
       "Uruguay":3395,
-      "Albania":7136
+      "Albania":7136,
+      "Paraguay":2375
     }
   },
   "2026-03": {
@@ -670,6 +696,8 @@ const MONTHLY_DATA = {
     raw: {
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [925,0,2628,0,6761,3836,14150],
+      // source: ATTT via webdo.tn/kapitalis.com — Jan-Jul 2026 combined total divided evenly across the 7 months per user request; HEV is an estimate scaled from Q1 2026's HEV/Total ratio; Essence+Diesel combined into Petrol (Diesel=0) per user instruction; see 2026-01 comment for full methodology
+      "Tunisia": [220,311,123,0,5302,0,5956],
       "Austria": [8206,3165,10513,0,8181,2953,33018],
       "Belgium": [15661,2417,5221,423,18908,1103,43733],
       "Bulgaria": [349,82,231,0,3310,509,4481],
@@ -745,7 +773,9 @@ const MONTHLY_DATA = {
       // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
       "Uruguay": [1774,211,706,0,2051,10,4752],
       // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
-      "Albania": [1153,0,194,350,1069,3337,6103]
+      "Albania": [1153,0,194,350,1069,3337,6103],
+      // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
+      "Paraguay": [180,295,478,78,2368,247,3646]
     },
     priorYearBev: {
       "Canada":8800,
@@ -758,7 +788,8 @@ const MONTHLY_DATA = {
       "Israel":4767,
       "Peru":62,
       "Uruguay":730,
-      "Albania":266
+      "Albania":266,
+      "Paraguay":162
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
@@ -766,7 +797,8 @@ const MONTHLY_DATA = {
       "Israel":26744,
       "Peru":16779,
       "Uruguay":4256,
-      "Albania":5475
+      "Albania":5475,
+      "Paraguay":2604
     }
   },
   "2026-02": {
@@ -774,6 +806,8 @@ const MONTHLY_DATA = {
     raw: {
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [661,0,2043,0,5481,2705,10890],
+      // source: ATTT via webdo.tn/kapitalis.com — Jan-Jul 2026 combined total divided evenly across the 7 months per user request; HEV is an estimate scaled from Q1 2026's HEV/Total ratio; Essence+Diesel combined into Petrol (Diesel=0) per user instruction; see 2026-01 comment for full methodology
+      "Tunisia": [220,311,123,0,5302,0,5956],
       "Austria": [4439,2151,6665,0,5530,2503,21288],
       "Belgium": [11677,1965,5058,113,17528,734,37075],
       "Bulgaria": [215,61,209,2,2926,353,3766],
@@ -848,7 +882,9 @@ const MONTHLY_DATA = {
       // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
       "Uruguay": [1578,191,716,0,1774,0,4259],
       // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
-      "Albania": [858,0,156,294,1202,3395,5905]
+      "Albania": [858,0,156,294,1202,3395,5905],
+      // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
+      "Paraguay": [126,127,288,75,2343,300,3259]
     },
     priorYearBev: {
       "Canada":8800,
@@ -861,7 +897,8 @@ const MONTHLY_DATA = {
       "Israel":3375,
       "Peru":39,
       "Uruguay":872,
-      "Albania":281
+      "Albania":281,
+      "Paraguay":41
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
@@ -869,7 +906,8 @@ const MONTHLY_DATA = {
       "Israel":23579,
       "Peru":15426,
       "Uruguay":3688,
-      "Albania":4903
+      "Albania":4903,
+      "Paraguay":2166
     }
   },
   "2026-01": {
@@ -877,6 +915,8 @@ const MONTHLY_DATA = {
     raw: {
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [612,0,1908,0,5892,2930,11342],
+      // source: ATTT via webdo.tn/kapitalis.com — Jan-Jul 2026 combined total divided evenly across the 7 months per user request; HEV is an estimate scaled from Q1 2026's HEV/Total ratio; Essence+Diesel combined into Petrol (Diesel=0) per user instruction; see 2026-07 comment for full methodology
+      "Tunisia": [220,311,123,0,5302,0,5956],
       "Austria": [4702,2738,6496,0,6718,2275,22929],
       "Belgium": [12131,2068,3809,100,14105,784,32997],
       "Bulgaria": [182,45,204,6,2378,403,3218],
@@ -959,7 +999,9 @@ const MONTHLY_DATA = {
       // source: ACAU (Uruguay), Compilado 2026 — genuine standalone month, cross-verified against ACAU's own Mercado brand-level total; HEV includes MHEV combined
       "Uruguay": [1582,182,518,0,1504,6,3792],
       // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
-      "Albania": [753,0,130,260,958,3572,5673]
+      "Albania": [753,0,130,260,958,3572,5673],
+      // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
+      "Paraguay": [64,177,305,119,1791,354,2810]
     },
     // BEV units for the same month/quarter a year prior — source: ACEA (world_auto_sales, 2025-01) / same StatCan table for Canada, for YoY %
     priorYearBev: {
@@ -976,7 +1018,8 @@ const MONTHLY_DATA = {
       "Israel":8043,
       "Peru":50,
       "Uruguay":400,
-      "Albania":379
+      "Albania":379,
+      "Paraguay":56
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
@@ -984,7 +1027,8 @@ const MONTHLY_DATA = {
       "Israel":50757,
       "Peru":18532,
       "Uruguay":2748,
-      "Albania":6355
+      "Albania":6355,
+      "Paraguay":1997
     }
   },
   "2026-ytd": {
@@ -1075,7 +1119,9 @@ const MONTHLY_DATA = {
       // source: ACAU (Uruguay), Compilado 2026 — Jan-Jul 2026 summed from the monthly figures; HEV includes MHEV combined
       "Uruguay": [14375,1594,4276,0,11521,42,31808],
       // source: DPSHTRR (Albania), Jan-Aug 2026 summed from the monthly figures — HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
-      "Albania": [6560,0,1375,2869,11050,31170,53024]
+      "Albania": [6560,0,1375,2869,11050,31170,53024],
+      // source: DNA (Direccion Nacional de Aduanas) Paraguay, Jan-Aug 2026 summed from the monthly figures — fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
+      "Paraguay": [1138,2024,5130,485,19955,2399,31131]
     },
     // per-country "as of" coverage, since cutoffs differ by source — surfaced in the Country Detail table's "Data Through" column
     asOf: {
@@ -1111,7 +1157,8 @@ const MONTHLY_DATA = {
       "Kazakhstan":"through Jun 2026",
       "Peru":"through Jul 2026",
       "Uruguay":"through Jul 2026",
-      "Albania":"through Aug 2026"
+      "Albania":"through Aug 2026",
+      "Paraguay":"through Aug 2026"
     },
     // BEV units for the matching prior-year period (same months)
     priorYearBev: {
@@ -1125,7 +1172,8 @@ const MONTHLY_DATA = {
       "Israel":40028,
       "Peru":437,
       "Uruguay":5830,
-      "Albania":3038
+      "Albania":3038,
+      "Paraguay":504
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
@@ -1134,7 +1182,8 @@ const MONTHLY_DATA = {
       "Israel":220530,
       "Peru":117029,
       "Uruguay":25094,
-      "Albania":54624
+      "Albania":54624,
+      "Paraguay":18964
     }
     // note: China omitted from priorYearBev — no matching Jan-Jul 2025 monthly data sourced (world_auto_sales has no pre-2026 China rows)
   },
@@ -1218,7 +1267,9 @@ const MONTHLY_DATA = {
       // source: FENALCO-ANDI, Colombia — each fuel trended from the last 3 actual months' average (May-Jul, all genuine/near-genuine single months) or the 7-mo YTD average if higher, applied to the remaining 5 months; PHEV folded into HEV, Petrol is the undifferentiated combustion remainder (Diesel=0)
       "Colombia": [54024,0,98643,0,176598,0,329265],
       // source: DPSHTRR (Albania) — each fuel trended from the last 3 actual months' average (Jun-Aug) or the 8-mo YTD average if higher, applied to the remaining 4 months
-      "Albania": [9840,0,2062,4565,17698,49303,83468]
+      "Albania": [9840,0,2062,4565,17698,49303,83468],
+      // source: DNA (Direccion Nacional de Aduanas) Paraguay — each fuel trended from the last 3 actual months' average (Jun-Aug) or the 8-mo YTD average if higher, applied to the remaining 4 months
+      "Paraguay": [1805,3320,8985,765,31763,3838,50476]
     },
     // Two projection methods, depending on what data exists per country:
     // (1) Every country with a real monthly breakdown — the 31 ACEA/Europe countries, New Zealand, Argentina,
@@ -1245,7 +1296,8 @@ const MONTHLY_DATA = {
       "Peru":"trended from last 3 mo. (YTD floor)",
       "Uruguay":"trended from last 3 mo. (YTD floor)",
       "Colombia":"trended from last 3 mo. (YTD floor)",
-      "Albania":"trended from last 3 mo. (YTD floor)"
+      "Albania":"trended from last 3 mo. (YTD floor)",
+      "Paraguay":"trended from last 3 mo. (YTD floor)"
     },
     // BEV units for full-year 2025 (actual), to compare the projection against real prior-year performance
     priorYearBev: {
@@ -1255,7 +1307,8 @@ const MONTHLY_DATA = {
       "Peru":751,
       "Uruguay":13788,
       "Colombia":19724,
-      "Albania":5666
+      "Albania":5666,
+      "Paraguay":851
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
@@ -1265,7 +1318,8 @@ const MONTHLY_DATA = {
       "Peru":211776,
       "Uruguay":48588,
       "Colombia":254205,
-      "Albania":80739
+      "Albania":80739,
+      "Paraguay":30798
     }
   },
   "2025-annual": {
@@ -1354,6 +1408,10 @@ const MONTHLY_DATA = {
       "Uruguay": [13788,0,5723,0,28754,323,48588],
       // source: DPSHTRR (Albania), full-year 2025 (DPSHTRR's own separately-published figure, not summed from monthly) — HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked; no priorYear comparison (2024 not sourced)
       "Albania": [5666,0,2190,5307,16339,51237,80739],
+      // source: DNA (Direccion Nacional de Aduanas) Paraguay, full-year 2025 summed from the 12 monthly figures — fuel split from the HS2022 8703 sub-heading structure itself; no priorYear comparison (2024 not sourced)
+      "Paraguay": [851,1128,2047,207,22712,3853,30798],
+      // source: ATTT (Agence Technique des Transports Terrestres), via automobile.tn's annual "Statistiques des immatriculations" report — real, published Essence/Diesel/Hybride/Électrique split (new for this report vintage). Scope = "Véhicules Légers" = VP+VU+Mixte (passenger cars + light commercial + mixed-use), not passenger-cars-only like most rows here. Figures are "Premières immatriculations" (official dealer network) only — excludes Tunisia's large "réimmatriculations"/marché parallèle of 4-5-year-old European used-vehicle reimports (29,228 units in 2025, tracked separately). PHEV not separately coded (folded into HEV).
+      "Tunisia": [539,0,2824,0,40520,20019,63902],
       // source: CERR (Center for Economic Research and Reforms), full-year 2025 — only BEV tracked (user's explicit choice); rest folded into Others. Both Total and BEV here are CERR's own primary-market figures, same scope on both sides (368,300/40,700 = 11.1%, matching CERR's own "~10%" market-share statements and IEA's independent 6% estimate within a plausible range). 2026 monthly rows were built and then REMOVED (2026-09-02): they paired this same primary-market Total against CERR's monthly EV headline, which turned out to blend primary+secondary market sales -- inflating BEV share to 21-35% vs the true ~10-11%. Only this correctly-scoped annual row remains; see country_data_coverage for the full retraction note and what a valid monthly reload would need.
       "Uzbekistan": [40700,0,0,327600,0,0,368300]
     },
@@ -1369,6 +1427,7 @@ const MONTHLY_DATA = {
       "Nepal":11701,
       "Peru":435,
       "Uruguay":5367,
+      "Tunisia":226,
       "India": 105461,
       "United States": 1243419,
       "China": 7720000,
@@ -1394,7 +1453,8 @@ const MONTHLY_DATA = {
       "Ecuador":108266,
       "Malaysia":816747,"India":4224368,"United States":15858418,"China":31436193,"Mexico":1504322,"Japan":2523105,"Australia":1185971,"Brazil":2487536,"South Korea":1645998,"Indonesia":865723,"Thailand":572675,"Turkey":980341,"New Zealand":86523,"Austria":253789,"Belgium":448278,"Bulgaria":42186,"Croatia":65020,"Cyprus":15057,"Czechia":231490,"Denmark":173114,"Estonia":25386,"Finland":74056,"France":1718412,"Germany":2817331,"Greece":137075,"Hungary":121597,"Iceland":10238,"Ireland":121307,"Italy":1558225,"Latvia":17191,"Lithuania":30101,"Luxembourg":46693,"Malta":7829,"Netherlands":383602,"Norway":128687,"Poland":551568,"Portugal":209695,"Romania":151105,"Slovakia":95014,"Slovenia":52666,"Spain":1016990,"Sweden":269582,"Switzerland":239803,"United Kingdom":1952778,"Canada":1853441,"Taiwan":403702,"Singapore":43022,"Nepal":15929,
       "Peru":169309,
-      "Uruguay":42168
+      "Uruguay":42168,
+      "Tunisia":57137
     }
   },
   "2024-annual": {
@@ -1465,7 +1525,9 @@ const MONTHLY_DATA = {
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry, full-year 2024 summed from monthly figures — HEV includes MHEV combined; Diesel folded into Petrol
       "Peru": [435,265,5946,0,162663,0,169309],
       // source: ACAU (Uruguay), Compilado 2024 report, full-year summed from monthly figures — HEV includes MHEV combined; PHEV not separately coded in 2024 (folded into HEV)
-      "Uruguay": [5367,0,3675,0,32169,957,42168]
+      "Uruguay": [5367,0,3675,0,32169,957,42168],
+      // source: ATTT, via automobile.tn — real Essence/Diesel/Hybride/Électrique split, scope "Véhicules Légers" (VP+VU+Mixte), official-dealer-network "Premières immatriculations" only. PHEV not separately coded (folded into HEV).
+      "Tunisia": [226,0,2897,0,36674,17340,57137]
     },
     // per-country "as of" override for a source whose fiscal year doesn't match the calendar year
     asOf: {
@@ -1479,6 +1541,7 @@ const MONTHLY_DATA = {
       "Nepal":4050,
       "Peru":267,
       "Uruguay":1474,
+      "Tunisia":32,
       "Australia":87212,"Austria":47621,"Belgium":93285,"Brazil":19277,"Bulgaria":1467,"Canada":143666,"Chile":1588,"China":6685000,"Croatia":1624,"Cyprus":788,"Czechia":6702,"Denmark":62759,"Estonia":1445,"Finland":29534,"France":298219,"Germany":524219,"Greece":6379,"Hungary":5748,"Iceland":8781,"India":89227,"Indonesia":17058,"Ireland":22842,"Italy":66278,"Japan":43991,"Latvia":1790,"Lithuania":2060,"Luxembourg":11052,"Malta":982,"Mexico":14172,"Morocco":463,"Netherlands":114455,"New Zealand":20729,"Norway":104587,"Poland":17081,"Portugal":36390,"Romania":15368,"Slovakia":2346,"Slovenia":4332,"South Korea":163000,"Spain":51714,"Sweden":112208,"Switzerland":52728,"Thailand":73567,"Turkey":65562,"United Kingdom":314684,"United States":1164638,"Taiwan":24706,"Singapore":5468
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
@@ -1486,7 +1549,8 @@ const MONTHLY_DATA = {
       "Ecuador":132402,
       "Malaysia":799731,"Australia":1165003,"Austria":239150,"Belgium":476675,"Brazil":2180230,"Bulgaria":35764,"Canada":1714999,"Chile":313865,"China":30093698,"Croatia":56293,"Cyprus":14760,"Czechia":221419,"Denmark":172798,"Estonia":22820,"Finland":87496,"France":1774723,"Germany":2844609,"Greece":134485,"Hungary":107601,"Iceland":17543,"India":3892290,"Indonesia":1005802,"Ireland":121824,"Italy":1565596,"Japan":2651397,"Latvia":18989,"Lithuania":27492,"Luxembourg":49151,"Malta":6567,"Mexico":1363714,"Netherlands":372156,"New Zealand":108702,"Norway":126955,"Poland":475030,"Portugal":199623,"Romania":144611,"Slovakia":88003,"Slovenia":48978,"South Korea":1759561,"Spain":949474,"Sweden":289827,"Switzerland":252214,"Thailand":775780,"Turkey":967341,"United Kingdom":1903054,"United States":15502479,"Taiwan":416290,"Singapore":30225,"Nepal":7114,
       "Peru":181812,
-      "Uruguay":38245
+      "Uruguay":38245,
+      "Tunisia":55813
     }
   },
   "2023-annual": {
@@ -1557,7 +1621,9 @@ const MONTHLY_DATA = {
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry, full-year 2023 summed from monthly figures — HEV includes MHEV combined; Diesel folded into Petrol
       "Peru": [267,289,3928,0,177328,0,181812],
       // source: ACAU (Uruguay), Compilado 2023 report, full-year summed from monthly figures — HEV includes MHEV combined; PHEV not separately coded in 2023 (folded into HEV). No priorYear comparison: 2022 is total-only (no fuel-type split available for Uruguay before 2023).
-      "Uruguay": [1474,0,3075,0,32685,1011,38245]
+      "Uruguay": [1474,0,3075,0,32685,1011,38245],
+      // source: ATTT, via WMC (webmanagercenter.com) citing ATTT figures — BEV (32) and Hybride (1015) confirmed by two independent secondary sources; Essence/Diesel NOT separately published for 2023 (automobile.tn's own energy-split table only began with the 2025 report), so the full ICE remainder (Total minus BEV minus Hybride) is placed in petrol with diesel=0 — NOT a claim Tunisia sold no diesel in 2023 (2024/2025 show diesel at ~30-45% of the ICE remainder). No priorYear comparison: 2022 fuel-type split not sourced. Scope "Véhicules Légers" (VP+VU+Mixte), official-dealer-network only, same as 2024/2025.
+      "Tunisia": [32,0,1015,0,54766,0,55813]
     },
     // per-country "as of" override for a source whose fiscal year doesn't match the calendar year
     asOf: {
@@ -1814,7 +1880,7 @@ const COUNTRY_CONTINENT = {
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
   "Canada":"NAC","United States":"NAC","China":"ASIA","India":"ASIA","Mexico":"NAC","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"SA","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"SA","Turkey":"EU","Philippines":"ASIA","Chile":"SA","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA","Taiwan":"ASIA","Singapore":"ASIA","Serbia":"EU","Colombia":"SA","Vietnam":"ASIA","Nepal":"ASIA"
-,"Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA","Uzbekistan":"ASIA","Uruguay":"SA","Ecuador":"SA","Ukraine":"EU","Albania":"EU","Paraguay":"SA"};
+,"Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA","Uzbekistan":"ASIA","Uruguay":"SA","Ecuador":"SA","Ukraine":"EU","Albania":"EU","Paraguay":"SA","Tunisia":"AFRICA"};
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 
 // country -> ISO 3166-1 alpha-2 code, for flag images (flagcdn.com)
@@ -1825,7 +1891,7 @@ const COUNTRY_ISO2 = {
   "Norway":"no","Poland":"pl","Portugal":"pt","Romania":"ro","Slovakia":"sk","Slovenia":"si","Spain":"es",
   "Sweden":"se","Switzerland":"ch","United Kingdom":"gb","Canada":"ca",
   "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th","Argentina":"ar","Turkey":"tr","Philippines":"ph","Chile":"cl","Morocco":"ma","New Zealand":"nz","Malaysia":"my","Taiwan":"tw","Singapore":"sg","Serbia":"rs","Colombia":"co","Vietnam":"vn","Nepal":"np"
-,"Israel":"il","Kazakhstan":"kz","Peru":"pe","Uzbekistan":"uz","Uruguay":"uy","Ecuador":"ec","Ukraine":"ua","Albania":"al","Paraguay":"py"};
+,"Israel":"il","Kazakhstan":"kz","Peru":"pe","Uzbekistan":"uz","Uruguay":"uy","Ecuador":"ec","Ukraine":"ua","Albania":"al","Paraguay":"py","Tunisia":"tn"};
 const ALL_COUNTRIES_SORTED = [...ALL_COUNTRIES].sort((a,b) => {
   const ca = COUNTRY_CONTINENT[a] || 'ZZ', cb = COUNTRY_CONTINENT[b] || 'ZZ';
   return ca !== cb ? ca.localeCompare(cb) : a.localeCompare(b);
