@@ -102,7 +102,7 @@
 
         <div class="card chart-card">
           <h2>BEV Share Map</h2>
-          <p class="note">Darker green = higher battery-electric share. Scroll/pinch or use the buttons to zoom, drag to pan. Hover a country for exact figures — gray countries with no data for the selected period still show their last available period if one exists. Click any colored or gray-but-tracked country to focus every chart on this page on it.</p>
+          <p class="note">Darker green = higher battery-electric share. Scroll/pinch or use the buttons to zoom, drag to pan. Hover a country for exact figures — a country with no data for the selected period still shows its last available period if one exists. Darker gray means we've researched that country and confirmed no fuel-type breakdown exists (still worth a hover, to see why); lighter gray means it hasn't been looked at yet. Click any colored or gray-but-tracked country to focus every chart on this page on it.</p>
           <div class="map-wrap">
             <svg class="map-svg" id="map-svg" viewBox="0 0 940 460" role="img" aria-label="World map shaded by battery-electric vehicle share"></svg>
             <div class="map-zoom-controls">
@@ -2236,7 +2236,8 @@ function renderLegend(){
         </div>`;
       }).join('')}
     </div>
-    <div class="legend-nodata"><span class="legend-swatch" style="background:var(--surface-alt);border:1px solid var(--border)"></span>No data / filtered out</div>
+    <div class="legend-nodata"><span class="legend-swatch" style="background:var(--surface-alt);border:1px solid var(--border)"></span>Not researched / filtered out</div>
+    <div class="legend-nodata"><span class="legend-swatch" style="background:var(--map-no-motorisation)"></span>Researched — no fuel-type data</div>
   `;
 }
 
@@ -2282,6 +2283,12 @@ function dataQualityTooltipHTML(name){
   return `<br><span class="dq-tooltip-line dq-${dq.grade}">Data quality: <strong>${dq.grade}</strong></span><br><span style="opacity:.75">${dq.notes}</span>`;
 }
 
+// researched (has a data_quality grade in country_data_coverage) but never has a real
+// fuel-type split in any period -- distinct from a country that's simply never been looked at
+function isResearchedNoMotorisation(name){
+  return !!COUNTRY_DATA_QUALITY[name] && !COUNTRIES_WITH_TREND.has(name);
+}
+
 function mapTooltipHTML(entry, name){
   if(entry){
     return `${entry.country}<br><strong>${entry.bevPct}%</strong> BEV share · ${entry.total.toLocaleString('en-US')} registrations${entry.bevYoyPct == null ? '' : `<br>BEV YoY: <strong>${entry.bevYoyPct > 0 ? '+' : ''}${entry.bevYoyPct}%</strong>`}` +
@@ -2291,6 +2298,8 @@ function mapTooltipHTML(entry, name){
   } else if(LAST_AVAILABLE_PERIOD[name]){
     return `${name}<br>No data for this period<br><span style="opacity:.75">Last available: ${LAST_AVAILABLE_PERIOD[name]}</span><br><span style="opacity:.75">Click to focus trend →</span>` +
       dataQualityTooltipHTML(name);
+  } else if(isResearchedNoMotorisation(name)){
+    return `${name}<br>No fuel-type/motorisation split available` + dataQualityTooltipHTML(name);
   }
   return `${name}<br>No data` + dataQualityTooltipHTML(name);
 }
@@ -2306,9 +2315,11 @@ function renderMap(){
   if(!geoFeatures) return;
   mapG.selectAll('path').data(geoFeatures).join('path')
     .attr('class', d => {
-      const cls = ['country', mapEntry(d) ? 'has-data' : 'no-data'];
-      if(COUNTRIES_WITH_TREND.has(mapCountryName(d))) cls.push('has-trend');
-      if(focusedCountry && mapCountryName(d) === focusedCountry) cls.push('selected');
+      const entry = mapEntry(d);
+      const name = mapCountryName(d);
+      const cls = ['country', entry ? 'has-data' : (isResearchedNoMotorisation(name) ? 'researched-no-data' : 'no-data')];
+      if(COUNTRIES_WITH_TREND.has(name)) cls.push('has-trend');
+      if(focusedCountry && name === focusedCountry) cls.push('selected');
       return cls.join(' ');
     })
     .attr('d', path)
@@ -2333,7 +2344,7 @@ function renderMap(){
   mapG.selectAll('circle.dom-tom').data(Object.entries(DOM_TOM_COORDS)).join('circle')
     .attr('class', ([name]) => {
       const entry = DATA_BY_NAME[name];
-      const cls = ['country', 'dom-tom', entry ? 'has-data' : 'no-data'];
+      const cls = ['country', 'dom-tom', entry ? 'has-data' : (isResearchedNoMotorisation(name) ? 'researched-no-data' : 'no-data')];
       if(COUNTRIES_WITH_TREND.has(name)) cls.push('has-trend');
       if(focusedCountry === name) cls.push('selected');
       return cls.join(' ');
@@ -2343,7 +2354,7 @@ function renderMap(){
     .attr('r', 4.5)
     .attr('fill', ([name]) => {
       const entry = DATA_BY_NAME[name];
-      return entry ? colorScale(entry.bevPct) : 'var(--surface-alt)';
+      return entry ? colorScale(entry.bevPct) : null;
     })
     .on('pointermove', (e, [name]) => {
       positionMapTooltip(e);
