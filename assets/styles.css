@@ -527,6 +527,22 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
   overflow:hidden;
   background:var(--surface-alt);
   cursor:default;
+  position:relative;
+}
+/* 75% reference line -- since the stack order is BEV/PHEV/Hybrid/Petrol/Diesel/Others,
+   this marks "electrified+hybrid is 75%+ of the mix" i.e. combined Petrol+Diesel (+Others)
+   under 25%. Only meaningful in %-stacked mode, where every bar sums to the same 100% --
+   in raw (unit-scaled) mode bars have different totals, so the mark is hidden there. */
+#rank-rows:not(.raw-mode) .rank-row .bar-track::after{
+  content:'';
+  position:absolute;
+  left:75%;
+  top:0;
+  bottom:0;
+  width:0;
+  border-left:1.5px dotted var(--text);
+  opacity:0.55;
+  pointer-events:none;
 }
 .rank-row .bar-seg{ height:100%; cursor:pointer; }
 .rank-row .bev-outside-label{

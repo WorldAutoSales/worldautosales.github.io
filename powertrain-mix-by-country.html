@@ -134,7 +134,7 @@
               <button type="button" class="mode-btn" data-sort-key="threeYrPct" title="Sort by BEV registration growth vs. 2023 (full year).">3Y %</button>
             </div>
           </div>
-          <p class="note" id="bars-note">Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments (a narrow BEV slice shows its value to the right instead of hiding it). Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that country's BEV registration growth — hover any segment for exact figures.</p>
+          <p class="note" id="bars-note">Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments (a narrow BEV slice shows its value to the right instead of hiding it). The dotted line marks 75% — a country whose colored segments reach past it has combined Petrol+Diesel (plus any small Others slice, stacked last) under 25%. Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that country's BEV registration growth — hover any segment for exact figures.</p>
           <div class="legend-row">
             <div class="chart-legend" id="legend"></div>
             <div class="chart-mode-toggle lg" role="group" aria-label="Bar display mode">
@@ -1924,9 +1924,16 @@ const COUNTRIES_WITH_TREND = new Set([...ALL_COUNTRIES, "Malaysia", "Colombia", 
 // most-recent period (in this page's own period list, newest-first) that actually has each country —
 // used so hovering a country with no data for the *selected* period can still say when it was last seen
 const LAST_AVAILABLE_PERIOD = {};
+// same lookup as LAST_AVAILABLE_PERIOD but keyed by the actual MONTHLY_DATA period key (e.g.
+// "2025-annual") rather than its display label, so code can pass it to aggregateByCountry() --
+// used by buildFocusStats() to fall back to a country's own latest real data when neither the
+// currently-selected period nor the 2026 projection has anything for it (e.g. an annual-only
+// country like Morocco/Costa Rica viewed while a recent month is selected).
+const LAST_AVAILABLE_PERIOD_KEY = {};
 Object.keys(MONTHLY_DATA).forEach(key => {
   Object.keys(MONTHLY_DATA[key].raw).forEach(country => {
     if(!(country in LAST_AVAILABLE_PERIOD)) LAST_AVAILABLE_PERIOD[country] = MONTHLY_DATA[key].label;
+    if(!(country in LAST_AVAILABLE_PERIOD_KEY)) LAST_AVAILABLE_PERIOD_KEY[country] = key;
   });
 });
 LAST_AVAILABLE_PERIOD["Malaysia"] = LAST_AVAILABLE_PERIOD["Malaysia"] || "2025 (Annual)";
@@ -2079,6 +2086,17 @@ function buildFocusStats(){
       d = projected[country];
       usedProjected = true;
       asOfLabel = projLabel;
+    }
+    // second fallback: neither the selected period nor the 2026 projection has this country (e.g.
+    // an annual-only source like Morocco/Costa Rica with no 2026 data at all yet) -- fall back to
+    // its own latest real period rather than dropping it from the stats entirely
+    if((!d || d.total <= 0) && LAST_AVAILABLE_PERIOD_KEY[country]){
+      const own = aggregateByCountry([LAST_AVAILABLE_PERIOD_KEY[country]])[country];
+      if(own && own.total > 0){
+        d = own;
+        usedProjected = false;
+        asOfLabel = LAST_AVAILABLE_PERIOD[country];
+      }
     }
     if(!d || d.total <= 0) return null;
 
@@ -2747,6 +2765,7 @@ function segHTML(d, key, denom, widthDenom){
 }
 
 function renderBars(){
+  rankRows.classList.toggle('raw-mode', barMode === 'raw');
   const threeYrByCountry = Object.fromEntries(buildFocusStats().map(f => [f.country, f.threeYrPct]));
   const withGrowth = DATA.map(d => ({ ...d, threeYrPct: threeYrByCountry[d.country] ?? null }));
   const sorted = [...withGrowth].sort((a,b) => {
@@ -2786,7 +2805,7 @@ function renderBars(){
 }
 
 const barsNote = document.getElementById('bars-note');
-const PCT_NOTE = 'Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments (a narrow BEV slice shows its value to the right instead of hiding it). Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that country\'s BEV registration growth — hover any segment for exact figures.';
+const PCT_NOTE = 'Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments (a narrow BEV slice shows its value to the right instead of hiding it). The dotted line marks 75% — a country whose colored segments reach past it has combined Petrol+Diesel (plus any small Others slice, stacked last) under 25%. Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that country\'s BEV registration growth — hover any segment for exact figures.';
 const RAW_NOTE = 'Bar length now reflects actual registrations (scaled to the biggest market shown), so countries are comparable by volume, not just mix. Sorted by BEV share, high to low. Segment labels show unit counts (a narrow BEV slice shows its value to the right instead of hiding it) — hover any segment for exact figures.';
 document.querySelectorAll('[data-bar-mode]').forEach(btn => {
   btn.addEventListener('click', () => {
