@@ -1965,7 +1965,11 @@ const WORLD_RANK_2025 = {};
     .sort((a,b) => b.total - a.total)
     .forEach((d,i) => { WORLD_RANK_2025[d.country] = i + 1; });
 })();
-function frenchOrdinal(n){ return n === 1 ? '1er' : `${n}e`; }
+function ordinal(n){
+  const suffixes = ['th','st','nd','rd'];
+  const v = n % 100;
+  return n + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
+}
 // Top 10 = gold, 11-30 = silver, 31-50 = bronze, 51-75 = blue, 76+ = black
 function worldRankTier(n){
   if(n <= 10) return 'gold';
@@ -1974,14 +1978,14 @@ function worldRankTier(n){
   if(n <= 75) return 'blue';
   return 'black';
 }
-// phrase:true -> "54e marché mondial en 2025" (headers/tooltips); otherwise just "54e" (compact, in-row use)
+// phrase:true -> "54th largest market in 2025" (headers/tooltips); otherwise just "54th" (compact, in-row use)
 function worldRankBadgeHTML(country, {phrase = false} = {}){
   const rank = WORLD_RANK_2025[country];
   if(!rank) return '';
-  const ordinal = frenchOrdinal(rank);
+  const ord = ordinal(rank);
   const tier = worldRankTier(rank);
-  const label = phrase ? `${ordinal} marché mondial en 2025` : ordinal;
-  return `<span class="world-rank-badge tier-${tier}" title="${ordinal} marché mondial en 2025 (total registrations, all powertrains)">${label}</span>`;
+  const label = phrase ? `${ord} largest market in 2025` : ord;
+  return `<span class="world-rank-badge tier-${tier}" title="${ord} largest market in 2025 (total registrations, all powertrains)">${label}</span>`;
 }
 
 // country -> short continent code, so the filters stay ready as non-European markets get added

@@ -462,7 +462,15 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
 .world-rank-badge.tier-bronze{ color:#8a4a1f; background:rgba(176,106,53,.2); border:1px solid #b06a35; }
 .world-rank-badge.tier-blue{ color:#2f5f8f; background:rgba(59,110,165,.16); border:1px solid #3b6ea5; }
 .world-rank-badge.tier-black{ color:#2b2b2b; background:rgba(43,43,43,.1); border:1px solid #2b2b2b; }
-.tooltip .world-rank-badge{ margin-top:2px; }
+/* inside a tooltip, the badge sits on an inverted (near-black in light mode, near-white in
+   dark mode) background where the default tinted-text-on-tint styling above has poor contrast
+   -- use solid, opaque, self-contained colors instead so it reads regardless of what's behind it */
+.tooltip .world-rank-badge{ margin-top:2px; border:none; }
+.tooltip .world-rank-badge.tier-gold{ background:#d4af37; color:#3a2e00; }
+.tooltip .world-rank-badge.tier-silver{ background:#b7bfc7; color:#202427; }
+.tooltip .world-rank-badge.tier-bronze{ background:#b06a35; color:#fff; }
+.tooltip .world-rank-badge.tier-blue{ background:#4a80b8; color:#fff; }
+.tooltip .world-rank-badge.tier-black{ background:#6b6b6b; color:#fff; }
 
 /* ---------- bubble chart (volume vs BEV share) ---------- */
 .bubble-axis .domain, .bubble-axis .tick line{ stroke:var(--border); }
