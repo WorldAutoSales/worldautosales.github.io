@@ -169,4 +169,20 @@ function renderElectrificationBarsChart(country){
       .on('pointerleave', () => { tooltip.style.opacity = 0; });
     laidOut.forEach((d, i) => { baseline[i] += d[key]; });
   });
+
+  // BEV % label above each bar -- always the full BEV share, positioned above the top of the
+  // whole (un-isolated) stack so it stays put regardless of which fuel is currently isolated
+  g.selectAll('.elec-bar-bev-label')
+    .data(laidOut)
+    .join('text')
+    .attr('class', 'elec-bar-bev-label')
+    .attr('x', d => d.x0 + d.w / 2)
+    .attr('y', d => yScale(d.bev + d.phev + d.hev) - 6)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '10.5px')
+    .style('font-weight', '700')
+    .style('font-variant-numeric', 'tabular-nums')
+    .style('fill', 'var(--text)')
+    .style('pointer-events', 'none')
+    .text(d => d.bev.toFixed(1) + '%');
 }
