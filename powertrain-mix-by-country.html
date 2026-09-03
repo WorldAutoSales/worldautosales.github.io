@@ -1159,7 +1159,9 @@ const MONTHLY_DATA = {
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, Jan-Aug 2026 summed from the monthly figures — fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
       "Paraguay": [1138,2024,5130,485,19955,2399,31131],
       // source: ATTT via webdo.tn/kapitalis.com — the real Jan-Jul 2026 combined total itself (the 7 identical monthly figures elsewhere are that same total split evenly, not independent months, so this reproduces it exactly: 7x220=1540 etc.)
-      "Tunisia": [1540,2177,861,0,37114,0,41692]
+      "Tunisia": [1540,2177,861,0,37114,0,41692],
+      // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles); 2026 figure is Jan-Jul YTD
+      "Mauritius": [1441,0,5735,0,11150,0,18326]
     },
     // per-country "as of" coverage, since cutoffs differ by source — surfaced in the Country Detail table's "Data Through" column
     asOf: {
@@ -1197,7 +1199,8 @@ const MONTHLY_DATA = {
       "Peru":"through Jul 2026",
       "Uruguay":"through Jul 2026",
       "Albania":"through Aug 2026",
-      "Paraguay":"through Aug 2026"
+      "Paraguay":"through Aug 2026",
+      "Mauritius":"through Jul 2026"
     },
     // BEV units for the matching prior-year period (same months)
     priorYearBev: {
@@ -1466,7 +1469,9 @@ const MONTHLY_DATA = {
       "France - Martinique": [759,294,5175,30,6287,310,12855],
       "France - Guyane": [120,144,2512,0,1861,179,4816],
       "France - Reunion": [2350,528,12347,595,8064,2579,26463],
-      "France - Mayotte": [53,9,1345,10,786,76,2279]
+      "France - Mayotte": [53,9,1345,10,786,76,2279],
+      // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles)
+      "Mauritius": [2449,0,14225,0,21388,0,38062]
     },
     // per-country "as of" override — every country here is a genuine full year except Philippines (11 of 12 months)
     asOf: {
@@ -1598,7 +1603,9 @@ const MONTHLY_DATA = {
       "France - Martinique": [627,440,3111,38,7981,677,12874],
       "France - Guyane": [132,120,1404,1,2936,522,5115],
       "France - Reunion": [2832,986,7934,467,9059,3462,24740],
-      "France - Mayotte": [40,11,756,8,918,237,1970]
+      "France - Mayotte": [40,11,756,8,918,237,1970],
+      // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles)
+      "Mauritius": [1553,0,12087,0,22275,0,35915]
     },
     // per-country "as of" override for a source whose fiscal year doesn't match the calendar year
     asOf: {
@@ -1710,7 +1717,9 @@ const MONTHLY_DATA = {
       "France - Martinique": [684,370,2365,10,10112,660,14201],
       "France - Guyane": [179,142,1026,3,3591,523,5464],
       "France - Reunion": [3633,919,6600,120,11418,4834,27524],
-      "France - Mayotte": [57,15,742,4,1042,206,2066]
+      "France - Mayotte": [57,15,742,4,1042,206,2066],
+      // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles)
+      "Mauritius": [1025,0,8208,0,20629,0,29862]
     },
     // per-country "as of" override for a source whose fiscal year doesn't match the calendar year
     asOf: {
@@ -1788,7 +1797,9 @@ const MONTHLY_DATA = {
       // source: Israel Ministry of Transport (data.gov.il) vehicle registry -- CAVEAT: this is a snapshot of vehicles still active as of the 2026-09 pull, so it undercounts historical years (this row is only 91% of OICA's 2022 total, which stays the primary total-market source above); loaded anyway for the powertrain-mix breakdown, which exists nowhere else for this year. Petrol/HEV split via I-VIA's quarterly ratio.
       "Israel": [26878,14895,54487,92,143036,23360,262748],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry, full-year 2022 summed from monthly figures — HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [165,107,2408,0,174863,0,177543]
+      "Peru": [165,107,2408,0,174863,0,177543],
+      // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles)
+      "Mauritius": [387,0,3892,0,30006,0,34285]
     },
     priorYearBev: {
       "Ecuador":284,
@@ -1858,7 +1869,9 @@ const MONTHLY_DATA = {
       // source: Israel Ministry of Transport (data.gov.il) vehicle registry -- CAVEAT: this is a snapshot of vehicles still active as of the 2026-09 pull, so it undercounts historical years (this row is only 91% of OICA's 2021 total, which stays the primary total-market source above); loaded anyway for the powertrain-mix breakdown, which exists nowhere else for this year. HEV not split from Petrol -- no independent ratio source available before 2022.
       "Israel": [10586,12664,0,132,228867,30387,282636],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry, full-year 2021 summed from monthly figures — HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [33,58,1364,0,173296,0,174751]
+      "Peru": [33,58,1364,0,173296,0,174751],
+      // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles)
+      "Mauritius": [244,0,3183,0,21520,0,24947]
     },
     priorYearBev: {
       "Ecuador":134,
@@ -1923,7 +1936,9 @@ const MONTHLY_DATA = {
       // source: Israel Ministry of Transport (data.gov.il) vehicle registry -- CAVEAT: this is a snapshot of vehicles still active as of the 2026-09 pull, so it undercounts historical years (this row is only 91% of OICA's 2020 total, which stays the primary total-market source above); loaded anyway for the powertrain-mix breakdown, which exists nowhere else for this year. HEV not split from Petrol -- no independent ratio source available before 2022.
       "Israel": [1412,5225,0,150,175893,24006,206686],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry, full-year 2020 summed from monthly figures — HEV includes MHEV combined; Diesel folded into Petrol. No 2019 data sourced, so no priorYear comparison for this earliest year.
-      "Peru": [26,10,542,0,124512,0,125090]
+      "Peru": [26,10,542,0,124512,0,125090],
+      // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles)
+      "Mauritius": [136,0,3307,0,20009,0,23452]
     },
     priorYearBev: {
       "Ecuador":103,
@@ -2022,7 +2037,7 @@ const COUNTRY_CONTINENT = {
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
   "Canada":"NAC","United States":"NAC","China":"ASIA","India":"ASIA","Mexico":"NAC","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"SA","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"SA","Turkey":"EU","Philippines":"ASIA","Chile":"SA","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA","Taiwan":"ASIA","Singapore":"ASIA","Serbia":"EU","Colombia":"SA","Vietnam":"ASIA","Nepal":"ASIA"
-,"Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA","Uzbekistan":"ASIA","Uruguay":"SA","Ecuador":"SA","Ukraine":"EU","Albania":"EU","Paraguay":"SA","Tunisia":"AFRICA","France - Guadeloupe":"NAC","France - Martinique":"NAC","France - Guyane":"SA","France - Reunion":"AFRICA","France - Mayotte":"AFRICA","Costa Rica":"NAC"};
+,"Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA","Uzbekistan":"ASIA","Uruguay":"SA","Ecuador":"SA","Ukraine":"EU","Albania":"EU","Paraguay":"SA","Tunisia":"AFRICA","France - Guadeloupe":"NAC","France - Martinique":"NAC","France - Guyane":"SA","France - Reunion":"AFRICA","France - Mayotte":"AFRICA","Costa Rica":"NAC","Mauritius":"AFRICA"};
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 
 // country -> ISO 3166-1 alpha-2 code, for flag images (flagcdn.com)
@@ -2033,7 +2048,7 @@ const COUNTRY_ISO2 = {
   "Norway":"no","Poland":"pl","Portugal":"pt","Romania":"ro","Slovakia":"sk","Slovenia":"si","Spain":"es",
   "Sweden":"se","Switzerland":"ch","United Kingdom":"gb","Canada":"ca",
   "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th","Argentina":"ar","Turkey":"tr","Philippines":"ph","Chile":"cl","Morocco":"ma","New Zealand":"nz","Malaysia":"my","Taiwan":"tw","Singapore":"sg","Serbia":"rs","Colombia":"co","Vietnam":"vn","Nepal":"np"
-,"Israel":"il","Kazakhstan":"kz","Peru":"pe","Uzbekistan":"uz","Uruguay":"uy","Ecuador":"ec","Ukraine":"ua","Albania":"al","Paraguay":"py","Tunisia":"tn","France - Guadeloupe":"gp","France - Martinique":"mq","France - Guyane":"gf","France - Reunion":"re","France - Mayotte":"yt","Costa Rica":"cr"};
+,"Israel":"il","Kazakhstan":"kz","Peru":"pe","Uzbekistan":"uz","Uruguay":"uy","Ecuador":"ec","Ukraine":"ua","Albania":"al","Paraguay":"py","Tunisia":"tn","France - Guadeloupe":"gp","France - Martinique":"mq","France - Guyane":"gf","France - Reunion":"re","France - Mayotte":"yt","Costa Rica":"cr","Mauritius":"mu"};
 
 // country -> { grade, notes } — editorial source-quality grade from country_data_coverage
 // (Supabase: data_quality/data_quality_notes columns). AA=Parfaite, A=Excellente, B=Bonne,
