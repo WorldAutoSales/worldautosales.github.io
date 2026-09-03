@@ -2399,16 +2399,18 @@ const MAP_NAME_ALIASES = { "United States of America": "United States" };
 function mapEntry(d){ return DATA_BY_NAME[d.properties.name] || DATA_BY_NAME[MAP_NAME_ALIASES[d.properties.name]]; }
 function mapCountryName(d){ return MAP_NAME_ALIASES[d.properties.name] || d.properties.name; }
 
-// small overseas territories with no separate shape in the 50m basemap (they're either absent
-// entirely, e.g. Guadeloupe/Martinique/Reunion/Mayotte, or folded into France's own polygon as an
-// unclickable exclave ring, e.g. Guyane) — plotted as standalone markers at [lon, lat] instead so
-// each one is individually visible and clickable rather than being invisible or reading as "France"
+// small territories with no usable shape in the 50m basemap at normal zoom (either absent
+// entirely, e.g. Guadeloupe/Martinique/Reunion/Mayotte/Mauritius, or folded into a larger
+// country's own polygon as an unclickable exclave ring, e.g. Guyane into France) — plotted as
+// standalone markers at [lon, lat] instead so each one is individually visible and clickable
+// rather than being invisible or reading as whatever country/ocean is underneath
 const DOM_TOM_COORDS = {
   "France - Guadeloupe": [-61.53, 16.24],
   "France - Martinique": [-61.02, 14.60],
   "France - Guyane": [-52.33, 4.94],
   "France - Reunion": [55.45, -20.90],
   "France - Mayotte": [45.16, -12.83],
+  "Mauritius": [57.50, -20.16],
 };
 
 // shared tooltip line for a country's source-quality grade (AA/A/B/C/D) + rationale, wherever it's known
