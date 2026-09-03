@@ -66,6 +66,17 @@
 
         <div class="filter-group">
           <div class="filter-label">
+            Market Rank
+            <span class="filter-bulk">
+              <button type="button" class="filter-bulk-btn" data-target="ranktiers" data-action="check">Check all</button> / <button type="button" class="filter-bulk-btn" data-target="ranktiers" data-action="uncheck">Uncheck all</button>
+            </span>
+          </div>
+          <div class="filter-countries" id="filter-rank-tiers"></div>
+          <p class="filter-note">By total 2025 registrations, all powertrains. A country with no 2025 total isn't excluded by this filter (there's no rank to check it against).</p>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-label">
             Powertrain
             <span class="filter-bulk">
               <button type="button" class="filter-bulk-btn" data-target="fuels" data-action="check">Check all</button> / <button type="button" class="filter-bulk-btn" data-target="fuels" data-action="uncheck">Uncheck all</button>
@@ -1987,6 +1998,15 @@ function worldRankBadgeHTML(country, {phrase = false} = {}){
   const label = phrase ? `${ord} largest market in 2025` : ord;
   return `<span class="world-rank-badge tier-${tier}" title="${ord} largest market in 2025 (total registrations, all powertrains)">${label}</span>`;
 }
+const RANK_TIER_KEYS = ['gold','blue','green','darkred','black'];
+const RANK_TIER_LABELS = { gold:'Top 10', blue:'Top 11-30', green:'Top 31-50', darkred:'Top 51-75', black:'Top 76+' };
+const RANK_TIER_COLORS = { gold:'#c9a227', blue:'#3b6ea5', green:'#1e8f5f', darkred:'#7a1f1f', black:'#2b2b2b' };
+// a country with no 2025 total (no rank to check) always passes -- the filter only ever excludes
+// a country that HAS a rank outside the checked tiers, never one we simply can't place
+function passesRankFilter(country){
+  const rank = WORLD_RANK_2025[country];
+  return !rank || selectedRankTiers.has(worldRankTier(rank));
+}
 
 // country -> short continent code, so the filters stay ready as non-European markets get added
 const CONTINENT_LABELS = { EU:"Europe", NAC:"North America and Central", SA:"South America", ASIA:"Asia", AFRICA:"Africa", OCEANIA:"Oceania", MIDEAST:"Middle East" };
@@ -2024,6 +2044,7 @@ const ALL_COUNTRIES_SORTED = [...ALL_COUNTRIES].sort((a,b) => {
 let selectedFuels = new Set(FUEL_KEYS);
 let selectedContinents = new Set(ALL_CONTINENTS);
 let selectedCountries = new Set(ALL_COUNTRIES);
+let selectedRankTiers = new Set(RANK_TIER_KEYS);
 // prefer the newest month with full (Europe-included) coverage as the default — "2026-07" sorts
 // first chronologically but only has 25 non-ACEA countries so far (ACEA's own calendar has
 // no July release; it's still listed as an option, just not what loads by default)
@@ -2038,6 +2059,15 @@ fuelsBox.innerHTML = FUEL_KEYS.map(k => `
     <span class="swatch" style="background:${FUEL_COLORS[k]}"></span>
     <span class="fc-label">${FUEL_LABELS[k]}</span>
     <button type="button" class="only-btn" data-only-fuel="${k}">Only</button>
+  </label>`).join('');
+
+const rankTiersBox = document.getElementById('filter-rank-tiers');
+rankTiersBox.innerHTML = RANK_TIER_KEYS.map(k => `
+  <label class="filter-checkbox">
+    <input type="checkbox" data-rank-tier="${k}" checked>
+    <span class="swatch" style="background:${RANK_TIER_COLORS[k]}"></span>
+    <span class="fc-label">${RANK_TIER_LABELS[k]}</span>
+    <button type="button" class="only-btn" data-only-rank-tier="${k}">Only</button>
   </label>`).join('');
 
 const continentsBox = document.getElementById('filter-continents');
@@ -2246,7 +2276,7 @@ function renderElectrificationBars(){
 
 function buildData(){
   return Object.values(aggregateByCountry())
-    .filter(d => selectedCountries.has(d.country) && selectedContinents.has(COUNTRY_CONTINENT[d.country] || "OTHER") && d.total > 0)
+    .filter(d => selectedCountries.has(d.country) && selectedContinents.has(COUNTRY_CONTINENT[d.country] || "OTHER") && passesRankFilter(d.country) && d.total > 0)
     .filter(d => !focusedCountry || d.country === focusedCountry)
     .map(d => ({
       ...d,
@@ -2546,7 +2576,7 @@ function trendsSeriesForCountry(name){
 
 // only countries/years with a full fuel-type split are summed, so the aggregate never silently understates ICE
 function trendsSeriesAggregate(){
-  const countries = [...selectedCountries].filter(c => selectedContinents.has(COUNTRY_CONTINENT[c] || "OTHER") && COUNTRY_YEARLY[c]);
+  const countries = [...selectedCountries].filter(c => selectedContinents.has(COUNTRY_CONTINENT[c] || "OTHER") && passesRankFilter(c) && COUNTRY_YEARLY[c]);
   // the current (latest) year across the whole dataset is the only one allowed to be "partial" —
   // a single country reporting an early/partial cut of an otherwise-finished past year (e.g. the
   // Philippines' Jan-Nov-only 2025 row) shouldn't mislabel that whole year's aggregate as YTD
@@ -2759,7 +2789,7 @@ function renderMomentum(){
   if(focusedCountry){ section.classList.add('hidden'); return; }
   section.classList.remove('hidden');
 
-  const countries = ALL_COUNTRIES.filter(c => selectedCountries.has(c) && selectedContinents.has(COUNTRY_CONTINENT[c] || "OTHER"));
+  const countries = ALL_COUNTRIES.filter(c => selectedCountries.has(c) && selectedContinents.has(COUNTRY_CONTINENT[c] || "OTHER") && passesRankFilter(c));
   const cards = countries.map(momentumCardData).filter(Boolean).sort((a,b) => {
     if(a.delta == null) return 1;
     if(b.delta == null) return -1;
@@ -3339,6 +3369,7 @@ function updateURL(){
   if(selectedFuels.size !== FUEL_KEYS.length) params.set('fuels', [...selectedFuels].join(','));
   if(selectedContinents.size !== ALL_CONTINENTS.length) params.set('continents', [...selectedContinents].join(','));
   if(selectedCountries.size !== ALL_COUNTRIES.length) params.set('countries', [...selectedCountries].join(','));
+  if(selectedRankTiers.size !== RANK_TIER_KEYS.length) params.set('ranktiers', [...selectedRankTiers].join(','));
   const qs = params.toString();
   history.replaceState(null, '', window.location.pathname + (qs ? '?' + qs : ''));
 }
@@ -3364,9 +3395,15 @@ function applyURLState(){
     const set = new Set(countries.split(',').filter(c => ALL_COUNTRIES.includes(c)));
     if(set.size) selectedCountries = set;
   }
+  const rankTiers = params.get('ranktiers');
+  if(rankTiers){
+    const set = new Set(rankTiers.split(',').filter(t => RANK_TIER_KEYS.includes(t)));
+    if(set.size) selectedRankTiers = set;
+  }
   fuelsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = selectedFuels.has(cb.dataset.fuel); });
   continentsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = selectedContinents.has(cb.dataset.continent); });
   countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = selectedCountries.has(cb.dataset.country); });
+  rankTiersBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = selectedRankTiers.has(cb.dataset.rankTier); });
   const currentPeriod = [...selectedMonths][0];
   monthsBox.querySelectorAll('input[type="radio"]').forEach(rb => { rb.checked = rb.dataset.month === currentPeriod; });
 }
@@ -3426,6 +3463,24 @@ function clearSelection(){
   selectedCountries = new Set(ALL_COUNTRIES);
   countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = true; });
 }
+
+rankTiersBox.addEventListener('change', e => {
+  const cb = e.target;
+  if(!cb.matches('input[type="checkbox"]')) return;
+  const key = cb.dataset.rankTier;
+  if(cb.checked) selectedRankTiers.add(key); else selectedRankTiers.delete(key);
+  if(focusedCountry) clearSelection();
+  recompute();
+});
+rankTiersBox.addEventListener('click', e => {
+  const btn = e.target.closest('.only-btn');
+  if(!btn) return;
+  const key = btn.dataset.onlyRankTier;
+  selectedRankTiers = new Set([key]);
+  rankTiersBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = cb.dataset.rankTier === key; });
+  if(focusedCountry) clearSelection();
+  recompute();
+});
 
 continentsBox.addEventListener('change', e => {
   const cb = e.target;
@@ -3489,6 +3544,10 @@ document.querySelectorAll('.filter-bulk-btn').forEach(btn => {
       selectedCountries = check ? new Set(ALL_COUNTRIES) : new Set();
       countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = check);
       recompute();
+    } else if(target === 'ranktiers'){
+      selectedRankTiers = check ? new Set(RANK_TIER_KEYS) : new Set();
+      rankTiersBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = check);
+      recompute();
     }
   });
 });
@@ -3498,10 +3557,12 @@ document.getElementById('filter-reset').addEventListener('click', () => {
   selectedFuels = new Set(FUEL_KEYS);
   selectedContinents = new Set(ALL_CONTINENTS);
   selectedCountries = new Set(ALL_COUNTRIES);
+  selectedRankTiers = new Set(RANK_TIER_KEYS);
   selectedMonths = new Set([DEFAULT_MONTH]);
   fuelsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
   continentsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
   countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+  rankTiersBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
   monthsBox.querySelectorAll('input[type="radio"]').forEach(rb => { rb.checked = rb.dataset.month === DEFAULT_MONTH; });
   recompute();
 });
