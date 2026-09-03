@@ -17,6 +17,11 @@
      both --surface-alt (used for "never looked at this country" map fill) and the pale-green
      end of the BEV colorScale, so the two "no color" states read as genuinely different */
   --map-no-motorisation:#b6ada1;
+  /* map fill for "never researched" countries -- its own token rather than reusing
+     --surface-alt, because --surface-alt is near-black in dark mode and made this tier
+     unreadable (blending into the map's dark background); darker tan in light mode so
+     it reads as a deliberate fill rather than empty page background */
+  --map-not-researched:#ddd0ba;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -31,6 +36,7 @@
     --shadow: 0 1px 2px rgba(0,0,0,0.4);
     --dq-tooltip-highlight:#8a6a00;
     --map-no-motorisation:#5c554b;
+    --map-not-researched:#ffffff;
   }
 }
 :root[data-theme="dark"]{
@@ -44,6 +50,7 @@
   --border:#362e26;
   --shadow: 0 1px 2px rgba(0,0,0,0.4);
   --dq-tooltip-highlight:#8a6a00;
+  --map-not-researched:#ffffff;
   --map-no-motorisation:#5c554b;
 }
 
@@ -1139,7 +1146,7 @@ svg.map-svg:active{ cursor:grabbing; }
 .map-wrap{ position:relative; }
 svg.map-svg{ width:100%; height:auto; display:block; }
 .map-svg .country{ stroke:var(--surface); stroke-width:0.5; }
-.map-svg .country.no-data{ fill:var(--surface-alt); }
+.map-svg .country.no-data{ fill:var(--map-not-researched); }
 .map-svg .country.researched-no-data{ fill:var(--map-no-motorisation); cursor:help; }
 .map-svg .country.has-data, .map-svg .country.has-trend{ cursor:pointer; }
 .map-svg .country.has-data:hover, .map-svg .country.has-trend:hover{ stroke:var(--text); stroke-width:1.2; }
