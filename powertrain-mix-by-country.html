@@ -1954,6 +1954,36 @@ LAST_AVAILABLE_PERIOD["Colombia"] = LAST_AVAILABLE_PERIOD["Colombia"] || "2025 (
 LAST_AVAILABLE_PERIOD["Vietnam"] = LAST_AVAILABLE_PERIOD["Vietnam"] || "2025 (Annual)";
 LAST_AVAILABLE_PERIOD["Peru"] = LAST_AVAILABLE_PERIOD["Peru"] || "2025 (Annual)";
 
+// country -> world rank by TOTAL registrations (all powertrains) for 2025, the last complete
+// year -- independent of the sidebar filters or whatever period is currently selected, so a
+// country's rank is a fixed fact, not something that shifts as you browse. Computed once.
+const WORLD_RANK_2025 = {};
+(function(){
+  const totals = aggregateByCountry(['2025-annual']);
+  Object.values(totals)
+    .filter(d => d.total > 0)
+    .sort((a,b) => b.total - a.total)
+    .forEach((d,i) => { WORLD_RANK_2025[d.country] = i + 1; });
+})();
+function frenchOrdinal(n){ return n === 1 ? '1er' : `${n}e`; }
+// Top 10 = gold, 11-30 = silver, 31-50 = bronze, 51-75 = blue, 76+ = black
+function worldRankTier(n){
+  if(n <= 10) return 'gold';
+  if(n <= 30) return 'silver';
+  if(n <= 50) return 'bronze';
+  if(n <= 75) return 'blue';
+  return 'black';
+}
+// phrase:true -> "54e marché mondial en 2025" (headers/tooltips); otherwise just "54e" (compact, in-row use)
+function worldRankBadgeHTML(country, {phrase = false} = {}){
+  const rank = WORLD_RANK_2025[country];
+  if(!rank) return '';
+  const ordinal = frenchOrdinal(rank);
+  const tier = worldRankTier(rank);
+  const label = phrase ? `${ordinal} marché mondial en 2025` : ordinal;
+  return `<span class="world-rank-badge tier-${tier}" title="${ordinal} marché mondial en 2025 (total registrations, all powertrains)">${label}</span>`;
+}
+
 // country -> short continent code, so the filters stay ready as non-European markets get added
 const CONTINENT_LABELS = { EU:"Europe", NAC:"North America and Central", SA:"South America", ASIA:"Asia", AFRICA:"Africa", OCEANIA:"Oceania", MIDEAST:"Middle East" };
 const COUNTRY_CONTINENT = {
@@ -2161,7 +2191,8 @@ function renderFocusStats(){
   const dqBadgeHTML = (focusDq && ['B','C','D'].includes(focusDq.grade))
     ? ` <span class="dq-badge dq-${focusDq.grade}" title="${focusDq.notes.replace(/"/g, '&quot;')}">Data quality: ${focusDq.grade}</span>`
     : '';
-  document.getElementById('focus-stats-title').innerHTML = `${focusedCountry} — Country Stats${dqBadgeHTML}`;
+  const rankBadgeHTML = worldRankBadgeHTML(focusedCountry, {phrase: true});
+  document.getElementById('focus-stats-title').innerHTML = `${focusedCountry} — Country Stats ${rankBadgeHTML}${dqBadgeHTML}`;
 
   if(!me){
     body.innerHTML = `<p class="note">No registration data available for ${focusedCountry} in any period.</p>`;
@@ -2325,18 +2356,20 @@ function isResearchedNoMotorisation(name){
 }
 
 function mapTooltipHTML(entry, name){
+  let base;
   if(entry){
-    return `${entry.country}<br><strong>${entry.bevPct}%</strong> BEV share · ${entry.total.toLocaleString('en-US')} registrations${entry.bevYoyPct == null ? '' : `<br>BEV YoY: <strong>${entry.bevYoyPct > 0 ? '+' : ''}${entry.bevYoyPct}%</strong>`}` +
+    base = `${entry.country}<br><strong>${entry.bevPct}%</strong> BEV share · ${entry.total.toLocaleString('en-US')} registrations${entry.bevYoyPct == null ? '' : `<br>BEV YoY: <strong>${entry.bevYoyPct > 0 ? '+' : ''}${entry.bevYoyPct}%</strong>`}` +
       (entry.country === 'Canada' ? `<br><span style="opacity:.7">quarterly StatCan data spread evenly across months</span>` : '') +
-      (COUNTRIES_WITH_TREND.has(name) ? `<br><span style="opacity:.75">Click to focus trend →</span>` : '') +
-      dataQualityTooltipHTML(name);
+      (COUNTRIES_WITH_TREND.has(name) ? `<br><span style="opacity:.75">Click to focus trend →</span>` : '');
   } else if(LAST_AVAILABLE_PERIOD[name]){
-    return `${name}<br>No data for this period<br><span style="opacity:.75">Last available: ${LAST_AVAILABLE_PERIOD[name]}</span><br><span style="opacity:.75">Click to focus trend →</span>` +
-      dataQualityTooltipHTML(name);
+    base = `${name}<br>No data for this period<br><span style="opacity:.75">Last available: ${LAST_AVAILABLE_PERIOD[name]}</span><br><span style="opacity:.75">Click to focus trend →</span>`;
   } else if(isResearchedNoMotorisation(name)){
-    return `${name}<br>No fuel-type/motorisation split available` + dataQualityTooltipHTML(name);
+    base = `${name}<br>No fuel-type/motorisation split available`;
+  } else {
+    base = `${name}<br>No data`;
   }
-  return `${name}<br>No data` + dataQualityTooltipHTML(name);
+  const rankBadgeHTML = worldRankBadgeHTML(name, {phrase: true});
+  return base + dataQualityTooltipHTML(name) + (rankBadgeHTML ? `<br>${rankBadgeHTML}` : '');
 }
 
 function positionMapTooltip(e){
@@ -2804,8 +2837,9 @@ function renderBars(){
     const bevNarrow = fuels.includes('bev') && d.bev > 0 && denom > 0 && bevWidth < 7;
     const bevOutsideText = barMode === 'raw' ? d.bev.toLocaleString('en-US') : (d.bev/denom*100).toFixed(1) + '%';
     return `
-    <div class="rank-row">
+    <div class="rank-row" data-country="${d.country}">
       <div class="country-label">${d.country}</div>
+      ${worldRankBadgeHTML(d.country)}
       <span class="bev-outside-label" style="color:${FUEL_COLORS.bev}">${bevNarrow ? `BEV ${bevOutsideText}` : ''}</span>
       <div class="bar-track">
         ${fuels.map(k => segHTML(d,k,denom,widthDenom)).join('')}
@@ -2846,14 +2880,26 @@ rankRows.addEventListener('click', e => {
 
 rankRows.addEventListener('pointermove', e => {
   const seg = e.target.closest('.bar-seg');
-  if(!seg){ tooltip.style.opacity = 0; return; }
-  const key = seg.dataset.key;
   const cardRect = barChartCard.getBoundingClientRect();
+  if(seg){
+    const key = seg.dataset.key;
+    tooltip.style.left = (e.clientX - cardRect.left) + 'px';
+    tooltip.style.top = (e.clientY - cardRect.top - 10) + 'px';
+    tooltip.style.opacity = 1;
+    tooltip.innerHTML = `${seg.dataset.country} — ${FUEL_LABELS[key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)` +
+      (seg.dataset.country === 'Canada' ? `<br><span style="opacity:.7">quarterly StatCan data spread evenly across months</span>` : '');
+    return;
+  }
+  // hovering the row itself (country name, rank badge, etc.) rather than a specific fuel
+  // segment -- show the same full country tooltip used on the map
+  const row = e.target.closest('.rank-row');
+  if(!row){ tooltip.style.opacity = 0; return; }
+  const country = row.dataset.country;
+  const entry = DATA.find(d => d.country === country);
   tooltip.style.left = (e.clientX - cardRect.left) + 'px';
   tooltip.style.top = (e.clientY - cardRect.top - 10) + 'px';
   tooltip.style.opacity = 1;
-  tooltip.innerHTML = `${seg.dataset.country} — ${FUEL_LABELS[key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)` +
-    (seg.dataset.country === 'Canada' ? `<br><span style="opacity:.7">quarterly StatCan data spread evenly across months</span>` : '');
+  tooltip.innerHTML = mapTooltipHTML(entry, country);
 });
 rankRows.addEventListener('pointerleave', () => { tooltip.style.opacity = 0; });
 
