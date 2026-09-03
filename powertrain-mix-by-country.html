@@ -1201,7 +1201,7 @@ const MONTHLY_DATA = {
       "Ecuador": [11825,0,30603,0,76606,44491,163525],
       "Malaysia": [66300, 0, 51045, 0, 685351, 37030, 839726],
       "Argentina": [8057, 0, 76746, 0, 497535, 0, 582338],
-      "Australia": [265063, 124548, 219674, 0, 365509, 314434, 1289228],
+      "Australia": [265063,124548,219674,0,365509,314434,1289228],
       "China": [11457000, 5378667, 0, 0, 14734286, 0, 31569953],
       "Austria": [85486, 37961, 101905, 6, 81018, 33090, 339466],
       "Belgium": [170908, 25328, 57801, 5160, 195076, 13940, 468213],
@@ -2127,13 +2127,33 @@ let DATA = [];
 const DATA_BY_NAME = {};
 
 // --- color scale for the map: continuous, pale -> dark green by BEV% (0% = palest) ---
-// Domain is the true worldwide BEV% range for the selected period, independent of the continent/
-// country/focus filters — so darkest green always means "highest BEV share among all tracked
-// countries," and filtering down to a region with uniformly low BEV share correctly shows pale
-// green everywhere rather than rescaling that region's own top country to look "maxed out."
+// Domain is the true GLOBAL BEV% ceiling across every period AND every country ever tracked —
+// fixed regardless of which period is selected or which continent/country/focus filters are
+// active, so the same BEV% always renders the same color everywhere: darkest green always means
+// "highest BEV share ever recorded in this dataset" (in practice, Norway), filtering down to a
+// region with uniformly low BEV share correctly shows pale green everywhere rather than rescaling
+// that region's own top country to look "maxed out," AND switching between periods (e.g. a month
+// where the worldwide max happened to be lower) no longer shifts what color a given % renders as.
+// Computed once and cached — summing bev/total across multiple selected periods can only ever
+// average within the range of the individual periods it combines, never exceed it, so a per-period
+// ceiling is a valid upper bound for any period selection too.
+let GLOBAL_MAX_BEV_PCT = null;
+function computeGlobalMaxBevPct(){
+  let max = 0;
+  Object.values(MONTHLY_DATA).forEach(period => {
+    Object.values(period.raw).forEach(v => {
+      const [bev, , , , , , total] = v;
+      if(total > 0){
+        const pct = bev / total * 100;
+        if(pct > max) max = pct;
+      }
+    });
+  });
+  return max || 1;
+}
 function makeColorScale(){
-  const maxPct = d3.max(Object.values(aggregateByCountry()), d => d.total ? d.bev/d.total*100 : 0) || 1;
-  return d3.scaleSequential().domain([0, maxPct]).interpolator(d3.interpolate("#EAF3DE", "#173404"));
+  if(GLOBAL_MAX_BEV_PCT === null) GLOBAL_MAX_BEV_PCT = computeGlobalMaxBevPct();
+  return d3.scaleSequential().domain([0, GLOBAL_MAX_BEV_PCT]).interpolator(d3.interpolate("#EAF3DE", "#173404"));
 }
 let colorScale = null;
 
