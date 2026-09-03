@@ -263,7 +263,9 @@ const MONTHLY_DATA = {
       // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
       "Albania": [615,0,127,359,1300,4177,6578],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
-      "Paraguay": [158,643,1367,32,2460,357,5017]
+      "Paraguay": [158,643,1367,32,2460,357,5017],
+      // source: FCAI (VFACTS) via CarExpert, Australia (monthly) — light vehicles only, excludes heavy commercial; others=0 (no LPG/hydrogen/CNG reported). CarExpert's article notes a small (~50-unit, <0.05%) internal inconsistency between its monthly and YTD fuel-type figures and cites three different total-EV numbers (27,078 body text / 27,089 FCAI press release / 27,028 used here from the structured table) — flagged rather than silently resolved. New data for Australia is typically published within the first few days of the following month (FCAI/VFACTS releases on the 3rd working day) — faster than most other markets tracked here.
+      "Australia": [27028,10591,18662,0,25824,23608,105713]
     },
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY %
     priorYearBev: {
@@ -273,6 +275,7 @@ const MONTHLY_DATA = {
       "Paraguay":38
     },
     // Total (all powertrains) units for the same month a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
+    // Australia omitted — no matching August 2025 monthly figure sourced
     priorYearTotal: {
       "India": 343212, "South Korea": 127947,
       "Israel":25847,
@@ -1079,8 +1082,8 @@ const MONTHLY_DATA = {
       "India": [213571,20,288005,823793,1531561,617958,3474908],
       // source: JADA — registered passenger cars only, excludes kei-cars (~35-40% of Japan's market) and commercial vehicles
       "Japan": [61090,25914,961974,251,461345,67662,1578236],
-      // source: FCAI (VFACTS) — light-vehicle market only (excludes heavy trucks/buses), Jan-Jul 2026 summed from monthly
-      "Australia": [127224,64600,123563,0,217849,183933,717169],
+      // source: FCAI (VFACTS) — light-vehicle market only (excludes heavy trucks/buses), Jan-Aug 2026 summed from monthly
+      "Australia": [154252,75191,142225,0,243673,207541,822882],
       // source: ANFAVEA — "Carta da Anfavea"; Brazil's dominant Flex-fuel (gasoline/ethanol) vehicles mapped into petrol
       "Brazil": [116517,95399,95697,0,1167337,152101,1627051],
       // source: ACARA/SIOMAA — from the report's own cumulative "Acum 2026" columns, not summed from separately-revised months
@@ -1121,11 +1124,14 @@ const MONTHLY_DATA = {
       // source: DPSHTRR (Albania), Jan-Aug 2026 summed from the monthly figures — HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
       "Albania": [6560,0,1375,2869,11050,31170,53024],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, Jan-Aug 2026 summed from the monthly figures — fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
-      "Paraguay": [1138,2024,5130,485,19955,2399,31131]
+      "Paraguay": [1138,2024,5130,485,19955,2399,31131],
+      // source: ATTT via webdo.tn/kapitalis.com — the real Jan-Jul 2026 combined total itself (the 7 identical monthly figures elsewhere are that same total split evenly, not independent months, so this reproduces it exactly: 7x220=1540 etc.)
+      "Tunisia": [1540,2177,861,0,37114,0,41692]
     },
     // per-country "as of" coverage, since cutoffs differ by source — surfaced in the Country Detail table's "Data Through" column
     asOf: {
       "Ecuador":"through Jul 2026",
+      "Tunisia":"through Jul 2026",
       "Austria":"through Jun 2026","Belgium":"through Jun 2026","Bulgaria":"through Jun 2026","Croatia":"through Jun 2026",
       "Cyprus":"through Jun 2026","Czechia":"through Jun 2026","Denmark":"through Jun 2026","Estonia":"through Jun 2026",
       "Finland":"through Jun 2026","France":"through Jun 2026","Germany":"through Jun 2026","Greece":"through Jun 2026",
@@ -1139,7 +1145,7 @@ const MONTHLY_DATA = {
       "Mexico":"through Jul 2026",
       "India":"through Aug 2026",
       "Japan":"through Jul 2026",
-      "Australia":"through Jul 2026",
+      "Australia":"through Aug 2026",
       "Brazil":"through Jul 2026",
       "Argentina":"through Jul 2026",
       "Turkey":"through Jul 2026",
@@ -1186,6 +1192,7 @@ const MONTHLY_DATA = {
       "Paraguay":18964
     }
     // note: China omitted from priorYearBev — no matching Jan-Jul 2025 monthly data sourced (world_auto_sales has no pre-2026 China rows)
+    // note: Tunisia omitted from priorYearBev/priorYearTotal for the same reason — only a full-year 2025 total was sourced (see 2025-annual), no Jan-Jul 2025 monthly breakdown to compare against
   },
   "2026-projection": {
     label: "2026 (Projected)",
@@ -1194,7 +1201,7 @@ const MONTHLY_DATA = {
       "Ecuador": [11825,0,30603,0,76606,44491,163525],
       "Malaysia": [66300, 0, 51045, 0, 685351, 37030, 839726],
       "Argentina": [8057, 0, 76746, 0, 497535, 0, 582338],
-      "Australia": [256196, 124170, 220978, 0, 373455, 320188, 1294987],
+      "Australia": [265063, 124548, 219674, 0, 365509, 314434, 1289228],
       "China": [11457000, 5378667, 0, 0, 14734286, 0, 31569953],
       "Austria": [85486, 37961, 101905, 6, 81018, 33090, 339466],
       "Belgium": [170908, 25328, 57801, 5160, 195076, 13940, 468213],
@@ -1269,7 +1276,9 @@ const MONTHLY_DATA = {
       // source: DPSHTRR (Albania) — each fuel trended from the last 3 actual months' average (Jun-Aug) or the 8-mo YTD average if higher, applied to the remaining 4 months
       "Albania": [9840,0,2062,4565,17698,49303,83468],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay — each fuel trended from the last 3 actual months' average (Jun-Aug) or the 8-mo YTD average if higher, applied to the remaining 4 months
-      "Paraguay": [1805,3320,8985,765,31763,3838,50476]
+      "Paraguay": [1805,3320,8985,765,31763,3838,50476],
+      // source: ATTT via webdo.tn/kapitalis.com — plain run-rate (YTD x 12/7), same method as Philippines/Turkey: the underlying Jan-Jul figures are already a flat estimate (one combined total split evenly), so there's no real month-to-month variation to trend from
+      "Tunisia": [2640,3732,1476,0,63624,0,71472]
     },
     // Two projection methods, depending on what data exists per country:
     // (1) Every country with a real monthly breakdown — the 31 ACEA/Europe countries, New Zealand, Argentina,
@@ -1297,7 +1306,8 @@ const MONTHLY_DATA = {
       "Uruguay":"trended from last 3 mo. (YTD floor)",
       "Colombia":"trended from last 3 mo. (YTD floor)",
       "Albania":"trended from last 3 mo. (YTD floor)",
-      "Paraguay":"trended from last 3 mo. (YTD floor)"
+      "Paraguay":"trended from last 3 mo. (YTD floor)",
+      "Tunisia":"run-rate projected from 7 mo."
     },
     // BEV units for full-year 2025 (actual), to compare the projection against real prior-year performance
     priorYearBev: {
@@ -1308,7 +1318,8 @@ const MONTHLY_DATA = {
       "Uruguay":13788,
       "Colombia":19724,
       "Albania":5666,
-      "Paraguay":851
+      "Paraguay":851,
+      "Tunisia":539
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
@@ -1319,7 +1330,8 @@ const MONTHLY_DATA = {
       "Uruguay":48588,
       "Colombia":254205,
       "Albania":80739,
-      "Paraguay":30798
+      "Paraguay":30798,
+      "Tunisia":63902
     }
   },
   "2025-annual": {
