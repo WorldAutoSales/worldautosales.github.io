@@ -72,7 +72,7 @@
             </span>
           </div>
           <div class="filter-countries" id="filter-rank-tiers"></div>
-          <p class="filter-note">By total 2025 registrations, all powertrains. A country with no 2025 total isn't excluded by this filter (there's no rank to check it against).</p>
+          <p class="filter-note">By total 2025 registrations, all powertrains. A country with no 2025 total has no tier to belong to, so it only shows while every tier here is checked — narrowing to any subset (e.g. "Top 10" alone) excludes it.</p>
         </div>
 
         <div class="filter-group">
@@ -2004,8 +2004,13 @@ const RANK_TIER_COLORS = { gold:'#c9a227', blue:'#3b6ea5', green:'#1e8f5f', dark
 // a country with no 2025 total (no rank to check) always passes -- the filter only ever excludes
 // a country that HAS a rank outside the checked tiers, never one we simply can't place
 function passesRankFilter(country){
+  // untouched (all 5 tiers checked) -- behave exactly like no rank filter exists at all, so an
+  // unranked country (no 2025 total) still shows here same as it always did. Narrowed down to a
+  // subset of tiers, though, "Top 10" should mean exactly those ranked 1-10, nothing else -- an
+  // unranked country has no tier to belong to, so it drops out once the filter is actually used.
+  if(selectedRankTiers.size === RANK_TIER_KEYS.length) return true;
   const rank = WORLD_RANK_2025[country];
-  return !rank || selectedRankTiers.has(worldRankTier(rank));
+  return !!rank && selectedRankTiers.has(worldRankTier(rank));
 }
 
 // country -> short continent code, so the filters stay ready as non-European markets get added
