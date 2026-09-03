@@ -1431,6 +1431,8 @@ const MONTHLY_DATA = {
       "Albania": [5666,0,2190,5307,16339,51237,80739],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, full-year 2025 summed from the 12 monthly figures — fuel split from the HS2022 8703 sub-heading structure itself; no priorYear comparison (2024 not sourced)
       "Paraguay": [851,1128,2047,207,22712,3853,30798],
+      // source: Ale Tech (alemonterotech.com), independent analyst blog citing Costa Rica import statistics -- NO official body (MINAE/PROCOMER/RITEVE) named in the article, and PROCOMER's own OData API (confirmed at the database-schema level) only tracks Valor/Peso, not vehicle units, so this blog figure cannot be cross-checked against a primary source this way. Only 3 categories published: Electrico (assumed pure BEV; PHEV not separately identified, may be folded in either direction), Hibrido (assumed HEV+PHEV combined), Combustion (Petrol+Diesel undifferentiated, placed entirely in petrol with diesel=0). Full-year 2025.
+      "Costa Rica": [11682,0,2288,0,57465,0,71435],
       // source: ATTT (Agence Technique des Transports Terrestres), via automobile.tn's annual "Statistiques des immatriculations" report — real, published Essence/Diesel/Hybride/Électrique split (new for this report vintage). Scope = "Véhicules Légers" = VP+VU+Mixte (passenger cars + light commercial + mixed-use), not passenger-cars-only like most rows here. Figures are "Premières immatriculations" (official dealer network) only — excludes Tunisia's large "réimmatriculations"/marché parallèle of 4-5-year-old European used-vehicle reimports (29,228 units in 2025, tracked separately). PHEV not separately coded (folded into HEV).
       "Tunisia": [539,0,2824,0,40520,20019,63902],
       // source: CERR (Center for Economic Research and Reforms), full-year 2025 — only BEV tracked (user's explicit choice); rest folded into Others. Both Total and BEV here are CERR's own primary-market figures, same scope on both sides (368,300/40,700 = 11.1%, matching CERR's own "~10%" market-share statements and IEA's independent 6% estimate within a plausible range). 2026 monthly rows were built and then REMOVED (2026-09-02): they paired this same primary-market Total against CERR's monthly EV headline, which turned out to blend primary+secondary market sales -- inflating BEV share to 21-35% vs the true ~10-11%. Only this correctly-scoped annual row remains; see country_data_coverage for the full retraction note and what a valid monthly reload would need.
@@ -1563,6 +1565,8 @@ const MONTHLY_DATA = {
       "Peru": [435,265,5946,0,162663,0,169309],
       // source: ACAU (Uruguay), Compilado 2024 report, full-year summed from monthly figures — HEV includes MHEV combined; PHEV not separately coded in 2024 (folded into HEV)
       "Uruguay": [5367,0,3675,0,32169,957,42168],
+      // source: Ale Tech (alemonterotech.com), independent analyst blog citing Costa Rica import statistics -- see 2025-annual comment for full methodology/caveats (no official body named, only 3 categories, Combustion undifferentiated). Full-year 2024.
+      "Costa Rica": [11373,0,2644,0,59822,0,73839],
       // source: ATTT, via automobile.tn — real Essence/Diesel/Hybride/Électrique split, scope "Véhicules Légers" (VP+VU+Mixte), official-dealer-network "Premières immatriculations" only. PHEV not separately coded (folded into HEV).
       "Tunisia": [226,0,2897,0,36674,17340,57137],
       // source: SDES via data.gouv.fr — commune-level new-vehicle registrations (SIV), ANNUAL only, French overseas departments (DROM). See 2025-annual comment for the CARBURANT-to-fuel-type mapping.
@@ -1939,7 +1943,7 @@ const COUNTRY_CONTINENT = {
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
   "Canada":"NAC","United States":"NAC","China":"ASIA","India":"ASIA","Mexico":"NAC","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"SA","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"SA","Turkey":"EU","Philippines":"ASIA","Chile":"SA","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA","Taiwan":"ASIA","Singapore":"ASIA","Serbia":"EU","Colombia":"SA","Vietnam":"ASIA","Nepal":"ASIA"
-,"Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA","Uzbekistan":"ASIA","Uruguay":"SA","Ecuador":"SA","Ukraine":"EU","Albania":"EU","Paraguay":"SA","Tunisia":"AFRICA","France - Guadeloupe":"NAC","France - Martinique":"NAC","France - Guyane":"SA","France - Reunion":"AFRICA","France - Mayotte":"AFRICA"};
+,"Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA","Uzbekistan":"ASIA","Uruguay":"SA","Ecuador":"SA","Ukraine":"EU","Albania":"EU","Paraguay":"SA","Tunisia":"AFRICA","France - Guadeloupe":"NAC","France - Martinique":"NAC","France - Guyane":"SA","France - Reunion":"AFRICA","France - Mayotte":"AFRICA","Costa Rica":"NAC"};
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 
 // country -> ISO 3166-1 alpha-2 code, for flag images (flagcdn.com)
@@ -1950,7 +1954,7 @@ const COUNTRY_ISO2 = {
   "Norway":"no","Poland":"pl","Portugal":"pt","Romania":"ro","Slovakia":"sk","Slovenia":"si","Spain":"es",
   "Sweden":"se","Switzerland":"ch","United Kingdom":"gb","Canada":"ca",
   "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th","Argentina":"ar","Turkey":"tr","Philippines":"ph","Chile":"cl","Morocco":"ma","New Zealand":"nz","Malaysia":"my","Taiwan":"tw","Singapore":"sg","Serbia":"rs","Colombia":"co","Vietnam":"vn","Nepal":"np"
-,"Israel":"il","Kazakhstan":"kz","Peru":"pe","Uzbekistan":"uz","Uruguay":"uy","Ecuador":"ec","Ukraine":"ua","Albania":"al","Paraguay":"py","Tunisia":"tn","France - Guadeloupe":"gp","France - Martinique":"mq","France - Guyane":"gf","France - Reunion":"re","France - Mayotte":"yt"};
+,"Israel":"il","Kazakhstan":"kz","Peru":"pe","Uzbekistan":"uz","Uruguay":"uy","Ecuador":"ec","Ukraine":"ua","Albania":"al","Paraguay":"py","Tunisia":"tn","France - Guadeloupe":"gp","France - Martinique":"mq","France - Guyane":"gf","France - Reunion":"re","France - Mayotte":"yt","Costa Rica":"cr"};
 
 // country -> { grade, notes } — editorial source-quality grade from country_data_coverage
 // (Supabase: data_quality/data_quality_notes columns). AA=Parfaite, A=Excellente, B=Bonne,
