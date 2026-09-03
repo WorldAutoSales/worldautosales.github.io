@@ -1973,9 +1973,9 @@ function ordinal(n){
 // Top 10 = gold, 11-30 = silver, 31-50 = bronze, 51-75 = blue, 76+ = black
 function worldRankTier(n){
   if(n <= 10) return 'gold';
-  if(n <= 30) return 'silver';
-  if(n <= 50) return 'bronze';
-  if(n <= 75) return 'blue';
+  if(n <= 30) return 'blue';
+  if(n <= 50) return 'green';
+  if(n <= 75) return 'darkred';
   return 'black';
 }
 // phrase:true -> "54th largest market in 2025" (headers/tooltips); otherwise just "54th" (compact, in-row use)

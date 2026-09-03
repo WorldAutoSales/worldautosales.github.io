@@ -458,18 +458,18 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
 }
 .rank-row .world-rank-badge{ width:38px; flex-shrink:0; text-align:center; padding:2px 0; }
 .world-rank-badge.tier-gold{ color:#8a6d00; background:rgba(212,175,55,.2); border:1px solid #c9a227; }
-.world-rank-badge.tier-silver{ color:#54606c; background:rgba(154,165,177,.22); border:1px solid #9aa5b1; }
-.world-rank-badge.tier-bronze{ color:#8a4a1f; background:rgba(176,106,53,.2); border:1px solid #b06a35; }
 .world-rank-badge.tier-blue{ color:#2f5f8f; background:rgba(59,110,165,.16); border:1px solid #3b6ea5; }
+.world-rank-badge.tier-green{ color:#1a6b3f; background:rgba(30,143,95,.16); border:1px solid #1e8f5f; }
+.world-rank-badge.tier-darkred{ color:#7a1f1f; background:rgba(122,31,31,.14); border:1px solid #7a1f1f; }
 .world-rank-badge.tier-black{ color:#2b2b2b; background:rgba(43,43,43,.1); border:1px solid #2b2b2b; }
 /* inside a tooltip, the badge sits on an inverted (near-black in light mode, near-white in
    dark mode) background where the default tinted-text-on-tint styling above has poor contrast
    -- use solid, opaque, self-contained colors instead so it reads regardless of what's behind it */
 .tooltip .world-rank-badge{ margin-top:2px; border:none; }
 .tooltip .world-rank-badge.tier-gold{ background:#d4af37; color:#3a2e00; }
-.tooltip .world-rank-badge.tier-silver{ background:#b7bfc7; color:#202427; }
-.tooltip .world-rank-badge.tier-bronze{ background:#b06a35; color:#fff; }
 .tooltip .world-rank-badge.tier-blue{ background:#4a80b8; color:#fff; }
+.tooltip .world-rank-badge.tier-green{ background:#1e8f5f; color:#fff; }
+.tooltip .world-rank-badge.tier-darkred{ background:#7a1f1f; color:#fff; }
 .tooltip .world-rank-badge.tier-black{ background:#6b6b6b; color:#fff; }
 
 /* ---------- bubble chart (volume vs BEV share) ---------- */
