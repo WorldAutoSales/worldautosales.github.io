@@ -8,10 +8,15 @@
   --accent-strong:#b3261e;
   --border:#e3d5c1;
   --shadow: 0 1px 2px rgba(43,32,24,0.08);
-  /* the .tooltip background is var(--text) (inverted vs. the page), so this needs the
+  /* the .tooltip background is var(--text) (inverted vs. the page), so these need the
      opposite light/dark pairing from every other token here: bright in light mode
-     (tooltip is dark), deeper/richer in dark mode (tooltip is light) -- see below */
-  --dq-tooltip-highlight:#ffd60a;
+     (tooltip is dark), deeper/richer in dark mode (tooltip is light) -- see below.
+     One per B/C/D grade so the tooltip's "Data quality" line is distinguishable at a
+     glance again, not one flat highlight color for every grade. AA/A get no override at
+     all (plain tooltip text) so the B/C/D colors are the ones that stand out. */
+  --dq-tooltip-b:#ffd60a;
+  --dq-tooltip-c:#ff9d4d;
+  --dq-tooltip-d:#ff6259;
   /* map fill for a country we've actively researched and graded (has a country_data_coverage
      entry) but that has no fuel-type split in any period -- a true neutral gray, distinct from
      both --surface-alt (used for "never looked at this country" map fill) and the pale-green
@@ -34,7 +39,9 @@
     --accent-strong:#e2564a;
     --border:#362e26;
     --shadow: 0 1px 2px rgba(0,0,0,0.4);
-    --dq-tooltip-highlight:#8a6a00;
+    --dq-tooltip-b:#8a6a00;
+    --dq-tooltip-c:#8a4300;
+    --dq-tooltip-d:#8a1f16;
     --map-no-motorisation:#5c554b;
     --map-not-researched:#ffffff;
   }
@@ -49,7 +56,9 @@
   --accent-strong:#e2564a;
   --border:#362e26;
   --shadow: 0 1px 2px rgba(0,0,0,0.4);
-  --dq-tooltip-highlight:#8a6a00;
+  --dq-tooltip-b:#8a6a00;
+  --dq-tooltip-c:#8a4300;
+  --dq-tooltip-d:#8a1f16;
   --map-not-researched:#ffffff;
   --map-no-motorisation:#5c554b;
 }
@@ -424,13 +433,16 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
   margin-left:6px; cursor:help; white-space:nowrap;
 }
 .dq-tooltip-line{ font-weight:700; }
-/* inside the map tooltip, override the muted badge colors with one bright, theme-aware
-   highlight so the quality line pops against the tooltip's dark (light-mode) / light
-   (dark-mode) background instead of blending into the rest of the tooltip text */
-.tooltip .dq-tooltip-line.dq-AA, .tooltip .dq-tooltip-line.dq-A,
-.tooltip .dq-tooltip-line.dq-B, .tooltip .dq-tooltip-line.dq-C, .tooltip .dq-tooltip-line.dq-D{
-  color:var(--dq-tooltip-highlight);
-}
+/* inside the map tooltip, override the muted badge colors with bright, theme-aware,
+   per-grade colors so the quality line pops against the tooltip's dark (light-mode) /
+   light (dark-mode) background instead of blending into the rest of the tooltip text.
+   AA/A are reset to plain tooltip text (overriding the .dq-AA/.dq-A badge color below,
+   which would otherwise still apply here too) so the B/C/D colors -- the grades
+   actually worth flagging -- are the ones that stand out. */
+.tooltip .dq-tooltip-line.dq-AA, .tooltip .dq-tooltip-line.dq-A{ color:inherit; }
+.tooltip .dq-tooltip-line.dq-B{ color:var(--dq-tooltip-b); }
+.tooltip .dq-tooltip-line.dq-C{ color:var(--dq-tooltip-c); }
+.tooltip .dq-tooltip-line.dq-D{ color:var(--dq-tooltip-d); }
 .dq-AA, .dq-A{ color:#1a7a3c; border:1px solid #1a7a3c; background:rgba(26,122,60,.08); }
 .dq-B{ color:#9a7a00; border:1px solid #9a7a00; background:rgba(154,122,0,.1); }
 .dq-C{ color:#b85c00; border:1px solid #b85c00; background:rgba(184,92,0,.1); }
