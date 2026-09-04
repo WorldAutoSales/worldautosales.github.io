@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Powertrain Mix by Country — World Auto Sales</title>
+<title>Individual Country — World Auto Sales</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
 <link rel="stylesheet" href="assets/styles.css">
 </head>
@@ -32,8 +32,8 @@
       <a href="world-auto-sales.html"><span class="dot"></span>World Auto Sales</a>
 
       <div class="nav-heading">Powertrain</div>
-      <a href="powertrain-mix-by-country.html" aria-current="page"><span class="dot"></span>Mix by Country</a>
-      <a href="individual-country.html"><span class="dot"></span>Individual Country</a>
+      <a href="powertrain-mix-by-country.html"><span class="dot"></span>Mix by Country</a>
+      <a href="individual-country.html" aria-current="page"><span class="dot"></span>Individual Country</a>
 
       <div class="nav-heading">Markets</div>
       <a href="auto-markets-by-country.html"><span class="dot"></span>Auto Markets by Country</a>
@@ -90,8 +90,8 @@
       <div class="page">
         <header class="page-header">
           <div class="eyebrow">World Auto Sales · Powertrain</div>
-          <h1>Powertrain Mix by Country</h1>
-          <p class="subtitle">New car registrations by powertrain (Battery Electric, Plug-in Hybrid, Hybrid, Petrol, Diesel, Others) across Europe, the Americas, Asia, and Africa. Countries ranked by BEV (battery-electric) share. Use the filters to zoom into a powertrain, country, or period.</p>
+          <h1>Individual Country</h1>
+          <p class="subtitle">The same powertrain charts as Mix by Country, but the world map shows every country in its own flag colors instead of a BEV-share gradient — full color where real powertrain data exists, faded and grayed out where it doesn't. Canada additionally breaks down by province further below.</p>
         </header>
 
         <div class="stat-row" id="stat-row"></div>
@@ -120,10 +120,10 @@
         </div>
 
         <div class="card chart-card">
-          <h2>BEV Share Map</h2>
-          <p class="note">Darker green = higher battery-electric share. Scroll/pinch or use the buttons to zoom, drag to pan. Hover a country for exact figures — a country with no data for the selected period still shows its last available period if one exists. Darker gray means we've researched that country and confirmed no fuel-type breakdown exists (still worth a hover, to see why); lighter gray means it hasn't been looked at yet. Click any colored or gray-but-tracked country to focus every chart on this page on it.</p>
+          <h2>Flag Map</h2>
+          <p class="note">Every country is shaded in its own flag. Full color = real powertrain data is loaded; faded and grayed out = researched but no fuel-type breakdown exists (still worth a hover, to see why) or not researched yet. Scroll/pinch or use the buttons to zoom, drag to pan. Hover a country for exact figures — a country with no data for the selected period still shows its last available period if one exists. Click any full-color or dimmed-but-tracked country to focus every chart on this page on it.</p>
           <div class="map-wrap">
-            <svg class="map-svg" id="map-svg" viewBox="0 0 940 460" role="img" aria-label="World map shaded by battery-electric vehicle share"></svg>
+            <svg class="map-svg flag-map" id="map-svg" viewBox="0 0 940 460" role="img" aria-label="World map with each country shown in its own flag colors"></svg>
             <div class="map-zoom-controls">
               <button type="button" class="map-zoom-btn" id="zoom-in" title="Zoom in">+</button>
               <button type="button" class="map-zoom-btn" id="zoom-out" title="Zoom out">−</button>
@@ -233,6 +233,34 @@
           <div class="momentum-grid" id="momentum-grid"></div>
         </div>
 
+        <div class="card chart-card" id="canada-province-section">
+          <div class="chart-header-row">
+            <h2>Canada — By Province</h2>
+            <select id="canada-province-period" class="filter-search" style="width:auto;"></select>
+          </div>
+          <p class="note">Statistics Canada, Table 20-10-0025-01 — quarterly by province, split evenly into 3 months (StatCan does not report a province breakdown more often than quarterly). Alberta and Newfoundland &amp; Labrador are not shown: StatCan publishes no data at all for these two provinces in this table, at any level, for any period. Sorted by BEV share, high to low.</p>
+          <div class="rank-rows" id="canada-province-rows"></div>
+          <div class="tooltip" id="canada-province-tooltip"></div>
+          <div class="table-scroll" style="margin-top:16px;">
+            <table id="canada-province-table">
+              <thead>
+                <tr>
+                  <th data-key="province" data-type="str">Province</th>
+                  <th data-key="bev" data-type="num">BEV</th>
+                  <th data-key="phev" data-type="num">PHEV</th>
+                  <th data-key="hev" data-type="num">HEV</th>
+                  <th data-key="petrol" data-type="num">Petrol</th>
+                  <th data-key="diesel" data-type="num">Diesel</th>
+                  <th data-key="others" data-type="num">Others</th>
+                  <th data-key="total" data-type="num">Total</th>
+                  <th data-key="bevPct" data-type="num">BEV %</th>
+                </tr>
+              </thead>
+              <tbody id="canada-province-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+
         <footer class="page-footer">
           Sources: ACEA (EU + EFTA + UK, monthly) · Statistics Canada, Table 20-10-0025-01 (quarterly) · Vahan Dashboard, India (monthly) · Argonne National Laboratory, USA (monthly + annual, no diesel split) · CAAM/CPCA via CnEVPost, China (annual 2021-2025 approximate; monthly + YTD + projected 2026, wholesale basis incl. exports, no diesel split) · INEGI (RAIAVL), Mexico (monthly) · JADA, Japan (monthly, registered passenger cars excl. kei-cars) · FCAI/VFACTS, Australia (monthly since 2026-01 + annual, light vehicles only) · ANFAVEA, Brazil (monthly, Flex-fuel folded into Petrol) · TS/KOTSA new-registration API + MOLIT, South Korea (monthly, PHEV folded into HEV) · GAIKINDO, Indonesia (monthly, no diesel split) · FTI Automotive Industry Club, Thailand (monthly since 2025-01 + annual, includes commercial vehicles) · ACARA/SIOMAA, Argentina (annual + YTD + monthly from March 2026, petrol/diesel approximate) · MAA + JPJ vehicle registrations (data.gov.my), Malaysia (monthly, Petrol/Diesel derived from JPJ's ratio) · ODMD, Turkey (annual + YTD, passenger cars only) · CAMPI-TMA, Philippines (annual + YTD, no diesel split) · ANAC, Chile (monthly since 2025-01 + annual back to 2020, petrol/diesel is a residual split at ANAC's own year-specific ratio) · AIVAM, Morocco (annual, full split 2024 only) · NZTA Waka Kotahi, New Zealand (monthly, light vehicles only) · naamsa, South Africa (annual, approximate) · VAMA + VinFast + TC Group, Vietnam (monthly since 2026-01 + annual, 3 sources merged, excludes minor independent importers) · Israel Ministry of Transport vehicle registry (data.gov.il), Israel (monthly since 2025-01 + annual 2025; BEV/PHEV/Diesel exact, Petrol/HEV split via I-VIA's quarterly ratio)<br>
           Map boundaries: Natural Earth via world-atlas (public domain)
@@ -277,6 +305,7 @@
 <script src="assets/country-monthly-data.js"></script>
 <script src="assets/world-market-totals-2025.js"></script>
 <script src="assets/electrification-bars.js"></script>
+<script src="assets/canada-province-data.js"></script>
 <script>
 // month key -> { label, raw: { country: [BEV, PHEV, HEV, OTHERS, PETROL, DIESEL, TOTAL] } } — source: ACEA
 const MONTHLY_DATA = {
@@ -2368,53 +2397,13 @@ function buildData(){
 let DATA = [];
 const DATA_BY_NAME = {};
 
-// --- color scale for the map: continuous, pale -> dark green by BEV% (0% = palest) ---
-// Domain is the true GLOBAL BEV% ceiling across every period AND every country ever tracked —
-// fixed regardless of which period is selected or which continent/country/focus filters are
-// active, so the same BEV% always renders the same color everywhere: darkest green always means
-// "highest BEV share ever recorded in this dataset" (in practice, Norway), filtering down to a
-// region with uniformly low BEV share correctly shows pale green everywhere rather than rescaling
-// that region's own top country to look "maxed out," AND switching between periods (e.g. a month
-// where the worldwide max happened to be lower) no longer shifts what color a given % renders as.
-// Computed once and cached — summing bev/total across multiple selected periods can only ever
-// average within the range of the individual periods it combines, never exceed it, so a per-period
-// ceiling is a valid upper bound for any period selection too.
-let GLOBAL_MAX_BEV_PCT = null;
-function computeGlobalMaxBevPct(){
-  let max = 0;
-  Object.values(MONTHLY_DATA).forEach(period => {
-    Object.values(period.raw).forEach(v => {
-      const [bev, , , , , , total] = v;
-      if(total > 0){
-        const pct = bev / total * 100;
-        if(pct > max) max = pct;
-      }
-    });
-  });
-  return max || 1;
-}
-function makeColorScale(){
-  if(GLOBAL_MAX_BEV_PCT === null) GLOBAL_MAX_BEV_PCT = computeGlobalMaxBevPct();
-  return d3.scaleSequential().domain([0, GLOBAL_MAX_BEV_PCT]).interpolator(d3.interpolate("#EAF3DE", "#173404"));
-}
-let colorScale = null;
-
 function renderLegend(){
-  const maxPct = colorScale ? colorScale.domain()[1] : 0;
-  const steps = 6;
+  const sample = 'https://flagcdn.com/ca.svg';
   document.getElementById('map-legend').innerHTML = `
-    <div class="legend-label">BEV share</div>
-    <div class="legend-scale">
-      ${Array.from({length:steps}, (_,i) => {
-        const v = maxPct * i / (steps-1);
-        return `<div class="legend-step">
-          <div class="legend-swatch" style="background:${colorScale(v)}"></div>
-          <div class="legend-num">${v.toFixed(0)}%</div>
-        </div>`;
-      }).join('')}
-    </div>
-    <div class="legend-nodata"><span class="legend-swatch" style="background:var(--map-not-researched);border:1px solid var(--border)"></span>Not researched / filtered out</div>
-    <div class="legend-nodata"><span class="legend-swatch" style="background:var(--map-no-motorisation)"></span>Researched — no fuel-type data</div>
+    <div class="legend-label">Flag colors — every country in its own flag</div>
+    <div class="legend-nodata"><span class="legend-swatch flag-legend-full" style="background-image:url(${sample})"></span>Has real powertrain data</div>
+    <div class="legend-nodata"><span class="legend-swatch flag-legend-dim" style="background-image:url(${sample})"></span>Researched — no fuel-type data</div>
+    <div class="legend-nodata"><span class="legend-swatch flag-legend-faint" style="background-image:url(${sample})"></span>Not researched / filtered out</div>
   `;
 }
 
@@ -2422,6 +2411,7 @@ function renderLegend(){
 const mapTooltip = document.getElementById('map-tooltip');
 const mapWrap = document.querySelector('.map-wrap');
 const svg = d3.select('#map-svg');
+const mapDefs = svg.append('defs');
 const mapG = svg.append('g');
 const projection = d3.geoNaturalEarth1();
 const path = d3.geoPath(projection);
@@ -2455,6 +2445,43 @@ const DOM_TOM_COORDS = {
   "Mauritius": [57.50, -20.16],
   "Singapore": [103.82, 1.35],
 };
+// DOM_TOM_COORDS keys aren't real country names (e.g. "France - Guyane"), so they need
+// their own ISO2 lookup for the flag map rather than going through COUNTRY_ISO2
+const DOM_TOM_ISO2 = {
+  "France - Guadeloupe": "FR", "France - Martinique": "FR", "France - Guyane": "FR",
+  "France - Reunion": "FR", "France - Mayotte": "FR", "Mauritius": "MU", "Singapore": "SG",
+};
+
+// name -> ISO 3166-1 alpha-2, derived from the basemap's own 241 Natural Earth shapes
+// (pycountry name/fuzzy match + manual fixes for NE's abbreviated/disputed entries).
+// Keyed by the basemap's own raw properties.name (NOT the internal aliased country name --
+// see MAP_NAME_ALIASES above), covering every shape the topojson draws, tracked or not --
+// distinct from the pre-existing COUNTRY_ISO2 above, which only covers ~60 tracked countries
+// keyed by their internal name, for the bubble chart's flag icons.
+// null = no real ISO2 exists (Antarctica and a handful of uninhabited/unrecognised
+// territories) -- these get a fixed neutral fill instead of a flag pattern.
+const MAP_FLAG_ISO2 = {"Afghanistan":"AF","Albania":"AL","Algeria":"DZ","American Samoa":"AS","Andorra":"AD","Angola":"AO","Anguilla":"AI","Antarctica":null,"Antigua and Barb.":"AG","Argentina":"AR","Armenia":"AM","Aruba":"AW","Ashmore and Cartier Is.":null,"Australia":"AU","Austria":"AT","Azerbaijan":"AZ","Bahamas":"BS","Bahrain":"BH","Bangladesh":"BD","Barbados":"BB","Belarus":"BY","Belgium":"BE","Belize":"BZ","Benin":"BJ","Bermuda":"BM","Bhutan":"BT","Bolivia":"BO","Bosnia and Herz.":"BA","Botswana":"BW","Br. Indian Ocean Ter.":"IO","Brazil":"BR","British Virgin Is.":"VG","Brunei":"BN","Bulgaria":"BG","Burkina Faso":"BF","Burundi":"BI","Cabo Verde":"CV","Cambodia":"KH","Cameroon":"CM","Canada":"CA","Cayman Is.":"KY","Central African Rep.":"CF","Chad":"TD","Chile":"CL","China":"CN","Colombia":"CO","Comoros":"KM","Congo":"CG","Cook Is.":"CK","Costa Rica":"CR","Croatia":"HR","Cuba":"CU","Curaçao":"CW","Cyprus":"CY","Czechia":"CZ","Côte d'Ivoire":"CI","Dem. Rep. Congo":"CD","Denmark":"DK","Djibouti":"DJ","Dominica":"DM","Dominican Rep.":"DO","Ecuador":"EC","Egypt":"EG","El Salvador":"SV","Eq. Guinea":"GQ","Eritrea":"ER","Estonia":"EE","Ethiopia":"ET","Faeroe Is.":"FO","Falkland Is.":"FK","Fiji":"FJ","Finland":"FI","Fr. Polynesia":"PF","Fr. S. Antarctic Lands":null,"France":"FR","Gabon":"GA","Gambia":"GM","Georgia":"GE","Germany":"DE","Ghana":"GH","Greece":"GR","Greenland":"GL","Grenada":"GD","Guam":"GU","Guatemala":"GT","Guernsey":"GG","Guinea":"GN","Guinea-Bissau":"GW","Guyana":"GY","Haiti":"HT","Heard I. and McDonald Is.":"HM","Honduras":"HN","Hong Kong":"HK","Hungary":"HU","Iceland":"IS","India":"IN","Indian Ocean Ter.":null,"Indonesia":"ID","Iran":"IR","Iraq":"IQ","Ireland":"IE","Isle of Man":"IM","Israel":"IL","Italy":"IT","Jamaica":"JM","Japan":"JP","Jersey":"JE","Jordan":"JO","Kazakhstan":"KZ","Kenya":"KE","Kiribati":"KI","Kosovo":"XK","Kuwait":"KW","Kyrgyzstan":"KG","Laos":"LA","Latvia":"LV","Lebanon":"LB","Lesotho":"LS","Liberia":"LR","Libya":"LY","Liechtenstein":"LI","Lithuania":"LT","Luxembourg":"LU","Macao":"MO","Macedonia":"MK","Madagascar":"MG","Malawi":"MW","Malaysia":"MY","Maldives":"MV","Mali":"ML","Malta":"MT","Marshall Is.":"MH","Mauritania":"MR","Mauritius":"MU","Mexico":"MX","Micronesia":"FM","Moldova":"MD","Monaco":"MC","Mongolia":"MN","Montenegro":"ME","Montserrat":"MS","Morocco":"MA","Mozambique":"MZ","Myanmar":"MM","N. Cyprus":null,"N. Mariana Is.":"MP","Namibia":"NA","Nauru":"NR","Nepal":"NP","Netherlands":"NL","New Caledonia":"NC","New Zealand":"NZ","Nicaragua":"NI","Niger":"NE","Nigeria":"NG","Niue":"NU","Norfolk Island":"NF","North Korea":"KP","Norway":"NO","Oman":"OM","Pakistan":"PK","Palau":"PW","Palestine":"PS","Panama":"PA","Papua New Guinea":"PG","Paraguay":"PY","Peru":"PE","Philippines":"PH","Pitcairn Is.":"PN","Poland":"PL","Portugal":"PT","Puerto Rico":"PR","Qatar":"QA","Romania":"RO","Russia":"RU","Rwanda":"RW","S. Geo. and the Is.":"GS","S. Sudan":"SS","Saint Helena":"SH","Saint Lucia":"LC","Samoa":"WS","San Marino":"SM","Saudi Arabia":"SA","Senegal":"SN","Serbia":"RS","Seychelles":"SC","Siachen Glacier":null,"Sierra Leone":"SL","Singapore":"SG","Sint Maarten":"SX","Slovakia":"SK","Slovenia":"SI","Solomon Is.":"SB","Somalia":"SO","Somaliland":null,"South Africa":"ZA","South Korea":"KR","Spain":"ES","Sri Lanka":"LK","St-Barthélemy":"BL","St-Martin":"MF","St. Kitts and Nevis":"KN","St. Pierre and Miquelon":"PM","St. Vin. and Gren.":"VC","Sudan":"SD","Suriname":"SR","Sweden":"SE","Switzerland":"CH","Syria":"SY","São Tomé and Principe":"ST","Taiwan":"TW","Tajikistan":"TJ","Tanzania":"TZ","Thailand":"TH","Timor-Leste":"TL","Togo":"TG","Tonga":"TO","Trinidad and Tobago":"TT","Tunisia":"TN","Turkey":"TR","Turkmenistan":"TM","Turks and Caicos Is.":"TC","U.S. Virgin Is.":"VI","Uganda":"UG","Ukraine":"UA","United Arab Emirates":"AE","United Kingdom":"GB","United States of America":"US","Uruguay":"UY","Uzbekistan":"UZ","Vanuatu":"VU","Vatican":"VA","Venezuela":"VE","Vietnam":"VN","W. Sahara":"EH","Wallis and Futuna Is.":"WF","Yemen":"YE","Zambia":"ZM","Zimbabwe":"ZW","eSwatini":"SZ","Åland":"AX"};
+
+const FLAG_FALLBACK_FILL = 'var(--map-not-researched)';
+const flagPatternsAdded = new Set();
+function ensureFlagPattern(iso2){
+  if(!iso2 || flagPatternsAdded.has(iso2)) return;
+  flagPatternsAdded.add(iso2);
+  mapDefs.append('pattern')
+    .attr('id', 'flag-' + iso2)
+    .attr('patternUnits', 'objectBoundingBox')
+    .attr('width', 1).attr('height', 1)
+    .append('image')
+      .attr('href', `https://flagcdn.com/${iso2.toLowerCase()}.svg`)
+      .attr('x', 0).attr('y', 0).attr('width', 1).attr('height', 1)
+      .attr('preserveAspectRatio', 'none');
+}
+function flagFillFor(name, isDomTom){
+  const iso2 = isDomTom ? DOM_TOM_ISO2[name] : MAP_FLAG_ISO2[name];
+  if(!iso2) return FLAG_FALLBACK_FILL;
+  ensureFlagPattern(iso2);
+  return `url(#flag-${iso2})`;
+}
 
 // shared tooltip line for a country's source-quality grade (AA/A/B/C/D) + rationale, wherever it's known
 function dataQualityTooltipHTML(name){
@@ -2505,10 +2532,7 @@ function renderMap(){
       return cls.join(' ');
     })
     .attr('d', path)
-    .attr('fill', d => {
-      const entry = mapEntry(d);
-      return entry ? colorScale(entry.bevPct) : null;
-    })
+    .style('fill', d => flagFillFor(d.properties.name, false))
     .on('pointermove', (e, d) => {
       const entry = mapEntry(d);
       const name = mapCountryName(d);
@@ -2534,10 +2558,7 @@ function renderMap(){
     .attr('cx', ([,coord]) => projection(coord)[0])
     .attr('cy', ([,coord]) => projection(coord)[1])
     .attr('r', 4.5)
-    .attr('fill', ([name]) => {
-      const entry = DATA_BY_NAME[name];
-      return entry ? colorScale(entry.bevPct) : null;
-    })
+    .style('fill', ([name]) => flagFillFor(name, true))
     .on('pointermove', (e, [name]) => {
       positionMapTooltip(e);
       mapTooltip.innerHTML = mapTooltipHTML(DATA_BY_NAME[name], name);
@@ -3419,12 +3440,116 @@ tbody.addEventListener('click', e => {
   if(cell) focusCountry(cell.dataset.country);
 });
 
+// --- Canada by Province: independent of the main DATA/filter pipeline above, since it's a
+// single fixed country broken down by a dimension (province) nothing else on this page has.
+// Reuses FUEL_KEYS/FUEL_COLORS/segHTML so the bars look and behave exactly like the main
+// Electrified Share by Country chart. ---
+const canadaProvinceRows = document.getElementById('canada-province-rows');
+const canadaProvinceTooltip = document.getElementById('canada-province-tooltip');
+const canadaProvincePeriodSelect = document.getElementById('canada-province-period');
+const canadaProvinceCard = document.getElementById('canada-province-section');
+const ALL_CANADA_PROVINCE_MONTHS = [...new Set(CANADA_PROVINCE_MONTHLY.map(r => r[0]))].sort().reverse();
+
+function initCanadaProvincePeriodSelect(){
+  canadaProvincePeriodSelect.innerHTML = ALL_CANADA_PROVINCE_MONTHS.map(ym => `<option value="${ym}">${ym}</option>`).join('');
+  canadaProvincePeriodSelect.value = ALL_CANADA_PROVINCE_MONTHS[0];
+  canadaProvincePeriodSelect.addEventListener('change', renderCanadaProvinceSection);
+}
+
+function canadaProvinceRowsForPeriod(ym){
+  return CANADA_PROVINCE_MONTHLY
+    .filter(r => r[0] === ym)
+    .map(r => {
+      const [,abbr,bev,phev,hev,petrol,diesel,others,total] = r;
+      return { country: CANADA_PROVINCE_NAMES[abbr] || abbr, bev, phev, hev, petrol, diesel, others, total, bevPct: total ? bev/total*100 : 0 };
+    })
+    .sort((a,b) => b.bevPct - a.bevPct);
+}
+
+function renderCanadaProvinceSection(){
+  const ym = canadaProvincePeriodSelect.value || ALL_CANADA_PROVINCE_MONTHS[0];
+  const rows = canadaProvinceRowsForPeriod(ym);
+  const denoms = rows.map(d => FUEL_KEYS.reduce((s,k) => s + d[k], 0));
+  canadaProvinceRows.innerHTML = rows.map((d,i) => {
+    const denom = denoms[i];
+    const bevWidth = denom > 0 ? d.bev / denom * 100 : 0;
+    const bevNarrow = d.bev > 0 && denom > 0 && bevWidth < 7;
+    const bevOutsideText = (d.bev/denom*100).toFixed(1) + '%';
+    return `
+    <div class="rank-row" data-province="${d.country}">
+      <div class="country-label">${d.country}</div>
+      <span class="bev-outside-label" style="color:${FUEL_COLORS.bev}">${bevNarrow ? `BEV ${bevOutsideText}` : ''}</span>
+      <div class="bar-track">
+        ${FUEL_KEYS.map(k => segHTML(d,k,denom,denom)).join('')}
+      </div>
+    </div>`;
+  }).join('');
+
+  const tbody = document.getElementById('canada-province-table-body');
+  tbody.innerHTML = rows.map(d => `
+    <tr>
+      <td>${d.country}</td>
+      <td>${d.bev.toLocaleString('en-US')}</td>
+      <td>${d.phev.toLocaleString('en-US')}</td>
+      <td>${d.hev.toLocaleString('en-US')}</td>
+      <td>${d.petrol.toLocaleString('en-US')}</td>
+      <td>${d.diesel.toLocaleString('en-US')}</td>
+      <td>${d.others.toLocaleString('en-US')}</td>
+      <td>${d.total.toLocaleString('en-US')}</td>
+      <td>${d.bevPct.toFixed(1)}%</td>
+    </tr>`).join('');
+}
+
+canadaProvinceRows.addEventListener('pointermove', e => {
+  const seg = e.target.closest('.bar-seg');
+  const cardRect = canadaProvinceCard.getBoundingClientRect();
+  if(!seg){ canadaProvinceTooltip.style.opacity = 0; return; }
+  const key = seg.dataset.key;
+  canadaProvinceTooltip.style.left = (e.clientX - cardRect.left) + 'px';
+  canadaProvinceTooltip.style.top = (e.clientY - cardRect.top - 10) + 'px';
+  canadaProvinceTooltip.style.opacity = 1;
+  canadaProvinceTooltip.innerHTML = `${seg.dataset.country} — ${FUEL_LABELS[key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)<br><span style="opacity:.7">quarterly StatCan data spread evenly across months</span>`;
+});
+canadaProvinceRows.addEventListener('pointerleave', () => { canadaProvinceTooltip.style.opacity = 0; });
+
+document.querySelectorAll('#canada-province-table th[data-key]').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.key;
+    const type = th.dataset.type;
+    const ym = canadaProvincePeriodSelect.value || ALL_CANADA_PROVINCE_MONTHS[0];
+    const rows = canadaProvinceRowsForPeriod(ym);
+    const sortDir = th.dataset.sortDir === 'asc' ? 'desc' : 'asc';
+    document.querySelectorAll('#canada-province-table th').forEach(h => delete h.dataset.sortDir);
+    th.dataset.sortDir = sortDir;
+    rows.sort((a,b) => {
+      const av = a[key], bv = b[key];
+      const cmp = type === 'num' ? av - bv : String(av).localeCompare(String(bv));
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    const tbody = document.getElementById('canada-province-table-body');
+    tbody.innerHTML = rows.map(d => `
+      <tr>
+        <td>${d.country}</td>
+        <td>${d.bev.toLocaleString('en-US')}</td>
+        <td>${d.phev.toLocaleString('en-US')}</td>
+        <td>${d.hev.toLocaleString('en-US')}</td>
+        <td>${d.petrol.toLocaleString('en-US')}</td>
+        <td>${d.diesel.toLocaleString('en-US')}</td>
+        <td>${d.others.toLocaleString('en-US')}</td>
+        <td>${d.total.toLocaleString('en-US')}</td>
+        <td>${d.bevPct.toFixed(1)}%</td>
+      </tr>`).join('');
+  });
+});
+
+initCanadaProvincePeriodSelect();
+renderCanadaProvinceSection();
+
 // --- main recompute ---
 function recompute(){
   DATA = buildData();
   Object.keys(DATA_BY_NAME).forEach(k => delete DATA_BY_NAME[k]);
   DATA.forEach(d => { DATA_BY_NAME[d.country] = d; });
-  colorScale = makeColorScale();
   renderStats();
   renderBars();
   renderTable();

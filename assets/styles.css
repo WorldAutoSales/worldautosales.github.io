@@ -1220,6 +1220,18 @@ svg.map-svg{ width:100%; height:auto; display:block; }
 .map-svg .country.researched-no-data:hover{ stroke:var(--text); stroke-width:1; }
 .map-svg .country.dom-tom{ stroke:var(--text); stroke-width:0.75; stroke-opacity:.55; }
 .map-svg .country.dom-tom.selected{ stroke-opacity:1; }
+
+/* flag map (individual-country.html): fill is a per-country flag pattern set inline via JS;
+   these classes only control how much a country stands out, reusing the same 3-tier
+   has-data/researched-no-data/no-data classes the green BEV map uses. */
+.flag-map .country.has-data, .flag-map .country.has-trend{ opacity:1; }
+.flag-map .country.researched-no-data{ opacity:.55; filter:grayscale(.6); cursor:help; }
+.flag-map .country.no-data{ opacity:.3; filter:grayscale(1); }
+.flag-map .country.no-data:hover, .flag-map .country.researched-no-data:hover{ opacity:.75; }
+.legend-swatch.flag-legend-full{ background-size:cover; background-position:center; opacity:1; }
+.legend-swatch.flag-legend-dim{ background-size:cover; background-position:center; opacity:.55; filter:grayscale(.6); }
+.legend-swatch.flag-legend-faint{ background-size:cover; background-position:center; opacity:.3; filter:grayscale(1); }
+
 .map-legend{
   display:flex;
   align-items:center;
