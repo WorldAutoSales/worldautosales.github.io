@@ -1633,7 +1633,9 @@ const MONTHLY_DATA = {
       "France - Reunion": [2832,986,7934,467,9059,3462,24740],
       "France - Mayotte": [40,11,756,8,918,237,1970],
       // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles)
-      "Mauritius": [1553,0,12087,0,22275,0,35915]
+      "Mauritius": [1553,0,12087,0,22275,0,35915],
+      // source: MONSTAT (Statistical Office of Montenegro) -- Total is real first-time-registered passenger cars; BEV/HEV are year-over-year stock deltas (reliable, negligible attrition in these recent categories); Petrol/Diesel are a residual of the true total split by that year's stock-delta ratio (no genuine flow-based split published) -- see world_auto_sales_annual.source for full methodology
+      "Montenegro": [163,0,1989,0,3251,23489,28892]
     },
     // per-country "as of" override for a source whose fiscal year doesn't match the calendar year
     asOf: {
@@ -1748,7 +1750,9 @@ const MONTHLY_DATA = {
       "France - Reunion": [3633,919,6600,120,11418,4834,27524],
       "France - Mayotte": [57,15,742,4,1042,206,2066],
       // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles)
-      "Mauritius": [1025,0,8208,0,20629,0,29862]
+      "Mauritius": [1025,0,8208,0,20629,0,29862],
+      // source: MONSTAT (Statistical Office of Montenegro) -- Total is real first-time-registered passenger cars; BEV/HEV are year-over-year stock deltas (reliable, negligible attrition in these recent categories); Petrol/Diesel are a residual of the true total split by that year's stock-delta ratio (no genuine flow-based split published) -- see world_auto_sales_annual.source for full methodology
+      "Montenegro": [137,0,1206,0,2658,21266,25267]
     },
     // per-country "as of" override for a source whose fiscal year doesn't match the calendar year
     asOf: {
@@ -1829,7 +1833,9 @@ const MONTHLY_DATA = {
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry, full-year 2022 summed from monthly figures — HEV includes MHEV combined; Diesel folded into Petrol
       "Peru": [165,107,2408,0,174863,0,177543],
       // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles)
-      "Mauritius": [387,0,3892,0,30006,0,34285]
+      "Mauritius": [387,0,3892,0,30006,0,34285],
+      // source: MONSTAT (Statistical Office of Montenegro) -- Total is real first-time-registered passenger cars; BEV/HEV are year-over-year stock deltas (reliable, negligible attrition in these recent categories); Petrol/Diesel are a residual of the true total split by that year's stock-delta ratio (no genuine flow-based split published) -- see world_auto_sales_annual.source for full methodology
+      "Montenegro": [92,0,3,0,991,16439,17525]
     },
     priorYearBev: {
       "Ecuador":284,
@@ -1902,7 +1908,9 @@ const MONTHLY_DATA = {
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry, full-year 2021 summed from monthly figures — HEV includes MHEV combined; Diesel folded into Petrol
       "Peru": [33,58,1364,0,173296,0,174751],
       // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles)
-      "Mauritius": [244,0,3183,0,21520,0,24947]
+      "Mauritius": [244,0,3183,0,21520,0,24947],
+      // source: MONSTAT (Statistical Office of Montenegro) -- Total is real first-time-registered passenger cars; BEV/HEV are year-over-year stock deltas (reliable, negligible attrition in these recent categories); Petrol/Diesel are a residual of the true total split by that year's stock-delta ratio (no genuine flow-based split published) -- see world_auto_sales_annual.source for full methodology
+      "Montenegro": [122,0,0,0,1164,13032,14318]
     },
     priorYearBev: {
       "Ecuador":134,
@@ -2097,7 +2105,7 @@ const COUNTRY_CONTINENT = {
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
   "Canada":"NAC","United States":"NAC","China":"ASIA","India":"ASIA","Mexico":"NAC","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"SA","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"SA","Turkey":"EU","Philippines":"ASIA","Chile":"SA","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA","Taiwan":"ASIA","Singapore":"ASIA","Serbia":"EU","Colombia":"SA","Vietnam":"ASIA","Nepal":"ASIA"
-,"Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA","Uzbekistan":"ASIA","Uruguay":"SA","Ecuador":"SA","Ukraine":"EU","Albania":"EU","Paraguay":"SA","Tunisia":"AFRICA","France - Guadeloupe":"NAC","France - Martinique":"NAC","France - Guyane":"SA","France - Reunion":"AFRICA","France - Mayotte":"AFRICA","Costa Rica":"NAC","Mauritius":"AFRICA","Russian Federation":"EU","Georgia":"EU"};
+,"Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA","Uzbekistan":"ASIA","Uruguay":"SA","Ecuador":"SA","Ukraine":"EU","Albania":"EU","Paraguay":"SA","Tunisia":"AFRICA","France - Guadeloupe":"NAC","France - Martinique":"NAC","France - Guyane":"SA","France - Reunion":"AFRICA","France - Mayotte":"AFRICA","Costa Rica":"NAC","Mauritius":"AFRICA","Russian Federation":"EU","Georgia":"EU","Montenegro":"EU"};
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 
 // country -> ISO 3166-1 alpha-2 code, for flag images (flagcdn.com)
@@ -2108,7 +2116,7 @@ const COUNTRY_ISO2 = {
   "Norway":"no","Poland":"pl","Portugal":"pt","Romania":"ro","Slovakia":"sk","Slovenia":"si","Spain":"es",
   "Sweden":"se","Switzerland":"ch","United Kingdom":"gb","Canada":"ca",
   "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th","Argentina":"ar","Turkey":"tr","Philippines":"ph","Chile":"cl","Morocco":"ma","New Zealand":"nz","Malaysia":"my","Taiwan":"tw","Singapore":"sg","Serbia":"rs","Colombia":"co","Vietnam":"vn","Nepal":"np"
-,"Israel":"il","Kazakhstan":"kz","Peru":"pe","Uzbekistan":"uz","Uruguay":"uy","Ecuador":"ec","Ukraine":"ua","Albania":"al","Paraguay":"py","Tunisia":"tn","France - Guadeloupe":"gp","France - Martinique":"mq","France - Guyane":"gf","France - Reunion":"re","France - Mayotte":"yt","Costa Rica":"cr","Mauritius":"mu","Russian Federation":"ru","Georgia":"ge"};
+,"Israel":"il","Kazakhstan":"kz","Peru":"pe","Uzbekistan":"uz","Uruguay":"uy","Ecuador":"ec","Ukraine":"ua","Albania":"al","Paraguay":"py","Tunisia":"tn","France - Guadeloupe":"gp","France - Martinique":"mq","France - Guyane":"gf","France - Reunion":"re","France - Mayotte":"yt","Costa Rica":"cr","Mauritius":"mu","Russian Federation":"ru","Georgia":"ge","Montenegro":"me"};
 
 // country -> { grade, notes } — editorial source-quality grade from country_data_coverage
 // (Supabase: data_quality/data_quality_notes columns). AA=Parfaite, A=Excellente, B=Bonne,
