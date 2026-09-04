@@ -48,8 +48,16 @@
   </aside>
 
   <main class="main">
+    <div class="country-search-bar" id="country-search-bar">
+      <label for="top-country-search" class="country-search-label">Choose a country</label>
+      <div class="country-search-input-wrap">
+        <input type="text" id="top-country-search" class="country-search-input" placeholder="Search countries… (3+ letters)" autocomplete="off">
+        <div class="country-search-results hidden" id="top-country-search-results"></div>
+      </div>
+      <a href="#" id="top-country-clear" class="map-clear-btn hidden">✕ Clear Selection</a>
+    </div>
     <div class="content-with-filters">
-      <aside class="filters-panel filters-panel-left">
+      <aside class="filters-panel filters-panel-left gated-section hidden">
         <div class="filter-group">
           <div class="filter-label">
             Period
@@ -65,7 +73,7 @@
           </div>
         </div>
 
-        <div class="filter-group">
+        <div class="filter-group hidden">
           <div class="filter-label">
             Market Rank
             <span class="filter-bulk">
@@ -94,9 +102,9 @@
           <p class="subtitle">The same powertrain charts as Mix by Country, but the world map shows every country in its own flag colors instead of a BEV-share gradient — full color where real powertrain data exists, faded and grayed out where it doesn't. Canada additionally breaks down by province further below.</p>
         </header>
 
-        <div class="stat-row" id="stat-row"></div>
+        <div class="stat-row gated-section hidden" id="stat-row"></div>
 
-        <div class="card notes-card is-collapsed">
+        <div class="card notes-card is-collapsed gated-section hidden">
           <button type="button" class="notes-toggle" aria-expanded="false">
             <span>📝 Notes</span>
             <span class="notes-hint">Click to expand notes</span>
@@ -141,7 +149,7 @@
           <div class="stat-row" id="focus-stats-body"></div>
         </div>
 
-        <div class="card chart-card">
+        <div class="card chart-card gated-section hidden">
           <div class="chart-header-row">
             <h2>Electrified Share by Country</h2>
             <div class="chart-mode-toggle" role="group" aria-label="Sort order">
@@ -178,7 +186,7 @@
           <div class="tooltip" id="elec-bars-tooltip"></div>
         </div>
 
-        <div class="card chart-card">
+        <div class="card chart-card gated-section hidden">
           <div class="chart-header-row">
             <h2 id="trends-title">Motorisation Trends</h2>
             <a href="#" id="trends-clear" class="mode-btn hidden" style="text-decoration:none;">✕ Show all filtered countries</a>
@@ -190,7 +198,7 @@
           <a href="#" id="trends-country-page-link" class="back-link hidden" style="margin:10px 0 0;">Open full country page →</a>
         </div>
 
-        <div class="card chart-card">
+        <div class="card chart-card gated-section hidden">
           <div class="chart-header-row">
             <h2>Volume vs. BEV Share</h2>
             <div class="chart-mode-toggle" role="group" aria-label="Chart view">
@@ -203,7 +211,7 @@
           <div class="tooltip" id="bubble-tooltip"></div>
         </div>
 
-        <div class="card table-card">
+        <div class="card table-card gated-section hidden">
           <h2>Country Detail</h2>
           <p class="note">Click a header to sort, or a country name to focus every chart on this page on it. Units = new car registrations, summed over the selected month(s). "Data Through" shows each row's actual coverage — useful for "2026 YTD" and "2025 (Annual)" where it varies by country.</p>
           <div class="table-scroll">
@@ -227,13 +235,13 @@
           </div>
         </div>
 
-        <div class="card chart-card" id="momentum-section">
+        <div class="card chart-card gated-section hidden" id="momentum-section">
           <h2>Momentum — Who's Moving Fastest</h2>
           <p class="note" title="Momentum is the CHANGE in BEV share over the last full period, in percentage points — not the share itself. A market can have a high BEV share but low momentum (already EV-heavy, growth has plateaued), or the reverse.">Every filtered market's BEV-share trajectory, ranked by change over its last full period (12 months for Europe/Canada, one year for everyone else) — fastest gainers first. Click a card to focus every chart on this page on it.</p>
           <div class="momentum-grid" id="momentum-grid"></div>
         </div>
 
-        <div class="card chart-card" id="canada-province-section">
+        <div class="card chart-card gated-section hidden" id="canada-province-section">
           <div class="chart-header-row">
             <h2>Canada — By Province</h2>
             <select id="canada-province-period" class="filter-search" style="width:auto;"></select>
@@ -267,7 +275,7 @@
         </footer>
       </div>
 
-      <aside class="filters-panel">
+      <aside class="filters-panel gated-section hidden">
         <div class="filter-group">
           <div class="filter-label">
             Continent
@@ -1232,6 +1240,9 @@ const MONTHLY_DATA = {
       "China":"through Jul 2026",
       "South Korea":"through Aug 2026",
       "Singapore":"through Jul 2026",
+      "Malaysia":"through Jul 2026",
+      "Thailand":"through Jul 2026",
+      "Indonesia":"through Jul 2026",
       "Chile":"through Jul 2026",
       "Vietnam":"through Jul 2026",
       "Taiwan":"through Jul 2026",
@@ -2207,6 +2218,57 @@ countrySearchInput.addEventListener('input', () => {
   });
 });
 
+// --- top "choose a country" search bar: same 3+ character trigger as the sidebar search
+// above, but this one picks a single country and focuses it (revealing the gated sections)
+// rather than filtering a checklist ---
+const topCountrySearchInput = document.getElementById('top-country-search');
+const topCountrySearchResults = document.getElementById('top-country-search-results');
+const topCountryClearBtn = document.getElementById('top-country-clear');
+
+function renderTopCountrySearchResults(matches){
+  if(!matches.length){
+    topCountrySearchResults.innerHTML = `<div class="country-search-empty">No country matches</div>`;
+  } else {
+    topCountrySearchResults.innerHTML = matches.map(c => `
+      <button type="button" class="country-search-result" data-country="${c}">
+        <span class="csr-continent">${COUNTRY_CONTINENT[c] || 'OTHER'}</span>${c}
+      </button>`).join('');
+  }
+  topCountrySearchResults.classList.remove('hidden');
+}
+
+topCountrySearchInput.addEventListener('input', () => {
+  const q = topCountrySearchInput.value.trim().toLowerCase();
+  if(q.length < 3){
+    topCountrySearchResults.classList.add('hidden');
+    topCountrySearchResults.innerHTML = '';
+    return;
+  }
+  renderTopCountrySearchResults(ALL_COUNTRIES_SORTED.filter(c => c.toLowerCase().includes(q)));
+});
+
+topCountrySearchResults.addEventListener('click', e => {
+  const btn = e.target.closest('.country-search-result');
+  if(!btn) return;
+  focusCountry(btn.dataset.country);
+  topCountrySearchResults.classList.add('hidden');
+  topCountrySearchResults.innerHTML = '';
+});
+
+document.addEventListener('click', e => {
+  if(!e.target.closest('.country-search-input-wrap')) topCountrySearchResults.classList.add('hidden');
+});
+
+topCountrySearchInput.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){ topCountrySearchResults.classList.add('hidden'); topCountrySearchInput.blur(); }
+});
+
+topCountryClearBtn.addEventListener('click', e => {
+  e.preventDefault();
+  clearSelection();
+  recompute();
+});
+
 const monthsBox = document.getElementById('filter-months');
 monthsBox.innerHTML = ALL_MONTHS.map(m => `
   <label class="filter-checkbox">
@@ -2470,6 +2532,7 @@ function ensureFlagPattern(iso2){
   mapDefs.append('pattern')
     .attr('id', 'flag-' + iso2)
     .attr('patternUnits', 'objectBoundingBox')
+    .attr('patternContentUnits', 'objectBoundingBox')
     .attr('width', 1).attr('height', 1)
     .append('image')
       .attr('href', `https://flagcdn.com/${iso2.toLowerCase()}.svg`)
@@ -2882,13 +2945,11 @@ function wireMomentumCardClicks(container){
   });
 }
 
-// hidden while a country is focused — that country's own momentum card moves into the
-// Country Stats row instead (see renderFocusStats), so a 1-card grid here would be redundant
+// visibility is owned by updateGating() (this page requires a country to be focused before
+// any section shows, this one included) -- that country's own momentum card also appears in
+// Country Stats via renderFocusStats, this grid still shows every filtered country alongside it
 function renderMomentum(){
-  const section = document.getElementById('momentum-section');
   const grid = document.getElementById('momentum-grid');
-  if(focusedCountry){ section.classList.add('hidden'); return; }
-  section.classList.remove('hidden');
 
   const countries = ALL_COUNTRIES.filter(c => selectedCountries.has(c) && selectedContinents.has(COUNTRY_CONTINENT[c] || "OTHER") && passesRankFilter(c));
   const cards = countries.map(momentumCardData).filter(Boolean).sort((a,b) => {
@@ -3372,14 +3433,20 @@ let sortKey = 'bevPct', sortDir = -1;
 // within the same year, show the actual-so-far figure (YTD) before the full-year estimate
 // derived from it (PROJECTED) — reads top-to-bottom as "what we know, then what we project"
 const PERIOD_DISPLAY_ORDER = { ANNUAL: 0, YTD: 0, PROJECTED: 1, NEXT_YEAR_PROJECTED: 1 };
+// this table's own display order, separate from PERIOD_DISPLAY_ORDER (which the Motorisation
+// Trends chart also uses, where YTD must stay chronologically before Projected within the same
+// year) -- here Projected is the more forward-looking, "best current estimate" figure, so it
+// displays above the plain YTD actuals-only row for the same year
+const TABLE_PERIOD_DISPLAY_ORDER = { ANNUAL: 0, PROJECTED: 0, NEXT_YEAR_PROJECTED: 0, YTD: 1 };
+
 function renderFocusedCountryTable(){
   const rows = (typeof COUNTRY_YEARLY !== 'undefined' && COUNTRY_YEARLY[focusedCountry]) || [];
   const sorted = [...rows].sort((a,b) => {
     if(b.year !== a.year) return b.year - a.year;
-    return (PERIOD_DISPLAY_ORDER[a.period_type] ?? 0) - (PERIOD_DISPLAY_ORDER[b.period_type] ?? 0);
+    return (TABLE_PERIOD_DISPLAY_ORDER[a.period_type] ?? 0) - (TABLE_PERIOD_DISPLAY_ORDER[b.period_type] ?? 0);
   });
   const fmt = v => (v == null ? '—' : v.toLocaleString('en-US'));
-  tbody.innerHTML = sorted.map(r => {
+  const rowHTML = r => {
     const bevPct = (r.total && r.bev != null) ? +(r.bev / r.total * 100).toFixed(1) : null;
     const yearLabel = r.period_type === 'ANNUAL' ? String(r.year) : `${r.year} (${r.period_type === 'YTD' ? 'YTD' : 'Proj.'})`;
     return `
@@ -3395,7 +3462,34 @@ function renderFocusedCountryTable(){
       <td>${bevPct == null ? '—' : bevPct + '%'}</td>
       <td class="as-of-cell">${yearLabel}</td>
     </tr>`;
-  }).join('');
+  };
+  tbody.innerHTML = sorted.map(rowHTML).join('') + totalRowHTML(sorted);
+}
+
+// summed across real data only (ANNUAL years + the current YTD row) -- Projected is deliberately
+// excluded from the total since it's an estimate, not a real measurement
+function totalRowHTML(sorted){
+  const realRows = sorted.filter(r => r.period_type === 'ANNUAL' || r.period_type === 'YTD');
+  if(!realRows.length) return '';
+  const years = realRows.map(r => r.year);
+  const minYear = Math.min(...years), maxYear = Math.max(...years);
+  const sum = key => realRows.reduce((s,r) => s + (r[key] || 0), 0);
+  const totals = { bev: sum('bev'), phev: sum('phev'), hev: sum('hev'), petrol: sum('petrol'), diesel: sum('diesel'), others: sum('others'), total: sum('total') };
+  const bevPct = totals.total ? +(totals.bev / totals.total * 100).toFixed(1) : null;
+  const fmt = v => v.toLocaleString('en-US');
+  return `
+    <tr class="total-row">
+      <td>TOTAL ${minYear}-${maxYear} (YTD)</td>
+      <td>${fmt(totals.bev)}</td>
+      <td>${fmt(totals.phev)}</td>
+      <td>${fmt(totals.hev)}</td>
+      <td>${fmt(totals.petrol)}</td>
+      <td>${fmt(totals.diesel)}</td>
+      <td>${fmt(totals.others)}</td>
+      <td>${fmt(totals.total)}</td>
+      <td>${bevPct == null ? '—' : bevPct + '%'}</td>
+      <td class="as-of-cell">Sum of real data only, ${minYear}–${maxYear}</td>
+    </tr>`;
 }
 
 function renderTable(){
@@ -3456,6 +3550,11 @@ function initCanadaProvincePeriodSelect(){
   canadaProvincePeriodSelect.addEventListener('change', renderCanadaProvinceSection);
 }
 
+// StatCan Table 20-10-0025-01 has no data at all for these two provinces, at any level, for
+// any period (confirmed by downloading the full source table directly) -- shown as explicit
+// "NO DATA" rows rather than silently omitted, pinned to the bottom regardless of sort column
+const MISSING_CANADA_PROVINCES = ['Alberta', 'Newfoundland and Labrador'];
+
 function canadaProvinceRowsForPeriod(ym){
   return CANADA_PROVINCE_MONTHLY
     .filter(r => r[0] === ym)
@@ -3464,6 +3563,17 @@ function canadaProvinceRowsForPeriod(ym){
       return { country: CANADA_PROVINCE_NAMES[abbr] || abbr, bev, phev, hev, petrol, diesel, others, total, bevPct: total ? bev/total*100 : 0 };
     })
     .sort((a,b) => b.bevPct - a.bevPct);
+}
+
+function noDataProvinceBarHTML(name){
+  return `
+    <div class="rank-row no-data-row" data-province="${name}">
+      <div class="country-label">${name} — NO DATA</div>
+      <div class="bar-track"><div class="no-data-bar" title="StatCan publishes no data at all for this province in this table, at any level, for any period">Not published by Statistics Canada</div></div>
+    </div>`;
+}
+function noDataProvinceTableRowHTML(name){
+  return `<tr class="no-data-row"><td>${name} — NO DATA</td><td colspan="8">Not published by Statistics Canada</td></tr>`;
 }
 
 function renderCanadaProvinceSection(){
@@ -3483,7 +3593,7 @@ function renderCanadaProvinceSection(){
         ${FUEL_KEYS.map(k => segHTML(d,k,denom,denom)).join('')}
       </div>
     </div>`;
-  }).join('');
+  }).join('') + MISSING_CANADA_PROVINCES.map(noDataProvinceBarHTML).join('');
 
   const tbody = document.getElementById('canada-province-table-body');
   tbody.innerHTML = rows.map(d => `
@@ -3497,7 +3607,7 @@ function renderCanadaProvinceSection(){
       <td>${d.others.toLocaleString('en-US')}</td>
       <td>${d.total.toLocaleString('en-US')}</td>
       <td>${d.bevPct.toFixed(1)}%</td>
-    </tr>`).join('');
+    </tr>`).join('') + MISSING_CANADA_PROVINCES.map(noDataProvinceTableRowHTML).join('');
 }
 
 canadaProvinceRows.addEventListener('pointermove', e => {
@@ -3538,7 +3648,7 @@ document.querySelectorAll('#canada-province-table th[data-key]').forEach(th => {
         <td>${d.others.toLocaleString('en-US')}</td>
         <td>${d.total.toLocaleString('en-US')}</td>
         <td>${d.bevPct.toFixed(1)}%</td>
-      </tr>`).join('');
+      </tr>`).join('') + MISSING_CANADA_PROVINCES.map(noDataProvinceTableRowHTML).join('');
   });
 });
 
@@ -3546,10 +3656,21 @@ initCanadaProvincePeriodSelect();
 renderCanadaProvinceSection();
 
 // --- main recompute ---
+// this page requires a country to be chosen -- everything except the search bar and the map
+// itself stays hidden until focusCountry()/clearSelection() sets focusedCountry
+function updateGating(){
+  const show = !!focusedCountry;
+  document.querySelectorAll('.gated-section').forEach(el => el.classList.toggle('hidden', !show));
+  document.getElementById('canada-province-section').classList.toggle('hidden', focusedCountry !== 'Canada');
+  document.getElementById('top-country-clear').classList.toggle('hidden', !show);
+  if(show) topCountrySearchInput.value = '';
+}
+
 function recompute(){
   DATA = buildData();
   Object.keys(DATA_BY_NAME).forEach(k => delete DATA_BY_NAME[k]);
   DATA.forEach(d => { DATA_BY_NAME[d.country] = d; });
+  updateGating();
   renderStats();
   renderBars();
   renderTable();
