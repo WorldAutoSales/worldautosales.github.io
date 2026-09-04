@@ -1079,6 +1079,8 @@ const MONTHLY_DATA = {
   "2026-ytd": {
     label: "2026 YTD",
     raw: {
+      // source: GEOSTAT ex-trade.geostat.ge, HS 8703 import microdata -- Jan-Jul 2026 summed directly from the 7 monthly entries above (no separate YTD figure published; this project computes it as the plain sum)
+      "Georgia": [7899,1023,28195,3894,80062,5433,126506],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — Jan-Jul 2026, from the July bulletin's own "Ene-Jul 26" YTD column, not summed from separately-revised months; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [6367,0,17230,0,44362,25038,92997],
       "Malaysia": [38675, 0, 29776, 0, 399788, 21601, 489840],
@@ -1176,6 +1178,7 @@ const MONTHLY_DATA = {
     asOf: {
       "Ecuador":"through Jul 2026",
       "Tunisia":"through Jul 2026",
+      "Georgia":"through Jul 2026",
       "Austria":"through Jun 2026","Belgium":"through Jun 2026","Bulgaria":"through Jun 2026","Croatia":"through Jun 2026",
       "Cyprus":"through Jun 2026","Czechia":"through Jun 2026","Denmark":"through Jun 2026","Estonia":"through Jun 2026",
       "Finland":"through Jun 2026","France":"through Jun 2026","Germany":"through Jun 2026","Greece":"through Jun 2026",
@@ -1242,6 +1245,8 @@ const MONTHLY_DATA = {
   "2026-projection": {
     label: "2026 (Projected)",
     raw: {
+      // source: derived, not published -- each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher) applied to the remaining 5 months, per this project's standard projection method (see Ecuador comment above); customs import quantity, not registrations
+      "Georgia": [15277,1846,52347,6866,141125,9655,227116],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [11825,0,30603,0,76606,44491,163525],
       "Malaysia": [66300, 0, 51045, 0, 685351, 37030, 839726],
@@ -1352,6 +1357,7 @@ const MONTHLY_DATA = {
       "Colombia":"trended from last 3 mo. (YTD floor)",
       "Albania":"trended from last 3 mo. (YTD floor)",
       "Paraguay":"trended from last 3 mo. (YTD floor)",
+      "Georgia":"trended from last 3 mo. (YTD floor)",
       "Tunisia":"run-rate projected from 7 mo."
     },
     // BEV units for full-year 2025 (actual), to compare the projection against real prior-year performance
@@ -1364,6 +1370,7 @@ const MONTHLY_DATA = {
       "Colombia":19724,
       "Albania":5666,
       "Paraguay":851,
+      "Georgia":7178,
       "Tunisia":539
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
@@ -1376,6 +1383,7 @@ const MONTHLY_DATA = {
       "Colombia":254205,
       "Albania":80739,
       "Paraguay":30798,
+      "Georgia":161132,
       "Tunisia":63902
     }
   },
