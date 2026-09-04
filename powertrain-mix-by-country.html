@@ -1496,7 +1496,9 @@ const MONTHLY_DATA = {
       "France - Reunion": [2350,528,12347,595,8064,2579,26463],
       "France - Mayotte": [53,9,1345,10,786,76,2279],
       // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles)
-      "Mauritius": [2449,0,14225,0,21388,0,38062]
+      "Mauritius": [2449,0,14225,0,21388,0,38062],
+      // source: MONSTAT "Annual statistics of transport, storage and communications - 2025" (published May 2026) -- Total is real first-time-registered passenger cars (27,108); BEV/HEV are year-over-year stock deltas (reliable, negligible attrition in these recent categories); Petrol/Diesel are a residual of the true total split by that year's stock-delta ratio (no genuine flow-based split published) -- see world_auto_sales_annual.source for full methodology
+      "Montenegro": [235,0,2653,0,4888,19332,27108]
     },
     // per-country "as of" override — every country here is a genuine full year except Philippines (11 of 12 months)
     asOf: {
@@ -1534,7 +1536,7 @@ const MONTHLY_DATA = {
       "Hungary":8567,"Iceland":2661,"Ireland":17500,"Italy":65413,"Latvia":1250,"Lithuania":1772,
       "Luxembourg":12780,"Malta":2130,"Netherlands":132422,"Norway":114396,"Poland":16571,"Portugal":41914,
       "Romania":9795,"Slovakia":2270,"Slovenia":3166,"Spain":57377,"Sweden":94366,"Switzerland":46147,
-      "United Kingdom":381970,"Canada":202333,"Taiwan":37629,"Singapore":14448
+      "United Kingdom":381970,"Canada":202333,"Taiwan":37629,"Singapore":14448,"Montenegro":163
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
@@ -1547,7 +1549,8 @@ const MONTHLY_DATA = {
       "France - Martinique":12874,
       "France - Guyane":5115,
       "France - Reunion":24740,
-      "France - Mayotte":1970
+      "France - Mayotte":1970,
+      "Montenegro":28892
     }
   },
   "2024-annual": {
