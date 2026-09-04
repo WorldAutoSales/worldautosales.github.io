@@ -2395,7 +2395,7 @@ document.getElementById('zoom-out').addEventListener('click', () => svg.transiti
 document.getElementById('zoom-reset').addEventListener('click', () => svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity));
 
 // the basemap's Natural Earth names don't always match our country names
-const MAP_NAME_ALIASES = { "United States of America": "United States" };
+const MAP_NAME_ALIASES = { "United States of America": "United States", "Russia": "Russian Federation", "United Arab Emirates": "UAE" };
 function mapEntry(d){ return DATA_BY_NAME[d.properties.name] || DATA_BY_NAME[MAP_NAME_ALIASES[d.properties.name]]; }
 function mapCountryName(d){ return MAP_NAME_ALIASES[d.properties.name] || d.properties.name; }
 
