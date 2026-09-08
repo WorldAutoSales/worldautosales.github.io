@@ -484,7 +484,9 @@ const MONTHLY_DATA = {
       // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
       "Albania": [728,0,177,486,1883,4671,7945],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
-      "Paraguay": [144,90,721,1,2620,271,3847]
+      "Paraguay": [144,90,721,1,2620,271,3847],
+      // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team — Q2 2026 delta (H1 2026 minus Q1 2026) split evenly across Apr-Jun (no finer intra-quarter split published); PHEV not separately tracked, folded into HEV
+      "Serbia": [133,0,1830,74,1742,394,4173]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-06), for YoY %
     priorYearBev: {
@@ -593,7 +595,9 @@ const MONTHLY_DATA = {
       // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
       "Albania": [723,0,251,327,1454,3603,6358],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
-      "Paraguay": [173,176,671,0,2255,223,3498]
+      "Paraguay": [173,176,671,0,2255,223,3498],
+      // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team — Q2 2026 delta (H1 2026 minus Q1 2026) split evenly across Apr-Jun (no finer intra-quarter split published); PHEV not separately tracked, folded into HEV
+      "Serbia": [132,0,1829,74,1742,394,4171]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-05), for YoY %
     priorYearBev: {
@@ -702,7 +706,9 @@ const MONTHLY_DATA = {
       // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
       "Albania": [1115,0,207,366,1381,3663,6732],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
-      "Paraguay": [95,277,497,3,2342,196,3410]
+      "Paraguay": [95,277,497,3,2342,196,3410],
+      // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team — Q2 2026 delta (H1 2026 minus Q1 2026) split evenly across Apr-Jun (no finer intra-quarter split published); PHEV not separately tracked, folded into HEV
+      "Serbia": [132,0,1829,74,1742,394,4171]
     },
     priorYearBev: {
       "Austria":5690,"Belgium":12469,"Bulgaria":144,"Croatia":60,"Cyprus":90,"Czechia":1229,"Denmark":9567,
@@ -783,8 +789,6 @@ const MONTHLY_DATA = {
       "Argentina": [534,0,6733,0,41933,0,49200],
       // source: Statistics Canada, Table 20-10-0025-01 — reports quarterly, not monthly; Q1 2026's total is divided evenly across Jan/Feb/Mar (same figure repeated each month)
       "Canada": [9936,4435,17861,0,94454,5848,132534],
-      // source: Serbian Association of Importers of Vehicles and Parts (uvoznicivozila.rs), passenger cars only — reports half-year/quarterly cumulative totals, not monthly; Q1 2026's total divided evenly across Jan/Feb/Mar. No PHEV/HEV split published (combined hybrid filed under HEV, PHEV=0)
-      "Serbia": [46,0,1008,29,980,270,2333],
       // source: FTI Automotive Industry Club via mreport.co.th, Thailand (monthly) — Total includes pickups/PPV, not passenger-cars-only; Diesel is a residual
       "Thailand": [12224,704,14896,133,11007,20901,59865],
       // source: TS/KOTSA new-registration API, South Korea (monthly) — PHEV folded into HEV
@@ -814,7 +818,9 @@ const MONTHLY_DATA = {
       // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
       "Albania": [1153,0,194,350,1069,3337,6103],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
-      "Paraguay": [180,295,478,78,2368,247,3646]
+      "Paraguay": [180,295,478,78,2368,247,3646],
+      // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team — Q1 2026 report total split evenly across Jan-Mar (no finer intra-quarter split published); PHEV not separately tracked, folded into HEV
+      "Serbia": [46,0,1008,29,981,270,2334]
     },
     priorYearBev: {
       "Canada":8800,
@@ -895,8 +901,6 @@ const MONTHLY_DATA = {
       "Indonesia": [12314,651,5798,0,62487,0,81250],
       // source: Statistics Canada, Table 20-10-0025-01 — reports quarterly, not monthly; Q1 2026's total is divided evenly across Jan/Feb/Mar (same figure repeated each month)
       "Canada": [9936,4435,17861,0,94454,5848,132534],
-      // source: Serbian Association of Importers of Vehicles and Parts (uvoznicivozila.rs), passenger cars only — reports half-year/quarterly cumulative totals, not monthly; Q1 2026's total divided evenly across Jan/Feb/Mar. No PHEV/HEV split published (combined hybrid filed under HEV, PHEV=0)
-      "Serbia": [46,0,1008,29,980,270,2333],
       // source: FTI Automotive Industry Club via mreport.co.th, Thailand (monthly) — Total includes pickups/PPV, not passenger-cars-only; Diesel is a residual
       "Thailand": [6274,352,12711,79,9330,19496,48242],
       // source: TS/KOTSA new-registration API, South Korea (monthly) — PHEV folded into HEV
@@ -926,7 +930,9 @@ const MONTHLY_DATA = {
       // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
       "Albania": [858,0,156,294,1202,3395,5905],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
-      "Paraguay": [126,127,288,75,2343,300,3259]
+      "Paraguay": [126,127,288,75,2343,300,3259],
+      // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team — Q1 2026 report total split evenly across Jan-Mar (no finer intra-quarter split published); PHEV not separately tracked, folded into HEV
+      "Serbia": [46,0,1008,29,981,270,2334]
     },
     priorYearBev: {
       "Canada":8800,
@@ -1001,11 +1007,6 @@ const MONTHLY_DATA = {
       // filed entirely under January, so month-over-month comparisons involving Canada aren't
       // artificially skewed by a whole quarter landing in one month
       "Canada": [9936,4435,17861,0,94454,5848,132534],
-      // source: Serbian Association of Importers of Vehicles and Parts (uvoznicivozila.rs), passenger
-      // cars only — reports half-year/quarterly cumulative totals, not monthly; Q1 2026's total is
-      // divided evenly across Jan/Feb/Mar for the same reason as Canada above. No PHEV/HEV split
-      // published, so the combined hybrid figure is filed entirely under HEV (PHEV=0)
-      "Serbia": [46,0,1008,29,980,270,2333],
       // source: NZTA Waka Kotahi (monthly, light vehicles only)
       "New Zealand": [723,616,3256,129,3519,742,8985],
       // source: Argonne National Laboratory (Wards Auto), monthly — Total = all light-duty vehicles; no Petrol/Diesel split published, Diesel=0
@@ -1047,7 +1048,9 @@ const MONTHLY_DATA = {
       // source: DPSHTRR (Albania), Open Data Looker Studio dashboard — genuine standalone month, filtered to Autoveturë (passenger cars); HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
       "Albania": [753,0,130,260,958,3572,5673],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
-      "Paraguay": [64,177,305,119,1791,354,2810]
+      "Paraguay": [64,177,305,119,1791,354,2810],
+      // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team — Q1 2026 report total split evenly across Jan-Mar (no finer intra-quarter split published); PHEV not separately tracked, folded into HEV
+      "Serbia": [46,0,1007,29,980,270,2332]
     },
     // BEV units for the same month/quarter a year prior — source: ACEA (world_auto_sales, 2025-01) / same StatCan table for Canada, for YoY %
     priorYearBev: {
@@ -1173,10 +1176,13 @@ const MONTHLY_DATA = {
       // source: ATTT via webdo.tn/kapitalis.com — the real Jan-Jul 2026 combined total itself (the 7 identical monthly figures elsewhere are that same total split evenly, not independent months, so this reproduces it exactly: 7x220=1540 etc.)
       "Tunisia": [1540,2177,861,0,37114,0,41692],
       // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles); 2026 figure is Jan-Jul YTD
-      "Mauritius": [1441,0,5735,0,11150,0,18326]
+      "Mauritius": [1441,0,5735,0,11150,0,18326],
+      // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team -- H1 2026 (Jan-Jun), real: Petrol 8,168, Diesel 1,992, Hybrid 8,511 (petrol-hybrid+diesel-hybrid combined), Electric 535, Other/LPG 309. PHEV not separately tracked, folded into HEV.
+      "Serbia": [535,0,8511,309,8168,1992,19515]
     },
     // per-country "as of" coverage, since cutoffs differ by source — surfaced in the Country Detail table's "Data Through" column
     asOf: {
+      "Serbia":"through Jun 2026 (H1)",
       "Ecuador":"through Jul 2026",
       "Tunisia":"through Jul 2026",
       "Georgia":"through Jul 2026",
@@ -1231,7 +1237,8 @@ const MONTHLY_DATA = {
       "Peru":437,
       "Uruguay":5830,
       "Albania":3038,
-      "Paraguay":504
+      "Paraguay":504,
+      "Serbia":161
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
@@ -1241,7 +1248,8 @@ const MONTHLY_DATA = {
       "Peru":117029,
       "Uruguay":25094,
       "Albania":54624,
-      "Paraguay":18964
+      "Paraguay":18964,
+      "Serbia":16473
     }
     // note: China omitted from priorYearBev — no matching Jan-Jul 2025 monthly data sourced (world_auto_sales has no pre-2026 China rows)
     // note: Tunisia omitted from priorYearBev/priorYearTotal for the same reason — only a full-year 2025 total was sourced (see 2025-annual), no Jan-Jul 2025 monthly breakdown to compare against
@@ -1332,7 +1340,9 @@ const MONTHLY_DATA = {
       // source: DNA (Direccion Nacional de Aduanas) Paraguay — each fuel trended from the last 3 actual months' average (Jun-Aug) or the 8-mo YTD average if higher, applied to the remaining 4 months
       "Paraguay": [1805,3320,8985,765,31763,3838,50476],
       // source: ATTT via webdo.tn/kapitalis.com — plain run-rate (YTD x 12/7), same method as Philippines/Turkey: the underlying Jan-Jul figures are already a flat estimate (one combined total split evenly), so there's no real month-to-month variation to trend from
-      "Tunisia": [2640,3732,1476,0,63624,0,71472]
+      "Tunisia": [2640,3732,1476,0,63624,0,71472],
+      // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team — flat annualization (H1 2026 x2), not the standard trend method: H1 2026 has no internal monthly granularity to trend from (it's itself an even split of the H1 total), so a plain doubling is the least-fabricated option available
+      "Serbia": [1070,0,17022,618,16336,3984,39030]
     },
     // Two projection methods, depending on what data exists per country:
     // (1) Every country with a real monthly breakdown — the 31 ACEA/Europe countries, New Zealand, Argentina,
@@ -1500,10 +1510,13 @@ const MONTHLY_DATA = {
       // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles)
       "Mauritius": [2449,0,14225,0,21388,0,38062],
       // source: MONSTAT "Annual statistics of transport, storage and communications - 2025" (published May 2026) -- Total is real first-time-registered passenger cars (27,108); BEV/HEV are year-over-year stock deltas (reliable, negligible attrition in these recent categories); Petrol/Diesel are a residual of the true total split by that year's stock-delta ratio (no genuine flow-based split published) -- see world_auto_sales_annual.source for full methodology
-      "Montenegro": [235,0,2653,0,4888,19332,27108]
+      "Montenegro": [235,0,2653,0,4888,19332,27108],
+      // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team, Ministry of Interior first-registration data -- Jan-Sep 2025 (9 months) only, union of the H1 2025 and 9-month 2025 reports (Q4 2025 never published, gap). PHEV not separately tracked, folded into HEV. Chosen over SORS (Statistical Office of Serbia), whose official annual total is ~6x larger but only splits Petrol/Diesel and is ~83% used-vehicle imports by the Association's own count -- see population log for the full comparison.
+      "Serbia": [298,0,8778,489,11268,3135,23968]
     },
-    // per-country "as of" override — every country here is a genuine full year except Philippines (11 of 12 months)
+    // per-country "as of" override — every country here is a genuine full year except Philippines (11 of 12 months) and Serbia (9 of 12, see comment)
     asOf: {
+      "Serbia": "uvoznicivozila.rs, Jan-Sep 2025 (9 mo) -- Q4 2025 report never published",
       "Philippines": "through Nov 2025 (11 mo)",
       "Nepal": "FY2081/82 (BS), ~mid-Jul 2024 to mid-Jul 2025"
     },
@@ -1641,12 +1654,15 @@ const MONTHLY_DATA = {
       // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles)
       "Mauritius": [1553,0,12087,0,22275,0,35915],
       // source: MONSTAT (Statistical Office of Montenegro) -- Total is real first-time-registered passenger cars; BEV/HEV are year-over-year stock deltas (reliable, negligible attrition in these recent categories); Petrol/Diesel are a residual of the true total split by that year's stock-delta ratio (no genuine flow-based split published) -- see world_auto_sales_annual.source for full methodology
-      "Montenegro": [163,0,1989,0,3251,23489,28892]
+      "Montenegro": [163,0,1989,0,3251,23489,28892],
+      // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team, Ministry of Interior first-registration data -- Jan-Jun 2024 (H1) only, the earliest report with a fuel-type split at this source. Petrol/Hybrid derived from stated percentages (48.33%/21.50%+7.68%), Diesel/Other/Electric close to exact -- see world_auto_sales_annual.source for full reconciliation. PHEV not separately tracked, folded into HEV.
+      "Serbia": [116,0,4423,318,7341,2960,15158]
     },
     // per-country "as of" override for a source whose fiscal year doesn't match the calendar year
     asOf: {
       "Nepal": "FY2080/81 (BS), ~mid-Jul 2023 to mid-Jul 2024",
-      "Israel":"MoT registry, 96% of OICA (undercount, see comment)"
+      "Israel":"MoT registry, 96% of OICA (undercount, see comment)",
+      "Serbia": "uvoznicivozila.rs, Jan-Jun 2024 (H1) only"
     },
     // BEV units for full-year 2023, for YoY %
     priorYearBev: {
@@ -2111,8 +2127,8 @@ const COUNTRY_CONTINENT = {
   "Ireland":"EU","Italy":"EU","Latvia":"EU","Lithuania":"EU","Luxembourg":"EU","Malta":"EU","Netherlands":"EU",
   "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
   "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
-  "Canada":"NAC","United States":"NAC","China":"ASIA","India":"ASIA","Mexico":"NAC","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"SA","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"SA","Turkey":"EU","Philippines":"ASIA","Chile":"SA","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA","Taiwan":"ASIA","Singapore":"ASIA","Serbia":"EU","Colombia":"SA","Vietnam":"ASIA","Nepal":"ASIA"
-,"Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA","Uzbekistan":"ASIA","Uruguay":"SA","Ecuador":"SA","Ukraine":"EU","Albania":"EU","Paraguay":"SA","Tunisia":"AFRICA","France - Guadeloupe":"NAC","France - Martinique":"NAC","France - Guyane":"SA","France - Reunion":"AFRICA","France - Mayotte":"AFRICA","Costa Rica":"NAC","Mauritius":"AFRICA","Russian Federation":"EU","Georgia":"EU","Montenegro":"EU","North Macedonia":"EU"};
+  "Canada":"NAC","United States":"NAC","China":"ASIA","India":"ASIA","Mexico":"NAC","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"SA","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"SA","Turkey":"EU","Philippines":"ASIA","Chile":"SA","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA","Taiwan":"ASIA","Singapore":"ASIA","Colombia":"SA","Vietnam":"ASIA","Nepal":"ASIA"
+,"Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA","Uzbekistan":"ASIA","Uruguay":"SA","Ecuador":"SA","Ukraine":"EU","Albania":"EU","Paraguay":"SA","Tunisia":"AFRICA","France - Guadeloupe":"NAC","France - Martinique":"NAC","France - Guyane":"SA","France - Reunion":"AFRICA","France - Mayotte":"AFRICA","Costa Rica":"NAC","Mauritius":"AFRICA","Russian Federation":"EU","Georgia":"EU","Montenegro":"EU","North Macedonia":"EU","Serbia":"EU"};
 const ALL_CONTINENTS = [...new Set(ALL_COUNTRIES.map(c => COUNTRY_CONTINENT[c] || "OTHER"))].sort();
 
 // country -> ISO 3166-1 alpha-2 code, for flag images (flagcdn.com)
@@ -2122,8 +2138,8 @@ const COUNTRY_ISO2 = {
   "Ireland":"ie","Italy":"it","Latvia":"lv","Lithuania":"lt","Luxembourg":"lu","Malta":"mt","Netherlands":"nl",
   "Norway":"no","Poland":"pl","Portugal":"pt","Romania":"ro","Slovakia":"sk","Slovenia":"si","Spain":"es",
   "Sweden":"se","Switzerland":"ch","United Kingdom":"gb","Canada":"ca",
-  "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th","Argentina":"ar","Turkey":"tr","Philippines":"ph","Chile":"cl","Morocco":"ma","New Zealand":"nz","Malaysia":"my","Taiwan":"tw","Singapore":"sg","Serbia":"rs","Colombia":"co","Vietnam":"vn","Nepal":"np"
-,"Israel":"il","Kazakhstan":"kz","Peru":"pe","Uzbekistan":"uz","Uruguay":"uy","Ecuador":"ec","Ukraine":"ua","Albania":"al","Paraguay":"py","Tunisia":"tn","France - Guadeloupe":"gp","France - Martinique":"mq","France - Guyane":"gf","France - Reunion":"re","France - Mayotte":"yt","Costa Rica":"cr","Mauritius":"mu","Russian Federation":"ru","Georgia":"ge","Montenegro":"me","North Macedonia":"mk"};
+  "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th","Argentina":"ar","Turkey":"tr","Philippines":"ph","Chile":"cl","Morocco":"ma","New Zealand":"nz","Malaysia":"my","Taiwan":"tw","Singapore":"sg","Colombia":"co","Vietnam":"vn","Nepal":"np"
+,"Israel":"il","Kazakhstan":"kz","Peru":"pe","Uzbekistan":"uz","Uruguay":"uy","Ecuador":"ec","Ukraine":"ua","Albania":"al","Paraguay":"py","Tunisia":"tn","France - Guadeloupe":"gp","France - Martinique":"mq","France - Guyane":"gf","France - Reunion":"re","France - Mayotte":"yt","Costa Rica":"cr","Mauritius":"mu","Russian Federation":"ru","Georgia":"ge","Montenegro":"me","North Macedonia":"mk","Serbia":"rs"};
 
 // country -> { grade, notes } — editorial source-quality grade from country_data_coverage
 // (Supabase: data_quality/data_quality_notes columns). AA=Parfaite, A=Excellente, B=Bonne,
