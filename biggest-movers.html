@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biggest Movers — World Auto Sales</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="index.html">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="50" r="46" fill="var(--surface)" stroke="var(--accent)" stroke-width="4"/>
+        <path d="M20 58 L26 40 C28 35 32 32 38 32 L62 32 C68 32 72 35 74 40 L80 58 L80 66 C80 69 78 71 75 71 L71 71 C68 71 66 69 66 66 L66 64 L34 64 L34 66 C34 69 32 71 29 71 L25 71 C22 71 20 69 20 66 Z" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linejoin="round"/>
+        <circle cx="32" cy="64" r="6" fill="var(--text)"/>
+        <circle cx="68" cy="64" r="6" fill="var(--text)"/>
+        <line x1="30" y1="45" x2="70" y2="45" stroke="var(--accent)" stroke-width="3" opacity="0.5"/>
+      </svg>
+      <span class="wordmark">
+        <span class="brand">World Auto</span>
+        <span class="sub">Sales Stats</span>
+      </span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <a href="index.html"><span class="dot"></span>Home</a>
+
+      <div class="nav-heading">Overview</div>
+      <a href="world-auto-sales.html"><span class="dot"></span>World Auto Sales</a>
+
+      <div class="nav-heading">Powertrain</div>
+      <a href="powertrain-mix-by-country.html"><span class="dot"></span>Mix by Country</a>
+      <a href="individual-country.html"><span class="dot"></span>Individual Country</a>
+
+      <div class="nav-heading">Markets</div>
+      <a href="auto-markets-by-country.html"><span class="dot"></span>Auto Markets by Country</a>
+
+      <div class="nav-heading">Rankings</div>
+      <a href="biggest-movers.html" aria-current="page"><span class="dot"></span>Biggest Movers</a>
+
+      <div class="nav-heading">Manufacturers<span class="soon-pill">Soon</span></div>
+      <div class="nav-heading">Trends<span class="soon-pill">Soon</span></div>
+    </nav>
+
+    <div class="sidebar-footer">
+      Monthly worldwide car sales &amp; powertrain stats — built for video &amp; social.
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page">
+      <header class="page-header">
+        <div class="eyebrow">World Auto Sales · Rankings</div>
+        <h1>Biggest Movers</h1>
+        <p class="subtitle">Which markets are growing their battery-electric (BEV) sales fastest — by year-over-year %, month-over-month %, and by the raw number of extra BEV units sold. Each country is measured against its own most recent real data, so a country with an older or gappier source simply doesn't show up until it publishes again.</p>
+      </header>
+
+      <div class="movers-page-grid">
+        <section class="card movers-page-card">
+          <h2>Top 20 — % Growth, Year over Year (BEV)</h2>
+          <p class="movers-page-note">Each country's latest available period vs. the same months a year earlier. Mixes countries at different cadences (monthly, YTD, annual) since each is compared only against its own matching prior-year window.</p>
+          <ol class="movers-list movers-page-list" id="list-yoy-pct"></ol>
+        </section>
+
+        <section class="card movers-page-card">
+          <h2>Top 20 — % Growth, Month over Month (BEV)</h2>
+          <p class="movers-page-note">Each country's two most recent consecutive real months. Countries with only quarterly, YTD, or annual data don't qualify — see the YoY table for those.</p>
+          <ol class="movers-list movers-page-list" id="list-mom-pct"></ol>
+        </section>
+
+        <section class="card movers-page-card">
+          <h2>Top 20 — BEV Units Added, Year over Year</h2>
+          <p class="movers-page-note">Absolute increase in BEV registrations vs. the same period a year earlier — the countries adding the most real electric cars, not just growing off a small base.</p>
+          <ol class="movers-list movers-page-list" id="list-yoy-abs"></ol>
+        </section>
+      </div>
+
+      <footer class="page-footer">
+        Data sourced from the World_auto_sales Supabase project. A handful of sources publish quarterly, semi-annual, or bimonthly figures spread evenly across their months (see each country's Data Quality note on the <a href="powertrain-mix-by-country.html">Mix by Country</a> page) — for those, a jump right at the reporting boundary reflects the source's cadence, not a real mid-period swing.
+      </footer>
+    </div>
+  </main>
+</div>
+
+<script src="assets/country-monthly-data.js"></script>
+<script src="assets/country-yearly-data.js"></script>
+<script src="assets/country-iso2.js"></script>
+<script>
+// --- helpers shared by the 3 rankings ---
+function flagHTML(country){
+  const iso = COUNTRY_ISO2[country];
+  return iso ? `<img class="movers-flag" src="https://flagcdn.com/24x18/${iso}.png" alt="" loading="lazy">` : '<span class="movers-flag movers-flag-blank"></span>';
+}
+function fmt(n){ return Math.round(n).toLocaleString('en-US'); }
+
+function rowHTML(country, valueHTML, detail){
+  return `
+    <li class="movers-row">
+      <span class="movers-rank"></span>
+      ${flagHTML(country)}
+      <span class="movers-country">${country}</span>
+      ${valueHTML}
+      <span class="movers-detail">${detail}</span>
+    </li>`;
+}
+function renderList(elId, rows, emptyMsg){
+  const el = document.getElementById(elId);
+  el.innerHTML = rows.length ? rows.join('') : `<li class="movers-empty">${emptyMsg}</li>`;
+}
+
+// --- Month-over-month (BEV), from COUNTRY_MONTHLY: each country's own latest two consecutive
+// real calendar months ---
+function computeMoM(){
+  const out = [];
+  Object.entries(COUNTRY_MONTHLY || {}).forEach(([country, rows]) => {
+    if(!rows || rows.length < 2) return;
+    const sorted = [...rows].sort((a,b) => a.ym < b.ym ? 1 : -1); // newest first
+    const cur = sorted[0], prev = sorted[1];
+    // require truly consecutive calendar months (not just "the two most recent rows on file",
+    // which could straddle a real gap)
+    const [cy, cm] = cur.ym.split('-').map(Number);
+    const [py, pm] = prev.ym.split('-').map(Number);
+    const isConsecutive = (cy === py && cm === pm + 1) || (cy === py + 1 && cm === 1 && pm === 12);
+    if(!isConsecutive) return;
+    if(!(prev.bev > 0)) return;
+    out.push({
+      country, curYm: cur.ym, prevYm: prev.ym,
+      curBev: cur.bev, prevBev: prev.bev,
+      pct: (cur.bev - prev.bev) / prev.bev * 100,
+      abs: cur.bev - prev.bev
+    });
+  });
+  return out;
+}
+
+// --- Year-over-year (BEV): prefer COUNTRY_MONTHLY (same calendar month, year prior); fall back
+// to COUNTRY_YEARLY's two most recent consecutive full ANNUAL rows for annual-only countries ---
+function computeYoY(){
+  const out = [];
+  const doneCountries = new Set();
+
+  Object.entries(COUNTRY_MONTHLY || {}).forEach(([country, rows]) => {
+    if(!rows || !rows.length) return;
+    const byYm = new Map(rows.map(r => [r.ym, r]));
+    const sorted = [...rows].sort((a,b) => a.ym < b.ym ? 1 : -1); // newest first
+    const cur = sorted[0];
+    const [cy, cm] = cur.ym.split('-').map(Number);
+    const priorYm = `${cy - 1}-${String(cm).padStart(2,'0')}`;
+    const prior = byYm.get(priorYm);
+    if(!prior || !(prior.bev > 0)) return;
+    doneCountries.add(country);
+    out.push({
+      country, curLabel: cur.ym, prevLabel: priorYm,
+      curBev: cur.bev, prevBev: prior.bev,
+      pct: (cur.bev - prior.bev) / prior.bev * 100,
+      abs: cur.bev - prior.bev
+    });
+  });
+
+  Object.entries(COUNTRY_YEARLY || {}).forEach(([country, rows]) => {
+    if(doneCountries.has(country) || !rows || !rows.length) return;
+    const annual = rows.filter(r => r.period_type === 'ANNUAL').sort((a,b) => b.year - a.year);
+    if(annual.length < 2) return;
+    const cur = annual[0], prior = annual[1];
+    if(cur.year !== prior.year + 1) return; // must be genuinely consecutive years
+    if(!(prior.bev > 0)) return;
+    out.push({
+      country, curLabel: String(cur.year), prevLabel: String(prior.year),
+      curBev: cur.bev, prevBev: prior.bev,
+      pct: (cur.bev - prior.bev) / prior.bev * 100,
+      abs: cur.bev - prior.bev
+    });
+  });
+
+  return out;
+}
+
+const MOM = computeMoM();
+const YOY = computeYoY();
+
+renderList('list-mom-pct',
+  [...MOM].sort((a,b) => b.pct - a.pct).slice(0,20)
+    .map(m => rowHTML(m.country,
+      `<span class="movers-value ${m.pct >= 0 ? 'yoy-up' : 'yoy-down'}">${m.pct >= 0 ? '+' : ''}${m.pct.toFixed(1)}%</span>`,
+      `${fmt(m.prevBev)} → ${fmt(m.curBev)} BEV · ${m.prevYm} → ${m.curYm}`)),
+  'Not enough consecutive-month data yet.');
+
+renderList('list-yoy-pct',
+  [...YOY].sort((a,b) => b.pct - a.pct).slice(0,20)
+    .map(m => rowHTML(m.country,
+      `<span class="movers-value ${m.pct >= 0 ? 'yoy-up' : 'yoy-down'}">${m.pct >= 0 ? '+' : ''}${m.pct.toFixed(1)}%</span>`,
+      `${fmt(m.prevBev)} → ${fmt(m.curBev)} BEV · ${m.prevLabel} → ${m.curLabel}`)),
+  'Not enough year-over-year data yet.');
+
+renderList('list-yoy-abs',
+  [...YOY].sort((a,b) => b.abs - a.abs).slice(0,20)
+    .map(m => rowHTML(m.country,
+      `<span class="movers-value ${m.abs >= 0 ? 'yoy-up' : 'yoy-down'}">${m.abs >= 0 ? '+' : ''}${fmt(m.abs)}</span>`,
+      `${fmt(m.prevBev)} → ${fmt(m.curBev)} BEV · ${m.prevLabel} → ${m.curLabel}`)),
+  'Not enough year-over-year data yet.');
+</script>
+</body>
+</html>

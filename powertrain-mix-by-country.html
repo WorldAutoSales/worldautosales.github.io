@@ -38,6 +38,9 @@
       <div class="nav-heading">Markets</div>
       <a href="auto-markets-by-country.html"><span class="dot"></span>Auto Markets by Country</a>
 
+      <div class="nav-heading">Rankings</div>
+      <a href="biggest-movers.html"><span class="dot"></span>Biggest Movers</a>
+
       <div class="nav-heading">Manufacturers<span class="soon-pill">Soon</span></div>
       <div class="nav-heading">Trends<span class="soon-pill">Soon</span></div>
     </nav>
@@ -95,6 +98,24 @@
         </header>
 
         <div class="stat-row" id="stat-row"></div>
+
+        <div class="card movers-card">
+          <div class="movers-header">
+            <span>🚀 Biggest Movers — Month over Month (BEV)</span>
+            <a href="biggest-movers.html" class="movers-see-all">See full rankings (YoY, MoM, volume) →</a>
+          </div>
+          <p class="movers-note">Each country is compared against its own most recent two consecutive months of real data — independent of the period filter above. A country with a reporting gap, or with only quarterly/annual data, won't appear here. A few sources publish quarterly or bimonthly figures spread evenly across their months; for those, a jump right at the reporting boundary reflects the source's cadence, not a real mid-period swing (check a country's Data Quality note in Country Detail below).</p>
+          <div class="movers-columns">
+            <div class="movers-col">
+              <div class="movers-col-title">Top 10 by % growth</div>
+              <ol class="movers-list" id="movers-top-pct"></ol>
+            </div>
+            <div class="movers-col">
+              <div class="movers-col-title">Top 5 by BEV units added</div>
+              <ol class="movers-list" id="movers-top-abs"></ol>
+            </div>
+          </div>
+        </div>
 
         <div class="card notes-card is-collapsed">
           <button type="button" class="notes-toggle" aria-expanded="false">
@@ -2269,6 +2290,62 @@ function aggregateByCountry(periodKeys){
   });
   return byCountry;
 }
+
+// --- Biggest Movers (month-over-month, BEV) — always uses each country's own latest two
+// consecutive real months, independent of the sidebar's selected period. A country with a
+// reporting gap, or with only quarterly/annual/YTD data, simply doesn't qualify. Computed once
+// at load since MONTHLY_DATA never changes at runtime.
+const REAL_MONTH_KEYS = ALL_MONTHS.filter(k => /^\d{4}-\d{2}$/.test(k)).sort().reverse();
+const MOM_PERIOD_AGG = {};
+REAL_MONTH_KEYS.forEach(k => { MOM_PERIOD_AGG[k] = aggregateByCountry([k]); });
+function computeMoMMovers(){
+  const movers = [];
+  ALL_COUNTRIES.forEach(country => {
+    let latestIdx = -1;
+    for(let i=0;i<REAL_MONTH_KEYS.length;i++){
+      if(MOM_PERIOD_AGG[REAL_MONTH_KEYS[i]][country].total > 0){ latestIdx = i; break; }
+    }
+    if(latestIdx === -1 || latestIdx+1 >= REAL_MONTH_KEYS.length) return;
+    const curKey = REAL_MONTH_KEYS[latestIdx], prevKey = REAL_MONTH_KEYS[latestIdx+1];
+    const cur = MOM_PERIOD_AGG[curKey][country], prev = MOM_PERIOD_AGG[prevKey][country];
+    if(prev.bev <= 0) return; // no real base to compute a % change from
+    movers.push({
+      country, curKey, prevKey,
+      curLabel: MONTHLY_DATA[curKey].label, prevLabel: MONTHLY_DATA[prevKey].label,
+      curBev: cur.bev, prevBev: prev.bev,
+      pctChange: (cur.bev - prev.bev) / prev.bev * 100,
+      absChange: cur.bev - prev.bev
+    });
+  });
+  return movers;
+}
+const MOM_MOVERS = computeMoMMovers();
+const TOP10_MOM_PCT = [...MOM_MOVERS].sort((a,b) => b.pctChange - a.pctChange).slice(0,10);
+const TOP5_MOM_ABS = [...MOM_MOVERS].sort((a,b) => b.absChange - a.absChange).slice(0,5);
+function moversFlagHTML(country){
+  const iso = COUNTRY_ISO2[country];
+  return iso ? `<img class="movers-flag" src="https://flagcdn.com/24x18/${iso}.png" alt="" loading="lazy">` : '<span class="movers-flag movers-flag-blank"></span>';
+}
+function renderMovers(){
+  const pctList = document.getElementById('movers-top-pct');
+  const absList = document.getElementById('movers-top-abs');
+  if(!pctList || !absList) return;
+  const row = (m, valueHTML) => `
+    <li class="movers-row">
+      <span class="movers-rank"></span>
+      ${moversFlagHTML(m.country)}
+      <span class="movers-country">${m.country}</span>
+      ${valueHTML}
+      <span class="movers-detail">${m.prevBev.toLocaleString('en-US')} → ${m.curBev.toLocaleString('en-US')} BEV · ${m.prevLabel} → ${m.curLabel}</span>
+    </li>`;
+  pctList.innerHTML = TOP10_MOM_PCT.length
+    ? TOP10_MOM_PCT.map(m => row(m, `<span class="movers-value ${m.pctChange >= 0 ? 'yoy-up' : 'yoy-down'}">${m.pctChange >= 0 ? '+' : ''}${m.pctChange.toFixed(1)}%</span>`)).join('')
+    : '<li class="movers-empty">Not enough consecutive months of data yet.</li>';
+  absList.innerHTML = TOP5_MOM_ABS.length
+    ? TOP5_MOM_ABS.map(m => row(m, `<span class="movers-value ${m.absChange >= 0 ? 'yoy-up' : 'yoy-down'}">${m.absChange >= 0 ? '+' : ''}${m.absChange.toLocaleString('en-US')}</span>`)).join('')
+    : '<li class="movers-empty">Not enough consecutive months of data yet.</li>';
+}
+renderMovers();
 
 // per-country stats for the focused-country cards + Continent/World ranking — always computed from
 // EVERY country (ignores the continent/country sidebar filters, since a rank is a fact about the
