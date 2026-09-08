@@ -41,7 +41,9 @@
       <div class="nav-heading">Rankings</div>
       <a href="biggest-movers.html"><span class="dot"></span>Biggest Movers</a>
 
-      <div class="nav-heading">Manufacturers<span class="soon-pill">Soon</span></div>
+      <div class="nav-heading">Manufacturers</div>
+      <a href="manufacturers.html"><span class="dot"></span>Sales by Brand</a>
+
       <div class="nav-heading">Trends<span class="soon-pill">Soon</span></div>
     </nav>
 
@@ -254,6 +256,25 @@
           <div class="momentum-grid" id="momentum-grid"></div>
         </div>
 
+        <div class="card chart-card" id="mfr-section">
+          <div class="chart-header-row">
+            <h2>Sales by Manufacturers — Germany (KBA)</h2>
+            <a href="manufacturers.html" class="movers-see-all">Open the full Manufacturers page →</a>
+          </div>
+          <p class="note">Germany is currently the only market in this project with a genuine per-brand Petrol/Diesel/BEV/PHEV/HEV split — source: Kraftfahrt-Bundesamt (KBA), Germany's federal motor authority, "Neuzulassungen von Personenkraftwagen nach Marken und Modellreihen". Bars show each brand's total new registrations; the green segment is its BEV share of that total. Sorted by total sales, top 20 brands.</p>
+          <div class="mfr-controls">
+            <label for="mfr-year-select">Year</label>
+            <select id="mfr-year-select"></select>
+          </div>
+          <div class="rank-rows-header">
+            <span class="rrh-spacer"></span>
+            <span class="rrh-total">BEV %</span>
+            <span class="rrh-total">Total</span>
+          </div>
+          <div class="rank-rows" id="mfr-rank-rows"></div>
+          <div class="tooltip" id="mfr-tooltip"></div>
+        </div>
+
         <footer class="page-footer">
           Sources: ACEA (EU + EFTA + UK, monthly) · Statistics Canada, Table 20-10-0025-01 (quarterly) · Vahan Dashboard, India (monthly) · Argonne National Laboratory, USA (monthly + annual, no diesel split) · CAAM/CPCA via CnEVPost, China (annual 2021-2025 approximate; monthly + YTD + projected 2026, wholesale basis incl. exports, no diesel split) · INEGI (RAIAVL), Mexico (monthly) · JADA, Japan (monthly, registered passenger cars excl. kei-cars) · FCAI/VFACTS, Australia (monthly since 2026-01 + annual, light vehicles only) · ANFAVEA, Brazil (monthly, Flex-fuel folded into Petrol) · TS/KOTSA new-registration API + MOLIT, South Korea (monthly, PHEV folded into HEV) · GAIKINDO, Indonesia (monthly, no diesel split) · FTI Automotive Industry Club, Thailand (monthly since 2025-01 + annual, includes commercial vehicles) · ACARA/SIOMAA, Argentina (annual + YTD + monthly from March 2026, petrol/diesel approximate) · MAA + JPJ vehicle registrations (data.gov.my), Malaysia (monthly, Petrol/Diesel derived from JPJ's ratio) · ODMD, Turkey (annual + YTD, passenger cars only) · CAMPI-TMA, Philippines (annual + YTD, no diesel split) · ANAC, Chile (monthly since 2025-01 + annual back to 2020, petrol/diesel is a residual split at ANAC's own year-specific ratio) · AIVAM, Morocco (annual, full split 2024 only) · NZTA Waka Kotahi, New Zealand (monthly, light vehicles only) · naamsa, South Africa (annual, approximate) · VAMA + VinFast + TC Group, Vietnam (monthly since 2026-01 + annual, 3 sources merged, excludes minor independent importers) · Israel Ministry of Transport vehicle registry (data.gov.il), Israel (monthly since 2025-01 + annual 2025; BEV/PHEV/Diesel exact, Petrol/HEV split via I-VIA's quarterly ratio)<br>
           Map boundaries: Natural Earth via world-atlas (public domain)
@@ -297,6 +318,7 @@
 <script src="assets/country-yearly-data.js"></script>
 <script src="assets/country-monthly-data.js"></script>
 <script src="assets/world-market-totals-2025.js"></script>
+<script src="assets/manufacturer-yearly-data.js"></script>
 <script src="assets/electrification-bars.js"></script>
 <script>
 // month key -> { label, raw: { country: [BEV, PHEV, HEV, OTHERS, PETROL, DIESEL, TOTAL] } } — source: ACEA
@@ -3821,6 +3843,59 @@ document.getElementById('filter-reset').addEventListener('click', () => {
   monthsBox.querySelectorAll('input[type="radio"]').forEach(rb => { rb.checked = rb.dataset.month === DEFAULT_MONTH; });
   recompute();
 });
+
+// --- Sales by Manufacturers (Germany, KBA) — self-contained, only reacts to its own Year
+// selector (not the country/period sidebar filters, since this is a different dimension: brands,
+// not countries)
+(function(){
+  const yearSelect = document.getElementById('mfr-year-select');
+  const mfrRows = document.getElementById('mfr-rank-rows');
+  const mfrTooltip = document.getElementById('mfr-tooltip');
+  if(!yearSelect || !mfrRows || typeof MANUFACTURER_YEARLY === 'undefined') return;
+
+  const MFR_FUEL_KEYS = ['bev','phev','hev','petrol','diesel'];
+  const years = [...new Set(MANUFACTURER_YEARLY.Germany.map(r => r.year))].sort((a,b) => b - a);
+  const latestYear = years[0];
+  yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}${y === latestYear ? ' (YTD)' : ''}</option>`).join('');
+  yearSelect.value = years.includes(2025) ? 2025 : latestYear;
+
+  function mfrSegHTML(row, key){
+    const units = row[key];
+    if(units <= 0 || row.total <= 0) return '';
+    const pct = units / row.total * 100;
+    const showLabel = pct >= 7;
+    return `<div class="bar-seg" style="width:${pct}%; background:${FUEL_COLORS[key]}" data-brand="${row.brand}" data-key="${key}" data-units="${units}" data-pct="${pct.toFixed(1)}">${showLabel ? `<span class="seg-label">${pct.toFixed(0)}%</span>` : ''}</div>`;
+  }
+  function renderManufacturerBars(){
+    const year = +yearSelect.value;
+    const top20 = MANUFACTURER_YEARLY.Germany.filter(r => r.year === year).sort((a,b) => b.total - a.total).slice(0,20);
+    mfrRows.innerHTML = top20.map(row => {
+      const bevPct = row.bev / row.total * 100;
+      return `
+      <div class="rank-row" data-brand="${row.brand}">
+        <div class="country-label">${row.brand}</div>
+        <div class="bar-track">
+          ${MFR_FUEL_KEYS.map(k => mfrSegHTML(row, k)).join('')}
+        </div>
+        <div class="pct-label" style="color:${FUEL_COLORS.bev}">${bevPct.toFixed(1)}%</div>
+        <div class="total-label">${row.total.toLocaleString('en-US')}</div>
+      </div>`;
+    }).join('');
+  }
+  yearSelect.addEventListener('change', renderManufacturerBars);
+  renderManufacturerBars();
+
+  mfrRows.addEventListener('pointermove', e => {
+    const seg = e.target.closest('.bar-seg');
+    if(!seg){ mfrTooltip.style.opacity = 0; return; }
+    const cardRect = document.getElementById('mfr-section').getBoundingClientRect();
+    mfrTooltip.style.left = (e.clientX - cardRect.left) + 'px';
+    mfrTooltip.style.top = (e.clientY - cardRect.top - 10) + 'px';
+    mfrTooltip.style.opacity = 1;
+    mfrTooltip.innerHTML = `${seg.dataset.brand} — ${FUEL_LABELS[seg.dataset.key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)`;
+  });
+  mfrRows.addEventListener('pointerleave', () => { mfrTooltip.style.opacity = 0; });
+})();
 </script>
 <script src="assets/notes-toggle.js"></script>
 </body>
