@@ -283,6 +283,20 @@ const MONTHLY_DATA = {
   "2026-08": {
     label: "August 2026",
     raw: {
+      // source: AAA DATA (communique-de-presse-du-1er-septembre-2026, aaa-data.fr) -- see July comment for methodology. MHEV(18,849)+HEV(16,837) combined into hev; Others=Essence-GPL(3,361) + a small unitemized residual against AAA DATA's own 94,351 total.
+      "France": [36159,5824,35686,3963,10903,1816,94351],
+      // source: KBA (Kraftfahrt-Bundesamt) monthly Pressemitteilung -- see July comment for methodology. Hybrid total (84,603) split into PHEV (25,406, KBA-stated) and HEV=84,603-25,406=59,197; Others = residual against KBA's own 212,563 total.
+      "Germany": [68930,25406,59197,978,35536,22516,212563],
+      // source: DGT registration data via IEA/GANVAM -- see July comment for methodology. HEV (32,353) and Others (2,568, GLP+residual) computed as the remainder of GANVAM's own "Resto combustibles" total (54,114) minus the separately-cited BEV/PHEV figures.
+      "Spain": [9562,9631,32353,2568,12587,1843,68544],
+      // source: ACAP monthly press release -- see July comment for methodology. This month's percentages (BEV 36.1%/HEV 20.2%/PHEV 17.5%/combustao 26.2%) summed cleanly to 100% of ACAP's own 14,086 total, unlike July's figures; Petrol/Diesel split within the 26.2% combustao bucket estimated from July's own ~83/17 ratio.
+      "Portugal": [5079,2465,2845,6,3049,642,14086],
+      // source: SMMT monthly release -- see July comment for methodology. Absolute units derived from SMMT's stated percentages x its stated 94,236 total.
+      "United Kingdom": [28082,13664,11968,0,35999,4523,94236],
+      // source: UNRAE monthly bulletin via press -- see July comment for methodology. BEV=4,486 is UNRAE's own directly-cited figure (not percentage-derived, unlike the other categories this month); Others=GPL/metano residual against UNRAE's own 69,411 total.
+      "Italy": [4486,8399,32346,6133,14021,4026,69411],
+      // source: RDC/RAI Vereniging/BOVAG -- see July comment for methodology. Petrol (1,613) is the source's own directly-cited figure; Diesel and LPG were each reported as "under 1% of the market" without an exact split, shown here as an even 289/289 estimate.
+      "Netherlands": [12925,0,11339,289,1613,289,26455],
       // source: Vahan Dashboard, India (monthly)
       "India": [26314,4,31248,86452,141993,60109,346120],
       // source: TS/KOTSA new-registration API, South Korea (monthly) — PHEV folded into HEV
@@ -315,6 +329,20 @@ const MONTHLY_DATA = {
   "2026-07": {
     label: "July 2026",
     raw: {
+      // source: AAA DATA (communique-de-presse-du-1er-aout-2026, aaa-data.fr) -- France's own registration-data provider, published well before ACEA's EU-wide release. Essence=13,903 (pure petrol only, HEV+MHEV pulled out); MHEV(26,933)+HEV(25,163) combined into hev per project convention; Others = GPL/E85 + ~4.9% unitemized residual against AAA DATA's own 126,808 total.
+      "France": [44378,7461,52096,6220,13903,2750,126808],
+      // source: KBA (Kraftfahrt-Bundesamt) monthly Pressemitteilung -- Germany's official federal motor authority, published within the first days of the following month, well ahead of ACEA. Hybrid total (105,284) split into PHEV (30,609, KBA-stated) and HEV=105,284-30,609=74,675; Others = residual against KBA's own 268,068 total (Sonstige/other fuels).
+      "Germany": [78609,30609,74675,1878,50665,31632,268068],
+      // source: DGT (Direccion General de Trafico) registration microdata, processed by IEA (Instituto de Estudios de Automocion) for GANVAM -- Spain's official traffic authority via industry-association bulletin, published early in the following month, ahead of ACEA. BEV=10,722 (pure BEV, E-REV's 171 units folded into the PHEV subtotal per the source's own "Hibrido Enchufable (PHEV)"=14,507 line, which already includes it); HEV=47,636 (Hibrido Gasolina+Diesel combined); Others=4,084 GLP.
+      "Spain": [10722,14507,47636,4084,22193,2807,101949],
+      // source: ACAP (Associacao Automovel de Portugal) monthly press release -- Portugal's official industry association, published within days of month-end, ahead of ACEA. Ligeiros de passageiros (light passenger vehicles) only. Others=1,482, an unitemized residual (likely GPL/other) against ACAP's own 18,157 total -- the individually-cited BEV/PHEV/HEV/Petrol/Diesel figures only summed to 16,675.
+      "Portugal": [5603,3210,4206,1482,3021,635,18157],
+      // source: SMMT (Society of Motor Manufacturers and Traders) monthly release -- the UK's official industry body, published a few days into the following month, ahead of ACEA (not an EU/ACEA market anyway post-Brexit, but grouped with this region on this site). Absolute units derived from SMMT's stated percentages x its stated 156,571 total (SMMT's press release itself leads with percentages, not a full unit-level fuel table); Others is the small residual left after that scaling.
+      "United Kingdom": [43057,23329,20667,157,62785,6576,156571],
+      // source: UNRAE (Unione Nazionale Rappresentanti Autoveicoli Esteri) monthly bulletin, via press (Quattroruote) -- Italy's official importers' association, published in the first days of the following month, ahead of ACEA. Absolute units derived from UNRAE's stated percentages x its stated 123,184 total; Others=GPL (Italy has a genuinely large LPG passenger-car segment, ~10.6% this month).
+      "Italy": [7268,13058,58512,13057,23405,7884,123184],
+      // source: RDC registration data, analysed by RAI Vereniging and BOVAG (bovag.nl/mijn.bovag.nl) -- the Dutch industry bodies' monthly release, published in the first days of the following month, ahead of ACEA. Hybrid (12,342) not split into PHEV/HEV by the source, folded into hev with phev=0. Petrol/Diesel/LPG make up the small remainder (2,457 units) undifferentiated by the source for this month -- split ~90/6/4 as a rough estimate based on August's own reported split, flagged as such rather than a directly-cited figure.
+      "Netherlands": [13267,0,12342,107,2200,150,28066],
       "Georgia": [1735,104,5139,642,11758,850,20228],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month, from the "VENTAS DE VEHÍCULOS POR TIPO DE ENERGÍA" table in AEADE's monthly press bulletin; Hibrido = MHEV+HEV+PHEV+EREV combined (AEADE's bulletin gives one Hibrido figure, PHEV folded in)
       "Ecuador": [910,0,3091,0,6616,4195,14812],
