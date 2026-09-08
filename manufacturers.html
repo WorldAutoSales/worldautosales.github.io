@@ -103,9 +103,28 @@
 
       <section class="card chart-card">
         <div class="chart-header-row">
+          <h2>Toyota Canada (TCI) — total sales &amp; electrification</h2>
+        </div>
+        <p class="note">Source: Toyota Canada Inc. (TCI) Newsroom press releases (media.toyota.ca) — a real total-market figure, unlike the iZEV chart below. TCI only ever reports Toyota+Lexus <strong>combined</strong>, never Toyota alone. Before 2023, TCI didn't disclose a Zero-Emission Vehicle (ZEV) figure at all, so "Electrified" (green+blue below) is shown as a single HEV bucket even though a small, growing BEV/PHEV share (RAV4 Prime from 2020-21, bZ4X from 2022) is folded in. 2023-2025 separate a combined ZEV (BEV+PHEV+FCEV, shown as the "BEV" segment) from HEV, but still don't split BEV from PHEV. Only 2026 (Jan-Jun, from the Q1/Q2 releases) has genuine separate BEV and PHEV figures.</p>
+        <div class="mfr-controls">
+          <label for="tci-year-select">Year</label>
+          <select id="tci-year-select"></select>
+          <span id="tci-year-note" class="mfr-year-total"></span>
+        </div>
+        <div class="rank-rows-header">
+          <span class="rrh-spacer"></span>
+          <span class="rrh-total">Electrified %</span>
+          <span class="rrh-total">Total</span>
+        </div>
+        <div class="rank-rows" id="tci-rank-rows"></div>
+        <div class="tooltip" id="tci-tooltip"></div>
+      </section>
+
+      <section class="card chart-card">
+        <div class="chart-header-row">
           <h2>Canada — EV registrations by brand</h2>
         </div>
-        <p class="note">Source: Transport Canada's iZEV incentive program (open.canada.ca) — this counts <strong>rebate claims</strong> for battery-electric and plug-in hybrid vehicles, not total registrations. Canada doesn't publish a free per-brand Petrol/Diesel/HEV breakdown, so there's no total-market denominator here and no "% of sales" figure — this chart ranks brands purely by BEV+PHEV volume, a different kind of measurement than the Germany chart above.</p>
+        <p class="note">Source: Transport Canada's iZEV incentive program (open.canada.ca) — this counts <strong>rebate claims</strong> for battery-electric and plug-in hybrid vehicles, not total registrations. Canada doesn't publish a free per-brand Petrol/Diesel/HEV breakdown, so there's no total-market denominator here and no "% of sales" figure — this chart ranks brands purely by BEV+PHEV volume, a different kind of measurement than the Germany and Toyota TCI charts above. Toyota/Lexus are excluded here since Toyota Canada's own real sales figures (above) replace this claims-based estimate for that brand.</p>
         <div class="mfr-controls">
           <label for="ca-year-select">Year</label>
           <select id="ca-year-select"></select>
@@ -221,11 +240,44 @@ function wireTooltip(container, tooltipEl, cardEl){
   wireTooltip(rows, document.getElementById('de-tooltip'), rows.closest('.card'));
 })();
 
-// --- Canada ---
+// --- Toyota Canada (TCI) ---
+(function(){
+  const yearSelect = document.getElementById('tci-year-select');
+  const rows = document.getElementById('tci-rank-rows');
+  const noteEl = document.getElementById('tci-year-note');
+  const data = MANUFACTURER_YEARLY.Canada.filter(r => r.brand === 'Toyota (TCI: Toyota+Lexus combined)');
+  const years = [...new Set(data.map(r => r.year))].sort((a,b) => b - a);
+  const latestYear = years[0];
+  yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}${y === latestYear ? ' (H1)' : ''}</option>`).join('');
+  yearSelect.value = latestYear;
+
+  const TCI_FUEL_KEYS = ['bev','phev','hev','petrol'];
+  function render(){
+    const year = +yearSelect.value;
+    const row = data.find(r => r.year === year);
+    if(!row) return;
+    const electrifiedPct = (row.bev+row.phev+row.hev) / row.total * 100;
+    noteEl.textContent = year === latestYear ? 'Jan-Jun 2026 only (H1), not a full year' : '';
+    rows.innerHTML = `
+      <div class="rank-row" data-brand="Toyota (TCI)">
+        <div class="country-label">Toyota (TCI)</div>
+        <div class="bar-track">
+          ${TCI_FUEL_KEYS.map(k => segHTML(row, k)).join('')}
+        </div>
+        <div class="pct-label" style="color:${FUEL_COLORS.bev}">${electrifiedPct.toFixed(1)}%</div>
+        <div class="total-label">${row.total.toLocaleString('en-US')}</div>
+      </div>`;
+  }
+  yearSelect.addEventListener('change', render);
+  render();
+  wireTooltip(rows, document.getElementById('tci-tooltip'), rows.closest('.card'));
+})();
+
+// --- Canada (iZEV, excludes Toyota which now has real TCI figures above) ---
 (function(){
   const yearSelect = document.getElementById('ca-year-select');
   const rows = document.getElementById('ca-rank-rows');
-  const data = MANUFACTURER_YEARLY.Canada;
+  const data = MANUFACTURER_YEARLY.Canada.filter(r => r.brand !== 'Toyota (TCI: Toyota+Lexus combined)');
   const years = [...new Set(data.map(r => r.year))].sort((a,b) => b - a);
   yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
   yearSelect.value = years[0];
