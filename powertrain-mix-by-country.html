@@ -296,7 +296,7 @@ const MONTHLY_DATA = {
       // source: UNRAE monthly bulletin via press -- see July comment for methodology. BEV=4,486 is UNRAE's own directly-cited figure (not percentage-derived, unlike the other categories this month); Others=GPL/metano residual against UNRAE's own 69,411 total.
       "Italy": [4486,8399,32346,6133,14021,4026,69411],
       // source: RDC/RAI Vereniging/BOVAG -- see July comment for methodology. Petrol (1,613) is the source's own directly-cited figure; Diesel and LPG were each reported as "under 1% of the market" without an exact split, shown here as an even 289/289 estimate.
-      "Netherlands": [12925,0,11339,289,1613,289,26455],
+      "Netherlands": [12925,5001,6338,289,1613,289,26455],
       // source: Vahan Dashboard, India (monthly)
       "India": [26314,4,31248,86452,141993,60109,346120],
       // source: TS/KOTSA new-registration API, South Korea (monthly) — PHEV folded into HEV
@@ -341,8 +341,8 @@ const MONTHLY_DATA = {
       "United Kingdom": [43057,23329,20667,157,62785,6576,156571],
       // source: UNRAE (Unione Nazionale Rappresentanti Autoveicoli Esteri) monthly bulletin, via press (Quattroruote) -- Italy's official importers' association, published in the first days of the following month, ahead of ACEA. Absolute units derived from UNRAE's stated percentages x its stated 123,184 total; Others=GPL (Italy has a genuinely large LPG passenger-car segment, ~10.6% this month).
       "Italy": [7268,13058,58512,13057,23405,7884,123184],
-      // source: RDC registration data, analysed by RAI Vereniging and BOVAG (bovag.nl/mijn.bovag.nl) -- the Dutch industry bodies' monthly release, published in the first days of the following month, ahead of ACEA. Hybrid (12,342) not split into PHEV/HEV by the source, folded into hev with phev=0. Petrol/Diesel/LPG make up the small remainder (2,457 units) undifferentiated by the source for this month -- split ~90/6/4 as a rough estimate based on August's own reported split, flagged as such rather than a directly-cited figure.
-      "Netherlands": [13267,0,12342,107,2200,150,28066],
+      // source: RDC registration data, analysed by RAI Vereniging and BOVAG (bovag.nl/mijn.bovag.nl) -- the Dutch industry bodies' monthly release, published in the first days of the following month, ahead of ACEA. Hybrid (12,342) not split into PHEV/HEV by any national-source press release found for this month, so it is split using the ~44.1%/55.9% PHEV/HEV ratio computed from the Netherlands' own real, ACEA-sourced Jan-Jun 2026 monthly data already in this dataset (42,165 PHEV / 53,445 HEV over those 6 months) -- flagged as an estimate, not a directly-cited split. (An earlier version of this row used phev=0, which was wrong: this country genuinely has a large PHEV share, confirmed by its own Jan-Jun figures, corrected 2026-09-07.) Petrol/Diesel/LPG make up the small remainder (2,457 units) undifferentiated by the source for this month -- split ~90/6/4 as a rough estimate based on August's own reported split, flagged as such rather than a directly-cited figure.
+      "Netherlands": [13267,5443,6899,107,2200,150,28066],
       "Georgia": [1735,104,5139,642,11758,850,20228],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month, from the "VENTAS DE VEHÍCULOS POR TIPO DE ENERGÍA" table in AEADE's monthly press bulletin; Hibrido = MHEV+HEV+PHEV+EREV combined (AEADE's bulletin gives one Hibrido figure, PHEV folded in)
       "Ecuador": [910,0,3091,0,6616,4195,14812],
@@ -1139,7 +1139,7 @@ const MONTHLY_DATA = {
       "Lithuania": [1852,2914,12652,446,3793,2454,24111],
       "Luxembourg": [7745,1530,8908,0,6140,2186,26509],
       "Malta": [1051,219,1141,0,1091,170,3671],
-      "Netherlands": [90512,42165,77126,1042,17953,2551,231349],
+      "Netherlands": [90512,52609,66682,1042,17953,2551,231349],
       "Norway": [71654,486,482,0,127,647,73396],
       "Poland": [16557,26603,154745,8038,87287,18803,312033],
       "Portugal": [45388,25306,45980,9987,36381,6281,169323],
@@ -1317,7 +1317,7 @@ const MONTHLY_DATA = {
       "Luxembourg": [16473, 3176, 18288, 0, 12458, 4372, 54767],
       "Malta": [2381, 505, 2395, 0, 2182, 378, 7841],
       "Mexico": [29135, 34368, 135329, 0, 1327928, 0, 1526760],
-      "Netherlands": [148444,63247,123173,1829,26929,3827,367449],
+      "Netherlands": [148444,78913,100023,1829,26929,3827,359965],
       "New Zealand": [20882, 11887, 34527, 1487, 31099, 6573, 106455],
       "Norway": [161728, 1080, 1372, 0, 299, 1359, 165838],
       "Philippines": [17959, 12161, 35513, 0, 348753, 0, 414386],
