@@ -342,7 +342,9 @@ const MONTHLY_DATA = {
       // source: Mobility Sweden (monthly) — from the official Manadsrapport Nyregistreringar Excel's PB - Drivmedel sheet; others = Etanol+Gas+Ospec.
       "Sweden": [10069,4988,2024,69,4270,1164,22584],
       // source: Mobility Denmark press release (monthly) — gives only Total and BEV (elbiler) exactly; no PHEV/HEV/Petrol/Diesel breakdown published, so the 2,278-unit non-BEV remainder is placed in Petrol per this project's established convention (see Russia) rather than fabricating a split
-      "Denmark": [13887,0,0,0,2278,0,16165]},
+      "Denmark": [13887,0,0,0,2278,0,16165],
+      // source: SIMI (Society of the Irish Motor Industry), Ireland (monthly) — Total and BEV are SIMI's own exact published figures; HEV/PHEV/Petrol/Diesel/Others are DERIVED (SIMI's release only gives YTD market-share %, not month-only): this month's split = (YTD-through-Aug % x YTD-through-Aug total) minus (YTD-through-Jul % x YTD-through-Jul total) per category, rescaled to sum exactly to this month's real total
+      "Ireland": [2265,1618,1365,234,1222,1107,7811]},
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY %
     priorYearBev: {
       "India": 20204, "South Korea": 23315,
@@ -424,7 +426,9 @@ const MONTHLY_DATA = {
       // source: Mobility Sweden (monthly) — from the official Manadsrapport Nyregistreringar Excel's PB - Drivmedel sheet; others = Etanol+Gas+Ospec.
       "Sweden": [7967,4448,1333,50,3507,1379,18684],
       // source: Mobility Denmark press release (monthly) — gives only Total and BEV (elbiler) exactly; no PHEV/HEV/Petrol/Diesel breakdown published, so the 2,890-unit non-BEV remainder is placed in Petrol per this project's established convention (see Russia) rather than fabricating a split
-      "Denmark": [11672,0,0,0,2890,0,14562]},
+      "Denmark": [11672,0,0,0,2890,0,14562],
+      // source: SIMI (Society of the Irish Motor Industry), Ireland (monthly) — Total and BEV are SIMI's own exact published figures; HEV/PHEV/Petrol/Diesel/Others are DERIVED (SIMI's release only gives YTD market-share %, not month-only): this month's split = (YTD-through-Jul % x YTD-through-Jul total) minus (YTD-through-Jun % x YTD-through-Jun total) per category, rescaled to sum exactly to this month's real total
+      "Ireland": [9682,4401,6034,326,5346,3257,29046]},
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY % (Argentina, China,
     // Indonesia, Australia, Singapore omitted — no matching July 2025 monthly figure sourced for those five)
     priorYearBev: {
@@ -1154,7 +1158,7 @@ const MONTHLY_DATA = {
       "Greece": [5286,5199,47557,2533,21328,2094,83997],
       "Hungary": [7493,6066,38433,392,15397,7124,74905],
       "Iceland": [3180,1602,1838,0,468,414,7502],
-      "Ireland": [20179,12536,23616,0,17941,10964,85236],
+      "Ireland": [32126,18555,31015,560,24509,15328,122093],
       "Italy": [79427,84718,462718,59360,185002,64812,936037],
       "Latvia": [839,1214,0,297,7640,1356,11346],
       "Lithuania": [1852,2914,12652,446,3793,2454,24111],
@@ -1235,7 +1239,7 @@ const MONTHLY_DATA = {
       "Austria":"through Jun 2026","Belgium":"through Jun 2026","Bulgaria":"through Jun 2026","Croatia":"through Jun 2026",
       "Cyprus":"through Jun 2026","Czechia":"through Jun 2026","Denmark":"through Aug 2026","Estonia":"through Jun 2026",
       "Finland":"through Jun 2026","France":"through Jun 2026","Germany":"through Jun 2026","Greece":"through Jun 2026",
-      "Hungary":"through Jun 2026","Iceland":"through Jun 2026","Ireland":"through Jun 2026","Italy":"through Jun 2026",
+      "Hungary":"through Jun 2026","Iceland":"through Jun 2026","Ireland":"through Aug 2026","Italy":"through Jun 2026",
       "Latvia":"through Jun 2026","Lithuania":"through Jun 2026","Luxembourg":"through Jun 2026","Malta":"through Jun 2026",
       "Netherlands":"through Jun 2026","Norway":"through Aug 2026","Poland":"through Jun 2026","Portugal":"through Jun 2026",
       "Romania":"through Jun 2026","Slovakia":"through Jun 2026","Slovenia":"through Jun 2026","Spain":"through Jun 2026",
@@ -1325,7 +1329,7 @@ const MONTHLY_DATA = {
       "Greece": [11270, 10967, 102795, 5971, 46872, 4492, 182367],
       "Hungary": [16093, 13364, 76866, 1002, 31791, 14834, 153950],
       "Iceland": [7296, 3204, 3676, 0, 1136, 952, 16264],
-      "Ireland": [40358, 25072, 47232, 0, 35882, 21928, 170472],
+      "Ireland": [49547, 27833, 46523, 1307, 36763, 22992, 184965],
       "Italy": [162111, 174186, 925436, 124304, 370004, 129624, 1885665],
       "Japan": [113163, 45887, 1649477, 430, 793252, 115992, 2718201],
       "Latvia": [1871, 2668, 0, 631, 16066, 2816, 24052],
