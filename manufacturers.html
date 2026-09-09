@@ -122,6 +122,25 @@
 
       <section class="card chart-card">
         <div class="chart-header-row">
+          <h2>Hyundai &amp; Kia Canada — real sales &amp; BEV</h2>
+        </div>
+        <p class="note">Total = GoodCarBadCar (goodcarbadcar.net), real Canada brand sales, cross-checked against Hyundai/Kia's own newsroom press releases where available. BEV = sum of the model-specific BEV nameplates GCBC tracks for Canada (Hyundai: IONIQ 5 only; Kia: EV6+EV9) — this understates true BEV volume, since Hyundai Kona Electric (mixed nameplate with the gas Kona, can't be isolated from GCBC's combined Kona page) and Hyundai IONIQ 6/IONIQ 9 (no Canada-specific GCBC tracking found) are real BEV sales not captured here. The grey "Rest of lineup" segment is a catch-all (Total minus BEV) — it is not a real petrol-only figure, it also contains HEV, PHEV, and the uncaptured BEV models above. Replaces this project's earlier iZEV-rebate-claims-based figures for these two brands, same reasoning as the Toyota Canada (TCI) chart above.</p>
+        <div class="mfr-controls">
+          <label for="hk-year-select">Year</label>
+          <select id="hk-year-select"></select>
+          <span id="hk-year-note" class="mfr-year-total"></span>
+        </div>
+        <div class="rank-rows-header">
+          <span class="rrh-spacer"></span>
+          <span class="rrh-total">BEV %</span>
+          <span class="rrh-total">Total</span>
+        </div>
+        <div class="rank-rows" id="hk-rank-rows"></div>
+        <div class="tooltip" id="hk-tooltip"></div>
+      </section>
+
+      <section class="card chart-card">
+        <div class="chart-header-row">
           <h2>Canada — EV registrations by brand</h2>
         </div>
         <p class="note">Source: Transport Canada's iZEV incentive program (open.canada.ca) — this counts <strong>rebate claims</strong> for battery-electric and plug-in hybrid vehicles, not total registrations. Canada doesn't publish a free per-brand Petrol/Diesel/HEV breakdown, so there's no total-market denominator here and no "% of sales" figure — this chart ranks brands purely by BEV+PHEV volume, a different kind of measurement than the Germany and Toyota TCI charts above. Toyota/Lexus are excluded here since Toyota Canada's own real sales figures (above) replace this claims-based estimate for that brand.</p>
@@ -299,11 +318,45 @@ function wireTooltip(container, tooltipEl, cardEl){
   wireTooltip(rows, document.getElementById('tci-tooltip'), rows.closest('.card'));
 })();
 
-// --- Canada (iZEV, excludes Toyota which now has real TCI figures above) ---
+// --- Hyundai & Kia Canada (real sales, replaces iZEV claims for these 2 brands) ---
+(function(){
+  const yearSelect = document.getElementById('hk-year-select');
+  const rows = document.getElementById('hk-rank-rows');
+  const noteEl = document.getElementById('hk-year-note');
+  const data = MANUFACTURER_YEARLY.Canada.filter(r => r.brand === 'Hyundai' || r.brand === 'Kia');
+  const years = [...new Set(data.map(r => r.year))].sort((a,b) => b - a);
+  const latestYear = years[0];
+  yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}${y === latestYear ? ' (Jan-Aug)' : ''}</option>`).join('');
+  yearSelect.value = latestYear;
+
+  const HK_FUEL_KEYS = ['bev','petrol']; // petrol here = "rest of lineup" catch-all, see note above
+  function render(){
+    const year = +yearSelect.value;
+    const yearRows = data.filter(r => r.year === year).sort((a,b) => b.total - a.total);
+    noteEl.textContent = year === latestYear ? 'Jan-Aug 2026 only, not a full year' : '';
+    rows.innerHTML = yearRows.map(row => {
+      const bevPct = row.bev / row.total * 100;
+      return `
+      <div class="rank-row" data-brand="${row.brand}">
+        <div class="country-label">${row.brand}</div>
+        <div class="bar-track">
+          ${HK_FUEL_KEYS.map(k => segHTML(row, k)).join('')}
+        </div>
+        <div class="pct-label" style="color:${FUEL_COLORS.bev}">${bevPct.toFixed(1)}%</div>
+        <div class="total-label">${row.total.toLocaleString('en-US')}</div>
+      </div>`;
+    }).join('');
+  }
+  yearSelect.addEventListener('change', render);
+  render();
+  wireTooltip(rows, document.getElementById('hk-tooltip'), rows.closest('.card'));
+})();
+
+// --- Canada (iZEV, excludes Toyota/Hyundai/Kia which now have real sales figures above) ---
 (function(){
   const yearSelect = document.getElementById('ca-year-select');
   const rows = document.getElementById('ca-rank-rows');
-  const data = MANUFACTURER_YEARLY.Canada.filter(r => r.brand !== 'Toyota (TCI: Toyota+Lexus combined)');
+  const data = MANUFACTURER_YEARLY.Canada.filter(r => r.brand !== 'Toyota (TCI: Toyota+Lexus combined)' && r.brand !== 'Hyundai' && r.brand !== 'Kia');
   const years = [...new Set(data.map(r => r.year))].sort((a,b) => b - a);
   yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
   yearSelect.value = years[0];
