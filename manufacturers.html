@@ -141,9 +141,28 @@
 
       <section class="card chart-card">
         <div class="chart-header-row">
+          <h2>GM Canada — real sales &amp; BEV</h2>
+        </div>
+        <p class="note">Chevrolet, Cadillac, Buick and GMC, each shown separately. Total and per-model BEV figures are from GM Authority's (gmauthority.com) quarterly GM Canada sales reports, which reconcile exactly to GM Canada's own official press-release totals (e.g. full-year 2025 = 299,813 units). BEV = sum of every current battery-electric nameplate GM Authority tracks by brand: Chevrolet Bolt EV + Blazer EV + Equinox EV + Silverado EV; Cadillac LYRIQ + OPTIQ + VISTIQ + Escalade IQ/IQL; GMC Hummer EV Pickup/SUV + Sierra EV. Buick has no BEV model on sale in Canada. The grey "Rest of lineup" segment is a catch-all (Total minus BEV) — it is not a real petrol-only figure, it also contains any HEV/PHEV volume (Chevrolet's Volt PHEV, 2019-2021, is tracked separately and folded into this brand's earlier years). Replaces this project's earlier iZEV-rebate-claims-based figures for these four brands, same reasoning as the Toyota Canada (TCI) and Hyundai &amp; Kia charts above.</p>
+        <div class="mfr-controls">
+          <label for="gm-year-select">Year</label>
+          <select id="gm-year-select"></select>
+          <span id="gm-year-note" class="mfr-year-total"></span>
+        </div>
+        <div class="rank-rows-header">
+          <span class="rrh-spacer"></span>
+          <span class="rrh-total">BEV %</span>
+          <span class="rrh-total">Total</span>
+        </div>
+        <div class="rank-rows" id="gm-rank-rows"></div>
+        <div class="tooltip" id="gm-tooltip"></div>
+      </section>
+
+      <section class="card chart-card">
+        <div class="chart-header-row">
           <h2>Canada — EV registrations by brand</h2>
         </div>
-        <p class="note">Source: Transport Canada's iZEV incentive program (open.canada.ca) — this counts <strong>rebate claims</strong> for battery-electric and plug-in hybrid vehicles, not total registrations. Canada doesn't publish a free per-brand Petrol/Diesel/HEV breakdown, so there's no total-market denominator here and no "% of sales" figure — this chart ranks brands purely by BEV+PHEV volume, a different kind of measurement than the Germany and Toyota TCI charts above. Toyota/Lexus are excluded here since Toyota Canada's own real sales figures (above) replace this claims-based estimate for that brand.</p>
+        <p class="note">Source: Transport Canada's iZEV incentive program (open.canada.ca) — this counts <strong>rebate claims</strong> for battery-electric and plug-in hybrid vehicles, not total registrations. Canada doesn't publish a free per-brand Petrol/Diesel/HEV breakdown, so there's no total-market denominator here and no "% of sales" figure — this chart ranks brands purely by BEV+PHEV volume, a different kind of measurement than the Germany and Toyota TCI charts above. Toyota/Lexus, Hyundai/Kia, and GM's four brands are excluded here since their own real sales figures (above) replace this claims-based estimate.</p>
         <div class="mfr-controls">
           <label for="ca-year-select">Year</label>
           <select id="ca-year-select"></select>
@@ -352,11 +371,47 @@ function wireTooltip(container, tooltipEl, cardEl){
   wireTooltip(rows, document.getElementById('hk-tooltip'), rows.closest('.card'));
 })();
 
-// --- Canada (iZEV, excludes Toyota/Hyundai/Kia which now have real sales figures above) ---
+// --- GM Canada (real sales, replaces iZEV claims for these 4 brands) ---
+(function(){
+  const yearSelect = document.getElementById('gm-year-select');
+  const rows = document.getElementById('gm-rank-rows');
+  const noteEl = document.getElementById('gm-year-note');
+  const GM_BRANDS = ['Chevrolet', 'Cadillac', 'Buick', 'GMC'];
+  const data = MANUFACTURER_YEARLY.Canada.filter(r => GM_BRANDS.includes(r.brand));
+  const years = [...new Set(data.map(r => r.year))].sort((a,b) => b - a);
+  const latestYear = years[0];
+  yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}${y === latestYear ? ' (Jan-Jun)' : ''}</option>`).join('');
+  yearSelect.value = latestYear;
+
+  const GM_FUEL_KEYS = ['bev','petrol']; // petrol here = "rest of lineup" catch-all, see note above
+  function render(){
+    const year = +yearSelect.value;
+    const yearRows = data.filter(r => r.year === year).sort((a,b) => b.total - a.total);
+    noteEl.textContent = year === latestYear ? 'Jan-Jun 2026 only (H1), not a full year' : '';
+    rows.innerHTML = yearRows.map(row => {
+      const bevPct = row.bev / row.total * 100;
+      return `
+      <div class="rank-row" data-brand="${row.brand}">
+        <div class="country-label">${row.brand}</div>
+        <div class="bar-track">
+          ${GM_FUEL_KEYS.map(k => segHTML(row, k)).join('')}
+        </div>
+        <div class="pct-label" style="color:${FUEL_COLORS.bev}">${bevPct.toFixed(1)}%</div>
+        <div class="total-label">${row.total.toLocaleString('en-US')}</div>
+      </div>`;
+    }).join('');
+  }
+  yearSelect.addEventListener('change', render);
+  render();
+  wireTooltip(rows, document.getElementById('gm-tooltip'), rows.closest('.card'));
+})();
+
+// --- Canada (iZEV, excludes Toyota/Hyundai/Kia/GM's 4 brands which now have real sales figures above) ---
 (function(){
   const yearSelect = document.getElementById('ca-year-select');
   const rows = document.getElementById('ca-rank-rows');
-  const data = MANUFACTURER_YEARLY.Canada.filter(r => r.brand !== 'Toyota (TCI: Toyota+Lexus combined)' && r.brand !== 'Hyundai' && r.brand !== 'Kia');
+  const EXCLUDED = ['Toyota (TCI: Toyota+Lexus combined)', 'Hyundai', 'Kia', 'Chevrolet', 'Cadillac', 'Buick', 'GMC'];
+  const data = MANUFACTURER_YEARLY.Canada.filter(r => !EXCLUDED.includes(r.brand));
   const years = [...new Set(data.map(r => r.year))].sort((a,b) => b - a);
   yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
   yearSelect.value = years[0];
