@@ -137,6 +137,32 @@
         <div class="tooltip" id="ca-tooltip"></div>
       </section>
 
+      <section class="card chart-card">
+        <div class="chart-header-row">
+          <h2>BEV by brand — confirmed floor, not exhaustive</h2>
+        </div>
+        <p class="note">These 4 markets (Netherlands, Italy, Ireland, Czechia) publish real per-model unit counts by national registration authority, but <strong>no fuel-type column</strong> — so BEV here is a conservative estimate: a brand's units only count as BEV when the model NAME itself is unambiguous (e.g. Tesla, VW ID.*, Skoda Enyaq/Elroq, Kia EV3/6/9, BMW/Mini i-prefix). Models sold under the <strong>same name</strong> in both a combustion/hybrid AND a battery-electric version (e.g. Hyundai Kona, Kia Niro, Volvo XC40) can't be split this way and are left in "Unclassified" rather than guessed — so the true per-brand BEV share is <strong>higher</strong> than shown here, sometimes substantially. Cross-checked against each country's real official BEV total (ACEA) as a ceiling: this method typically captures 65-82% of it in the Netherlands/Ireland/Czechia, but only 14-32% in Italy for 2023-2025 (its source groups powertrains much more coarsely) rising to 67% by 2026.</p>
+        <div class="mfr-controls">
+          <label for="floor-country-select">Country</label>
+          <select id="floor-country-select">
+            <option value="Netherlands">Netherlands</option>
+            <option value="Ireland">Ireland</option>
+            <option value="Czechia">Czechia</option>
+            <option value="Italy">Italy</option>
+          </select>
+          <label for="floor-year-select" style="margin-left:12px;">Year</label>
+          <select id="floor-year-select"></select>
+          <span id="floor-year-note" class="mfr-year-total"></span>
+        </div>
+        <div class="rank-rows-header">
+          <span class="rrh-spacer"></span>
+          <span class="rrh-total">BEV floor %</span>
+          <span class="rrh-total">Total</span>
+        </div>
+        <div class="rank-rows" id="floor-rank-rows"></div>
+        <div class="tooltip" id="floor-tooltip"></div>
+      </section>
+
       <footer class="page-footer">
         Data sourced from the World_auto_sales Supabase project. More markets will be added here as free, official per-brand powertrain data is found for them — see the <a href="powertrain-mix-by-country.html">Mix by Country</a> page for the full country-level picture in the meantime.
       </footer>
@@ -303,6 +329,69 @@ function wireTooltip(container, tooltipEl, cardEl){
   yearSelect.addEventListener('change', render);
   render();
   wireTooltip(rows, document.getElementById('ca-tooltip'), rows.closest('.card'));
+})();
+
+// --- BEV-by-brand confirmed floor (Netherlands / Italy / Ireland / Czechia) ---
+(function(){
+  const countrySelect = document.getElementById('floor-country-select');
+  const yearSelect = document.getElementById('floor-year-select');
+  const noteEl = document.getElementById('floor-year-note');
+  const rows = document.getElementById('floor-rank-rows');
+  const UNCLASSIFIED_COLOR = '#9ca3af';
+
+  function currentData(){
+    return MANUFACTURER_YEARLY[countrySelect.value] || [];
+  }
+  function populateYears(){
+    const years = [...new Set(currentData().map(r => r.year))].sort((a,b) => b - a);
+    yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
+    if(years.length) yearSelect.value = years[0];
+  }
+  function floorSegHTML(brand, key, units, total, color){
+    if(!(units > 0) || !(total > 0)) return '';
+    const pct = units / total * 100;
+    const showLabel = pct >= 8;
+    return `<div class="bar-seg" style="width:${pct}%; background:${color}" data-brand="${brand}" data-key="${key}" data-units="${units}" data-pct="${pct.toFixed(1)}">${showLabel ? `<span class="seg-label">${pct.toFixed(0)}%</span>` : ''}</div>`;
+  }
+  function render(){
+    const year = +yearSelect.value;
+    const yearRows = currentData().filter(r => r.year === year);
+    const top20 = [...yearRows].sort((a,b) => b.total - a.total).slice(0,20);
+    const countryTotal = yearRows.reduce((s,r) => s+r.total, 0);
+    const countryBev = yearRows.reduce((s,r) => s+r.bev, 0);
+    noteEl.textContent = `${countryBev.toLocaleString('en-US')} confirmed BEV of ${countryTotal.toLocaleString('en-US')} total (${(countryBev/countryTotal*100).toFixed(1)}% floor -- real share is higher)`;
+    rows.innerHTML = top20.map(row => {
+      const unclassified = row.total - row.bev;
+      const bevPct = row.bev / row.total * 100;
+      return `
+      <div class="rank-row" data-brand="${row.brand}">
+        <div class="country-label">${row.brand}</div>
+        <div class="bar-track">
+          ${floorSegHTML(row.brand, 'bev', row.bev, row.total, FUEL_COLORS.bev)}
+          ${floorSegHTML(row.brand, 'unclassified', unclassified, row.total, UNCLASSIFIED_COLOR)}
+        </div>
+        <div class="pct-label" style="color:${FUEL_COLORS.bev}">${bevPct.toFixed(1)}%</div>
+        <div class="total-label">${row.total.toLocaleString('en-US')}</div>
+      </div>`;
+    }).join('');
+  }
+  countrySelect.addEventListener('change', () => { populateYears(); render(); });
+  yearSelect.addEventListener('change', render);
+  populateYears();
+  render();
+
+  rows.addEventListener('pointermove', e => {
+    const seg = e.target.closest('.bar-seg');
+    const tooltipEl = document.getElementById('floor-tooltip');
+    if(!seg){ tooltipEl.style.opacity = 0; return; }
+    const rect = rows.closest('.card').getBoundingClientRect();
+    tooltipEl.style.left = (e.clientX - rect.left) + 'px';
+    tooltipEl.style.top = (e.clientY - rect.top - 10) + 'px';
+    tooltipEl.style.opacity = 1;
+    const label = seg.dataset.key === 'bev' ? 'Confirmed BEV' : 'Unclassified (mixed ICE/HEV/PHEV + unattributed BEV)';
+    tooltipEl.innerHTML = `${seg.dataset.brand} — ${label}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)`;
+  });
+  rows.addEventListener('pointerleave', () => { document.getElementById('floor-tooltip').style.opacity = 0; });
 })();
 </script>
 </body>
