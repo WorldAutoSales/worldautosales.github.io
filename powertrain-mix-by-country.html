@@ -256,12 +256,12 @@
           <div class="momentum-grid" id="momentum-grid"></div>
         </div>
 
-        <div class="card chart-card" id="mfr-section">
+        <div class="card chart-card hidden" id="mfr-section">
           <div class="chart-header-row">
-            <h2>Sales by Manufacturers — Germany (KBA)</h2>
+            <h2 id="mfr-title">Sales by Manufacturers</h2>
             <a href="manufacturers.html" class="movers-see-all">Open the full Manufacturers page →</a>
           </div>
-          <p class="note">Germany is currently the only market in this project with a genuine per-brand Petrol/Diesel/BEV/PHEV/HEV split — source: Kraftfahrt-Bundesamt (KBA), Germany's federal motor authority, "Neuzulassungen von Personenkraftwagen nach Marken und Modellreihen". Bars show each brand's total new registrations; the green segment is its BEV share of that total. Sorted by total sales, top 20 brands.</p>
+          <p class="note" id="mfr-note">Bars show each brand's total new registrations; the green segment is its BEV share of that total. Sorted by total sales, top 20 brands.</p>
           <div class="mfr-controls">
             <label for="mfr-year-select">Year</label>
             <select id="mfr-year-select"></select>
@@ -3641,6 +3641,7 @@ function recompute(){
   renderMomentum();
   renderFocusStats();
   renderElectrificationBars();
+  if(typeof renderMfrSection === 'function') renderMfrSection();
   updateURL();
 }
 
@@ -3852,20 +3853,26 @@ document.getElementById('filter-reset').addEventListener('click', () => {
   recompute();
 });
 
-// --- Sales by Manufacturers (Germany, KBA) — self-contained, only reacts to its own Year
-// selector (not the country/period sidebar filters, since this is a different dimension: brands,
-// not countries)
+// --- Sales by Manufacturers — per-brand split, only exists for a handful of countries
+// (MANUFACTURER_YEARLY's own keys) and only at annual granularity. Reacts to the main page's
+// Period and country-focus state (via renderMfrSection(), called from recompute()): hidden
+// unless the selected period is an annual one AND a single country is focused AND that country
+// has data here. Its own Year dropdown is a second, independent control once shown.
+const MFR_SOURCE_NOTE = {
+  Germany: 'source: Kraftfahrt-Bundesamt (KBA), Germany\'s federal motor authority, "Neuzulassungen von Personenkraftwagen nach Marken und Modellreihen".',
+  Canada: 'source: merged from several presses/trackers (GoodCarBadCar, Toyota Canada Inc. newsroom, Transport Canada iZEV Program, GM Authority) since Canada has no single official per-brand release.',
+};
 (function(){
   const yearSelect = document.getElementById('mfr-year-select');
   const mfrRows = document.getElementById('mfr-rank-rows');
   const mfrTooltip = document.getElementById('mfr-tooltip');
-  if(!yearSelect || !mfrRows || typeof MANUFACTURER_YEARLY === 'undefined') return;
+  const mfrSection = document.getElementById('mfr-section');
+  const mfrTitle = document.getElementById('mfr-title');
+  const mfrNote = document.getElementById('mfr-note');
+  if(!yearSelect || !mfrRows || !mfrSection || typeof MANUFACTURER_YEARLY === 'undefined') return;
 
   const MFR_FUEL_KEYS = ['bev','phev','hev','petrol','diesel'];
-  const years = [...new Set(MANUFACTURER_YEARLY.Germany.map(r => r.year))].sort((a,b) => b - a);
-  const latestYear = years[0];
-  yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}${y === latestYear ? ' (YTD)' : ''}</option>`).join('');
-  yearSelect.value = years.includes(2025) ? 2025 : latestYear;
+  let mfrCountry = null;
 
   function mfrSegHTML(row, key){
     const units = row[key];
@@ -3875,8 +3882,9 @@ document.getElementById('filter-reset').addEventListener('click', () => {
     return `<div class="bar-seg" style="width:${pct}%; background:${FUEL_COLORS[key]}" data-brand="${row.brand}" data-key="${key}" data-units="${units}" data-pct="${pct.toFixed(1)}">${showLabel ? `<span class="seg-label">${pct.toFixed(0)}%</span>` : ''}</div>`;
   }
   function renderManufacturerBars(){
+    if(!mfrCountry) return;
     const year = +yearSelect.value;
-    const top20 = MANUFACTURER_YEARLY.Germany.filter(r => r.year === year).sort((a,b) => b.total - a.total).slice(0,20);
+    const top20 = MANUFACTURER_YEARLY[mfrCountry].filter(r => r.year === year).sort((a,b) => b.total - a.total).slice(0,20);
     mfrRows.innerHTML = top20.map(row => {
       const bevPct = row.bev / row.total * 100;
       return `
@@ -3891,12 +3899,35 @@ document.getElementById('filter-reset').addEventListener('click', () => {
     }).join('');
   }
   yearSelect.addEventListener('change', renderManufacturerBars);
-  renderManufacturerBars();
+
+  // exposed globally so recompute() can call it whenever the period or country focus changes
+  window.renderMfrSection = function(){
+    const periodKey = [...selectedMonths][0];
+    const isAnnualPeriod = !!periodKey && periodKey.endsWith('-annual');
+    const hasData = focusedCountry && MANUFACTURER_YEARLY[focusedCountry];
+    if(!isAnnualPeriod || !hasData){
+      mfrSection.classList.add('hidden');
+      mfrCountry = null;
+      return;
+    }
+    mfrSection.classList.remove('hidden');
+    const countryChanged = mfrCountry !== focusedCountry;
+    mfrCountry = focusedCountry;
+    mfrTitle.textContent = `Sales by Manufacturers — ${mfrCountry}`;
+    mfrNote.textContent = `Bars show each brand's total new registrations; the green segment is its BEV share of that total. Sorted by total sales, top 20 brands. ${MFR_SOURCE_NOTE[mfrCountry] || ''}`;
+    if(countryChanged){
+      const years = [...new Set(MANUFACTURER_YEARLY[mfrCountry].map(r => r.year))].sort((a,b) => b - a);
+      const latestYear = years[0];
+      yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}${y === latestYear ? ' (YTD)' : ''}</option>`).join('');
+      yearSelect.value = years.includes(2025) ? 2025 : latestYear;
+    }
+    renderManufacturerBars();
+  };
 
   mfrRows.addEventListener('pointermove', e => {
     const seg = e.target.closest('.bar-seg');
     if(!seg){ mfrTooltip.style.opacity = 0; return; }
-    const cardRect = document.getElementById('mfr-section').getBoundingClientRect();
+    const cardRect = mfrSection.getBoundingClientRect();
     mfrTooltip.style.left = (e.clientX - cardRect.left) + 'px';
     mfrTooltip.style.top = (e.clientY - cardRect.top - 10) + 'px';
     mfrTooltip.style.opacity = 1;
