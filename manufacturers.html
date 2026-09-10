@@ -160,9 +160,47 @@
 
       <section class="card chart-card">
         <div class="chart-header-row">
+          <h2>Ford &amp; Lincoln Canada — real sales &amp; BEV</h2>
+        </div>
+        <p class="note">Total = GoodCarBadCar (goodcarbadcar.net), cross-checked against Ford of Canada's own newsroom combined total for 2025 (294,418 vs. GCBC's Ford+Lincoln sum of 293,897 — a 99.8% match). BEV = Ford Mustang Mach-E only — the sole cleanly-isolated BEV nameplate found for either brand. This significantly understates real BEV+PHEV volume: Ford's F-150 Lightning and E-Transit (both BEV) and Escape PHEV are only ever reported combined with their gas/hybrid siblings by every source checked, and Lincoln's Corsair Grand Touring and Aviator Grand Touring PHEV trims have the same problem — Lincoln shows 0% here despite having real PHEV sales. Ford's own newsroom reported 2025 "electrified" (BEV+PHEV+HEV) sales of 51,773, of which hybrid alone was 34,895 — implying BEV+PHEV combined of roughly 16,878 brand-wide, nearly double the 8,647 captured here. Replaces this project's earlier iZEV-rebate-claims-based figures for these two brands, same reasoning as the charts above.</p>
+        <div class="mfr-controls">
+          <label for="fl-year-select">Year</label>
+          <select id="fl-year-select"></select>
+          <span id="fl-year-note" class="mfr-year-total"></span>
+        </div>
+        <div class="rank-rows-header">
+          <span class="rrh-spacer"></span>
+          <span class="rrh-total">BEV %</span>
+          <span class="rrh-total">Total</span>
+        </div>
+        <div class="rank-rows" id="fl-rank-rows"></div>
+        <div class="tooltip" id="fl-tooltip"></div>
+      </section>
+
+      <section class="card chart-card">
+        <div class="chart-header-row">
+          <h2>Audi &amp; Porsche Canada — real sales &amp; BEV</h2>
+        </div>
+        <p class="note">Audi Total = GoodCarBadCar, cross-checked against Audi AG's own 2025 global release (Canada "over 37,000 units", matching GCBC's 37,201). Audi BEV = Q6 e-tron + A6 e-tron + e-tron GT only — the original e-tron SUV, Q4 e-tron and Q8 e-tron have no Canada-specific tracking in any source found, so Audi's real BEV volume is meaningfully understated, especially 2019-2023. Porsche Total &amp; BEV (Taycan) = Porsche Cars Canada's own official annual sales-results releases, the most reliable source in this whole series — GoodCarBadCar's Porsche Canada figure runs 4-10% below PCC's own numbers every year, a gap that widens over time, so PCC was used directly instead. Porsche's Cayenne/Panamera E-Hybrid PHEV volume is real but bundled into those models' combined totals, not isolatable. Skoda, Seat and Cupra are not sold in North America. Bentley and Lamborghini are not shown here: neither publishes a usable Canada brand total anywhere (Bentley's own financial reports give only global/Americas-region figures; Lamborghini Canada has confirmed it does not release model or regional sales data), so no defensible total-based chart could be built for either — this is a real gap in what's publicly available, not an oversight.</p>
+        <div class="mfr-controls">
+          <label for="ap-year-select">Year</label>
+          <select id="ap-year-select"></select>
+          <span id="ap-year-note" class="mfr-year-total"></span>
+        </div>
+        <div class="rank-rows-header">
+          <span class="rrh-spacer"></span>
+          <span class="rrh-total">BEV %</span>
+          <span class="rrh-total">Total</span>
+        </div>
+        <div class="rank-rows" id="ap-rank-rows"></div>
+        <div class="tooltip" id="ap-tooltip"></div>
+      </section>
+
+      <section class="card chart-card">
+        <div class="chart-header-row">
           <h2>Canada — EV registrations by brand</h2>
         </div>
-        <p class="note">Source: Transport Canada's iZEV incentive program (open.canada.ca) — this counts <strong>rebate claims</strong> for battery-electric and plug-in hybrid vehicles, not total registrations. Canada doesn't publish a free per-brand Petrol/Diesel/HEV breakdown, so there's no total-market denominator here and no "% of sales" figure — this chart ranks brands purely by BEV+PHEV volume, a different kind of measurement than the Germany and Toyota TCI charts above. Toyota/Lexus, Hyundai/Kia, and GM's four brands are excluded here since their own real sales figures (above) replace this claims-based estimate.</p>
+        <p class="note">Source: Transport Canada's iZEV incentive program (open.canada.ca) — this counts <strong>rebate claims</strong> for battery-electric and plug-in hybrid vehicles, not total registrations. Canada doesn't publish a free per-brand Petrol/Diesel/HEV breakdown, so there's no total-market denominator here and no "% of sales" figure — this chart ranks brands purely by BEV+PHEV volume, a different kind of measurement than the Germany and Toyota TCI charts above. Toyota/Lexus, Hyundai/Kia, GM's four brands, Ford/Lincoln, and Audi/Porsche are excluded here since their own real sales figures (above) replace this claims-based estimate.</p>
         <div class="mfr-controls">
           <label for="ca-year-select">Year</label>
           <select id="ca-year-select"></select>
@@ -406,11 +444,79 @@ function wireTooltip(container, tooltipEl, cardEl){
   wireTooltip(rows, document.getElementById('gm-tooltip'), rows.closest('.card'));
 })();
 
-// --- Canada (iZEV, excludes Toyota/Hyundai/Kia/GM's 4 brands which now have real sales figures above) ---
+// --- Ford & Lincoln Canada (real sales, replaces iZEV claims for these 2 brands) ---
+(function(){
+  const yearSelect = document.getElementById('fl-year-select');
+  const rows = document.getElementById('fl-rank-rows');
+  const noteEl = document.getElementById('fl-year-note');
+  const data = MANUFACTURER_YEARLY.Canada.filter(r => r.brand === 'Ford' || r.brand === 'Lincoln');
+  const years = [...new Set(data.map(r => r.year))].sort((a,b) => b - a);
+  const latestYear = years[0];
+  yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}${y === latestYear ? ' (Jan-Jun)' : ''}</option>`).join('');
+  yearSelect.value = latestYear;
+
+  const FL_FUEL_KEYS = ['bev','petrol']; // petrol here = "rest of lineup" catch-all, see note above
+  function render(){
+    const year = +yearSelect.value;
+    const yearRows = data.filter(r => r.year === year).sort((a,b) => b.total - a.total);
+    noteEl.textContent = year === latestYear ? 'Jan-Jun 2026 only (H1), not a full year' : '';
+    rows.innerHTML = yearRows.map(row => {
+      const bevPct = row.bev / row.total * 100;
+      return `
+      <div class="rank-row" data-brand="${row.brand}">
+        <div class="country-label">${row.brand}</div>
+        <div class="bar-track">
+          ${FL_FUEL_KEYS.map(k => segHTML(row, k)).join('')}
+        </div>
+        <div class="pct-label" style="color:${FUEL_COLORS.bev}">${bevPct.toFixed(1)}%</div>
+        <div class="total-label">${row.total.toLocaleString('en-US')}</div>
+      </div>`;
+    }).join('');
+  }
+  yearSelect.addEventListener('change', render);
+  render();
+  wireTooltip(rows, document.getElementById('fl-tooltip'), rows.closest('.card'));
+})();
+
+// --- Audi & Porsche Canada (real sales, replaces iZEV claims -- Porsche has no 2026 row yet, PCC reports annually) ---
+(function(){
+  const yearSelect = document.getElementById('ap-year-select');
+  const rows = document.getElementById('ap-rank-rows');
+  const noteEl = document.getElementById('ap-year-note');
+  const data = MANUFACTURER_YEARLY.Canada.filter(r => r.brand === 'Audi' || r.brand === 'Porsche');
+  const years = [...new Set(data.map(r => r.year))].sort((a,b) => b - a);
+  const latestYear = years[0];
+  yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}${y === latestYear ? ' (Jan-Jun, Audi only)' : ''}</option>`).join('');
+  yearSelect.value = latestYear;
+
+  const AP_FUEL_KEYS = ['bev','petrol']; // petrol here = "rest of lineup" catch-all, see note above
+  function render(){
+    const year = +yearSelect.value;
+    const yearRows = data.filter(r => r.year === year).sort((a,b) => b.total - a.total);
+    noteEl.textContent = year === latestYear ? 'Jan-Jun 2026 only (H1); Porsche not yet released for 2026' : '';
+    rows.innerHTML = yearRows.map(row => {
+      const bevPct = row.bev / row.total * 100;
+      return `
+      <div class="rank-row" data-brand="${row.brand}">
+        <div class="country-label">${row.brand}</div>
+        <div class="bar-track">
+          ${AP_FUEL_KEYS.map(k => segHTML(row, k)).join('')}
+        </div>
+        <div class="pct-label" style="color:${FUEL_COLORS.bev}">${bevPct.toFixed(1)}%</div>
+        <div class="total-label">${row.total.toLocaleString('en-US')}</div>
+      </div>`;
+    }).join('');
+  }
+  yearSelect.addEventListener('change', render);
+  render();
+  wireTooltip(rows, document.getElementById('ap-tooltip'), rows.closest('.card'));
+})();
+
+// --- Canada (iZEV, excludes Toyota/Hyundai/Kia/GM's 4 brands/Ford+Lincoln/Audi+Porsche which now have real sales figures above) ---
 (function(){
   const yearSelect = document.getElementById('ca-year-select');
   const rows = document.getElementById('ca-rank-rows');
-  const EXCLUDED = ['Toyota (TCI: Toyota+Lexus combined)', 'Hyundai', 'Kia', 'Chevrolet', 'Cadillac', 'Buick', 'GMC'];
+  const EXCLUDED = ['Toyota (TCI: Toyota+Lexus combined)', 'Hyundai', 'Kia', 'Chevrolet', 'Cadillac', 'Buick', 'GMC', 'Ford', 'Lincoln', 'Audi', 'Porsche'];
   const data = MANUFACTURER_YEARLY.Canada.filter(r => !EXCLUDED.includes(r.brand));
   const years = [...new Set(data.map(r => r.year))].sort((a,b) => b - a);
   yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
