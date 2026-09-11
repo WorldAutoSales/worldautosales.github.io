@@ -435,6 +435,8 @@ const MONTHLY_DATA = {
       "Singapore": [3200,154,1327,0,272,0,4953],
       // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw), Taiwan (monthly) — passenger cars only, PHEV folded into HEV
       "Taiwan": [1592,0,15668,0,16526,402,34188],
+      // source: naamsa, South Africa (monthly) — Total is naamsa's "Industry Total" (all vehicle types, local sales only: 57,708, per naamsa's July 2026 Flash Report); NEV split RECONSTRUCTED, not directly published -- naamsa's July Media Release NEV section contains a copy-paste error (it narrates "during June 2026" and repeats June's exact already-loaded 419/990/1488 figures verbatim). Worked around via subtraction: naamsa's own YTD-through-July figures (16,289 total NEV: 8,078 HEV/5,851 PHEV/2,360 BEV, cited in the same erroneous document and corroborated by techfinancials.co.za) minus YTD-through-June (13,193: 6,667/4,623/1,903, also in that document) = July's isolated contribution (3,096/1,411/1,228/457), independently matching techfinancials.co.za's separately-reported July NEV total of 3,096. Diesel folded into petrol (no separate split published)
+      "South Africa": [457,1228,1411,0,54612,0,57708],
       // source: ANAC A.G. (Registro Civil), Chile (monthly) — BEV/PHEV/HEV exact registry units from ANAC's electrified-vehicle report; Petrol/Diesel computed as (total market − electrified) residual, split at ~28.7% diesel share (ANAC doesn't publish Petrol/Diesel directly)
       "Chile": [781,654,3061,0,14421,5805,24722],
       // source: FENALCO-ANDI, Colombia — genuine standalone month, directly reported in full; PHEV folded into HEV
