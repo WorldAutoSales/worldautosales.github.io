@@ -508,6 +508,8 @@ const MONTHLY_DATA = {
   "2026-06": {
     label: "June 2026",
     raw: {
+      // source: Statistics Canada, Table 20-10-0025-01 — reports quarterly, not monthly; Q2 2026's total (released 2026-09-08) is divided evenly across Apr/May/Jun (same figure repeated each month) rather than filed entirely under April, so month-over-month comparisons involving Canada aren't artificially skewed by a whole quarter landing in one month
+      "Canada": [13528,6075,30623,0,125271,7060,182557],
       "Georgia": [1389,168,5066,613,12586,864,20686],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [1438,0,2693,0,6426,3855,14412],
@@ -627,6 +629,8 @@ const MONTHLY_DATA = {
   "2026-05": {
     label: "May 2026",
     raw: {
+      // source: Statistics Canada, Table 20-10-0025-01 — reports quarterly, not monthly; Q2 2026's total (released 2026-09-08) is divided evenly across Apr/May/Jun (same figure repeated each month) rather than filed entirely under April, so month-over-month comparisons involving Canada aren't artificially skewed by a whole quarter landing in one month
+      "Canada": [13528,6075,30623,0,125271,7060,182557],
       "Georgia": [1303,222,4286,528,12294,819,19452],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [927,0,2240,0,6304,3622,13093],
@@ -821,7 +825,7 @@ const MONTHLY_DATA = {
       "Paraguay": [95,277,497,3,2342,196,3410],
       // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team — Q2 2026 delta (H1 2026 minus Q1 2026) split evenly across Apr-Jun (no finer intra-quarter split published); PHEV not separately tracked, folded into HEV
       "Serbia": [132,0,1829,74,1742,394,4171],
-          // Statistics Canada Table 20-10-0025-01, Q2 2026 (released 2026-09-08), quarterly total spread evenly across Apr/May/Jun -- shown as one bar labeled at the quarter's first month
+      // source: Statistics Canada, Table 20-10-0025-01 — reports quarterly, not monthly; Q2 2026's total (released 2026-09-08) is divided evenly across Apr/May/Jun (same figure repeated each month) rather than filed entirely under April, so month-over-month comparisons involving Canada aren't artificially skewed by a whole quarter landing in one month
       "Canada": [13528,6075,30623,0,125271,7060,182557]},
     priorYearBev: {
       "Austria":5690,"Belgium":12469,"Bulgaria":144,"Croatia":60,"Cyprus":90,"Czechia":1229,"Denmark":9567,
@@ -2326,9 +2330,15 @@ countrySearchInput.addEventListener('input', () => {
 });
 
 const monthsBox = document.getElementById('filter-months');
-// only the 5 most recent periods are shown in the filter -- older annual history is still
-// reachable via Individual Country's trend chart, this list is just for quick recent-period access
-const VISIBLE_MONTHS = ALL_MONTHS.slice(0, 5);
+// curated period filter: the 5 most recent real months, then the current year's Projection
+// and YTD, then the 5 most recent full annual years -- older history beyond that is still
+// reachable via Individual Country's trend chart, this list is just for quick common-period access
+const VISIBLE_MONTHS = [
+  ...ALL_MONTHS.filter(k => /^\d{4}-\d{2}$/.test(k)).slice(0, 5),
+  ALL_MONTHS.find(k => k.endsWith('-projection')),
+  ALL_MONTHS.find(k => k.endsWith('-ytd')),
+  ...ALL_MONTHS.filter(k => k.endsWith('-annual')).slice(0, 5),
+].filter(Boolean);
 monthsBox.innerHTML = VISIBLE_MONTHS.map(m => `
   <label class="filter-checkbox">
     <input type="radio" name="month-filter" data-month="${m}" ${m === DEFAULT_MONTH ? 'checked' : ''}>
