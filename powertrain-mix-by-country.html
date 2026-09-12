@@ -343,6 +343,8 @@ const MONTHLY_DATA = {
       "Portugal": [5079,2465,2845,6,3049,642,14086],
       // source: SMMT monthly release -- see July comment for methodology. Absolute units derived from SMMT's stated percentages x its stated 94,236 total.
       "United Kingdom": [28082,13664,11968,0,35999,4523,94236],
+      // source: auto-schweiz monthly press release, Switzerland -- Total (16,047) and every fuel share are auto-schweiz's own exact published August figures for the first time this year (BEV 30.2%, PHEV 12.4%, Petrol 20.6%, Diesel 5.5%); BEV unit count (4,843) independently cross-checked against press citations. HEV = residual (31.3%); temporary pending ACEA
+      "Switzerland": [4843,1990,5025,0,3306,883,16047],
       // source: UNRAE monthly bulletin via press -- see July comment for methodology. BEV=4,486 is UNRAE's own directly-cited figure (not percentage-derived, unlike the other categories this month); Others=GPL/metano residual against UNRAE's own 69,411 total.
       "Italy": [4486,8399,32346,6133,14021,4026,69411],
       // source: RDC/RAI Vereniging/BOVAG -- see July comment for methodology. Petrol (1,613) is the source's own directly-cited figure; Diesel and LPG were each reported as "under 1% of the market" without an exact split, shown here as an even 289/289 estimate.
@@ -403,6 +405,10 @@ const MONTHLY_DATA = {
       "Portugal": [5603,3210,4206,1482,3021,635,18157],
       // source: SMMT (Society of Motor Manufacturers and Traders) monthly release -- the UK's official industry body, published a few days into the following month, ahead of ACEA (not an EU/ACEA market anyway post-Brexit, but grouped with this region on this site). Absolute units derived from SMMT's stated percentages x its stated 156,571 total (SMMT's press release itself leads with percentages, not a full unit-level fuel table); Others is the small residual left after that scaling.
       "United Kingdom": [43057,23329,20667,157,62785,6576,156571],
+      // source: FEBIAC (Fédération Belge de l'Automobile et du Cycle) monthly press release, Belgium -- Total (29,274) and BEV share (42.9%) are FEBIAC's own exact published figures; HEV (24.3%) and Petrol/Essence (23.6%) shares also FEBIAC-published. PHEV/Diesel/Others have no published July split -- apportioned from the residual 9.2% using Belgium's own real Jan-Jun 2026 ratio among those three categories (59.7% / 30.2% / 10.1%); temporary pending ACEA
+      "Belgium": [12559,1608,7114,272,6909,812,29274],
+      // source: auto-schweiz (Vereinigung Schweizer Automobil-Importeure) monthly press release, Switzerland -- BEV (4,899) is auto-schweiz's own exact published July figure; Total (18,994) and PHEV (2,351) derived by subtracting the June YTD cumulative (already loaded) from auto-schweiz's published YTD-through-July cumulative (135,542 total; BEV 32,788 exact; PHEV ~12.4% YTD share). HEV/Petrol/Diesel/Others split from the remainder using Switzerland's own June 2026 monthly ratio among those four categories; temporary pending ACEA
+      "Switzerland": [4899,2351,6685,1,3912,1146,18994],
       // source: UNRAE (Unione Nazionale Rappresentanti Autoveicoli Esteri) monthly bulletin, via press (Quattroruote) -- Italy's official importers' association, published in the first days of the following month, ahead of ACEA. Absolute units derived from UNRAE's stated percentages x its stated 123,184 total; Others=GPL (Italy has a genuinely large LPG passenger-car segment, ~10.6% this month).
       "Italy": [7268,13058,58512,13057,23405,7884,123184],
       // source: RDC registration data, analysed by RAI Vereniging and BOVAG (bovag.nl/mijn.bovag.nl) -- the Dutch industry bodies' monthly release, published in the first days of the following month, ahead of ACEA. Hybrid (12,342) not split into PHEV/HEV by any national-source press release found for this month, so it is split using the ~44.1%/55.9% PHEV/HEV ratio computed from the Netherlands' own real, ACEA-sourced Jan-Jun 2026 monthly data already in this dataset (42,165 PHEV / 53,445 HEV over those 6 months) -- flagged as an estimate, not a directly-cited split. (An earlier version of this row used phev=0, which was wrong: this country genuinely has a large PHEV share, confirmed by its own Jan-Jun figures, corrected 2026-09-07.) Petrol/Diesel/LPG make up the small remainder (2,457 units) undifferentiated by the source for this month -- split ~90/6/4 as a rough estimate based on August's own reported split, flagged as such rather than a directly-cited figure.
@@ -1190,7 +1196,7 @@ const MONTHLY_DATA = {
       "Malaysia": [38675, 0, 29776, 0, 399788, 21601, 489840],
       // source: world_auto_sales_annual, period_type='YTD' — each country summed only through its own latest available month/quarter (see asOf below), not a fixed common cutoff
       "Austria": [40060,18023,49751,2,40509,16184,164529],
-      "Belgium": [83282,12664,28659,2144,97538,6394,230681],
+      "Belgium": [95841,14272,35773,2416,104447,7206,259955],
       "Bulgaria": [2042,454,1565,66,18731,3099,25957],
       // source: FENALCO-ANDI, Colombia — Jan-Jul 2026 cumulative (dedicated monthly EV/Hybrid reports + ANDI monthly totals); PHEV folded into HEV; Petrol is the undifferentiated combustion remainder (Diesel=0). Total corrected 2026-09-02: 166,677 (an uncorroborated user-supplied figure) was wrong; 186,253 = confirmed H1 2026 total (157,620) + confirmed July total (28,633).
       "Colombia": [33888,0,63209,0,116277,0,213374],
@@ -1220,7 +1226,7 @@ const MONTHLY_DATA = {
       "Slovenia": [6062,1354,6927,434,17415,4545,36737],
       "Spain": [83504,102175,386657,29201,188195,28468,818200],
       "Sweden": [76837,44366,15921,743,33770,11482,183119],
-      "Switzerland": [27889,14456,42488,5,25224,6486,116548],
+      "Switzerland": [37631,18797,54198,6,32442,8515,151589],
       "United Kingdom": [355718,185125,461634,159,354579,31521,1388736],
       // source: StatCan 20-10-0025-01 — only Q1 2026 published so far
       "Canada": [29808,13305,53584,0,283361,17543,397601],
@@ -1286,14 +1292,14 @@ const MONTHLY_DATA = {
       "Ecuador":"through Jul 2026",
       "Tunisia":"through Jul 2026",
       "Georgia":"through Jul 2026",
-      "Austria":"through Jun 2026","Belgium":"through Jun 2026","Bulgaria":"through Jun 2026","Croatia":"through Jun 2026",
+      "Austria":"through Jun 2026","Belgium":"through Jul 2026 (national source, not yet ACEA)","Bulgaria":"through Jun 2026","Croatia":"through Jun 2026",
       "Cyprus":"through Jun 2026","Czechia":"through Jun 2026","Denmark":"through Aug 2026","Estonia":"through Jun 2026",
       "Finland":"through Aug 2026 (national source, not yet ACEA)","France":"through Aug 2026 (national source, not yet ACEA)","Germany":"through Aug 2026 (national source, not yet ACEA)","Greece":"through Jun 2026",
       "Hungary":"through Jun 2026","Iceland":"through Jun 2026","Ireland":"through Aug 2026","Italy":"through Aug 2026 (national source, not yet ACEA)",
       "Latvia":"through Jun 2026","Lithuania":"through Jun 2026","Luxembourg":"through Jun 2026","Malta":"through Jun 2026",
       "Netherlands":"through Aug 2026 (national source, not yet ACEA)","Norway":"through Aug 2026","Poland":"through Jun 2026","Portugal":"through Aug 2026 (national source, not yet ACEA)",
       "Romania":"through Jun 2026","Slovakia":"through Jun 2026","Slovenia":"through Jun 2026","Spain":"through Aug 2026 (national source, not yet ACEA)",
-      "Sweden":"through Aug 2026","Switzerland":"through Jun 2026","United Kingdom":"through Aug 2026 (national source, not yet ACEA)",
+      "Sweden":"through Aug 2026","Switzerland":"through Aug 2026 (national source, not yet ACEA)","United Kingdom":"through Aug 2026 (national source, not yet ACEA)",
       "Canada":"through Mar 2026 (Q1 only)",
       "Colombia":"through Aug 2026",
       "Mexico":"through Aug 2026",
@@ -1366,7 +1372,7 @@ const MONTHLY_DATA = {
       "Australia": [265063, 124548, 219674, 0, 365509, 314434, 1289228],
       "China": [11718000, 5390333, 0, 0, 14496000, 0, 31604333],
       "Austria": [85486, 37961, 101905, 6, 81018, 33090, 339466],
-      "Belgium": [170908, 25328, 57801, 5160, 195076, 13940, 468213],
+      "Belgium": [166509, 24466, 64405, 4764, 179052, 12788, 451984],
       "Brazil": [242683, 189628, 180861, 0, 2060473, 267365, 2941010],
       "Bulgaria": [4634, 986, 3407, 182, 38965, 6767, 54941],
       "Canada": [66001, 24729, 111729, 0, 557657, 35089, 795205],
@@ -1400,7 +1406,7 @@ const MONTHLY_DATA = {
       "Slovenia": [13592, 2708, 15449, 994, 35445, 9135, 77323],
       "Spain": [129515,155115,579985,44357,282293,42702,1233967],
       "Sweden": [118237, 66967, 23881, 1115, 51610, 17298, 279108],
-      "Switzerland": [60839, 30504, 86564, 13, 52310, 13450, 243680],
+      "Switzerland": [59490, 29161, 81297, 9, 48782, 13188, 231927],
       "Turkey": [157921, 6072, 269627, 9961, 354459, 50292, 848332],
       "United Kingdom": [535837,277687,692451,368,545231,50958,2102532],
       // source: Argonne National Laboratory — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
@@ -2313,7 +2319,10 @@ countrySearchInput.addEventListener('input', () => {
 });
 
 const monthsBox = document.getElementById('filter-months');
-monthsBox.innerHTML = ALL_MONTHS.map(m => `
+// only the 5 most recent periods are shown in the filter -- older annual history is still
+// reachable via Individual Country's trend chart, this list is just for quick recent-period access
+const VISIBLE_MONTHS = ALL_MONTHS.slice(0, 5);
+monthsBox.innerHTML = VISIBLE_MONTHS.map(m => `
   <label class="filter-checkbox">
     <input type="radio" name="month-filter" data-month="${m}" ${m === DEFAULT_MONTH ? 'checked' : ''}>
     <span class="fc-label">${MONTHLY_DATA[m].label}</span>
