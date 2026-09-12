@@ -185,7 +185,7 @@ nav.sidebar-nav a .dot{
   padding:40px 36px 80px;
 }
 .page{
-  max-width: 980px;
+  max-width: 1180px;
   margin: 0 auto;
   display:flex;
   flex-direction:column;
@@ -1194,7 +1194,7 @@ nav.sidebar-nav a.nav-link-alert:hover{
   display:flex;
   gap:28px;
   align-items:flex-start;
-  max-width: 1480px;
+  max-width: 1720px;
   margin: 0 auto;
 }
 .content-with-filters .page{
