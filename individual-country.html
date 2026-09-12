@@ -2818,25 +2818,37 @@ function renderTrendsChart(){
   const innerW = W - M.left - M.right;
   const innerH = H - M.top - M.bottom;
 
-  const pctSeries = points.map((d,i) => {
+  // each point's x-position is tracked in month-units, not just its array index -- a monthly
+  // series can have real annual-only points prepended (countries whose monthly data starts
+  // partway through their history) or appended (the "rest of this year" projected continuation).
+  // A prepended prior year covers 12 real months, so it gets 12x a real month's width; the
+  // trailing projected point is a single-month-equivalent continuation, not a full year, so it
+  // stays at 1x despite also having a bare-year label. Giving every point equal width regardless
+  // (the old d3.scalePoint-by-index approach) squeezed a full year of history into the same slot
+  // as one real month, visually overstating how much of the timeline the recent months cover.
+  let cumUnits = 0;
+  const pctSeries = points.map((d) => {
     const pct = {};
     const raw = {};
     activeKeys.forEach(k => { pct[k] = d.total ? d[k]/d.total*100 : 0; raw[k] = d[k]; });
-    return { i, label: d.label, total: d.total, isPartial: d.isPartial, isProjected: d.isProjected, raw, ...pct };
+    const widthUnits = isMonthly && d.label.length === 4 && !d.isProjected ? 12 : 1;
+    const pos = cumUnits;
+    cumUnits += widthUnits;
+    return { pos, label: d.label, total: d.total, isPartial: d.isPartial, isProjected: d.isProjected, raw, ...pct };
   });
 
-  const xScale = d3.scalePoint().domain(pctSeries.map(d => d.i)).range([0, innerW]).padding(0.05);
+  const xScale = d3.scaleLinear().domain([0, Math.max(1, cumUnits - 1)]).range([0, innerW]);
   const yMax = Math.max(10, d3.max(pctSeries, d => Math.max(...activeKeys.map(k => d[k] || 0))) * 1.15);
   const yScale = d3.scaleLinear().domain([0, yMax]).range([innerH, 0]);
 
   const g = trendsSvg.append('g').attr('transform', `translate(${M.left},${M.top})`);
 
   const tickValues = isMonthly
-    ? pctSeries.filter(d => d.label.endsWith('-01') || d.label.length === 4 || d.i === pctSeries.length - 1).map(d => d.i)
-    : pctSeries.map(d => d.i);
+    ? pctSeries.filter((d, idx) => d.label.endsWith('-01') || d.label.length === 4 || idx === pctSeries.length - 1).map(d => d.pos)
+    : pctSeries.map(d => d.pos);
   g.append('g').attr('class', 'bubble-axis').attr('transform', `translate(0,${innerH})`)
-    .call(d3.axisBottom(xScale).tickValues(tickValues).tickFormat(i => {
-      const d = pctSeries.find(s => s.i === i);
+    .call(d3.axisBottom(xScale).tickValues(tickValues).tickFormat(pos => {
+      const d = pctSeries.find(s => s.pos === pos);
       if(isMonthly) return d.isProjected ? `${d.label} (Proj.)` : d.label.endsWith('-01') ? d.label.slice(0,4) : d.label;
       return d.isPartial ? `${d.label} (YTD)` : d.isProjected ? `${d.label} (Proj.)` : d.label;
     }));
@@ -2859,7 +2871,7 @@ function renderTrendsChart(){
     applyTrendsIsolation();
   };
 
-  const line = key => d3.line().defined(d => d[key] != null).x(d => xScale(d.i)).y(d => yScale(d[key])).curve(d3.curveMonotoneX);
+  const line = key => d3.line().defined(d => d[key] != null).x(d => xScale(d.pos)).y(d => yScale(d[key])).curve(d3.curveMonotoneX);
   activeKeys.forEach(k => {
     if(isMonthly){
       const lastRealIdx = pctSeries.reduce((acc, d, idx) => !d.isProjected ? idx : acc, -1);
@@ -2886,7 +2898,7 @@ function renderTrendsChart(){
       .on('click', () => { trendsIsolatedFuel = (trendsIsolatedFuel === k) ? null : k; applyTrendsIsolation(); });
     if(!isMonthly){
       g.selectAll(`.trends-dot-${k}`).data(pctSeries.filter(d => d[k] != null)).join('circle')
-        .attr('class', `trends-dot-${k} trend-dot`).attr('cx', d => xScale(d.i)).attr('cy', d => yScale(d[k])).attr('r', 3.5).attr('fill', FUEL_COLORS[k]);
+        .attr('class', `trends-dot-${k} trend-dot`).attr('cx', d => xScale(d.pos)).attr('cy', d => yScale(d[k])).attr('r', 3.5).attr('fill', FUEL_COLORS[k]);
     }
   });
 
@@ -2896,9 +2908,9 @@ function renderTrendsChart(){
     .attr('fill', 'transparent')
     .on('pointermove', (e) => {
       const [mx] = d3.pointer(e);
-      const d = pctSeries.reduce((best, s) => (best === null || Math.abs(xScale(s.i) - mx) < Math.abs(xScale(best.i) - mx)) ? s : best, null);
+      const d = pctSeries.reduce((best, s) => (best === null || Math.abs(xScale(s.pos) - mx) < Math.abs(xScale(best.pos) - mx)) ? s : best, null);
       if(!d) return;
-      guide.attr('x1', xScale(d.i)).attr('x2', xScale(d.i)).style('opacity', 1);
+      guide.attr('x1', xScale(d.pos)).attr('x2', xScale(d.pos)).style('opacity', 1);
       const rect = trendsWrap.getBoundingClientRect();
       trendsTooltip.style.left = (e.clientX - rect.left) + 'px';
       trendsTooltip.style.top = (e.clientY - rect.top - 10) + 'px';

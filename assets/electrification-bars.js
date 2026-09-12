@@ -29,8 +29,9 @@ const ELEC_BARS_YEAR_COUNT = 5;
 // width ratios, relative to a single narrow bar (width 1) -- years widest, the current year's
 // YTD bar in between, individual months narrowest
 const ELEC_BARS_YEAR_WIDTH_RATIO = 2.2;
-const ELEC_BARS_YTD_WIDTH_RATIO = 1.6;
 const ELEC_BARS_MONTH_WIDTH_RATIO = 0.7;
+// exactly halfway between the year and month widths above
+const ELEC_BARS_YTD_WIDTH_RATIO = (ELEC_BARS_YEAR_WIDTH_RATIO + ELEC_BARS_MONTH_WIDTH_RATIO) / 2;
 // Y axis is fixed 0-100% in "%" mode (not auto-scaled to the country's own data) so charts are
 // comparable across countries and never jump around when switching focus -- 100% comfortably
 // covers the highest real value seen in this dataset (Norway, ~99.2% in March 2026).
