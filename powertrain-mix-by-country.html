@@ -259,8 +259,14 @@
 
         <div class="card chart-card" id="momentum-section">
           <h2>Momentum — Who's Moving Fastest</h2>
-          <p class="note" title="Momentum is the CHANGE in BEV share over the last full period, in percentage points — not the share itself. A market can have a high BEV share but low momentum (already EV-heavy, growth has plateaued), or the reverse.">Every filtered market's BEV-share trajectory, ranked by change over its last full period (12 months for Europe/Canada, one year for everyone else) — fastest gainers first. Click a card to focus every chart on this page on it.</p>
+          <p class="note" title="Momentum is the CHANGE in BEV share over the last full period, in percentage points — not the share itself. A market can have a high BEV share but low momentum (already EV-heavy, growth has plateaued), or the reverse.">Top 6 filtered markets by BEV-share change over their last full period (12 months for Europe/Canada, one year for everyone else) — fastest gainers first. Click a card to focus every chart on this page on it.</p>
           <div class="momentum-grid" id="momentum-grid"></div>
+        </div>
+
+        <div class="card chart-card" id="momentum-slowest-section">
+          <h2>Momentum — Who's Moving Slowest</h2>
+          <p class="note" title="Momentum is the CHANGE in BEV share over the last full period, in percentage points — not the share itself. A market can have a high BEV share but low momentum (already EV-heavy, growth has plateaued), or the reverse.">Bottom 6 filtered markets by BEV-share change over their last full period (12 months for Europe/Canada, one year for everyone else) — smallest gains or steepest declines first. Click a card to focus every chart on this page on it.</p>
+          <div class="momentum-grid" id="momentum-slowest-grid"></div>
         </div>
 
         <div class="card chart-card hidden" id="mfr-section">
@@ -3095,23 +3101,44 @@ function wireMomentumCardClicks(container){
   });
 }
 
+// only the top/bottom N filtered markets are shown (one grid row on typical widths) --
+// see biggest-movers.html for the full ranked list
+const MOMENTUM_CARD_COUNT = 6;
+
 // hidden while a country is focused — that country's own momentum card moves into the
 // Country Stats row instead (see renderFocusStats), so a 1-card grid here would be redundant
 function renderMomentum(){
   const section = document.getElementById('momentum-section');
   const grid = document.getElementById('momentum-grid');
-  if(focusedCountry){ section.classList.add('hidden'); return; }
+  const slowestSection = document.getElementById('momentum-slowest-section');
+  const slowestGrid = document.getElementById('momentum-slowest-grid');
+  if(focusedCountry){
+    section.classList.add('hidden');
+    slowestSection.classList.add('hidden');
+    return;
+  }
   section.classList.remove('hidden');
+  slowestSection.classList.remove('hidden');
 
   const countries = ALL_COUNTRIES.filter(c => selectedCountries.has(c) && selectedContinents.has(COUNTRY_CONTINENT[c] || "OTHER") && passesRankFilter(c));
-  const cards = countries.map(momentumCardData).filter(Boolean).sort((a,b) => {
-    if(a.delta == null) return 1;
-    if(b.delta == null) return -1;
-    return b.delta - a.delta;
-  });
+  // only markets with a real measured delta can be ranked fastest/slowest -- a country with
+  // no prior-period point to compare against wouldn't belong on either list
+  const withDelta = countries.map(momentumCardData).filter(c => c && c.delta != null);
+  const descending = [...withDelta].sort((a, b) => b.delta - a.delta);
 
-  grid.innerHTML = cards.map(momentumCardHTML).join('');
+  const fastest = descending.slice(0, MOMENTUM_CARD_COUNT);
+  // exclude anything already shown as fastest so a small filtered set can't put the same
+  // country on both lists
+  const fastestCountries = new Set(fastest.map(c => c.country));
+  const slowest = descending
+    .filter(c => !fastestCountries.has(c.country))
+    .sort((a, b) => a.delta - b.delta)
+    .slice(0, MOMENTUM_CARD_COUNT);
+
+  grid.innerHTML = fastest.map(momentumCardHTML).join('');
   wireMomentumCardClicks(grid);
+  slowestGrid.innerHTML = slowest.map(momentumCardHTML).join('');
+  wireMomentumCardClicks(slowestGrid);
 }
 
 fetch('assets/countries-50m.json').then(r => r.json()).then(topology => {
