@@ -2,8 +2,9 @@
 // the raw count) of each period's total registrations. Petrol/Diesel are also available but start
 // hidden (dimmed in the legend) -- click either chip (or "# of Units"/"%" mode toggle) to reveal
 // them stacked on top. Periods are the last 5 full annual years (fewer if a country's history is
-// shorter), then either each real month of the current year so far, or a single YTD bar if no
-// monthly breakdown exists for that country. Shared by country.html (always, for the URL country),
+// shorter), then the current year's YTD bar, then each real month of the current year so far (just
+// the YTD bar, on its own, if no monthly breakdown exists for that country). Shared by country.html
+// (always, for the URL country),
 // individual-country.html (only while a country is focused), and powertrain-mix-by-country.html
 // (only while a country is focused).
 // Requires COUNTRY_YEARLY, optionally COUNTRY_MONTHLY, FUEL_COLORS, FUEL_LABELS, and d3 already
@@ -22,11 +23,14 @@ const ELEC_BARS_KEYS = ['bev', 'phev', 'hev']; // shown by default
 const ELEC_BARS_EXTRA_KEYS = ['petrol', 'diesel']; // start hidden/dimmed in the legend -- click to reveal
 const ELEC_BARS_ALL_KEYS = [...ELEC_BARS_KEYS, ...ELEC_BARS_EXTRA_KEYS];
 const ELEC_BARS_MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const ELEC_BARS_NOTE = "Battery Electric, Plug-in Hybrid, and Hybrid as a share of each period's total registrations -- not stacked to 100% (Others isn't shown). Petrol and Diesel start dimmed in the legend; click either one (or a bar segment) to add it to the stack. The last 5 full years (fewer if history is shorter), then each month of the current year so far, or year-to-date if no monthly breakdown exists. Click a legend swatch or any segment to toggle that powertrain on/off.";
+const ELEC_BARS_NOTE = "Battery Electric, Plug-in Hybrid, and Hybrid as a share of each period's total registrations -- not stacked to 100% (Others isn't shown). Petrol and Diesel start dimmed in the legend; click either one (or a bar segment) to add it to the stack. The last 5 full years (fewer if history is shorter), then the current year's YTD total, then each month of the current year so far (just the YTD bar if no monthly breakdown exists). Click a legend swatch or any segment to toggle that powertrain on/off.";
 // how many full annual years (immediately preceding the current one) to show, history permitting
 const ELEC_BARS_YEAR_COUNT = 5;
-// years are drawn this many times wider than a single month/YTD bar
+// width ratios, relative to a single narrow bar (width 1) -- years widest, the current year's
+// YTD bar in between, individual months narrowest
 const ELEC_BARS_YEAR_WIDTH_RATIO = 2.2;
+const ELEC_BARS_YTD_WIDTH_RATIO = 1.6;
+const ELEC_BARS_MONTH_WIDTH_RATIO = 0.7;
 // Y axis is fixed 0-100% in "%" mode (not auto-scaled to the country's own data) so charts are
 // comparable across countries and never jump around when switching focus -- 100% comfortably
 // covers the highest real value seen in this dataset (Norway, ~99.2% in March 2026).
@@ -48,10 +52,14 @@ function buildElectrificationBarsSeries(country){
     .map(r => ({ label: String(r.year), bev: r.bev, phev: r.phev, hev: r.hev, petrol: r.petrol, diesel: r.diesel, total: r.total, isPartial: false, isYear: true }));
 
   const ytdRow = yearly.find(r => r.period_type === 'YTD');
-  let currentPeriods = [];
+  const ytdPeriod = ytdRow
+    ? { label: `${ytdRow.year} YTD`, bev: ytdRow.bev, phev: ytdRow.phev, hev: ytdRow.hev, petrol: ytdRow.petrol, diesel: ytdRow.diesel, total: ytdRow.total, isPartial: true, isYear: false, isYTD: true }
+    : null;
+
+  let monthPeriods = [];
   if(ytdRow && typeof COUNTRY_MONTHLY !== 'undefined' && COUNTRY_MONTHLY[country]){
     const yr = String(ytdRow.year);
-    currentPeriods = COUNTRY_MONTHLY[country]
+    monthPeriods = COUNTRY_MONTHLY[country]
       .filter(r => r.ym.startsWith(yr))
       .sort((a, b) => a.ym.localeCompare(b.ym))
       .map(r => {
@@ -59,16 +67,17 @@ function buildElectrificationBarsSeries(country){
         return { label: `${ELEC_BARS_MONTH_ABBR[mm - 1]} '${yr.slice(2)}`, bev: r.bev, phev: r.phev, hev: r.hev, petrol: r.petrol, diesel: r.diesel, total: r.total, isPartial: false, isYear: false };
       });
   }
-  if(currentPeriods.length === 0 && ytdRow){
-    currentPeriods = [{ label: `${ytdRow.year} YTD`, bev: ytdRow.bev, phev: ytdRow.phev, hev: ytdRow.hev, petrol: ytdRow.petrol, diesel: ytdRow.diesel, total: ytdRow.total, isPartial: true, isYear: false }];
-  }
-  return [...annualPeriods, ...currentPeriods];
+
+  // countries with no monthly breakdown fall back to the YTD bar alone as their only
+  // representation of the current year; otherwise the YTD bar leads the monthly bars
+  if(monthPeriods.length === 0) return ytdPeriod ? [...annualPeriods, ytdPeriod] : annualPeriods;
+  return ytdPeriod ? [...annualPeriods, ytdPeriod, ...monthPeriods] : [...annualPeriods, ...monthPeriods];
 }
 
 // variable-width x positions: year bars wider than month/YTD bars, scaled to fill innerW
 function elecBarsLayout(periods, innerW){
   const gapFrac = 0.4; // gap between bars, as a fraction of one narrow (month) bar's width
-  const slots = periods.map(d => d.isYear ? ELEC_BARS_YEAR_WIDTH_RATIO : 1);
+  const slots = periods.map(d => d.isYear ? ELEC_BARS_YEAR_WIDTH_RATIO : d.isYTD ? ELEC_BARS_YTD_WIDTH_RATIO : ELEC_BARS_MONTH_WIDTH_RATIO);
   const totalSlots = slots.reduce((a, b) => a + b, 0) + gapFrac * Math.max(0, periods.length - 1);
   const unit = innerW / totalSlots;
   let cursor = 0;
