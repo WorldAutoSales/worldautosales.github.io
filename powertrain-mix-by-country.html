@@ -78,7 +78,14 @@
             </span>
           </div>
           <div class="filter-countries" id="filter-rank-tiers"></div>
-          <p class="filter-note">Ranked against the true world market (~150 countries, all powertrains) — not just the countries tracked on this site. Iran, Saudi Arabia and others occupy real rank slots without ever appearing here, so e.g. "Top 20" can show fewer than 20 countries; that's expected. A country with no 2025 total of any kind only shows while every tier here is checked.</p>
+          <div class="card notes-card is-collapsed filter-notes-card">
+            <button type="button" class="notes-toggle" aria-expanded="false">
+              <span>ℹ️ About market rank</span>
+              <span class="notes-hint">Click to expand</span>
+              <span class="notes-arrow">▸</span>
+            </button>
+            <p class="notes-body">Ranked against the true world market (~150 countries, all powertrains) — not just the countries tracked on this site. Iran, Saudi Arabia and others occupy real rank slots without ever appearing here, so e.g. "Top 20" can show fewer than 20 countries; that's expected. A country with no 2025 total of any kind only shows while every tier here is checked.</p>
+          </div>
         </div>
 
         <div class="filter-group">
@@ -355,7 +362,9 @@ const MONTHLY_DATA = {
           // OFV (Opplysningsradet for veitrafikken), Norway (monthly) -- direct from OFV's own published fuel-type table (Fordeling per drivstoff); PHEV = Bensin+Diesel Plugin Hybrid combined, HEV = Bensin+Diesel Hybrid combined
       "Norway": [13274,51,32,0,30,64,13451],      // Mobility Sweden (monthly) -- from the official Manadsrapport Nyregistreringar Excel's PB - Drivmedel sheet; others = Etanol+Gas+Ospec.
       "Sweden": [10069,4988,2024,69,4270,1164,22584],      // Mobility Denmark press release (monthly) -- gives only Total and BEV (elbiler) exactly; no PHEV/HEV/Petrol/Diesel breakdown published, so the 2,278-unit non-BEV remainder is placed in Petrol per this project's established convention (see Russia) rather than fabricating a split
-      "Denmark": [13887,0,0,0,2278,0,16165],      // SIMI (Society of the Irish Motor Industry), Ireland (monthly) -- Total and BEV are SIMI's own exact published figures; HEV/PHEV/Petrol/Diesel/Others are DERIVED (not directly published): SIMI's press release only gives YTD market-share %, not month-only, so this month's split = (YTD-through-August % x YTD-through-August total) minus (YTD-through-July % x YTD-through-July total), per category, then rescaled to sum exactly to this month's real total
+      "Denmark": [13887,0,0,0,2278,0,16165],
+      // source: Tilastokeskus (Statistics Finland), PxWeb table 121d (Autojen ensirekisteröinnit), monthly -- BEV (Sähkö) and Diesel are exact official figures; PHEV = Bensiini/Sähkö + Diesel/Sähkö (616+8). Finland's own classification has no separate non-plug-in-hybrid code -- ordinary hybrids are folded into Bensiini (Petrol) -- so HEV/Petrol were split out of the combined Bensiini figure (2,405) using Finland's own real Jan-Jun 2026 ACEA ratio (77.5% HEV / 22.5% petrol of that combined bucket); temporary pending ACEA
+      "Finland": [3427,624,1863,0,542,187,6643],      // SIMI (Society of the Irish Motor Industry), Ireland (monthly) -- Total and BEV are SIMI's own exact published figures; HEV/PHEV/Petrol/Diesel/Others are DERIVED (not directly published): SIMI's press release only gives YTD market-share %, not month-only, so this month's split = (YTD-through-August % x YTD-through-August total) minus (YTD-through-July % x YTD-through-July total), per category, then rescaled to sum exactly to this month's real total
       "Ireland": [2265,1618,1365,234,1222,1107,7811],      // JADA fuel-type registration stats, released 2026-09-04. others=FCV, consistent with prior months convention
       "Japan": [8351,3218,107134,70,48948,5118,172839],      // MTA (Motor Trade Association) vstat dashboard sourced from NZTA -- new passenger vehicle registrations only, released 2026-09-01
       "New Zealand": [1049,1174,3442,0,2889,583,9137],      // ODMD Basin Bulteni 2 Eylul 2026, Ek5 Agustos 2026 monthly column -- scope=Otomobil only, excludes HTA; genuine standalone-month table this time (not YTD-subtraction derived)
@@ -460,7 +469,9 @@ const MONTHLY_DATA = {
           // OFV (Opplysningsradet for veitrafikken), Norway (monthly) -- direct from OFV's own published fuel-type table (Fordeling per drivstoff), not ACEA's slower aggregate; PHEV = Bensin+Diesel Plugin Hybrid combined, HEV = Bensin Hybrid (no Diesel Hybrid entries this month)
       "Norway": [9379,56,96,0,15,63,9609],      // Mobility Sweden (monthly) -- from the official Manadsrapport Nyregistreringar Excel's PB - Drivmedel sheet; others = Etanol+Gas+Ospec.
       "Sweden": [7967,4448,1333,50,3507,1379,18684],      // Mobility Denmark press release (monthly) -- gives only Total and BEV (elbiler) exactly; no PHEV/HEV/Petrol/Diesel breakdown published, so the 2,890-unit non-BEV remainder is placed in Petrol per this project's established convention (see Russia) rather than fabricating a split
-      "Denmark": [11672,0,0,0,2890,0,14562],      // SIMI (Society of the Irish Motor Industry), Ireland (monthly) -- Total and BEV are SIMI's own exact published figures; HEV/PHEV/Petrol/Diesel/Others are DERIVED (not directly published): SIMI's press release only gives YTD market-share %, not month-only, so this month's split = (YTD-through-July % x YTD-through-July total) minus (YTD-through-June % x YTD-through-June total), per category, then rescaled to sum exactly to this month's real total
+      "Denmark": [11672,0,0,0,2890,0,14562],
+      // source: Tilastokeskus (Statistics Finland), PxWeb table 121d (Autojen ensirekisteröinnit), monthly -- BEV (Sähkö) and Diesel are exact official figures; PHEV = Bensiini/Sähkö + Diesel/Sähkö (709+2). Finland's own classification has no separate non-plug-in-hybrid code -- ordinary hybrids are folded into Bensiini (Petrol) -- so HEV/Petrol were split out of the combined Bensiini figure (2,025) using Finland's own real Jan-Jun 2026 ACEA ratio (77.5% HEV / 22.5% petrol of that combined bucket); temporary pending ACEA
+      "Finland": [3114,711,1568,0,457,196,6046],      // SIMI (Society of the Irish Motor Industry), Ireland (monthly) -- Total and BEV are SIMI's own exact published figures; HEV/PHEV/Petrol/Diesel/Others are DERIVED (not directly published): SIMI's press release only gives YTD market-share %, not month-only, so this month's split = (YTD-through-July % x YTD-through-July total) minus (YTD-through-June % x YTD-through-June total), per category, then rescaled to sum exactly to this month's real total
       "Ireland": [9682,4401,6034,326,5346,3257,29046]},
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY % (Argentina, China,
     // Indonesia, Australia, Singapore omitted — no matching July 2025 monthly figure sourced for those five)
@@ -1188,7 +1199,7 @@ const MONTHLY_DATA = {
       "Czechia": [8630,6517,31060,2739,57043,23819,129808],
       "Denmark": [106266,706,11702,2,10759,2327,131762],
       "Estonia": [617,864,5820,0,1556,1122,9979],
-      "Finland": [17797,4753,10375,0,3020,1309,37254],
+      "Finland": [24338,6088,13806,0,4019,1692,49943],
       "France": [322099,61150,476065,39356,152942,26712,1078324],
       "Germany": [515545,219808,561505,9580,411281,247305,1965024],
       "Greece": [5286,5199,47557,2533,21328,2094,83997],
@@ -1277,7 +1288,7 @@ const MONTHLY_DATA = {
       "Georgia":"through Jul 2026",
       "Austria":"through Jun 2026","Belgium":"through Jun 2026","Bulgaria":"through Jun 2026","Croatia":"through Jun 2026",
       "Cyprus":"through Jun 2026","Czechia":"through Jun 2026","Denmark":"through Aug 2026","Estonia":"through Jun 2026",
-      "Finland":"through Jun 2026","France":"through Aug 2026 (national source, not yet ACEA)","Germany":"through Aug 2026 (national source, not yet ACEA)","Greece":"through Jun 2026",
+      "Finland":"through Aug 2026 (national source, not yet ACEA)","France":"through Aug 2026 (national source, not yet ACEA)","Germany":"through Aug 2026 (national source, not yet ACEA)","Greece":"through Jun 2026",
       "Hungary":"through Jun 2026","Iceland":"through Jun 2026","Ireland":"through Aug 2026","Italy":"through Aug 2026 (national source, not yet ACEA)",
       "Latvia":"through Jun 2026","Lithuania":"through Jun 2026","Luxembourg":"through Jun 2026","Malta":"through Jun 2026",
       "Netherlands":"through Aug 2026 (national source, not yet ACEA)","Norway":"through Aug 2026","Poland":"through Jun 2026","Portugal":"through Aug 2026 (national source, not yet ACEA)",
@@ -1364,7 +1375,7 @@ const MONTHLY_DATA = {
       "Czechia": [19012, 13985, 64066, 5941, 117135, 48185, 268324],
       "Denmark": [163006, 1059, 17553, 3, 19198, 3491, 204310],
       "Estonia": [1331, 1786, 12888, 0, 3112, 2398, 21515],
-      "Finland": [37265, 9506, 21881, 0, 6222, 2695, 77569],
+      "Finland": [37915, 9132, 21183, 0, 6172, 2593, 76995],
       "France": [503950,95263,714097,62401,229413,40068,1645192],
       "Germany": [824340,337444,851088,16236,616921,370957,3016986],
       "Greece": [11270, 10967, 102795, 5971, 46872, 4492, 182367],
