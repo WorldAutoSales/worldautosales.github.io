@@ -212,13 +212,6 @@
           <div class="tooltip" id="elec-bars-tooltip"></div>
         </div>
 
-        <div class="card chart-card hidden" id="cars-on-road-card">
-          <h2>Non-BEV Cars on the Road</h2>
-          <p class="note" id="cars-on-road-note">Estimated non-battery-electric fleet (petrol, diesel, hybrid combined), 2018–2041 — built by aging every year's new registrations with a survival curve and anchoring to real observed fleet-by-fuel data where it exists. Solid = observed or estimated from real fleet data. Dashed (2027 onward) = projected: total new registrations are held constant at the 2026 level, while the non-BEV share of those registrations keeps shrinking at the same compound annual rate observed from 2024 to 2026 for this country — this is a trend continuation, not a guaranteed outcome.</p>
-          <svg class="chart" id="cars-on-road-svg" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
-          <div class="tooltip" id="cars-on-road-tooltip"></div>
-        </div>
-
         <div class="card chart-card">
           <div class="chart-header-row">
             <h2 id="trends-title">Motorisation Trends</h2>
@@ -297,6 +290,13 @@
           </div>
           <div class="rank-rows" id="mfr-rank-rows"></div>
           <div class="tooltip" id="mfr-tooltip"></div>
+        </div>
+
+        <div class="card chart-card hidden" id="cars-on-road-card">
+          <h2>Non-BEV Cars on the Road</h2>
+          <p class="note" id="cars-on-road-note">Estimated non-battery-electric fleet (petrol, diesel, hybrid combined), 2018–2041 — built by aging every year's new registrations with a survival curve and anchoring to real observed fleet-by-fuel data where it exists. Solid = observed or estimated from real fleet data. Dashed (2027 onward) = projected: total new registrations are held constant at the 2026 level, while the non-BEV share of those registrations keeps shrinking at the same compound annual rate observed from 2024 to 2026 for this country — this is a trend continuation, not a guaranteed outcome.</p>
+          <svg class="chart" id="cars-on-road-svg" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
+          <div class="tooltip" id="cars-on-road-tooltip"></div>
         </div>
 
         <footer class="page-footer">
@@ -2697,6 +2697,25 @@ function renderCarsOnRoadChart(country){
   g.append('g')
     .attr('class', 'bubble-axis')
     .call(d3.axisLeft(yScale).ticks(5).tickFormat(d3.format('~s')));
+
+  // reference lines: 20% and 50% of the 2025 non-BEV volume, so the decline is readable at a
+  // glance against a fixed baseline rather than only against the chart's own shifting scale
+  const base2025 = series.find(d => d.year === 2025);
+  if(base2025 && base2025.nonBev > 0){
+    [{pct:0.5,label:'50%'},{pct:0.2,label:'20%'}].forEach(({pct,label}) => {
+      const threshold = base2025.nonBev * pct;
+      const ty = yScale(threshold);
+      g.append('line')
+        .attr('x1', 0).attr('x2', innerW).attr('y1', ty).attr('y2', ty)
+        .attr('stroke', '#dc2626').attr('stroke-width', 1.25).attr('stroke-dasharray', '2,3')
+        .style('pointer-events', 'none');
+      g.append('text')
+        .attr('x', innerW).attr('y', ty - 3)
+        .attr('text-anchor', 'end').attr('fill', '#dc2626')
+        .style('font-size', '10px').style('pointer-events', 'none')
+        .text(`${label} of 2025 (${Math.round(threshold).toLocaleString('en-US')})`);
+    });
+  }
 
   const area = d3.area().x(d => xScale(d.year)).y0(innerH).y1(d => yScale(d.nonBev));
   g.append('path').datum(series).attr('d', area).attr('fill', COLOR).attr('fill-opacity', 0.18).attr('stroke', 'none');
