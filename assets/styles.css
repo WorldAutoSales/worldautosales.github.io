@@ -600,6 +600,9 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
   opacity:.3;
   pointer-events:none;
 }
+.bubble-trend-path.is-down{
+  stroke:var(--accent-strong);
+}
 .bubble-trend-dot{
   fill:var(--accent);
   stroke:var(--surface);

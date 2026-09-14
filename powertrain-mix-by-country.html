@@ -3666,10 +3666,20 @@ function renderBubbleChart(){
     const trailG = g.append('g').attr('class', 'bubble-trails');
     const lineGen = d3.line().x(p => xScale(p.bev)).y(p => yScale(p.bevPct));
 
-    trailG.selectAll('.bubble-trend-path').data(trails.filter(t => t.points.length >= 2), t => t.country).join('path')
-      .attr('class', 'bubble-trend-path')
+    // one path per SEGMENT (not per country) so a declining leg of the trail can be colored
+    // red independently of the rest -- "declining" = BEV volume dropped vs. the prior point,
+    // the same metric the YoY/3Y growth stats elsewhere on this page use.
+    const segments = trails.filter(t => t.points.length >= 2).flatMap(t =>
+      t.points.slice(0, -1).map((p0, i) => ({
+        key: `${t.country}-${p0.period}`,
+        isDown: t.points[i+1].bev < p0.bev,
+        pair: [p0, t.points[i+1]]
+      }))
+    );
+    trailG.selectAll('.bubble-trend-path').data(segments, s => s.key).join('path')
+      .attr('class', s => `bubble-trend-path${s.isDown ? ' is-down' : ''}`)
       .attr('fill', 'none')
-      .attr('d', t => lineGen(t.points));
+      .attr('d', s => lineGen(s.pair));
 
     // every point but the last (the last = the selected period, drawn as the full flag bubble below)
     const pastPoints = trails.flatMap(t => t.points.slice(0, -1).map((p, i, arr) => ({ ...p, country: t.country, stepsBack: arr.length - i })));
