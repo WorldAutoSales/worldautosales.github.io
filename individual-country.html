@@ -205,7 +205,7 @@
           <div class="chart-header-row">
             <h2>Volume vs. BEV Share</h2>
             <div class="chart-mode-toggle" role="group" aria-label="Chart view">
-              <button type="button" class="mode-btn active" data-bubble-mode="trend" title="Adds the 3 preceding full years as a fading trail, for countries with annual history.">TREND</button>
+              <button type="button" class="mode-btn active" data-bubble-mode="trend" title="Adds the preceding full years as a fading trail (5 years if fewer than 6 countries are selected, 3 otherwise), for countries with annual history.">TREND</button>
               <button type="button" class="mode-btn" data-bubble-mode="snapshot" title="One point per country, for the selected period only.">SNAPSHOT</button>
             </div>
           </div>
@@ -3230,23 +3230,26 @@ let bubbleMode = 'trend'; // 'snapshot' | 'trend' — see [data-bubble-mode] wir
 
 const BUBBLE_NOTES = {
   snapshot: `X = number of BEV units sold, Y = BEV share of that country's total. Each country is its own flag, same size for every market. Hover a flag for exact figures.`,
-  trend: `Flag = selected period, at its real figures. Paler dots trace the 3 preceding full years for the same country — only where annual history exists, so a short trail means a market we've only just started tracking, not one standing still. When the selected period is a single month, those yearly dots show that year's monthly average (÷12), so the trail compares like with like instead of dropping off a cliff at the end.`
+  trend: `Flag = selected period, at its real figures. Paler dots trace the preceding full years for the same country -- 5 years back when fewer than 6 countries are selected, 3 otherwise -- only where annual history exists, so a short trail means a market we've only just started tracking, not one standing still. When the selected period is a single month, those yearly dots show that year's monthly average (÷12), so the trail compares like with like instead of dropping off a cliff at the end.`
 };
 
 const IS_MONTH_KEY = /^\d{4}-\d{2}$/;
 const IS_ANNUAL_KEY = /-annual$/;
 
-// the selected period plus its 3 preceding full calendar years (annual totals), oldest first —
+// the selected period plus its preceding full calendar years (annual totals), oldest first —
 // the walk-back window for TREND mode, echoing the site's existing "3-Year Growth" stat, which
 // also anchors comparisons on annual data rather than a rolling window of months. The current
 // point still shows the real, un-normalized selected period (same figure SNAPSHOT would show) —
 // only the trailing history is pulled from full years, skipping any year with no annual data yet.
+// Trail length is 5 years when fewer than 6 countries are selected (room for more history without
+// cluttering the chart) and 3 years otherwise.
 function getTrendPeriods(){
   const current = [...selectedMonths][0];
   const year = parseInt(current.slice(0, 4), 10);
   if(!year) return [current];
+  const trailYears = selectedCountries.size < 6 ? 5 : 3;
   const years = [];
-  for(let y = year - 3; y < year; y++){
+  for(let y = year - trailYears; y < year; y++){
     const key = `${y}-annual`;
     if(MONTHLY_DATA[key]) years.push(key);
   }

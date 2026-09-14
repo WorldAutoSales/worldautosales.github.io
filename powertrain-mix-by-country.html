@@ -169,6 +169,18 @@
           </div>
         </div>
 
+        <div class="card chart-card" id="momentum-section">
+          <h2>Momentum — Who's Moving Fastest</h2>
+          <p class="note" title="Momentum is the CHANGE in BEV share over the last full period, in percentage points — not the share itself. A market can have a high BEV share but low momentum (already EV-heavy, growth has plateaued), or the reverse.">Top 6 filtered markets by BEV-share change over their last full period (12 months for Europe/Canada, one year for everyone else) — fastest gainers first. Click a card to focus every chart on this page on it.</p>
+          <div class="momentum-grid" id="momentum-grid"></div>
+        </div>
+
+        <div class="card chart-card" id="momentum-slowest-section">
+          <h2>Momentum — Who's Moving Slowest</h2>
+          <p class="note" title="Momentum is the CHANGE in BEV share over the last full period, in percentage points — not the share itself. A market can have a high BEV share but low momentum (already EV-heavy, growth has plateaued), or the reverse.">Bottom 6 filtered markets by BEV-share change over their last full period (12 months for Europe/Canada, one year for everyone else) — smallest gains or steepest declines first. Click a card to focus every chart on this page on it.</p>
+          <div class="momentum-grid" id="momentum-slowest-grid"></div>
+        </div>
+
         <div class="card chart-card focus-stats-card hidden" id="focus-stats-card">
           <h2 id="focus-stats-title">Country Stats</h2>
           <p class="note">Growth is battery-electric (BEV) registrations. "Sold" figures use the currently selected period, falling back to the 2026 full-year projection for countries with no data in that period (e.g. an annual-only country while a single month is selected). Ranks are always against every tracked country, regardless of the sidebar filters.</p>
@@ -228,7 +240,7 @@
           <div class="chart-header-row">
             <h2>Volume vs. BEV Share</h2>
             <div class="chart-mode-toggle" role="group" aria-label="Chart view">
-              <button type="button" class="mode-btn active" data-bubble-mode="trend" title="Adds the 3 preceding full years as a fading trail, for countries with annual history.">TREND</button>
+              <button type="button" class="mode-btn active" data-bubble-mode="trend" title="Adds the preceding full years as a fading trail (5 years if fewer than 6 countries are selected, 3 otherwise), for countries with annual history.">TREND</button>
               <button type="button" class="mode-btn" data-bubble-mode="snapshot" title="One point per country, for the selected period only.">SNAPSHOT</button>
             </div>
           </div>
@@ -259,18 +271,6 @@
               <tbody id="table-body"></tbody>
             </table>
           </div>
-        </div>
-
-        <div class="card chart-card" id="momentum-section">
-          <h2>Momentum — Who's Moving Fastest</h2>
-          <p class="note" title="Momentum is the CHANGE in BEV share over the last full period, in percentage points — not the share itself. A market can have a high BEV share but low momentum (already EV-heavy, growth has plateaued), or the reverse.">Top 6 filtered markets by BEV-share change over their last full period (12 months for Europe/Canada, one year for everyone else) — fastest gainers first. Click a card to focus every chart on this page on it.</p>
-          <div class="momentum-grid" id="momentum-grid"></div>
-        </div>
-
-        <div class="card chart-card" id="momentum-slowest-section">
-          <h2>Momentum — Who's Moving Slowest</h2>
-          <p class="note" title="Momentum is the CHANGE in BEV share over the last full period, in percentage points — not the share itself. A market can have a high BEV share but low momentum (already EV-heavy, growth has plateaued), or the reverse.">Bottom 6 filtered markets by BEV-share change over their last full period (12 months for Europe/Canada, one year for everyone else) — smallest gains or steepest declines first. Click a card to focus every chart on this page on it.</p>
-          <div class="momentum-grid" id="momentum-slowest-grid"></div>
         </div>
 
         <div class="card chart-card hidden" id="mfr-section">
@@ -3469,7 +3469,7 @@ let bubbleMode = 'trend'; // 'snapshot' | 'trend' — see [data-bubble-mode] wir
 
 const BUBBLE_NOTES = {
   snapshot: `X = number of BEV units sold, Y = BEV share of that country's total. Each country is its own flag, same size for every market. Hover a flag for exact figures.`,
-  trend: `Flag = selected period, at its real figures. Paler dots trace the 3 preceding full years for the same country — only where annual history exists, so a short trail means a market we've only just started tracking, not one standing still. When the selected period is a single month, those yearly dots show that year's monthly average (÷12), so the trail compares like with like instead of dropping off a cliff at the end.`
+  trend: `Flag = selected period, at its real figures. Paler dots trace the preceding full years for the same country -- 5 years back when fewer than 6 countries are selected, 3 otherwise -- only where annual history exists, so a short trail means a market we've only just started tracking, not one standing still. When the selected period is a single month, those yearly dots show that year's monthly average (÷12), so the trail compares like with like instead of dropping off a cliff at the end.`
 };
 
 const IS_MONTH_KEY = /^\d{4}-\d{2}$/;
@@ -3480,12 +3480,15 @@ const IS_ANNUAL_KEY = /-annual$/;
 // also anchors comparisons on annual data rather than a rolling window of months. The current
 // point still shows the real, un-normalized selected period (same figure SNAPSHOT would show) —
 // only the trailing history is pulled from full years, skipping any year with no annual data yet.
+// Trail length is 5 years when fewer than 6 countries are selected (room for more history
+// without cluttering the chart) and 3 years otherwise.
 function getTrendPeriods(){
   const current = [...selectedMonths][0];
   const year = parseInt(current.slice(0, 4), 10);
   if(!year) return [current];
+  const trailYears = selectedCountries.size < 6 ? 5 : 3;
   const years = [];
-  for(let y = year - 3; y < year; y++){
+  for(let y = year - trailYears; y < year; y++){
     const key = `${y}-annual`;
     if(MONTHLY_DATA[key]) years.push(key);
   }
