@@ -189,6 +189,13 @@
           <div class="tooltip" id="elec-bars-tooltip"></div>
         </div>
 
+        <div class="card chart-card hidden" id="cars-on-road-card">
+          <h2>Non-BEV Cars on the Road</h2>
+          <p class="note" id="cars-on-road-note">Estimated non-battery-electric fleet (petrol, diesel, hybrid combined), 2018–2041 — built by aging every year's new registrations with a survival curve and anchoring to real observed fleet-by-fuel data where it exists. Solid = observed or estimated from real fleet data. Dashed (2027 onward) = projected: total new registrations are held constant at the 2026 level, while the non-BEV share of those registrations keeps shrinking at the same compound annual rate observed from 2024 to 2026 for this country — this is a trend continuation, not a guaranteed outcome.</p>
+          <svg class="chart" id="cars-on-road-svg" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
+          <div class="tooltip" id="cars-on-road-tooltip"></div>
+        </div>
+
         <div class="card chart-card gated-section hidden">
           <div class="chart-header-row">
             <h2 id="trends-title">Motorisation Trends</h2>
@@ -310,6 +317,7 @@
 <script src="assets/country-monthly-data.js"></script>
 <script src="assets/world-market-totals-2025.js"></script>
 <script src="assets/electrification-bars.js"></script>
+<script src="assets/country-cars-on-road-data.js"></script>
 <script src="assets/canada-province-data.js"></script>
 <script>
 // month key -> { label, raw: { country: [BEV, PHEV, HEV, OTHERS, PETROL, DIESEL, TOTAL] } } — source: ACEA
@@ -2453,6 +2461,93 @@ function renderElectrificationBars(){
   renderElectrificationBarsChart(focusedCountry);
 }
 
+// Non-BEV on-road fleet (2018-2041): only meaningful once a single country is focused, and only
+// for countries with a real survival-curve model in CARS_ON_ROAD (currently Germany, Norway) --
+// renderCarsOnRoadChart itself hides the card and bails out when that data doesn't exist, so the
+// wrapper only needs to handle the "no country focused at all" case.
+function renderCarsOnRoad(){
+  const card = document.getElementById('cars-on-road-card');
+  if(!focusedCountry){ card.classList.add('hidden'); return; }
+  renderCarsOnRoadChart(focusedCountry);
+}
+
+function renderCarsOnRoadChart(country){
+  const card = document.getElementById('cars-on-road-card');
+  const allRows = (typeof CARS_ON_ROAD !== 'undefined') ? CARS_ON_ROAD[country] : null;
+  if(!allRows){ card.classList.add('hidden'); return; }
+
+  const series = allRows.filter(d => d.year >= 2018 && d.year <= 2041);
+  if(series.length < 2){ card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+
+  const COLOR = '#64748b';
+  const W = 900, H = 320, M = {top:16, right:16, bottom:30, left:56};
+  const innerW = W - M.left - M.right;
+  const innerH = H - M.top - M.bottom;
+  const svg = d3.select('#cars-on-road-svg');
+  svg.selectAll('*').remove();
+  const tooltip = document.getElementById('cars-on-road-tooltip');
+  const wrap = document.getElementById('cars-on-road-svg').closest('.chart-card');
+
+  const xScale = d3.scalePoint().domain(series.map(d => d.year)).range([0, innerW]).padding(0.02);
+  const yScale = d3.scaleLinear().domain([0, d3.max(series, d => d.nonBev) * 1.1]).range([innerH, 0]);
+
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+
+  g.append('g')
+    .attr('class', 'bubble-axis')
+    .attr('transform', `translate(0,${innerH})`)
+    .call(d3.axisBottom(xScale).tickValues(series.map(d => d.year).filter(y => y % 2 === 0)));
+
+  g.append('g')
+    .attr('class', 'bubble-axis')
+    .call(d3.axisLeft(yScale).ticks(5).tickFormat(d3.format('~s')));
+
+  const area = d3.area().x(d => xScale(d.year)).y0(innerH).y1(d => yScale(d.nonBev));
+  g.append('path').datum(series).attr('d', area).attr('fill', COLOR).attr('fill-opacity', 0.18).attr('stroke', 'none');
+
+  const line = d3.line().x(d => xScale(d.year)).y(d => yScale(d.nonBev));
+  const lastRealIdx = series.reduce((acc, d, idx) => d.method === 'REAL' ? idx : acc, -1);
+  const solidPart = series.slice(0, lastRealIdx + 1);
+  const dashedPart = series.slice(Math.max(lastRealIdx, 0));
+  if(solidPart.length > 1){
+    g.append('path').datum(solidPart).attr('class', 'trend-line').attr('stroke', COLOR).attr('d', line);
+  }
+  if(dashedPart.length > 1){
+    g.append('path').datum(dashedPart).attr('class', 'trend-line').attr('stroke', COLOR)
+      .attr('stroke-dasharray', '5,4').attr('d', line);
+  }
+  g.selectAll('.cars-on-road-dot').data(series).join('circle')
+    .attr('class', 'cars-on-road-dot trend-dot')
+    .attr('cx', d => xScale(d.year)).attr('cy', d => yScale(d.nonBev)).attr('r', 3)
+    .attr('fill', COLOR);
+
+  const guide = g.append('line').attr('class', 'trend-guideline').attr('y1', 0).attr('y2', innerH).style('opacity', 0);
+  g.append('rect')
+    .attr('width', innerW).attr('height', innerH)
+    .attr('fill', 'transparent')
+    .on('pointermove', (e) => {
+      const [mx] = d3.pointer(e);
+      const d = series.reduce((best, s) => (best === null || Math.abs(xScale(s.year) - mx) < Math.abs(xScale(best.year) - mx)) ? s : best, null);
+      if(!d) return;
+      guide.attr('x1', xScale(d.year)).attr('x2', xScale(d.year)).style('opacity', 1);
+      const rect = wrap.getBoundingClientRect();
+      tooltip.style.left = (e.clientX - rect.left) + 'px';
+      tooltip.style.top = (e.clientY - rect.top - 10) + 'px';
+      tooltip.style.opacity = 1;
+      const methodLabel = {
+        REAL: 'Observed / estimated from real fleet data',
+        MODEL_ANCHORED: 'Projected (no new registrations assumed yet)',
+        MODEL_ANCHORED_WITH_FUTURE_REG: 'Projected (includes new non-BEV registrations, trended from 2024–2026)'
+      }[d.method] || d.method;
+      tooltip.innerHTML = `<strong>${d.year}</strong><br>Non-BEV: <strong>${Math.round(d.nonBev).toLocaleString('en-US')}</strong>` +
+        `<br>BEV: ${Math.round(d.bev).toLocaleString('en-US')}` +
+        (d.futureNewRegProj != null ? `<br>New non-BEV registrations projected this year: ${Math.round(d.futureNewRegProj).toLocaleString('en-US')}` : '') +
+        `<br><span style="opacity:.7">${methodLabel}</span>`;
+    })
+    .on('pointerleave', () => { guide.style('opacity', 0); tooltip.style.opacity = 0; });
+}
+
 function buildData(){
   return Object.values(aggregateByCountry())
     .filter(d => selectedCountries.has(d.country) && selectedContinents.has(COUNTRY_CONTINENT[d.country] || "OTHER") && passesRankFilter(d.country) && d.total > 0)
@@ -3652,6 +3747,7 @@ function recompute(){
   renderTrendsChart();
   renderFocusStats();
   renderElectrificationBars();
+  renderCarsOnRoad();
   updateURL();
 }
 
