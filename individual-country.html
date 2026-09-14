@@ -107,8 +107,6 @@
           <p class="subtitle">The same powertrain charts as Mix by Country, but the world map shows every country in its own flag colors instead of a BEV-share gradient — full color where real powertrain data exists, faded and grayed out where it doesn't. Canada additionally breaks down by province further below.</p>
         </header>
 
-        <div class="stat-row gated-section hidden" id="stat-row"></div>
-
         <div class="card notes-card is-collapsed gated-section hidden">
           <button type="button" class="notes-toggle" aria-expanded="false">
             <span>📝 Notes</span>
@@ -238,12 +236,6 @@
               <tbody id="table-body"></tbody>
             </table>
           </div>
-        </div>
-
-        <div class="card chart-card gated-section hidden" id="momentum-section">
-          <h2>Momentum — Who's Moving Fastest</h2>
-          <p class="note" title="Momentum is the CHANGE in BEV share over the last full period, in percentage points — not the share itself. A market can have a high BEV share but low momentum (already EV-heavy, growth has plateaued), or the reverse.">Every filtered market's BEV-share trajectory, ranked by change over its last full period (12 months for Europe/Canada, one year for everyone else) — fastest gainers first. Click a card to focus every chart on this page on it.</p>
-          <div class="momentum-grid" id="momentum-grid"></div>
         </div>
 
         <div class="card chart-card gated-section hidden" id="canada-province-section">
@@ -2976,23 +2968,6 @@ function wireMomentumCardClicks(container){
   });
 }
 
-// visibility is owned by updateGating() (this page requires a country to be focused before
-// any section shows, this one included) -- that country's own momentum card also appears in
-// Country Stats via renderFocusStats, this grid still shows every filtered country alongside it
-function renderMomentum(){
-  const grid = document.getElementById('momentum-grid');
-
-  const countries = ALL_COUNTRIES.filter(c => selectedCountries.has(c) && selectedContinents.has(COUNTRY_CONTINENT[c] || "OTHER") && passesRankFilter(c));
-  const cards = countries.map(momentumCardData).filter(Boolean).sort((a,b) => {
-    if(a.delta == null) return 1;
-    if(b.delta == null) return -1;
-    return b.delta - a.delta;
-  });
-
-  grid.innerHTML = cards.map(momentumCardHTML).join('');
-  wireMomentumCardClicks(grid);
-}
-
 fetch('assets/countries-50m.json').then(r => r.json()).then(topology => {
   const geo = topojson.feature(topology, topology.objects.countries);
   geoFeatures = geo.features;
@@ -3420,40 +3395,6 @@ document.querySelectorAll('[data-bubble-mode]').forEach(btn => {
   });
 });
 
-// --- stat row ---
-function renderStats(){
-  // YoY needs like-for-like coverage: comparing this period's full total against a prior-year
-  // sum that's missing some big markets (China, Turkey, etc. — no matching prior-year figure
-  // sourced yet) would inflate the % against a smaller, incomplete denominator. So the YoY
-  // numerator only includes countries that also have a valid prior-year figure; the plain
-  // totals (not YoY) still use every currently-shown country.
-  const totals = DATA.reduce((acc,d) => {
-    acc.bev += d.bev; acc.total += d.total;
-    if(d.bevPrior){ acc.bevPrior += d.bevPrior; acc.bevForYoy += d.bev; }
-    if(d.totalPrior){ acc.totalPrior += d.totalPrior; acc.totalForYoy += d.total; }
-    return acc;
-  }, {bev:0, total:0, bevPrior:0, totalPrior:0, bevForYoy:0, totalForYoy:0});
-  const avgPct = totals.total ? +(totals.bev/totals.total*100).toFixed(1) : 0;
-  const totalYoy = totals.bevPrior ? +((totals.bevForYoy-totals.bevPrior)/totals.bevPrior*100).toFixed(1) : null;
-  const totalRegYoy = totals.totalPrior ? +((totals.totalForYoy-totals.totalPrior)/totals.totalPrior*100).toFixed(1) : null;
-  const top = DATA[0], bottom = DATA[DATA.length-1];
-  const monthLabel = selectedMonths.size === 1 ? MONTHLY_DATA[[...selectedMonths][0]].label : `${selectedMonths.size} months`;
-
-  const stats = [
-    {label:'Markets Shown', value:DATA.length, small:`of ${ALL_COUNTRIES.length}`},
-    {label:'BEV Share (avg)', value:avgPct+'%', small:monthLabel, yoy:totalYoy},
-    {label:'Highest', value: top ? top.bevPct+'%' : '—', small: top ? top.country : ''},
-    {label:'Lowest', value: bottom ? bottom.bevPct+'%' : '—', small: bottom ? bottom.country : ''},
-    {label:'Total EV Registrations', value:totals.bev.toLocaleString('en-US'), small: monthLabel, yoy:totalYoy},
-    {label:'Total Car Registrations', value:totals.total.toLocaleString('en-US'), small: monthLabel, yoy:totalRegYoy},
-  ];
-  document.getElementById('stat-row').innerHTML = stats.map(s => `
-    <div class="stat">
-      <div class="label">${s.label}</div>
-      <div class="value">${s.value}<small>${s.small}</small>${s.yoy == null ? '' : `<small class="stat-yoy ${s.yoy >= 0 ? 'yoy-up' : 'yoy-down'}">${s.yoy > 0 ? '+' : ''}${s.yoy}% YoY</small>`}</div>
-    </div>`).join('');
-}
-
 // --- table ---
 const tbody = document.getElementById('table-body');
 let sortKey = 'bevPct', sortDir = -1;
@@ -3702,7 +3643,6 @@ function recompute(){
   Object.keys(DATA_BY_NAME).forEach(k => delete DATA_BY_NAME[k]);
   DATA.forEach(d => { DATA_BY_NAME[d.country] = d; });
   updateGating();
-  renderStats();
   renderBars();
   renderTable();
   renderMap();
@@ -3710,7 +3650,6 @@ function recompute(){
   updateBubbleModeAuto();
   renderBubbleChart();
   renderTrendsChart();
-  renderMomentum();
   renderFocusStats();
   renderElectrificationBars();
   updateURL();

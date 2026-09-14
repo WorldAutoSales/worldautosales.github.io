@@ -147,9 +147,13 @@
           <div class="map-legend" id="map-legend"></div>
         </div>
 
-        <div class="card movers-card">
+        <div class="card movers-card" id="movers-card">
           <div class="movers-header">
-            <span>🚀 Biggest Movers — Month over Month (BEV)</span>
+            <span id="movers-title">🚀 Biggest Movers — Month over Month (BEV)</span>
+            <div class="chart-mode-toggle" role="group" aria-label="Comparison basis">
+              <button type="button" class="mode-btn active" data-movers-mode="mom" title="Compare each country's most recent month against the prior month.">MoM</button>
+              <button type="button" class="mode-btn" data-movers-mode="yoy" title="Compare the currently selected period against the same period one year earlier.">YoY</button>
+            </div>
             <a href="biggest-movers.html" class="movers-see-all">See full rankings (YoY, MoM, volume) →</a>
           </div>
           <p class="movers-note" id="movers-note">Loading…</p>
@@ -2426,6 +2430,28 @@ function computeMoMMovers(){
   });
   return { movers, fixedAnchor, selectedKey };
 }
+// YoY variant reuses each country's bevPrior/bev already computed onto DATA for the currently
+// selected period (via that period's priorYearBev/priorYearTotal) -- no separate month-pairing
+// needed, unlike MoM which has to walk actual monthly data to find two consecutive real months.
+function computeYoYMovers(){
+  const countries = moversFilteredCountries();
+  const selectedKey = [...selectedMonths][0];
+  const curLabel = MONTHLY_DATA[selectedKey] ? MONTHLY_DATA[selectedKey].label : selectedKey;
+  const prevLabel = priorYearLabel(curLabel) || `${curLabel} (prior year)`;
+  const movers = [];
+  countries.forEach(country => {
+    const d = DATA_BY_NAME[country];
+    if(!d || !(d.bevPrior > 0)) return; // no real prior-year figure to compare against
+    movers.push({
+      country, curLabel, prevLabel,
+      curBev: d.bev, prevBev: d.bevPrior,
+      pctChange: (d.bev - d.bevPrior) / d.bevPrior * 100,
+      absChange: d.bev - d.bevPrior
+    });
+  });
+  return { movers, curLabel };
+}
+let moversMode = 'mom';
 function moversFlagHTML(country){
   const iso = COUNTRY_ISO2[country];
   return iso ? `<img class="movers-flag" src="https://flagcdn.com/24x18/${iso}.png" alt="" loading="lazy">` : '<span class="movers-flag movers-flag-blank"></span>';
@@ -2434,20 +2460,32 @@ function renderMovers(){
   const pctList = document.getElementById('movers-top-pct');
   const absList = document.getElementById('movers-top-abs');
   const noteEl = document.getElementById('movers-note');
+  const titleEl = document.getElementById('movers-title');
   if(!pctList || !absList) return;
 
-  const { movers, fixedAnchor, selectedKey } = computeMoMMovers();
+  let movers, fixedAnchor, selectedKey;
+  if(moversMode === 'yoy'){
+    ({ movers, curLabel: selectedKey } = computeYoYMovers());
+  } else {
+    ({ movers, fixedAnchor, selectedKey } = computeMoMMovers());
+  }
   const top5Pct = [...movers].sort((a,b) => b.pctChange - a.pctChange).slice(0,5);
   const top5Abs = [...movers].sort((a,b) => b.absChange - a.absChange).slice(0,5);
 
+  if(titleEl) titleEl.textContent = moversMode === 'yoy' ? '🚀 Biggest Movers — Year over Year (BEV)' : '🚀 Biggest Movers — Month over Month (BEV)';
+
   if(noteEl){
-    const selectedLabel = MONTHLY_DATA[selectedKey] ? MONTHLY_DATA[selectedKey].label : selectedKey;
-    if(fixedAnchor){
-      const prevKey = prevMonthKey(selectedKey);
-      const prevLabel = MONTHLY_DATA[prevKey] ? MONTHLY_DATA[prevKey].label : prevKey;
-      noteEl.textContent = `Comparing ${prevLabel} → ${selectedLabel} for every country matching the sidebar's Market Rank, Continent and Country filters (Powertrain doesn't apply here — this is always BEV). A country with no data in one of those two months won't appear.`;
+    if(moversMode === 'yoy'){
+      noteEl.textContent = `Comparing ${selectedKey} against the same period one year earlier, for every country matching the sidebar's Market Rank, Continent and Country filters (Powertrain doesn't apply here — this is always BEV). A country with no real prior-year figure for this period won't appear.`;
     } else {
-      noteEl.textContent = `"${selectedLabel}" has no single prior month to compare against, so each country below instead uses its own most recent two consecutive real months — still limited to the sidebar's Market Rank, Continent and Country filters. A country with a reporting gap, or with only quarterly/annual data, won't appear. A few sources publish quarterly or bimonthly figures spread evenly across their months; for those, a jump right at the reporting boundary reflects the source's cadence, not a real mid-period swing (check a country's Data Quality note in Country Detail below).`;
+      const selectedLabel = MONTHLY_DATA[selectedKey] ? MONTHLY_DATA[selectedKey].label : selectedKey;
+      if(fixedAnchor){
+        const prevKey = prevMonthKey(selectedKey);
+        const prevLabel = MONTHLY_DATA[prevKey] ? MONTHLY_DATA[prevKey].label : prevKey;
+        noteEl.textContent = `Comparing ${prevLabel} → ${selectedLabel} for every country matching the sidebar's Market Rank, Continent and Country filters (Powertrain doesn't apply here — this is always BEV). A country with no data in one of those two months won't appear.`;
+      } else {
+        noteEl.textContent = `"${selectedLabel}" has no single prior month to compare against, so each country below instead uses its own most recent two consecutive real months — still limited to the sidebar's Market Rank, Continent and Country filters. A country with a reporting gap, or with only quarterly/annual data, won't appear. A few sources publish quarterly or bimonthly figures spread evenly across their months; for those, a jump right at the reporting boundary reflects the source's cadence, not a real mid-period swing (check a country's Data Quality note in Country Detail below).`;
+      }
     }
   }
 
@@ -3258,6 +3296,15 @@ document.querySelectorAll('[data-bar-mode]').forEach(btn => {
   });
 });
 
+document.querySelectorAll('[data-movers-mode]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if(btn.dataset.moversMode === moversMode) return;
+    moversMode = btn.dataset.moversMode;
+    document.querySelectorAll('[data-movers-mode]').forEach(b => b.classList.toggle('active', b === btn));
+    renderMovers();
+  });
+});
+
 document.querySelectorAll('[data-sort-key]').forEach(btn => {
   btn.addEventListener('click', () => {
     if(btn.dataset.sortKey === barSortKey) return;
@@ -3700,11 +3747,24 @@ tbody.addEventListener('click', e => {
 });
 
 // --- main recompute ---
+// The top stat row, Biggest Movers, and both Momentum (fastest/slowest) sections are
+// cross-country comparisons — once a single country is focused, they stop being useful (they'd
+// either show a "comparison" of one, or keep showing every other filtered country alongside the
+// one the user actually clicked on), so hide all four rather than let them go stale/confusing.
+function updateFocusSectionVisibility(){
+  const isFocused = !!focusedCountry;
+  document.getElementById('stat-row').classList.toggle('hidden', isFocused);
+  document.getElementById('movers-card').classList.toggle('hidden', isFocused);
+  document.getElementById('momentum-section').classList.toggle('hidden', isFocused);
+  document.getElementById('momentum-slowest-section').classList.toggle('hidden', isFocused);
+}
+
 function recompute(){
   DATA = buildData();
   Object.keys(DATA_BY_NAME).forEach(k => delete DATA_BY_NAME[k]);
   DATA.forEach(d => { DATA_BY_NAME[d.country] = d; });
   colorScale = makeColorScale();
+  updateFocusSectionVisibility();
   renderStats();
   renderMovers();
   renderBars();
