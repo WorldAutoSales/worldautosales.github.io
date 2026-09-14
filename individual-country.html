@@ -2503,12 +2503,13 @@ function renderCarsOnRoadChart(country){
     .attr('class', 'bubble-axis')
     .call(d3.axisLeft(yScale).ticks(5).tickFormat(d3.format('~s')));
 
-  // reference lines: 20% and 50% of the 2025 non-BEV volume, so the decline is readable at a
-  // glance against a fixed baseline rather than only against the chart's own shifting scale
-  const base2025 = series.find(d => d.year === 2025);
-  if(base2025 && base2025.nonBev > 0){
+  // reference lines: 20% and 50% of the peak non-BEV volume (whichever year that was for this
+  // country -- e.g. 2021 for the Netherlands), so the decline is readable at a glance against a
+  // fixed baseline rather than only against the chart's own shifting scale
+  const peakYear = series.reduce((best, d) => (!best || d.nonBev > best.nonBev) ? d : best, null);
+  if(peakYear && peakYear.nonBev > 0){
     [{pct:0.5,label:'50%'},{pct:0.2,label:'20%'}].forEach(({pct,label}) => {
-      const threshold = base2025.nonBev * pct;
+      const threshold = peakYear.nonBev * pct;
       const ty = yScale(threshold);
       g.append('line')
         .attr('x1', 0).attr('x2', innerW).attr('y1', ty).attr('y2', ty)
@@ -2518,7 +2519,7 @@ function renderCarsOnRoadChart(country){
         .attr('x', innerW).attr('y', ty - 3)
         .attr('text-anchor', 'end').attr('fill', '#dc2626')
         .style('font-size', '10px').style('pointer-events', 'none')
-        .text(`${label} of 2025 (${Math.round(threshold).toLocaleString('en-US')})`);
+        .text(`${label} of ${peakYear.year} peak (${Math.round(threshold).toLocaleString('en-US')})`);
     });
   }
 
@@ -3236,13 +3237,25 @@ const BUBBLE_NOTES = {
 const IS_MONTH_KEY = /^\d{4}-\d{2}$/;
 const IS_ANNUAL_KEY = /-annual$/;
 
+// a "-ytd" period is only a partial-year actual for the in-progress year -- plotted against a full
+// prior year (SNAPSHOT) or as a TREND trail's last point, its smaller BEV volume would always drag
+// the current year to the left/down, looking like a decline that's really just the year not being
+// over yet. Swap in the full-year projection instead, same convention buildFocusStats already uses
+// for its YoY/3Y stats.
+function bubblePeriodKey(period){
+  const m = period && period.match(/^(\d{4})-ytd$/);
+  if(!m) return period;
+  const projKey = `${m[1]}-projection`;
+  return MONTHLY_DATA[projKey] ? projKey : period;
+}
+
 // the selected period plus its preceding full calendar years (annual totals), oldest first —
 // the walk-back window for TREND mode, echoing the site's existing "3-Year Growth" stat, which
 // also anchors comparisons on annual data rather than a rolling window of months. The current
-// point still shows the real, un-normalized selected period (same figure SNAPSHOT would show) —
-// only the trailing history is pulled from full years, skipping any year with no annual data yet.
-// Trail length is 5 years when fewer than 6 countries are selected (room for more history without
-// cluttering the chart) and 3 years otherwise.
+// point shows the selected period (bubblePeriodKey-substituted, see above, when it's the current
+// year's YTD) — only the trailing history is pulled from full years, skipping any year with no
+// annual data yet. Trail length is 5 years when fewer than 6 countries are selected (room for more
+// history without cluttering the chart) and 3 years otherwise.
 function getTrendPeriods(){
   const current = [...selectedMonths][0];
   const year = parseInt(current.slice(0, 4), 10);
@@ -3279,7 +3292,7 @@ function buildFullBevValues(){
   const totals = {};
   ALL_COUNTRIES.forEach(c => { totals[c] = 0; });
   [...selectedMonths].forEach(m => {
-    const month = MONTHLY_DATA[m];
+    const month = MONTHLY_DATA[bubblePeriodKey(m)];
     Object.entries(month.raw).forEach(([country, v]) => {
       totals[country] = (totals[country] || 0) + v[0]; // v[0] = bev
     });
@@ -3331,6 +3344,17 @@ function renderBubbleChart(){
 
   bubbleSvg.selectAll('*').remove();
   if(!DATA.length) return;
+
+  // DATA is shared with the map/table, which deliberately keep YTD as real YTD -- so the
+  // projection substitution (see bubblePeriodKey) lives only in this bubble-local copy.
+  const currentKey = [...selectedMonths][0];
+  const bubbleCurrentKey = bubblePeriodKey(currentKey);
+  const currentOverride = bubbleCurrentKey !== currentKey ? aggregateByCountry([bubbleCurrentKey]) : null;
+  const bubbleData = currentOverride ? DATA.map(d => {
+    const rec = currentOverride[d.country];
+    if(!rec || rec.total <= 0) return d;
+    return { ...d, bev: rec.bev, phev: rec.phev, hev: rec.hev, others: rec.others, petrol: rec.petrol, diesel: rec.diesel, total: rec.total, bevPct: +(rec.bev/rec.total*100).toFixed(1) };
+  }) : DATA;
 
   const trendPeriods = bubbleMode === 'trend' ? getTrendPeriods() : [...selectedMonths];
 
@@ -3409,12 +3433,15 @@ function renderBubbleChart(){
   // added to monthly tracking simply shows its single current-period flag, same as SNAPSHOT.
   if(bubbleMode === 'trend'){
     const trendCurrent = [...selectedMonths][0];
-    const periodData = trendPeriods.map(p => ({
-      period: p,
-      label: MONTHLY_DATA[p] ? MONTHLY_DATA[p].label : p,
-      byCountry: aggregateByCountry([p]),
-      divisor: trendDivisor(p, trendCurrent)
-    }));
+    const periodData = trendPeriods.map(p => {
+      const key = bubblePeriodKey(p); // substitutes only the current entry, when it's a YTD key
+      return {
+        period: p,
+        label: MONTHLY_DATA[key] ? MONTHLY_DATA[key].label : p,
+        byCountry: aggregateByCountry([key]),
+        divisor: trendDivisor(p, trendCurrent)
+      };
+    });
     const trails = DATA.map(d => {
       const points = periodData.map(pd => {
         const rec = pd.byCountry[d.country];
@@ -3459,7 +3486,7 @@ function renderBubbleChart(){
       .on('pointerleave', () => { bubbleTooltip.style.opacity = 0; });
   }
 
-  const nodeGroups = g.selectAll('.bubble-node-group').data(DATA, d => d.country).join('g')
+  const nodeGroups = g.selectAll('.bubble-node-group').data(bubbleData, d => d.country).join('g')
     .attr('class', 'bubble-node-group')
     .attr('transform', d => `translate(${xScale(d.bev)},${yScale(d.bevPct)})`);
 
@@ -3494,8 +3521,8 @@ function renderBubbleChart(){
     });
 
   // label the biggest markets only, to avoid clutter
-  const topByTotal = new Set([...DATA].sort((a,b) => b.total - a.total).slice(0, 8).map(d => d.country));
-  g.selectAll('.bubble-label').data(DATA.filter(d => topByTotal.has(d.country)), d => d.country).join('text')
+  const topByTotal = new Set([...bubbleData].sort((a,b) => b.total - a.total).slice(0, 8).map(d => d.country));
+  g.selectAll('.bubble-label').data(bubbleData.filter(d => topByTotal.has(d.country)), d => d.country).join('text')
     .attr('class', 'bubble-label')
     .attr('x', d => xScale(d.bev))
     .attr('y', d => yScale(d.bevPct) - BUBBLE_R - 4)
