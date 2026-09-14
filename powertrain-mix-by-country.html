@@ -367,6 +367,8 @@ const MONTHLY_DATA = {
       "Paraguay": [158,643,1367,32,2460,357,5017],
       // source: FCAI (VFACTS) via CarExpert, Australia (monthly) — light vehicles only, excludes heavy commercial; others=0 (no LPG/hydrogen/CNG reported). CarExpert's article notes a small (~50-unit, <0.05%) internal inconsistency between its monthly and YTD fuel-type figures and cites three different total-EV numbers (27,078 body text / 27,089 FCAI press release / 27,028 used here from the structured table) — flagged rather than silently resolved. New data for Australia is typically published within the first few days of the following month (FCAI/VFACTS releases on the 3rd working day) — faster than most other markets tracked here.
       "Australia": [27028,10591,18662,0,25824,23608,105713],
+      // source: LTA (Land Transport Authority), Singapore (monthly) — COE quota-capped market, small volumes
+      "Singapore": [2880,288,1134,0,247,0,4549],
           // OFV (Opplysningsradet for veitrafikken), Norway (monthly) -- direct from OFV's own published fuel-type table (Fordeling per drivstoff); PHEV = Bensin+Diesel Plugin Hybrid combined, HEV = Bensin+Diesel Hybrid combined
       "Norway": [13274,51,32,0,30,64,13451],      // Mobility Sweden (monthly) -- from the official Manadsrapport Nyregistreringar Excel's PB - Drivmedel sheet; others = Etanol+Gas+Ospec.
       "Sweden": [10069,4988,2024,69,4270,1164,22584],      // Mobility Denmark press release (monthly) -- gives only Total and BEV (elbiler) exactly; no PHEV/HEV/Petrol/Diesel breakdown published, so the 2,278-unit non-BEV remainder is placed in Petrol per this project's established convention (see Russia) rather than fabricating a split
@@ -1276,7 +1278,7 @@ const MONTHLY_DATA = {
       // source: world_auto_sales_annual, period_type='YTD' — GAIKINDO, Jan-Jul 2026 summed; no diesel split published (Diesel=0)
       "Indonesia": [83837,6964,49156,0,377668,0,517625],
       // source: LTA (Land Transport Authority), Jan-Jul 2026 summed — COE quota-capped market, small volumes
-      "Singapore": [20148,763,9426,0,1757,3,32097],
+      "Singapore": [23028,1051,10560,0,2004,3,36646],
       // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw), Jan-Jul 2026 summed — passenger cars only, PHEV folded into HEV
       "Taiwan": [21541,0,91086,0,98141,2842,213610],
       // source: ANAC A.G. (Registro Civil), Jan-Jul 2026 summed — see monthly comments for Petrol/Diesel residual methodology
@@ -1331,7 +1333,7 @@ const MONTHLY_DATA = {
       "United States":"through Jul 2026",
       "China":"through Aug 2026",
       "South Korea":"through Aug 2026",
-      "Singapore":"through Jul 2026",
+      "Singapore":"through Aug 2026",
       "Malaysia":"through Jul 2026",
       "Thailand":"through Jul 2026",
       "Indonesia":"through Jul 2026",
@@ -1439,7 +1441,7 @@ const MONTHLY_DATA = {
       // source: world_auto_sales_annual, period_type='PROJECTED' — plain run-rate (YTD x 12/7) from GAIKINDO data; no diesel split published (Diesel=0)
       "Indonesia": [143721, 11938, 84267, 0, 647431, 0, 887357],
       // source: world_auto_sales_annual, period_type='PROJECTED' — plain run-rate (YTD x 12/7) from LTA data; COE quota-capped market
-      "Singapore": [34539, 1308, 16159, 0, 3012, 5, 55023],
+      "Singapore": [34542, 1576, 15840, 0, 3006, 4, 54968],
       // source: THB via Taiwan Stats (stats.tw) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; PHEV folded into HEV
       "Taiwan": [38978, 0, 163709, 0, 173184, 4872, 380743],
       // source: ANAC A.G. — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
