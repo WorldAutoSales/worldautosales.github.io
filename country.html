@@ -108,6 +108,7 @@
         <div class="card chart-card hidden" id="cars-on-road-card">
           <h2>Non-BEV Cars on the Road</h2>
           <p class="note" id="cars-on-road-note">Estimated non-battery-electric fleet (petrol, diesel, hybrid combined), 2018–2041 — built by aging every year's new registrations with a survival curve and anchoring to real observed fleet-by-fuel data where it exists. Solid = observed or estimated from real fleet data. Dashed (2027 onward) = projected: total new registrations are held constant at the 2026 level, while the non-BEV share of those registrations keeps shrinking at the same compound annual rate observed from 2024 to 2026 for this country — this is a trend continuation, not a guaranteed outcome.</p>
+          <div class="chart-legend" id="cars-on-road-legend"></div>
           <svg class="chart" id="cars-on-road-svg" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
           <div class="tooltip" id="cars-on-road-tooltip"></div>
         </div>
@@ -292,6 +293,7 @@ function renderCarsOnRoadChart(country){
   card.classList.remove('hidden');
 
   const COLOR = '#64748b';
+  const BEV_COLOR = '#1e8f5f';
   const W = 900, H = 320, M = {top:16, right:16, bottom:30, left:56};
   const innerW = W - M.left - M.right;
   const innerH = H - M.top - M.bottom;
@@ -300,8 +302,12 @@ function renderCarsOnRoadChart(country){
   const tooltip = document.getElementById('cars-on-road-tooltip');
   const wrap = document.getElementById('cars-on-road-svg').closest('.chart-card');
 
+  document.getElementById('cars-on-road-legend').innerHTML = `
+    <div class="legend-chip"><span class="swatch" style="background:${COLOR}"></span>Non-BEV</div>
+    <div class="legend-chip"><span class="swatch" style="background:${BEV_COLOR}"></span>BEV</div>`;
+
   const xScale = d3.scalePoint().domain(series.map(d => d.year)).range([0, innerW]).padding(0.02);
-  const yScale = d3.scaleLinear().domain([0, d3.max(series, d => d.nonBev) * 1.1]).range([innerH, 0]);
+  const yScale = d3.scaleLinear().domain([0, d3.max(series, d => d.nonBev + d.bev) * 1.1]).range([innerH, 0]);
 
   const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
 
@@ -314,12 +320,13 @@ function renderCarsOnRoadChart(country){
     .attr('class', 'bubble-axis')
     .call(d3.axisLeft(yScale).ticks(5).tickFormat(d3.format('~s')));
 
-  // reference lines: 20% and 50% of the 2025 non-BEV volume, so the decline is readable at a
-  // glance against a fixed baseline rather than only against the chart's own shifting scale
-  const base2025 = series.find(d => d.year === 2025);
-  if(base2025 && base2025.nonBev > 0){
+  // reference lines: 20% and 50% of the peak non-BEV volume (whichever year that was for this
+  // country -- e.g. 2021 for the Netherlands), so the decline is readable at a glance against a
+  // fixed baseline rather than only against the chart's own shifting scale
+  const peakYear = series.reduce((best, d) => (!best || d.nonBev > best.nonBev) ? d : best, null);
+  if(peakYear && peakYear.nonBev > 0){
     [{pct:0.5,label:'50%'},{pct:0.2,label:'20%'}].forEach(({pct,label}) => {
-      const threshold = base2025.nonBev * pct;
+      const threshold = peakYear.nonBev * pct;
       const ty = yScale(threshold);
       g.append('line')
         .attr('x1', 0).attr('x2', innerW).attr('y1', ty).attr('y2', ty)
@@ -329,28 +336,40 @@ function renderCarsOnRoadChart(country){
         .attr('x', innerW).attr('y', ty - 3)
         .attr('text-anchor', 'end').attr('fill', '#dc2626')
         .style('font-size', '10px').style('pointer-events', 'none')
-        .text(`${label} of 2025 (${Math.round(threshold).toLocaleString('en-US')})`);
+        .text(`${label} of ${peakYear.year} peak (${Math.round(threshold).toLocaleString('en-US')})`);
     });
   }
 
   const area = d3.area().x(d => xScale(d.year)).y0(innerH).y1(d => yScale(d.nonBev));
   g.append('path').datum(series).attr('d', area).attr('fill', COLOR).attr('fill-opacity', 0.18).attr('stroke', 'none');
 
+  // BEV layer stacked on top of the grey non-BEV area, so the top edge traces total fleet on the road
+  const bevArea = d3.area().x(d => xScale(d.year)).y0(d => yScale(d.nonBev)).y1(d => yScale(d.nonBev + d.bev));
+  g.append('path').datum(series).attr('d', bevArea).attr('fill', BEV_COLOR).attr('fill-opacity', 0.35).attr('stroke', 'none');
+
   const line = d3.line().x(d => xScale(d.year)).y(d => yScale(d.nonBev));
+  const bevLine = d3.line().x(d => xScale(d.year)).y(d => yScale(d.nonBev + d.bev));
   const lastRealIdx = series.reduce((acc, d, idx) => d.method === 'REAL' ? idx : acc, -1);
   const solidPart = series.slice(0, lastRealIdx + 1);
   const dashedPart = series.slice(Math.max(lastRealIdx, 0));
   if(solidPart.length > 1){
     g.append('path').datum(solidPart).attr('class', 'trend-line').attr('stroke', COLOR).attr('d', line);
+    g.append('path').datum(solidPart).attr('class', 'trend-line').attr('stroke', BEV_COLOR).attr('d', bevLine);
   }
   if(dashedPart.length > 1){
     g.append('path').datum(dashedPart).attr('class', 'trend-line').attr('stroke', COLOR)
       .attr('stroke-dasharray', '5,4').attr('d', line);
+    g.append('path').datum(dashedPart).attr('class', 'trend-line').attr('stroke', BEV_COLOR)
+      .attr('stroke-dasharray', '5,4').attr('d', bevLine);
   }
   g.selectAll('.cars-on-road-dot').data(series).join('circle')
     .attr('class', 'cars-on-road-dot trend-dot')
     .attr('cx', d => xScale(d.year)).attr('cy', d => yScale(d.nonBev)).attr('r', 3)
     .attr('fill', COLOR);
+  g.selectAll('.cars-on-road-bev-dot').data(series).join('circle')
+    .attr('class', 'cars-on-road-bev-dot trend-dot')
+    .attr('cx', d => xScale(d.year)).attr('cy', d => yScale(d.nonBev + d.bev)).attr('r', 3)
+    .attr('fill', BEV_COLOR);
 
   const guide = g.append('line').attr('class', 'trend-guideline').attr('y1', 0).attr('y2', innerH).style('opacity', 0);
   g.append('rect')
