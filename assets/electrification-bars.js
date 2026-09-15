@@ -52,7 +52,10 @@ function buildElectrificationBarsSeries(country){
     .slice(-ELEC_BARS_YEAR_COUNT)
     .map(r => ({ label: String(r.year), bev: r.bev, phev: r.phev, hev: r.hev, petrol: r.petrol, diesel: r.diesel, total: r.total, isPartial: false, isYear: true }));
 
-  const ytdRow = yearly.find(r => r.period_type === 'YTD');
+  // a country can carry more than one YTD row across different years (e.g. a stale prior-year
+  // YTD left in place alongside the current year's) -- always take the most recent one, not
+  // just the first match, so this chart's monthly breakdown looks up the right year
+  const ytdRow = yearly.filter(r => r.period_type === 'YTD').sort((a, b) => b.year - a.year)[0];
   const ytdPeriod = ytdRow
     ? { label: `${ytdRow.year} YTD`, bev: ytdRow.bev, phev: ytdRow.phev, hev: ytdRow.hev, petrol: ytdRow.petrol, diesel: ytdRow.diesel, total: ytdRow.total, isPartial: true, isYear: false, isYTD: true }
     : null;
