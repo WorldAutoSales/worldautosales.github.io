@@ -269,8 +269,15 @@
         <div class="card chart-card hidden" id="cars-on-road-card">
           <h2>Non-BEV Cars on the Road</h2>
           <p class="note" id="cars-on-road-note">Estimated non-battery-electric fleet (petrol, diesel, hybrid combined), 2018–2041 — built by aging every year's new registrations with a survival curve and anchoring to real observed fleet-by-fuel data where it exists. Solid = observed or estimated from real fleet data. Dashed (2027 onward) = projected: total new registrations are held constant at the 2026 level, while the non-BEV share of those registrations keeps shrinking at the same compound annual rate observed from 2024 to 2026 for this country — this is a trend continuation, not a guaranteed outcome.</p>
+          <div class="chart-legend" id="cars-on-road-legend"></div>
           <svg class="chart" id="cars-on-road-svg" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
           <div class="tooltip" id="cars-on-road-tooltip"></div>
+        </div>
+
+        <div class="card chart-card hidden" id="ev-regulations-card">
+          <h2>EV/ICE Regulation &amp; Policy</h2>
+          <p class="note">Sales/CO2 mandates, credit-trading rules, and stated policy objectives, by country — researched from official and news sources, not derived from this site's sales data. Fast-moving area; treat "last verified" dates as the point-in-time this was checked, not a guarantee of current accuracy.</p>
+          <div id="ev-regulations-body"></div>
         </div>
 
         <footer class="page-footer">
@@ -318,6 +325,7 @@
 <script src="assets/world-market-totals-2025.js"></script>
 <script src="assets/electrification-bars.js"></script>
 <script src="assets/country-cars-on-road-data.js"></script>
+<script src="assets/country-ev-regulations-data.js"></script>
 <script src="assets/canada-province-data.js"></script>
 <script>
 // month key -> { label, raw: { country: [BEV, PHEV, HEV, OTHERS, PETROL, DIESEL, TOTAL] } } — source: ACEA
@@ -2481,6 +2489,7 @@ function renderCarsOnRoadChart(country){
   card.classList.remove('hidden');
 
   const COLOR = '#64748b';
+  const BEV_COLOR = '#1e8f5f';
   const W = 900, H = 320, M = {top:16, right:16, bottom:30, left:56};
   const innerW = W - M.left - M.right;
   const innerH = H - M.top - M.bottom;
@@ -2489,8 +2498,12 @@ function renderCarsOnRoadChart(country){
   const tooltip = document.getElementById('cars-on-road-tooltip');
   const wrap = document.getElementById('cars-on-road-svg').closest('.chart-card');
 
+  document.getElementById('cars-on-road-legend').innerHTML = `
+    <div class="legend-chip"><span class="swatch" style="background:${COLOR}"></span>Non-BEV</div>
+    <div class="legend-chip"><span class="swatch" style="background:${BEV_COLOR}"></span>BEV</div>`;
+
   const xScale = d3.scalePoint().domain(series.map(d => d.year)).range([0, innerW]).padding(0.02);
-  const yScale = d3.scaleLinear().domain([0, d3.max(series, d => d.nonBev) * 1.1]).range([innerH, 0]);
+  const yScale = d3.scaleLinear().domain([0, d3.max(series, d => d.nonBev + d.bev) * 1.1]).range([innerH, 0]);
 
   const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
 
@@ -2526,21 +2539,33 @@ function renderCarsOnRoadChart(country){
   const area = d3.area().x(d => xScale(d.year)).y0(innerH).y1(d => yScale(d.nonBev));
   g.append('path').datum(series).attr('d', area).attr('fill', COLOR).attr('fill-opacity', 0.18).attr('stroke', 'none');
 
+  // BEV layer stacked on top of the grey non-BEV area, so the top edge traces total fleet on the road
+  const bevArea = d3.area().x(d => xScale(d.year)).y0(d => yScale(d.nonBev)).y1(d => yScale(d.nonBev + d.bev));
+  g.append('path').datum(series).attr('d', bevArea).attr('fill', BEV_COLOR).attr('fill-opacity', 0.35).attr('stroke', 'none');
+
   const line = d3.line().x(d => xScale(d.year)).y(d => yScale(d.nonBev));
+  const bevLine = d3.line().x(d => xScale(d.year)).y(d => yScale(d.nonBev + d.bev));
   const lastRealIdx = series.reduce((acc, d, idx) => d.method === 'REAL' ? idx : acc, -1);
   const solidPart = series.slice(0, lastRealIdx + 1);
   const dashedPart = series.slice(Math.max(lastRealIdx, 0));
   if(solidPart.length > 1){
     g.append('path').datum(solidPart).attr('class', 'trend-line').attr('stroke', COLOR).attr('d', line);
+    g.append('path').datum(solidPart).attr('class', 'trend-line').attr('stroke', BEV_COLOR).attr('d', bevLine);
   }
   if(dashedPart.length > 1){
     g.append('path').datum(dashedPart).attr('class', 'trend-line').attr('stroke', COLOR)
       .attr('stroke-dasharray', '5,4').attr('d', line);
+    g.append('path').datum(dashedPart).attr('class', 'trend-line').attr('stroke', BEV_COLOR)
+      .attr('stroke-dasharray', '5,4').attr('d', bevLine);
   }
   g.selectAll('.cars-on-road-dot').data(series).join('circle')
     .attr('class', 'cars-on-road-dot trend-dot')
     .attr('cx', d => xScale(d.year)).attr('cy', d => yScale(d.nonBev)).attr('r', 3)
     .attr('fill', COLOR);
+  g.selectAll('.cars-on-road-bev-dot').data(series).join('circle')
+    .attr('class', 'cars-on-road-bev-dot trend-dot')
+    .attr('cx', d => xScale(d.year)).attr('cy', d => yScale(d.nonBev + d.bev)).attr('r', 3)
+    .attr('fill', BEV_COLOR);
 
   const guide = g.append('line').attr('class', 'trend-guideline').attr('y1', 0).attr('y2', innerH).style('opacity', 0);
   g.append('rect')
@@ -2566,6 +2591,35 @@ function renderCarsOnRoadChart(country){
         `<br><span style="opacity:.7">${methodLabel}</span>`;
     })
     .on('pointerleave', () => { guide.style('opacity', 0); tooltip.style.opacity = 0; });
+}
+
+// EV/ICE regulation & policy card: static per-country research data (assets/country-ev-regulations-data.js),
+// not derived from sales figures. Only meaningful once a single country is focused; renderEvRegulationsBody
+// itself hides the card and bails out when no entry exists for that country, so the wrapper only needs to
+// handle the "nothing focused" case.
+function renderEvRegulations(){
+  const card = document.getElementById('ev-regulations-card');
+  if(!focusedCountry){ card.classList.add('hidden'); return; }
+  renderEvRegulationsBody(focusedCountry);
+}
+
+function renderEvRegulationsBody(country){
+  const card = document.getElementById('ev-regulations-card');
+  const entries = (typeof EV_REGULATIONS !== 'undefined') ? EV_REGULATIONS[country] : null;
+  if(!entries || !entries.length){ card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  document.getElementById('ev-regulations-body').innerHTML = entries.map(e => `
+    <div class="ev-reg-entry">
+      ${e.region_bloc ? `<div class="ev-reg-bloc">${e.region_bloc}</div>` : ''}
+      <div class="ev-reg-badge ${e.has_binding_mandate ? 'binding' : 'non-binding'}">${e.has_binding_mandate ? 'Binding mandate' : 'No binding mandate'}</div>
+      <div class="ev-reg-row"><span class="ev-reg-label">Mandate type</span>${e.mandate_type || '—'}</div>
+      <div class="ev-reg-row"><span class="ev-reg-label">Target${e.target_year ? ` — ${e.target_year}` : ''}</span>${e.target_description || '—'}</div>
+      <div class="ev-reg-row"><span class="ev-reg-label">Credit rules</span>${e.credit_rules || 'N/A'}</div>
+      ${e.objective_notes ? `<div class="ev-reg-row"><span class="ev-reg-label">Objective</span>${e.objective_notes}</div>` : ''}
+      ${e.notes ? `<div class="ev-reg-row ev-reg-caveat"><span class="ev-reg-label">Caveat</span>${e.notes}</div>` : ''}
+      <div class="ev-reg-footer">${e.source_url ? `<a href="${e.source_url}" target="_blank" rel="noopener">Source</a> · ` : ''}Verified ${e.last_verified}</div>
+    </div>
+  `).join('');
 }
 
 function buildData(){
@@ -3807,6 +3861,7 @@ function recompute(){
   renderFocusStats();
   renderElectrificationBars();
   renderCarsOnRoad();
+  renderEvRegulations();
   updateURL();
 }
 

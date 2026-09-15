@@ -603,6 +603,51 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
 .bubble-trend-path.is-down{
   stroke:var(--accent-strong);
 }
+.ev-reg-entry{
+  padding:10px 0;
+  border-top:1px solid var(--border);
+}
+.ev-reg-entry:first-child{ border-top:none; padding-top:0; }
+.ev-reg-bloc{
+  font-size:11px;
+  font-weight:700;
+  color:var(--text-muted);
+  text-transform:uppercase;
+  letter-spacing:.03em;
+  margin-bottom:4px;
+}
+.ev-reg-badge{
+  display:inline-block;
+  font-size:11px;
+  font-weight:600;
+  padding:2px 8px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  margin-bottom:8px;
+}
+.ev-reg-badge.binding{ background:var(--surface-alt); color:var(--text); }
+.ev-reg-badge.non-binding{ background:transparent; color:var(--text-muted); }
+.ev-reg-row{
+  font-size:12.5px;
+  line-height:1.5;
+  margin-top:6px;
+}
+.ev-reg-label{
+  display:block;
+  font-size:10.5px;
+  font-weight:700;
+  color:var(--text-muted);
+  text-transform:uppercase;
+  letter-spacing:.03em;
+  margin-bottom:2px;
+}
+.ev-reg-caveat{ color:var(--text-muted); }
+.ev-reg-footer{
+  margin-top:8px;
+  font-size:11px;
+  color:var(--text-muted);
+}
+.ev-reg-footer a{ color:var(--accent); }
 .bubble-trend-dot{
   fill:var(--accent);
   stroke:var(--surface);
@@ -982,26 +1027,6 @@ ul.notes-body{
   .movers-columns{ grid-template-columns:1fr; }
 }
 
-/* ---------- Sales by Manufacturers ---------- */
-.mfr-controls{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin:0 0 14px;
-  font-size:12.5px;
-  font-weight:600;
-  color:var(--text-muted);
-}
-.mfr-controls select{
-  font:inherit;
-  font-size:13px;
-  font-weight:600;
-  color:var(--text);
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:6px;
-  padding:4px 8px;
-}
 #mfr-rank-rows .rank-row .total-label{ color:var(--text); font-weight:700; }
 .mfr-year-total{ font-size:12px; color:var(--text-muted); font-weight:500; margin-left:6px; }
 

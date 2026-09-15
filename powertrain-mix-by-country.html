@@ -295,8 +295,15 @@
         <div class="card chart-card hidden" id="cars-on-road-card">
           <h2>Non-BEV Cars on the Road</h2>
           <p class="note" id="cars-on-road-note">Estimated non-battery-electric fleet (petrol, diesel, hybrid combined), 2018–2041 — built by aging every year's new registrations with a survival curve and anchoring to real observed fleet-by-fuel data where it exists. Solid = observed or estimated from real fleet data. Dashed (2027 onward) = projected: total new registrations are held constant at the 2026 level, while the non-BEV share of those registrations keeps shrinking at the same compound annual rate observed from 2024 to 2026 for this country — this is a trend continuation, not a guaranteed outcome.</p>
+          <div class="chart-legend" id="cars-on-road-legend"></div>
           <svg class="chart" id="cars-on-road-svg" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
           <div class="tooltip" id="cars-on-road-tooltip"></div>
+        </div>
+
+        <div class="card chart-card hidden" id="ev-regulations-card">
+          <h2>EV/ICE Regulation &amp; Policy</h2>
+          <p class="note">Sales/CO2 mandates, credit-trading rules, and stated policy objectives, by country — researched from official and news sources, not derived from this site's sales data. Fast-moving area; treat "last verified" dates as the point-in-time this was checked, not a guarantee of current accuracy.</p>
+          <div id="ev-regulations-body"></div>
         </div>
 
         <footer class="page-footer">
@@ -345,6 +352,7 @@
 <script src="assets/manufacturer-yearly-data.js"></script>
 <script src="assets/electrification-bars.js"></script>
 <script src="assets/country-cars-on-road-data.js"></script>
+<script src="assets/country-ev-regulations-data.js"></script>
 <script>
 // month key -> { label, raw: { country: [BEV, PHEV, HEV, OTHERS, PETROL, DIESEL, TOTAL] } } — source: ACEA
 const MONTHLY_DATA = {
@@ -2676,6 +2684,7 @@ function renderCarsOnRoadChart(country){
   card.classList.remove('hidden');
 
   const COLOR = '#64748b';
+  const BEV_COLOR = '#1e8f5f';
   const W = 900, H = 320, M = {top:16, right:16, bottom:30, left:56};
   const innerW = W - M.left - M.right;
   const innerH = H - M.top - M.bottom;
@@ -2684,8 +2693,12 @@ function renderCarsOnRoadChart(country){
   const tooltip = document.getElementById('cars-on-road-tooltip');
   const wrap = document.getElementById('cars-on-road-svg').closest('.chart-card');
 
+  document.getElementById('cars-on-road-legend').innerHTML = `
+    <div class="legend-chip"><span class="swatch" style="background:${COLOR}"></span>Non-BEV</div>
+    <div class="legend-chip"><span class="swatch" style="background:${BEV_COLOR}"></span>BEV</div>`;
+
   const xScale = d3.scalePoint().domain(series.map(d => d.year)).range([0, innerW]).padding(0.02);
-  const yScale = d3.scaleLinear().domain([0, d3.max(series, d => d.nonBev) * 1.1]).range([innerH, 0]);
+  const yScale = d3.scaleLinear().domain([0, d3.max(series, d => d.nonBev + d.bev) * 1.1]).range([innerH, 0]);
 
   const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
 
@@ -2721,21 +2734,33 @@ function renderCarsOnRoadChart(country){
   const area = d3.area().x(d => xScale(d.year)).y0(innerH).y1(d => yScale(d.nonBev));
   g.append('path').datum(series).attr('d', area).attr('fill', COLOR).attr('fill-opacity', 0.18).attr('stroke', 'none');
 
+  // BEV layer stacked on top of the grey non-BEV area, so the top edge traces total fleet on the road
+  const bevArea = d3.area().x(d => xScale(d.year)).y0(d => yScale(d.nonBev)).y1(d => yScale(d.nonBev + d.bev));
+  g.append('path').datum(series).attr('d', bevArea).attr('fill', BEV_COLOR).attr('fill-opacity', 0.35).attr('stroke', 'none');
+
   const line = d3.line().x(d => xScale(d.year)).y(d => yScale(d.nonBev));
+  const bevLine = d3.line().x(d => xScale(d.year)).y(d => yScale(d.nonBev + d.bev));
   const lastRealIdx = series.reduce((acc, d, idx) => d.method === 'REAL' ? idx : acc, -1);
   const solidPart = series.slice(0, lastRealIdx + 1);
   const dashedPart = series.slice(Math.max(lastRealIdx, 0));
   if(solidPart.length > 1){
     g.append('path').datum(solidPart).attr('class', 'trend-line').attr('stroke', COLOR).attr('d', line);
+    g.append('path').datum(solidPart).attr('class', 'trend-line').attr('stroke', BEV_COLOR).attr('d', bevLine);
   }
   if(dashedPart.length > 1){
     g.append('path').datum(dashedPart).attr('class', 'trend-line').attr('stroke', COLOR)
       .attr('stroke-dasharray', '5,4').attr('d', line);
+    g.append('path').datum(dashedPart).attr('class', 'trend-line').attr('stroke', BEV_COLOR)
+      .attr('stroke-dasharray', '5,4').attr('d', bevLine);
   }
   g.selectAll('.cars-on-road-dot').data(series).join('circle')
     .attr('class', 'cars-on-road-dot trend-dot')
     .attr('cx', d => xScale(d.year)).attr('cy', d => yScale(d.nonBev)).attr('r', 3)
     .attr('fill', COLOR);
+  g.selectAll('.cars-on-road-bev-dot').data(series).join('circle')
+    .attr('class', 'cars-on-road-bev-dot trend-dot')
+    .attr('cx', d => xScale(d.year)).attr('cy', d => yScale(d.nonBev + d.bev)).attr('r', 3)
+    .attr('fill', BEV_COLOR);
 
   const guide = g.append('line').attr('class', 'trend-guideline').attr('y1', 0).attr('y2', innerH).style('opacity', 0);
   g.append('rect')
@@ -2761,6 +2786,35 @@ function renderCarsOnRoadChart(country){
         `<br><span style="opacity:.7">${methodLabel}</span>`;
     })
     .on('pointerleave', () => { guide.style('opacity', 0); tooltip.style.opacity = 0; });
+}
+
+// EV/ICE regulation & policy card: static per-country research data (assets/country-ev-regulations-data.js),
+// not derived from sales figures. Only meaningful once a single country is focused; renderEvRegulationsBody
+// itself hides the card and bails out when no entry exists for that country, so the wrapper only needs to
+// handle the "nothing focused" case.
+function renderEvRegulations(){
+  const card = document.getElementById('ev-regulations-card');
+  if(!focusedCountry){ card.classList.add('hidden'); return; }
+  renderEvRegulationsBody(focusedCountry);
+}
+
+function renderEvRegulationsBody(country){
+  const card = document.getElementById('ev-regulations-card');
+  const entries = (typeof EV_REGULATIONS !== 'undefined') ? EV_REGULATIONS[country] : null;
+  if(!entries || !entries.length){ card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  document.getElementById('ev-regulations-body').innerHTML = entries.map(e => `
+    <div class="ev-reg-entry">
+      ${e.region_bloc ? `<div class="ev-reg-bloc">${e.region_bloc}</div>` : ''}
+      <div class="ev-reg-badge ${e.has_binding_mandate ? 'binding' : 'non-binding'}">${e.has_binding_mandate ? 'Binding mandate' : 'No binding mandate'}</div>
+      <div class="ev-reg-row"><span class="ev-reg-label">Mandate type</span>${e.mandate_type || '—'}</div>
+      <div class="ev-reg-row"><span class="ev-reg-label">Target${e.target_year ? ` — ${e.target_year}` : ''}</span>${e.target_description || '—'}</div>
+      <div class="ev-reg-row"><span class="ev-reg-label">Credit rules</span>${e.credit_rules || 'N/A'}</div>
+      ${e.objective_notes ? `<div class="ev-reg-row"><span class="ev-reg-label">Objective</span>${e.objective_notes}</div>` : ''}
+      ${e.notes ? `<div class="ev-reg-row ev-reg-caveat"><span class="ev-reg-label">Caveat</span>${e.notes}</div>` : ''}
+      <div class="ev-reg-footer">${e.source_url ? `<a href="${e.source_url}" target="_blank" rel="noopener">Source</a> · ` : ''}Verified ${e.last_verified}</div>
+    </div>
+  `).join('');
 }
 
 function buildData(){
@@ -3932,6 +3986,7 @@ function recompute(){
   renderFocusStats();
   renderElectrificationBars();
   renderCarsOnRoad();
+  renderEvRegulations();
   if(typeof renderMfrSection === 'function') renderMfrSection();
   updateURL();
 }
@@ -4147,72 +4202,82 @@ document.getElementById('filter-reset').addEventListener('click', () => {
 // --- Sales by Manufacturers — per-brand split, only exists for a handful of countries
 // (MANUFACTURER_YEARLY's own keys) and only at annual granularity. Reacts to the main page's
 // Period and country-focus state (via renderMfrSection(), called from recompute()): hidden
-// unless the selected period is an annual one AND a single country is focused AND that country
-// has data here. Its own Year dropdown is a second, independent control once shown.
+// unless a single country is focused AND that country has a manufacturer-data row for the
+// year embedded in whatever period is currently selected (no independent year control --
+// every period key carries its own year, e.g. "2026-06", "2026-ytd", "2025-annual").
 const MFR_SOURCE_NOTE = {
   Germany: 'source: Kraftfahrt-Bundesamt (KBA), Germany\'s federal motor authority, "Neuzulassungen von Personenkraftwagen nach Marken und Modellreihen".',
   Canada: 'source: merged from several presses/trackers (GoodCarBadCar, Toyota Canada Inc. newsroom, Transport Canada iZEV Program, GM Authority) since Canada has no single official per-brand release.',
   India: 'source: VAHAN Analytics Dashboard (analytics.parivahan.gov.in), the Government of India\'s official vehicle-registration portal -- Maker x Fuel table, calendar year 2025, all states. Single year only so far, no monthly breakdown loaded yet.',
 };
 (function(){
-  const yearSelect = document.getElementById('mfr-year-select');
   const mfrRows = document.getElementById('mfr-rank-rows');
   const mfrTooltip = document.getElementById('mfr-tooltip');
   const mfrSection = document.getElementById('mfr-section');
   const mfrTitle = document.getElementById('mfr-title');
   const mfrNote = document.getElementById('mfr-note');
-  if(!yearSelect || !mfrRows || !mfrSection || typeof MANUFACTURER_YEARLY === 'undefined') return;
+  if(!mfrRows || !mfrSection || typeof MANUFACTURER_YEARLY === 'undefined') return;
 
   const MFR_FUEL_KEYS = ['bev','phev','hev','petrol','diesel'];
   let mfrCountry = null;
+  let mfrYear = null;
+  let mfrMode = 'pct'; // 'pct' or 'raw'
 
-  function mfrSegHTML(row, key){
+  function mfrSegHTML(row, key, widthDenom){
     const units = row[key];
     if(units <= 0 || row.total <= 0) return '';
-    const pct = units / row.total * 100;
-    const showLabel = pct >= 7;
-    return `<div class="bar-seg" style="width:${pct}%; background:${FUEL_COLORS[key]}" data-brand="${row.brand}" data-key="${key}" data-units="${units}" data-pct="${pct.toFixed(1)}">${showLabel ? `<span class="seg-label">${pct.toFixed(0)}%</span>` : ''}</div>`;
+    const pct = units / row.total * 100; // always the true share, used for the tooltip
+    const width = units / widthDenom * 100; // bar geometry: 100%-stacked in pct mode, scaled-to-max in raw mode
+    const showLabel = width >= 7;
+    const labelText = mfrMode === 'raw' ? units.toLocaleString('en-US') : pct.toFixed(0) + '%';
+    return `<div class="bar-seg" style="width:${width}%; background:${FUEL_COLORS[key]}" data-brand="${row.brand}" data-key="${key}" data-units="${units}" data-pct="${pct.toFixed(1)}">${showLabel ? `<span class="seg-label">${labelText}</span>` : ''}</div>`;
   }
   function renderManufacturerBars(){
-    if(!mfrCountry) return;
-    const year = +yearSelect.value;
-    const top20 = MANUFACTURER_YEARLY[mfrCountry].filter(r => r.year === year).sort((a,b) => b.total - a.total).slice(0,20);
+    if(!mfrCountry || mfrYear == null) return;
+    mfrRows.classList.toggle('raw-mode', mfrMode === 'raw');
+    const top20 = MANUFACTURER_YEARLY[mfrCountry].filter(r => r.year === mfrYear).sort((a,b) => b.total - a.total).slice(0,20);
+    const globalMax = Math.max(1, ...top20.map(r => r.total));
     mfrRows.innerHTML = top20.map(row => {
       const bevPct = row.bev / row.total * 100;
+      const widthDenom = mfrMode === 'raw' ? globalMax : row.total;
       return `
       <div class="rank-row" data-brand="${row.brand}">
         <div class="country-label">${row.brand}</div>
         <div class="bar-track">
-          ${MFR_FUEL_KEYS.map(k => mfrSegHTML(row, k)).join('')}
+          ${MFR_FUEL_KEYS.map(k => mfrSegHTML(row, k, widthDenom)).join('')}
         </div>
         <div class="pct-label" style="color:${FUEL_COLORS.bev}">${bevPct.toFixed(1)}%</div>
         <div class="total-label">${row.total.toLocaleString('en-US')}</div>
       </div>`;
     }).join('');
   }
-  yearSelect.addEventListener('change', renderManufacturerBars);
+  document.querySelectorAll('[data-mfr-mode]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if(btn.dataset.mfrMode === mfrMode) return;
+      mfrMode = btn.dataset.mfrMode;
+      document.querySelectorAll('[data-mfr-mode]').forEach(b => b.classList.toggle('active', b === btn));
+      renderManufacturerBars();
+    });
+  });
 
   // exposed globally so recompute() can call it whenever the period or country focus changes
   window.renderMfrSection = function(){
     const periodKey = [...selectedMonths][0];
-    const isAnnualPeriod = !!periodKey && periodKey.endsWith('-annual');
-    const hasData = focusedCountry && MANUFACTURER_YEARLY[focusedCountry];
-    if(!isAnnualPeriod || !hasData){
+    const yearMatch = periodKey && periodKey.match(/(\d{4})/);
+    const year = yearMatch ? +yearMatch[1] : null;
+    const hasData = focusedCountry && year != null && MANUFACTURER_YEARLY[focusedCountry] &&
+      MANUFACTURER_YEARLY[focusedCountry].some(r => r.year === year);
+    if(!hasData){
       mfrSection.classList.add('hidden');
       mfrCountry = null;
+      mfrYear = null;
       return;
     }
     mfrSection.classList.remove('hidden');
-    const countryChanged = mfrCountry !== focusedCountry;
     mfrCountry = focusedCountry;
-    mfrTitle.textContent = `Sales by Manufacturers — ${mfrCountry}`;
+    mfrYear = year;
+    mfrTitle.textContent = `Sales by Manufacturers — ${mfrCountry} (${mfrYear})`;
     mfrNote.textContent = `Bars show each brand's total new registrations; the green segment is its BEV share of that total. Sorted by total sales, top 20 brands. ${MFR_SOURCE_NOTE[mfrCountry] || ''}`;
-    if(countryChanged){
-      const years = [...new Set(MANUFACTURER_YEARLY[mfrCountry].map(r => r.year))].sort((a,b) => b - a);
-      const latestYear = years[0];
-      yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}${y === latestYear ? ' (YTD)' : ''}</option>`).join('');
-      yearSelect.value = years.includes(2025) ? 2025 : latestYear;
-    }
     renderManufacturerBars();
   };
 
