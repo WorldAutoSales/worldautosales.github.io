@@ -268,7 +268,7 @@
 
         <div class="card chart-card hidden" id="cars-on-road-card">
           <h2>Non-BEV Cars on the Road</h2>
-          <p class="note" id="cars-on-road-note">Estimated non-battery-electric fleet (petrol, diesel, hybrid combined), 2018–2041 — built by aging every year's new registrations with a survival curve and anchoring to real observed fleet-by-fuel data where it exists. Solid = observed or estimated from real fleet data. Dashed (2027 onward) = projected: total new registrations are held constant at the 2026 level, while the non-BEV share of those registrations keeps shrinking at the same compound annual rate observed from 2024 to 2026 for this country — this is a trend continuation, not a guaranteed outcome.</p>
+          <p class="note" id="cars-on-road-note">Estimated non-battery-electric fleet (petrol, diesel, hybrid combined), 2018–2041 — built by aging every year's new registrations with a survival curve and anchoring to real observed fleet-by-fuel data where it exists. Solid = observed or estimated from real fleet data. Dashed (2027 onward) = projected: the total on-road fleet (BEV + non-BEV) is held constant at its last real/projected year's level — each year's new registrations are sized to exactly replace vehicles aging out, split between BEV and non-BEV by a continuation of this country's recent BEV-share growth trend (dampened over time, and grounded in a comparable market's real trend where this country's own recent data is too thin to trust) — this is a trend continuation, not a guaranteed outcome.</p>
           <div class="chart-legend" id="cars-on-road-legend"></div>
           <svg class="chart" id="cars-on-road-svg" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
           <div class="tooltip" id="cars-on-road-tooltip"></div>
@@ -2583,11 +2583,12 @@ function renderCarsOnRoadChart(country){
       const methodLabel = {
         REAL: 'Observed / estimated from real fleet data',
         MODEL_ANCHORED: 'Projected (no new registrations assumed yet)',
-        MODEL_ANCHORED_WITH_FUTURE_REG: 'Projected (includes new non-BEV registrations, trended from 2024–2026)'
+        MODEL_STOCK_CONSTANT_WITH_FUTURE_REG: 'Projected (total on-road fleet held constant at its real anchor-year level)'
       }[d.method] || d.method;
-      tooltip.innerHTML = `<strong>${d.year}</strong><br>Non-BEV: <strong>${Math.round(d.nonBev).toLocaleString('en-US')}</strong>` +
-        `<br>BEV: ${Math.round(d.bev).toLocaleString('en-US')}` +
-        (d.futureNewRegProj != null ? `<br>New non-BEV registrations projected this year: ${Math.round(d.futureNewRegProj).toLocaleString('en-US')}` : '') +
+      const dTotal = d.nonBev + d.bev;
+      tooltip.innerHTML = `<strong>${d.year}</strong><br>Non-BEV: <strong>${Math.round(d.nonBev).toLocaleString('en-US')}</strong> (${(d.nonBev/dTotal*100).toFixed(1)}%)` +
+        `<br>BEV: ${Math.round(d.bev).toLocaleString('en-US')} (${(d.bev/dTotal*100).toFixed(1)}%)` +
+        (d.futureNewRegProj != null ? `<br>New registrations projected this year: ${Math.round(d.futureNewRegProj).toLocaleString('en-US')}` : '') +
         `<br><span style="opacity:.7">${methodLabel}</span>`;
     })
     .on('pointerleave', () => { guide.style('opacity', 0); tooltip.style.opacity = 0; });

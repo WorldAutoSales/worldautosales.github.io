@@ -294,7 +294,7 @@
 
         <div class="card chart-card hidden" id="cars-on-road-card">
           <h2>Non-BEV Cars on the Road</h2>
-          <p class="note" id="cars-on-road-note">Estimated non-battery-electric fleet (petrol, diesel, hybrid combined), 2018–2041 — built by aging every year's new registrations with a survival curve and anchoring to real observed fleet-by-fuel data where it exists. Solid = observed or estimated from real fleet data. Dashed (2027 onward) = projected: total new registrations are held constant at the 2026 level, while the non-BEV share of those registrations keeps shrinking at the same compound annual rate observed from 2024 to 2026 for this country — this is a trend continuation, not a guaranteed outcome.</p>
+          <p class="note" id="cars-on-road-note">Estimated non-battery-electric fleet (petrol, diesel, hybrid combined), 2018–2041 — built by aging every year's new registrations with a survival curve and anchoring to real observed fleet-by-fuel data where it exists. Solid = observed or estimated from real fleet data. Dashed (2027 onward) = projected: the total on-road fleet (BEV + non-BEV) is held constant at its last real/projected year's level — each year's new registrations are sized to exactly replace vehicles aging out, split between BEV and non-BEV by a continuation of this country's recent BEV-share growth trend (dampened over time, and grounded in a comparable market's real trend where this country's own recent data is too thin to trust) — this is a trend continuation, not a guaranteed outcome.</p>
           <div class="chart-legend" id="cars-on-road-legend"></div>
           <svg class="chart" id="cars-on-road-svg" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
           <div class="tooltip" id="cars-on-road-tooltip"></div>
@@ -484,6 +484,8 @@ const MONTHLY_DATA = {
       "Chile": [781,654,3061,0,14421,5805,24722],
       // source: FENALCO-ANDI, Colombia — genuine standalone month, directly reported in full; PHEV folded into HEV
       "Colombia": [4870,0,9410,0,14353,0,28633],
+      // source: TopGear.com.ph "PH car sales report" (CAMPI-TMA data), Philippines — genuine standalone month; BEV/PHEV/HEV are the source's own exact published figures (BEV: VinFast 813 + Geely 509 + Omoda/Jaecoo 428; PHEV: Jetour 480 + MG 421 + Geely 312; HEV: Toyota 1,709 + Ford 333 + Omoda/Jaecoo 320); Diesel not separately published, folded into Petrol
+      "Philippines": [1750,1213,2362,0,37555,0,42880],
       // source: Department of Customs Nepal (customs.gov.np), HS 8703 imports — day-weighted blend of Ashadh (16d) + Shrawan (15d) BS fiscal months (Nepal's calendar never aligns to Gregorian months); three-wheelers excluded; imports not registrations
       "Nepal": [721,8,5,0,297,47,1078],
       // source: VAMA + VinFast + TC Group (merged) — VAMA member-brand sales (PC+Special→Petrol, CV→Diesel) plus VinFast (100% BEV, not a VAMA member) plus TC Group/Hyundai (independent of VAMA, folded into Petrol)
@@ -532,6 +534,8 @@ const MONTHLY_DATA = {
     raw: {
       // source: Statistics Canada, Table 20-10-0025-01 — reports quarterly, not monthly; Q2 2026's total (released 2026-09-08) is divided evenly across Apr/May/Jun (same figure repeated each month) rather than filed entirely under April, so month-over-month comparisons involving Canada aren't artificially skewed by a whole quarter landing in one month
       "Canada": [13528,6075,30623,0,125271,7060,182557],
+      // source: TopGear.com.ph "PH car sales report" (CAMPI-TMA data), Philippines — Q2 2026 delta (H1 2026 minus Q1 2026) split evenly across Apr-Jun (no finer intra-quarter split published); Diesel not separately published, folded into Petrol
+      "Philippines": [2138,1427,2962,0,26445,0,32972],
       "Georgia": [1389,168,5066,613,12586,864,20686],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [1438,0,2693,0,6426,3855,14412],
@@ -655,6 +659,8 @@ const MONTHLY_DATA = {
     raw: {
       // source: Statistics Canada, Table 20-10-0025-01 — reports quarterly, not monthly; Q2 2026's total (released 2026-09-08) is divided evenly across Apr/May/Jun (same figure repeated each month) rather than filed entirely under April, so month-over-month comparisons involving Canada aren't artificially skewed by a whole quarter landing in one month
       "Canada": [13528,6075,30623,0,125271,7060,182557],
+      // source: TopGear.com.ph "PH car sales report" (CAMPI-TMA data), Philippines — Q2 2026 delta (H1 2026 minus Q1 2026) split evenly across Apr-Jun (no finer intra-quarter split published); Diesel not separately published, folded into Petrol
+      "Philippines": [2138,1427,2962,0,26445,0,32972],
       "Georgia": [1303,222,4286,528,12294,819,19452],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [927,0,2240,0,6304,3622,13093],
@@ -851,6 +857,8 @@ const MONTHLY_DATA = {
       "Paraguay": [95,277,497,3,2342,196,3410],
       // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team — Q2 2026 delta (H1 2026 minus Q1 2026) split evenly across Apr-Jun (no finer intra-quarter split published); PHEV not separately tracked, folded into HEV
       "Serbia": [132,0,1829,74,1742,394,4171],
+      // source: TopGear.com.ph "PH car sales report" (CAMPI-TMA data), Philippines — Q2 2026 delta (H1 2026 minus Q1 2026) split evenly across Apr-Jun (no finer intra-quarter split published); Diesel not separately published, folded into Petrol
+      "Philippines": [2138,1427,2962,0,26445,0,32972],
       // source: Statistics Canada, Table 20-10-0025-01 — reports quarterly, not monthly; Q2 2026's total (released 2026-09-08) is divided evenly across Apr/May/Jun (same figure repeated each month) rather than filed entirely under April, so month-over-month comparisons involving Canada aren't artificially skewed by a whole quarter landing in one month
       "Canada": [13528,6075,30623,0,125271,7060,182557]},
     priorYearBev: {
@@ -934,6 +942,8 @@ const MONTHLY_DATA = {
       "Argentina": [534,0,6733,0,41933,0,49200],
       // source: Statistics Canada, Table 20-10-0025-01 — reports quarterly, not monthly; Q1 2026's total is divided evenly across Jan/Feb/Mar (same figure repeated each month)
       "Canada": [9936,4435,17861,0,94454,5848,132534],
+      // source: TopGear.com.ph "PH car sales report" (CAMPI-TMA data), Philippines — reports quarterly, not monthly; Q1 2026's total is divided evenly across Jan/Feb/Mar (same figure repeated each month); Diesel not separately published, folded into Petrol
+      "Philippines": [763,417,2754,0,31280,0,35214],
       // source: FTI Automotive Industry Club via mreport.co.th, Thailand (monthly) — Total includes pickups/PPV, not passenger-cars-only; Diesel is a residual
       "Thailand": [12224,704,14896,133,11007,20901,59865],
       // source: TS/KOTSA new-registration API, South Korea (monthly) — PHEV folded into HEV
@@ -1046,6 +1056,8 @@ const MONTHLY_DATA = {
       "Indonesia": [12314,651,5798,0,62487,0,81250],
       // source: Statistics Canada, Table 20-10-0025-01 — reports quarterly, not monthly; Q1 2026's total is divided evenly across Jan/Feb/Mar (same figure repeated each month)
       "Canada": [9936,4435,17861,0,94454,5848,132534],
+      // source: TopGear.com.ph "PH car sales report" (CAMPI-TMA data), Philippines — reports quarterly, not monthly; Q1 2026's total is divided evenly across Jan/Feb/Mar (same figure repeated each month); Diesel not separately published, folded into Petrol
+      "Philippines": [763,417,2754,0,31280,0,35214],
       // source: FTI Automotive Industry Club via mreport.co.th, Thailand (monthly) — Total includes pickups/PPV, not passenger-cars-only; Diesel is a residual
       "Thailand": [6274,352,12711,79,9330,19496,48242],
       // source: TS/KOTSA new-registration API, South Korea (monthly) — PHEV folded into HEV
@@ -1152,6 +1164,8 @@ const MONTHLY_DATA = {
       // filed entirely under January, so month-over-month comparisons involving Canada aren't
       // artificially skewed by a whole quarter landing in one month
       "Canada": [9936,4435,17861,0,94454,5848,132534],
+      // source: TopGear.com.ph "PH car sales report" (CAMPI-TMA data), Philippines — reports quarterly, not monthly; Q1 2026's total is divided evenly across Jan/Feb/Mar (same figure repeated each month); Diesel not separately published, folded into Petrol
+      "Philippines": [763,417,2754,0,31280,0,35214],
       // source: NZTA Waka Kotahi (monthly, light vehicles only)
       "New Zealand": [723,616,3256,129,3519,742,8985],
       // source: Argonne National Laboratory (Wards Auto), monthly — Total = all light-duty vehicles; no Petrol/Diesel split published, Diesel=0
@@ -2778,11 +2792,12 @@ function renderCarsOnRoadChart(country){
       const methodLabel = {
         REAL: 'Observed / estimated from real fleet data',
         MODEL_ANCHORED: 'Projected (no new registrations assumed yet)',
-        MODEL_ANCHORED_WITH_FUTURE_REG: 'Projected (includes new non-BEV registrations, trended from 2024–2026)'
+        MODEL_STOCK_CONSTANT_WITH_FUTURE_REG: 'Projected (total on-road fleet held constant at its real anchor-year level)'
       }[d.method] || d.method;
-      tooltip.innerHTML = `<strong>${d.year}</strong><br>Non-BEV: <strong>${Math.round(d.nonBev).toLocaleString('en-US')}</strong>` +
-        `<br>BEV: ${Math.round(d.bev).toLocaleString('en-US')}` +
-        (d.futureNewRegProj != null ? `<br>New non-BEV registrations projected this year: ${Math.round(d.futureNewRegProj).toLocaleString('en-US')}` : '') +
+      const dTotal = d.nonBev + d.bev;
+      tooltip.innerHTML = `<strong>${d.year}</strong><br>Non-BEV: <strong>${Math.round(d.nonBev).toLocaleString('en-US')}</strong> (${(d.nonBev/dTotal*100).toFixed(1)}%)` +
+        `<br>BEV: ${Math.round(d.bev).toLocaleString('en-US')} (${(d.bev/dTotal*100).toFixed(1)}%)` +
+        (d.futureNewRegProj != null ? `<br>New registrations projected this year: ${Math.round(d.futureNewRegProj).toLocaleString('en-US')}` : '') +
         `<br><span style="opacity:.7">${methodLabel}</span>`;
     })
     .on('pointerleave', () => { guide.style('opacity', 0); tooltip.style.opacity = 0; });
