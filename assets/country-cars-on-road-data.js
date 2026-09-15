@@ -14,8 +14,12 @@
 //                          rescaled to match it, assuming NO new registrations after the last
 //                          known registration year.
 //
-// MODEL_STOCK_CONSTANT_WITH_FUTURE_REG = every future year (anchor_year+1 .. 2041, for all 31
+// MODEL_STOCK_CONSTANT_WITH_FUTURE_REG = every future year (anchor_year+1 .. 2041, for all 33
 // countries, superseding the two now-retired FUTURE_REG methods this project used earlier).
+// Denmark and Singapore were added 2026-09-15 directly with this method (built with the same
+// pure survival-curve convolution back to 2005 the other MODEL_RAW_PREREAL countries used for
+// their historical rows, then this method for the future ones) -- they never had the superseded
+// versions below.
 // Corrected 2026-09-15 after both prior approaches proved wrong: the total ON-ROAD STOCK
 // (bev+nonBev) is now held EXACTLY CONSTANT at the anchor year's real total (2026 for most
 // countries; 2025 for Russian Federation and South Africa, which have no 2026 figure yet) --
@@ -381,6 +385,45 @@ const CARS_ON_ROAD = {
   {"year":2039,"bev":218585656,"nonBev":158661327,"futureNewRegProj":26219175,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
   {"year":2040,"bev":231457065,"nonBev":145789918,"futureNewRegProj":26055921,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
   {"year":2041,"bev":243368230,"nonBev":133878753,"futureNewRegProj":25865003,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"}
+],
+"Denmark": [
+  {"year":2005,"bev":0,"nonBev":211159,"method":"MODEL_RAW_PREREAL"},
+  {"year":2006,"bev":0,"nonBev":437498,"method":"MODEL_RAW_PREREAL"},
+  {"year":2007,"bev":0,"nonBev":663712,"method":"MODEL_RAW_PREREAL"},
+  {"year":2008,"bev":0,"nonBev":854881,"method":"MODEL_RAW_PREREAL"},
+  {"year":2009,"bev":0,"nonBev":978434,"method":"MODEL_RAW_PREREAL"},
+  {"year":2010,"bev":0,"nonBev":1141483,"method":"MODEL_RAW_PREREAL"},
+  {"year":2011,"bev":0,"nonBev":1328101,"method":"MODEL_RAW_PREREAL"},
+  {"year":2012,"bev":0,"nonBev":1513246,"method":"MODEL_RAW_PREREAL"},
+  {"year":2013,"bev":533,"nonBev":1676640,"method":"MODEL_RAW_PREREAL"},
+  {"year":2014,"bev":2097,"nonBev":1839336,"method":"MODEL_RAW_PREREAL"},
+  {"year":2015,"bev":3362,"nonBev":2011938,"method":"MODEL_RAW_PREREAL"},
+  {"year":2016,"bev":4627,"nonBev":2192246,"method":"MODEL_RAW_PREREAL"},
+  {"year":2017,"bev":5297,"nonBev":2365202,"method":"MODEL_RAW_PREREAL"},
+  {"year":2018,"bev":6977,"nonBev":2529720,"method":"MODEL_RAW_PREREAL"},
+  {"year":2019,"bev":12444,"nonBev":2682381,"method":"MODEL_RAW_PREREAL"},
+  {"year":2020,"bev":26585,"nonBev":2787873,"method":"MODEL_RAW_PREREAL"},
+  {"year":2021,"bev":51378,"nonBev":2852641,"method":"MODEL_RAW_PREREAL"},
+  {"year":2022,"bev":82023,"nonBev":2860625,"method":"MODEL_RAW_PREREAL"},
+  {"year":2023,"bev":144432,"nonBev":2845945,"method":"MODEL_RAW_PREREAL"},
+  {"year":2024,"bev":232864,"nonBev":2796995,"method":"MODEL_RAW_PREREAL"},
+  {"year":2025,"bev":358073,"nonBev":2713354,"method":"MODEL_RAW_PREREAL"},
+  {"year":2026,"bev":519260,"nonBev":2606804,"method":"MODEL_RAW_PREREAL"},
+  {"year":2027,"bev":654837,"nonBev":2471227,"futureNewRegProj":158351,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2028,"bev":802194,"nonBev":2323870,"futureNewRegProj":164958,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2029,"bev":956375,"nonBev":2169689,"futureNewRegProj":170114,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2030,"bev":1114369,"nonBev":2011695,"futureNewRegProj":174711,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2031,"bev":1293164,"nonBev":1832900,"futureNewRegProj":196141,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2032,"bev":1471071,"nonBev":1654993,"futureNewRegProj":198075,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2033,"bev":1645130,"nonBev":1480934,"futureNewRegProj":198535,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2034,"bev":1810505,"nonBev":1315559,"futureNewRegProj":195168,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2035,"bev":1963588,"nonBev":1162476,"futureNewRegProj":189798,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2036,"bev":2112144,"nonBev":1013920,"futureNewRegProj":192415,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2037,"bev":2253479,"nonBev":872585,"futureNewRegProj":193320,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2038,"bev":2382891,"nonBev":743173,"futureNewRegProj":189992,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2039,"bev":2498907,"nonBev":627157,"futureNewRegProj":186927,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2040,"bev":2603139,"nonBev":522925,"futureNewRegProj":186848,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2041,"bev":2697283,"nonBev":428781,"futureNewRegProj":188159,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"}
 ],
 "France": [
   {"year":2005,"bev":0,"nonBev":2598183,"method":"MODEL_RAW_PREREAL"},
@@ -888,6 +931,45 @@ const CARS_ON_ROAD = {
   {"year":2039,"bev":127270,"nonBev":29780915,"futureNewRegProj":1780430,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
   {"year":2040,"bev":126554,"nonBev":29781631,"futureNewRegProj":1728338,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
   {"year":2041,"bev":124885,"nonBev":29783300,"futureNewRegProj":1633316,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"}
+],
+"Singapore": [
+  {"year":2005,"bev":0,"nonBev":125018,"method":"MODEL_RAW_PREREAL"},
+  {"year":2006,"bev":0,"nonBev":257501,"method":"MODEL_RAW_PREREAL"},
+  {"year":2007,"bev":0,"nonBev":379505,"method":"MODEL_RAW_PREREAL"},
+  {"year":2008,"bev":0,"nonBev":489314,"method":"MODEL_RAW_PREREAL"},
+  {"year":2009,"bev":0,"nonBev":566917,"method":"MODEL_RAW_PREREAL"},
+  {"year":2010,"bev":0,"nonBev":615031,"method":"MODEL_RAW_PREREAL"},
+  {"year":2011,"bev":0,"nonBev":648161,"method":"MODEL_RAW_PREREAL"},
+  {"year":2012,"bev":0,"nonBev":675617,"method":"MODEL_RAW_PREREAL"},
+  {"year":2013,"bev":0,"nonBev":695660,"method":"MODEL_RAW_PREREAL"},
+  {"year":2014,"bev":0,"nonBev":721523,"method":"MODEL_RAW_PREREAL"},
+  {"year":2015,"bev":0,"nonBev":773536,"method":"MODEL_RAW_PREREAL"},
+  {"year":2016,"bev":0,"nonBev":851774,"method":"MODEL_RAW_PREREAL"},
+  {"year":2017,"bev":0,"nonBev":932584,"method":"MODEL_RAW_PREREAL"},
+  {"year":2018,"bev":0,"nonBev":986966,"method":"MODEL_RAW_PREREAL"},
+  {"year":2019,"bev":0,"nonBev":985402,"method":"MODEL_RAW_PREREAL"},
+  {"year":2020,"bev":0,"nonBev":979189,"method":"MODEL_RAW_PREREAL"},
+  {"year":2021,"bev":0,"nonBev":969874,"method":"MODEL_RAW_PREREAL"},
+  {"year":2022,"bev":3634,"nonBev":938998,"method":"MODEL_RAW_PREREAL"},
+  {"year":2023,"bev":9102,"nonBev":902968,"method":"MODEL_RAW_PREREAL"},
+  {"year":2024,"bev":23543,"nonBev":868826,"method":"MODEL_RAW_PREREAL"},
+  {"year":2025,"bev":47201,"nonBev":833726,"method":"MODEL_RAW_PREREAL"},
+  {"year":2026,"bev":81660,"nonBev":789367,"method":"MODEL_RAW_PREREAL"},
+  {"year":2027,"bev":130057,"nonBev":740970,"futureNewRegProj":65140,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2028,"bev":183671,"nonBev":687356,"futureNewRegProj":65165,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2029,"bev":240120,"nonBev":630907,"futureNewRegProj":64758,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2030,"bev":297647,"nonBev":573380,"futureNewRegProj":64137,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2031,"bev":358118,"nonBev":512909,"futureNewRegProj":66741,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2032,"bev":416402,"nonBev":454625,"futureNewRegProj":64871,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2033,"bev":471315,"nonBev":399712,"futureNewRegProj":62628,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2034,"bev":522437,"nonBev":348590,"futureNewRegProj":60671,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2035,"bev":568915,"nonBev":302112,"futureNewRegProj":58495,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2036,"bev":610802,"nonBev":260225,"futureNewRegProj":56907,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2037,"bev":648585,"nonBev":222442,"futureNewRegProj":56255,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2038,"bev":682539,"nonBev":188488,"futureNewRegProj":56206,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2039,"bev":712645,"nonBev":158382,"futureNewRegProj":56330,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2040,"bev":739450,"nonBev":131577,"futureNewRegProj":57071,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"},
+  {"year":2041,"bev":763585,"nonBev":107442,"futureNewRegProj":58374,"method":"MODEL_STOCK_CONSTANT_WITH_FUTURE_REG"}
 ],
 "South Africa": [
   {"year":2005,"bev":0,"nonBev":617406,"method":"MODEL_RAW_PREREAL"},
