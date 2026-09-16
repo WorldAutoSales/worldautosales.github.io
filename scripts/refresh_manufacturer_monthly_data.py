@@ -15,6 +15,7 @@ Usage:
 """
 import json
 import sys
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -29,7 +30,7 @@ PAGE_SIZE = 1000
 REPO_ROOT = Path(__file__).resolve().parent.parent
 TARGET_JS = REPO_ROOT / "assets" / "manufacturer-monthly-data.js"
 TABLE = "sales_manufacturer_country_month"
-COUNTRIES = ["Canada"]
+COUNTRIES = ["Canada", "United States"]
 
 COLUMNS = "year_month,brand,nb_bev,nb_phev,nb_hev,nb_petrol,nb_diesel"
 
@@ -39,7 +40,7 @@ def fetch_country_rows(country):
     offset = 0
     while True:
         req = urllib.request.Request(
-            f"{SUPABASE_URL}/rest/v1/{TABLE}?select={COLUMNS}&country=eq.{country}"
+            f"{SUPABASE_URL}/rest/v1/{TABLE}?select={COLUMNS}&country=eq.{urllib.parse.quote(country)}"
             f"&order=year_month.asc,brand.asc&limit={PAGE_SIZE}&offset={offset}",
             headers={"apikey": ANON_KEY, "Authorization": f"Bearer {ANON_KEY}"},
         )
