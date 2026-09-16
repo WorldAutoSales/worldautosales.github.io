@@ -32,7 +32,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 TARGET_JS = REPO_ROOT / "assets" / "manufacturer-model-monthly-data.js"
 TABLE = "sales_manufacturer_country_model_month"
 # Keep in sync with refresh_manufacturer_monthly_data.py's COUNTRIES/MIN_YEAR_MONTH.
-COUNTRIES = ["Canada", "United States", "Germany"]
+COUNTRIES = ["Canada", "United States", "Germany", "France"]
 MIN_YEAR_MONTH = {"Germany": "2026-01"}
 
 COLUMNS = "year_month,brand,model,nb_bev,nb_phev,nb_hev,nb_petrol,nb_diesel"
