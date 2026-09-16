@@ -276,6 +276,7 @@
         <div class="card chart-card hidden" id="mfr-section">
           <div class="chart-header-row">
             <h2 id="mfr-title">Sales by Manufacturers</h2>
+            <select id="mfr-month-select" class="filter-search hidden" style="width:auto;"></select>
             <div class="chart-mode-toggle" role="group" aria-label="Bar display mode">
               <button type="button" class="mode-btn active" data-mfr-mode="pct" title="Show each brand's fuel mix as a % of that brand's own total.">%</button>
               <button type="button" class="mode-btn" data-mfr-mode="raw" title="Show actual unit counts — bars scaled to the top-selling brand shown."># of Units</button>
@@ -350,6 +351,7 @@
 <script src="assets/country-monthly-data.js"></script>
 <script src="assets/world-market-totals-2025.js"></script>
 <script src="assets/manufacturer-yearly-data.js"></script>
+<script src="assets/manufacturer-monthly-data.js"></script>
 <script src="assets/electrification-bars.js"></script>
 <script src="assets/country-cars-on-road-data.js"></script>
 <script src="assets/country-ev-regulations-data.js"></script>
@@ -4225,18 +4227,25 @@ const MFR_SOURCE_NOTE = {
   Canada: 'source: merged from several presses/trackers (GoodCarBadCar, Toyota Canada Inc. newsroom, Transport Canada iZEV Program, GM Authority) since Canada has no single official per-brand release.',
   India: 'source: VAHAN Analytics Dashboard (analytics.parivahan.gov.in), the Government of India\'s official vehicle-registration portal -- Maker x Fuel table, calendar year 2025, all states. Single year only so far, no monthly breakdown loaded yet.',
 };
+const MFR_MONTHLY_SOURCE_NOTE = {
+  Canada: 'source: BestSellingCarsBlog (bestsellingcarsblog.com), citing Manufacturers + DesRosiers Automotive. Only the brands that still report sales monthly in Canada are covered (most automakers moved to quarterly/annual-only reporting) -- this is a real market limitation, not a gap in this chart. Only 1-2 months loaded so far, hence the dedicated month picker instead of using the page\'s main Period control.',
+};
 (function(){
   const mfrRows = document.getElementById('mfr-rank-rows');
   const mfrTooltip = document.getElementById('mfr-tooltip');
   const mfrSection = document.getElementById('mfr-section');
   const mfrTitle = document.getElementById('mfr-title');
   const mfrNote = document.getElementById('mfr-note');
+  const mfrMonthSelect = document.getElementById('mfr-month-select');
   if(!mfrRows || !mfrSection || typeof MANUFACTURER_YEARLY === 'undefined') return;
+  const hasMonthly = typeof MANUFACTURER_MONTHLY !== 'undefined';
 
   const MFR_FUEL_KEYS = ['bev','phev','hev','petrol','diesel'];
   let mfrCountry = null;
   let mfrYear = null;
+  let mfrMonthly = false; // true = current section is showing MANUFACTURER_MONTHLY rows for mfrMonthSelect.value
   let mfrMode = 'pct'; // 'pct' or 'raw'
+  let mfrMonthSelectWiredFor = null; // country the month <select> options were last built for
 
   function mfrSegHTML(row, key, widthDenom){
     const units = row[key];
@@ -4247,10 +4256,17 @@ const MFR_SOURCE_NOTE = {
     const labelText = mfrMode === 'raw' ? units.toLocaleString('en-US') : pct.toFixed(0) + '%';
     return `<div class="bar-seg" style="width:${width}%; background:${FUEL_COLORS[key]}" data-brand="${row.brand}" data-key="${key}" data-units="${units}" data-pct="${pct.toFixed(1)}">${showLabel ? `<span class="seg-label">${labelText}</span>` : ''}</div>`;
   }
+  function currentMfrRows(){
+    if(mfrMonthly){
+      const ym = mfrMonthSelect.value;
+      return MANUFACTURER_MONTHLY[mfrCountry].filter(r => r.year_month === ym).sort((a,b) => b.total - a.total).slice(0,20);
+    }
+    return MANUFACTURER_YEARLY[mfrCountry].filter(r => r.year === mfrYear).sort((a,b) => b.total - a.total).slice(0,20);
+  }
   function renderManufacturerBars(){
-    if(!mfrCountry || mfrYear == null) return;
+    if(!mfrCountry) return;
     mfrRows.classList.toggle('raw-mode', mfrMode === 'raw');
-    const top20 = MANUFACTURER_YEARLY[mfrCountry].filter(r => r.year === mfrYear).sort((a,b) => b.total - a.total).slice(0,20);
+    const top20 = currentMfrRows();
     const globalMax = Math.max(1, ...top20.map(r => r.total));
     mfrRows.innerHTML = top20.map(row => {
       const bevPct = row.bev / row.total * 100;
@@ -4274,9 +4290,34 @@ const MFR_SOURCE_NOTE = {
       renderManufacturerBars();
     });
   });
+  mfrMonthSelect.addEventListener('change', () => {
+    mfrTitle.textContent = `Sales by Manufacturers — ${mfrCountry} (${mfrMonthSelect.value})`;
+    renderManufacturerBars();
+  });
 
   // exposed globally so recompute() can call it whenever the period or country focus changes
   window.renderMfrSection = function(){
+    // Monthly data (currently just Canada) takes priority over the annual dataset and uses its
+    // own independent month picker rather than the page's main Period control -- there's only
+    // 1-2 months loaded so far, so tying it to the global multi-year period selector would mean
+    // it's hidden or empty for almost every period a visitor might pick.
+    if(hasMonthly && focusedCountry && MANUFACTURER_MONTHLY[focusedCountry] && MANUFACTURER_MONTHLY[focusedCountry].length){
+      mfrSection.classList.remove('hidden');
+      mfrCountry = focusedCountry;
+      mfrMonthly = true;
+      mfrMonthSelect.classList.remove('hidden');
+      if(mfrMonthSelectWiredFor !== mfrCountry){
+        const months = [...new Set(MANUFACTURER_MONTHLY[mfrCountry].map(r => r.year_month))].sort().reverse();
+        mfrMonthSelect.innerHTML = months.map(ym => `<option value="${ym}">${ym}</option>`).join('');
+        mfrMonthSelect.value = months[0];
+        mfrMonthSelectWiredFor = mfrCountry;
+      }
+      mfrTitle.textContent = `Sales by Manufacturers — ${mfrCountry} (${mfrMonthSelect.value})`;
+      mfrNote.textContent = `Bars show each brand's total new registrations; the green segment is its BEV share of that total. Sorted by total sales, top 20 brands. ${MFR_MONTHLY_SOURCE_NOTE[mfrCountry] || ''}`;
+      renderManufacturerBars();
+      return;
+    }
+
     const periodKey = [...selectedMonths][0];
     const yearMatch = periodKey && periodKey.match(/(\d{4})/);
     const year = yearMatch ? +yearMatch[1] : null;
@@ -4286,11 +4327,15 @@ const MFR_SOURCE_NOTE = {
       mfrSection.classList.add('hidden');
       mfrCountry = null;
       mfrYear = null;
+      mfrMonthly = false;
+      mfrMonthSelect.classList.add('hidden');
       return;
     }
     mfrSection.classList.remove('hidden');
     mfrCountry = focusedCountry;
     mfrYear = year;
+    mfrMonthly = false;
+    mfrMonthSelect.classList.add('hidden');
     mfrTitle.textContent = `Sales by Manufacturers — ${mfrCountry} (${mfrYear})`;
     mfrNote.textContent = `Bars show each brand's total new registrations; the green segment is its BEV share of that total. Sorted by total sales, top 20 brands. ${MFR_SOURCE_NOTE[mfrCountry] || ''}`;
     renderManufacturerBars();
