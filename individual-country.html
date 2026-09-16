@@ -266,13 +266,25 @@
           </div>
         </div>
 
+        <div class="card chart-card hidden" id="cars-on-road-card">
+          <h2>Non-BEV Cars on the Road</h2>
+          <p class="note" id="cars-on-road-note">Estimated non-battery-electric fleet (petrol, diesel, hybrid combined), 2018–2041 — built by aging every year's new registrations with a survival curve and anchoring to real observed fleet-by-fuel data where it exists. Solid = observed or estimated from real fleet data. Dashed (2027 onward) = projected: the total on-road fleet (BEV + non-BEV) is held constant at its last real/projected year's level — each year's new registrations are sized to exactly replace vehicles aging out, split between BEV and non-BEV by a continuation of this country's recent BEV-share growth trend (dampened over time, and grounded in a comparable market's real trend where this country's own recent data is too thin to trust) — this is a trend continuation, not a guaranteed outcome.</p>
+          <div class="chart-legend" id="cars-on-road-legend"></div>
+          <svg class="chart" id="cars-on-road-svg" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
+          <div class="tooltip" id="cars-on-road-tooltip"></div>
+        </div>
+
         <div class="card chart-card hidden" id="mfr-section">
           <div class="chart-header-row">
-            <h2 id="mfr-title">Sales by Manufacturers</h2>
+            <h2 id="mfr-title">Sales by Brand &amp; Model</h2>
             <select id="mfr-month-select" class="filter-search hidden" style="width:auto;"></select>
+            <div class="chart-mode-toggle" role="group" aria-label="Brand or model view" id="mfr-view-toggle">
+              <button type="button" class="mode-btn active" data-mfr-view="brand">By Brand</button>
+              <button type="button" class="mode-btn" data-mfr-view="model">By Model</button>
+            </div>
             <div class="chart-mode-toggle" role="group" aria-label="Bar display mode">
-              <button type="button" class="mode-btn active" data-mfr-mode="pct" title="Show each brand's fuel mix as a % of that brand's own total.">%</button>
-              <button type="button" class="mode-btn" data-mfr-mode="raw" title="Show actual unit counts — bars scaled to the top-selling brand shown."># of Units</button>
+              <button type="button" class="mode-btn active" data-mfr-mode="pct" title="Show each row's fuel mix as a % of its own total.">%</button>
+              <button type="button" class="mode-btn" data-mfr-mode="raw" title="Show actual unit counts — bars scaled to the top-selling row shown."># of Units</button>
             </div>
             <a href="manufacturers.html" class="movers-see-all">Open the full Manufacturers page →</a>
           </div>
@@ -284,14 +296,6 @@
           </div>
           <div class="rank-rows" id="mfr-rank-rows"></div>
           <div class="tooltip" id="mfr-tooltip"></div>
-        </div>
-
-        <div class="card chart-card hidden" id="cars-on-road-card">
-          <h2>Non-BEV Cars on the Road</h2>
-          <p class="note" id="cars-on-road-note">Estimated non-battery-electric fleet (petrol, diesel, hybrid combined), 2018–2041 — built by aging every year's new registrations with a survival curve and anchoring to real observed fleet-by-fuel data where it exists. Solid = observed or estimated from real fleet data. Dashed (2027 onward) = projected: the total on-road fleet (BEV + non-BEV) is held constant at its last real/projected year's level — each year's new registrations are sized to exactly replace vehicles aging out, split between BEV and non-BEV by a continuation of this country's recent BEV-share growth trend (dampened over time, and grounded in a comparable market's real trend where this country's own recent data is too thin to trust) — this is a trend continuation, not a guaranteed outcome.</p>
-          <div class="chart-legend" id="cars-on-road-legend"></div>
-          <svg class="chart" id="cars-on-road-svg" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
-          <div class="tooltip" id="cars-on-road-tooltip"></div>
         </div>
 
         <div class="card chart-card hidden" id="ev-regulations-card">
@@ -349,6 +353,7 @@
 <script src="assets/canada-province-data.js"></script>
 <script src="assets/manufacturer-yearly-data.js"></script>
 <script src="assets/manufacturer-monthly-data.js"></script>
+<script src="assets/manufacturer-model-monthly-data.js"></script>
 <script>
 // month key -> { label, raw: { country: [BEV, PHEV, HEV, OTHERS, PETROL, DIESEL, TOTAL] } } — source: ACEA
 const MONTHLY_DATA = {
@@ -3858,18 +3863,22 @@ document.querySelectorAll('#canada-province-table th[data-key]').forEach(th => {
 initCanadaProvincePeriodSelect();
 renderCanadaProvinceSection();
 
-// --- Sales by Manufacturers — per-brand split. Annual data (MANUFACTURER_YEARLY) exists for a
-// handful of countries and is driven by the page's own focused-country state; monthly data
-// (MANUFACTURER_MONTHLY, currently just Canada) takes priority when present and uses its own
-// independent month picker instead, since there's only 1-2 months loaded so far. See the
-// equivalent, more heavily-commented block on powertrain-mix-by-country.html for the original.
+// --- Sales by Brand & Model. Annual data (MANUFACTURER_YEARLY) exists for a handful of
+// countries and is driven by the page's own focused-country state; monthly data
+// (MANUFACTURER_MONTHLY / MANUFACTURER_MODEL_MONTHLY) takes priority when present and uses
+// its own independent month picker instead, since only a short recent window is loaded so
+// far. "By Model" is only offered when model-level monthly data exists for the focused
+// country -- there's no model-level annual export, so it's brand-only in annual mode.
+// See the equivalent, more heavily-commented block on powertrain-mix-by-country.html.
 const MFR_SOURCE_NOTE = {
   Germany: 'source: Kraftfahrt-Bundesamt (KBA), Germany\'s federal motor authority, "Neuzulassungen von Personenkraftwagen nach Marken und Modellreihen".',
   Canada: 'source: merged from several presses/trackers (GoodCarBadCar, Toyota Canada Inc. newsroom, Transport Canada iZEV Program, GM Authority) since Canada has no single official per-brand release.',
   India: 'source: VAHAN Analytics Dashboard (analytics.parivahan.gov.in), the Government of India\'s official vehicle-registration portal -- Maker x Fuel table, calendar year 2025, all states. Single year only so far, no monthly breakdown loaded yet.',
 };
 const MFR_MONTHLY_SOURCE_NOTE = {
-  Canada: 'source: BestSellingCarsBlog (bestsellingcarsblog.com), citing Manufacturers + DesRosiers Automotive. Only the brands that still report sales monthly in Canada are covered (most automakers moved to quarterly/annual-only reporting) -- this is a real market limitation, not a gap in this chart. Only 1-2 months loaded so far, hence the dedicated month picker instead of using the page\'s main Period control.',
+  Canada: 'source: BestSellingCarsBlog (bestsellingcarsblog.com), citing Manufacturers + DesRosiers Automotive. Only the brands that still report sales monthly in Canada are covered (most automakers moved to quarterly/annual-only reporting) -- this is a real market limitation, not a gap in this chart.',
+  'United States': 'source: BestSellingCarsBlog (bestsellingcarsblog.com), citing Manufacturers. Only the brands that still report sales monthly in the USA are covered (most automakers moved to quarterly/annual-only reporting) -- this is a real market limitation, not a gap in this chart.',
+  Germany: 'source: Kraftfahrt-Bundesamt (KBA), FZ 10 -- Neuzulassungen von Personenkraftwagen nach Marken und Modellreihen. Capped to 2026 onward here (full history back to 2008 is on the Manufacturers page); genuinely comprehensive, not brand-limited like Canada/USA.',
 };
 (function(){
   const mfrRows = document.getElementById('mfr-rank-rows');
@@ -3878,13 +3887,16 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   const mfrTitle = document.getElementById('mfr-title');
   const mfrNote = document.getElementById('mfr-note');
   const mfrMonthSelect = document.getElementById('mfr-month-select');
+  const mfrViewToggle = document.getElementById('mfr-view-toggle');
   if(!mfrRows || !mfrSection || typeof MANUFACTURER_YEARLY === 'undefined') return;
   const hasMonthly = typeof MANUFACTURER_MONTHLY !== 'undefined';
+  const hasModelMonthly = typeof MANUFACTURER_MODEL_MONTHLY !== 'undefined';
 
   const MFR_FUEL_KEYS = ['bev','phev','hev','petrol','diesel'];
   let mfrCountry = null;
   let mfrYear = null;
   let mfrMonthly = false;
+  let mfrView = 'brand'; // 'brand' or 'model'
   let mfrMode = 'pct'; // 'pct' or 'raw'
   let mfrMonthSelectWiredFor = null;
 
@@ -3895,14 +3907,24 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const width = units / widthDenom * 100;
     const showLabel = width >= 7;
     const labelText = mfrMode === 'raw' ? units.toLocaleString('en-US') : pct.toFixed(0) + '%';
-    return `<div class="bar-seg" style="width:${width}%; background:${FUEL_COLORS[key]}" data-brand="${row.brand}" data-key="${key}" data-units="${units}" data-pct="${pct.toFixed(1)}">${showLabel ? `<span class="seg-label">${labelText}</span>` : ''}</div>`;
+    return `<div class="bar-seg" style="width:${width}%; background:${FUEL_COLORS[key]}" data-label="${row.label}" data-key="${key}" data-units="${units}" data-pct="${pct.toFixed(1)}">${showLabel ? `<span class="seg-label">${labelText}</span>` : ''}</div>`;
   }
   function currentMfrRows(){
+    if(mfrView === 'model' && mfrMonthly && hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[mfrCountry]){
+      const ym = mfrMonthSelect.value;
+      return MANUFACTURER_MODEL_MONTHLY[mfrCountry].filter(r => r.year_month === ym)
+        .map(r => ({ ...r, label: `${r.brand} ${r.model}` }))
+        .sort((a,b) => b.total - a.total).slice(0,20);
+    }
     if(mfrMonthly){
       const ym = mfrMonthSelect.value;
-      return MANUFACTURER_MONTHLY[mfrCountry].filter(r => r.year_month === ym).sort((a,b) => b.total - a.total).slice(0,20);
+      return MANUFACTURER_MONTHLY[mfrCountry].filter(r => r.year_month === ym)
+        .map(r => ({ ...r, label: r.brand }))
+        .sort((a,b) => b.total - a.total).slice(0,20);
     }
-    return MANUFACTURER_YEARLY[mfrCountry].filter(r => r.year === mfrYear).sort((a,b) => b.total - a.total).slice(0,20);
+    return MANUFACTURER_YEARLY[mfrCountry].filter(r => r.year === mfrYear)
+      .map(r => ({ ...r, label: r.brand }))
+      .sort((a,b) => b.total - a.total).slice(0,20);
   }
   function renderManufacturerBars(){
     if(!mfrCountry) return;
@@ -3913,8 +3935,8 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       const bevPct = row.bev / row.total * 100;
       const widthDenom = mfrMode === 'raw' ? globalMax : row.total;
       return `
-      <div class="rank-row" data-brand="${row.brand}">
-        <div class="country-label">${row.brand}</div>
+      <div class="rank-row" data-label="${row.label}">
+        <div class="country-label">${row.label}</div>
         <div class="bar-track">
           ${MFR_FUEL_KEYS.map(k => mfrSegHTML(row, k, widthDenom)).join('')}
         </div>
@@ -3922,6 +3944,16 @@ const MFR_MONTHLY_SOURCE_NOTE = {
         <div class="total-label">${row.total.toLocaleString('en-US')}</div>
       </div>`;
     }).join('');
+  }
+  function mfrNoteText(){
+    const sourceNote = mfrMonthly ? (MFR_MONTHLY_SOURCE_NOTE[mfrCountry] || '') : (MFR_SOURCE_NOTE[mfrCountry] || '');
+    return mfrView === 'model'
+      ? `Bars show each model's total new registrations across all brands; the green segment is its BEV share of that total. Sorted by total sales, top 20 models. ${sourceNote}`
+      : `Bars show each brand's total new registrations; the green segment is its BEV share of that total. Sorted by total sales, top 20 brands. ${sourceNote}`;
+  }
+  function mfrTitleText(){
+    const period = mfrMonthly ? mfrMonthSelect.value : mfrYear;
+    return `Sales by Brand & Model — ${mfrCountry} (${period})`;
   }
   document.querySelectorAll('[data-mfr-mode]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -3931,25 +3963,40 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       renderManufacturerBars();
     });
   });
+  document.querySelectorAll('[data-mfr-view]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if(btn.dataset.mfrView === mfrView) return;
+      mfrView = btn.dataset.mfrView;
+      document.querySelectorAll('[data-mfr-view]').forEach(b => b.classList.toggle('active', b === btn));
+      mfrNote.textContent = mfrNoteText();
+      renderManufacturerBars();
+    });
+  });
   mfrMonthSelect.addEventListener('change', () => {
-    mfrTitle.textContent = `Sales by Manufacturers — ${mfrCountry} (${mfrMonthSelect.value})`;
+    mfrTitle.textContent = mfrTitleText();
     renderManufacturerBars();
   });
 
   window.renderMfrSection = function(){
+    if(focusedCountry !== mfrCountry){
+      mfrView = 'brand';
+      document.querySelectorAll('[data-mfr-view]').forEach(b => b.classList.toggle('active', b.dataset.mfrView === 'brand'));
+    }
     if(hasMonthly && focusedCountry && MANUFACTURER_MONTHLY[focusedCountry] && MANUFACTURER_MONTHLY[focusedCountry].length){
       mfrSection.classList.remove('hidden');
       mfrCountry = focusedCountry;
       mfrMonthly = true;
       mfrMonthSelect.classList.remove('hidden');
+      const hasModelData = hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[mfrCountry] && MANUFACTURER_MODEL_MONTHLY[mfrCountry].length;
+      mfrViewToggle.classList.toggle('hidden', !hasModelData);
       if(mfrMonthSelectWiredFor !== mfrCountry){
         const months = [...new Set(MANUFACTURER_MONTHLY[mfrCountry].map(r => r.year_month))].sort().reverse();
         mfrMonthSelect.innerHTML = months.map(ym => `<option value="${ym}">${ym}</option>`).join('');
         mfrMonthSelect.value = months[0];
         mfrMonthSelectWiredFor = mfrCountry;
       }
-      mfrTitle.textContent = `Sales by Manufacturers — ${mfrCountry} (${mfrMonthSelect.value})`;
-      mfrNote.textContent = `Bars show each brand's total new registrations; the green segment is its BEV share of that total. Sorted by total sales, top 20 brands. ${MFR_MONTHLY_SOURCE_NOTE[mfrCountry] || ''}`;
+      mfrTitle.textContent = mfrTitleText();
+      mfrNote.textContent = mfrNoteText();
       renderManufacturerBars();
       return;
     }
@@ -3965,6 +4012,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       mfrYear = null;
       mfrMonthly = false;
       mfrMonthSelect.classList.add('hidden');
+      mfrViewToggle.classList.add('hidden');
       return;
     }
     mfrSection.classList.remove('hidden');
@@ -3972,8 +4020,9 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     mfrYear = year;
     mfrMonthly = false;
     mfrMonthSelect.classList.add('hidden');
-    mfrTitle.textContent = `Sales by Manufacturers — ${mfrCountry} (${mfrYear})`;
-    mfrNote.textContent = `Bars show each brand's total new registrations; the green segment is its BEV share of that total. Sorted by total sales, top 20 brands. ${MFR_SOURCE_NOTE[mfrCountry] || ''}`;
+    mfrViewToggle.classList.add('hidden');
+    mfrTitle.textContent = mfrTitleText();
+    mfrNote.textContent = mfrNoteText();
     renderManufacturerBars();
   };
 
@@ -3984,7 +4033,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     mfrTooltip.style.left = (e.clientX - cardRect.left) + 'px';
     mfrTooltip.style.top = (e.clientY - cardRect.top - 10) + 'px';
     mfrTooltip.style.opacity = 1;
-    mfrTooltip.innerHTML = `${seg.dataset.brand} — ${FUEL_LABELS[seg.dataset.key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)`;
+    mfrTooltip.innerHTML = `${seg.dataset.label} — ${FUEL_LABELS[seg.dataset.key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)`;
   });
   mfrRows.addEventListener('pointerleave', () => { mfrTooltip.style.opacity = 0; });
 })();
