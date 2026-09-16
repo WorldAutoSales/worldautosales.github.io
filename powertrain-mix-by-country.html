@@ -405,6 +405,10 @@ const MONTHLY_DATA = {
       "China": [1161000,482000,0,0,1069000,0,2712000],      // INEGI (RAIAVL) open data, venta+hibrido monthly CSVs
       "Mexico": [2695,3205,11146,0,112316,0,129362],      // Automundo/ACARA + Infobae, released 2026-09-05. No PHEV column (established convention for Argentina)
       "Argentina": [665,0,6991,0,36759,0,44415],      // FENALCO-ANDI via elnorte.com.co, released 2026-09
+      // source: VAMA (member brands: PC+Special->Petrol, CV->Diesel) + VinFast (100% BEV) + TC Group/Hyundai (->Petrol), Vietnam -- HEV now reported separately by VAMA as member brands add hybrid models
+      "Vietnam": [20161,0,1388,0,18677,8258,48484],
+      // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry -- genuine standalone month, from the electrified-vehicle monthly chart (BEV/PHEV/HEV) plus the light+heavy total table; no Petrol/Diesel split published, so the non-electrified remainder is placed in Petrol for this chart (Diesel=0), same convention as Peru's other loaded months
+      "Peru": [67,229,1353,0,24679,0,26328],
       "Colombia": [4542,0,9195,0,13387,0,27124]},
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY %
     priorYearBev: {
@@ -1326,8 +1330,8 @@ const MONTHLY_DATA = {
       "Israel": [27748,57708,73563,1,66507,12204,237731],
       // source: KAO (kao.kz), Jan-Jun 2026 summed from the bimonthly-derived monthly figures — HEV is a floor from March on; Diesel=0
       "Kazakhstan": [1017,2640,825,0,101386,0,105868],
-      // source: AAP (Asociacion Automotriz del Peru), Jan-Jul 2026 summed from the monthly figures — HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [594,1000,8116,0,152778,0,162488],
+      // source: AAP (Asociacion Automotriz del Peru), Jan-Aug 2026 summed from the monthly figures — HEV includes MHEV combined; Diesel folded into Petrol
+      "Peru": [661,1229,9469,0,177457,0,188816],
       // source: ACAU (Uruguay), Compilado 2026 — Jan-Jul 2026 summed from the monthly figures; HEV includes MHEV combined
       "Uruguay": [14375,1594,4276,0,11521,42,31808],
       // source: DPSHTRR (Albania), Jan-Aug 2026 summed from the monthly figures — HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
@@ -1490,8 +1494,8 @@ const MONTHLY_DATA = {
       "Israel": [41871,86562,110344,2,99760,18306,356845],
       // source: KAO (kao.kz) — each fuel trended from the last 3 actual months' average (or the 6-mo YTD average if higher), applied to the remaining 6 months; HEV projection inherits the floor bias from Mar-Jun actuals
       "Kazakhstan": [2159,5984,2057,0,217890,0,228090],
-      // source: AAP (Asociacion Automotriz del Peru) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; HEV projection inherits the HEV+MHEV combined basis
-      "Peru": [1018,1980,14268,0,262695,0,279961],
+      // source: AAP (Asociacion Automotriz del Peru) — each fuel trended from the last 3 actual months' average (or the 8-mo YTD average if higher), applied to the remaining 4 months; HEV projection inherits the HEV+MHEV combined basis
+      "Peru": [949,2125,14617,0,269338,0,287029],
       // source: ACAU (Uruguay) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
       "Uruguay": [26685,2931,7330,0,19750,82,56778],
       // source: FENALCO-ANDI, Colombia — each fuel trended from the last 3 actual months' average (May-Jul, all genuine/near-genuine single months) or the 7-mo YTD average if higher, applied to the remaining 5 months; PHEV folded into HEV, Petrol is the undifferentiated combustion remainder (Diesel=0)
