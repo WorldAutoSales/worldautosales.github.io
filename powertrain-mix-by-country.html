@@ -283,12 +283,8 @@
 
         <div class="card chart-card hidden" id="mfr-section">
           <div class="chart-header-row">
-            <h2 id="mfr-title">Sales by Brand &amp; Model</h2>
+            <h2 id="mfr-title">Sales by Brand</h2>
             <select id="mfr-month-select" class="filter-search hidden" style="width:auto;"></select>
-            <div class="chart-mode-toggle" role="group" aria-label="Brand or model view" id="mfr-view-toggle">
-              <button type="button" class="mode-btn active" data-mfr-view="brand">By Brand</button>
-              <button type="button" class="mode-btn" data-mfr-view="model">By Model</button>
-            </div>
             <div class="chart-mode-toggle" role="group" aria-label="Bar display mode">
               <button type="button" class="mode-btn active" data-mfr-mode="pct" title="Show each row's fuel mix as a % of its own total.">%</button>
               <button type="button" class="mode-btn" data-mfr-mode="raw" title="Show actual unit counts — bars scaled to the top-selling row shown."># of Units</button>
@@ -299,10 +295,30 @@
           <div class="rank-rows-header">
             <span class="rrh-spacer"></span>
             <span class="rrh-total">BEV %</span>
+            <span class="rrh-total">Share</span>
             <span class="rrh-total">Total</span>
           </div>
           <div class="rank-rows" id="mfr-rank-rows"></div>
           <div class="tooltip" id="mfr-tooltip"></div>
+        </div>
+
+        <div class="card chart-card hidden" id="mfr-model-section">
+          <div class="chart-header-row">
+            <h2 id="mfr-model-title">Sales by Model</h2>
+            <div class="chart-mode-toggle" role="group" aria-label="Bar display mode">
+              <button type="button" class="mode-btn active" data-mfr-model-mode="pct" title="Show each row's fuel mix as a % of its own total.">%</button>
+              <button type="button" class="mode-btn" data-mfr-model-mode="raw" title="Show actual unit counts — bars scaled to the top-selling row shown."># of Units</button>
+            </div>
+          </div>
+          <p class="note" id="mfr-model-note">Bars show each model's total new registrations; the green segment is its BEV share of that total. Sorted by total sales, top 20 models.</p>
+          <div class="rank-rows-header">
+            <span class="rrh-spacer"></span>
+            <span class="rrh-total">BEV %</span>
+            <span class="rrh-total">Share</span>
+            <span class="rrh-total">Total</span>
+          </div>
+          <div class="rank-rows" id="mfr-model-rank-rows"></div>
+          <div class="tooltip" id="mfr-model-tooltip"></div>
         </div>
 
         <div class="card chart-card hidden" id="ev-regulations-card">
@@ -4253,7 +4269,11 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   const mfrTitle = document.getElementById('mfr-title');
   const mfrNote = document.getElementById('mfr-note');
   const mfrMonthSelect = document.getElementById('mfr-month-select');
-  const mfrViewToggle = document.getElementById('mfr-view-toggle');
+  const mfrModelRows = document.getElementById('mfr-model-rank-rows');
+  const mfrModelTooltip = document.getElementById('mfr-model-tooltip');
+  const mfrModelSection = document.getElementById('mfr-model-section');
+  const mfrModelTitle = document.getElementById('mfr-model-title');
+  const mfrModelNote = document.getElementById('mfr-model-note');
   if(!mfrRows || !mfrSection || typeof MANUFACTURER_YEARLY === 'undefined') return;
   const hasMonthly = typeof MANUFACTURER_MONTHLY !== 'undefined';
   const hasModelMonthly = typeof MANUFACTURER_MODEL_MONTHLY !== 'undefined';
@@ -4262,93 +4282,102 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   let mfrCountry = null;
   let mfrYear = null;
   let mfrMonthly = false; // true = current section is showing MANUFACTURER_MONTHLY rows for mfrMonthSelect.value
-  let mfrView = 'brand'; // 'brand' or 'model'
-  let mfrMode = 'pct'; // 'pct' or 'raw'
+  let mfrMode = 'pct'; // 'pct' or 'raw' -- brand section
+  let mfrModelMode = 'pct'; // 'pct' or 'raw' -- model section
   let mfrMonthSelectWiredFor = null; // country the month <select> options were last built for
 
-  function mfrSegHTML(row, key, widthDenom){
+  function mfrSegHTML(row, key, widthDenom, mode){
     const units = row[key];
     if(units <= 0 || row.total <= 0) return '';
     const pct = units / row.total * 100; // always the true share, used for the tooltip
     const width = units / widthDenom * 100; // bar geometry: 100%-stacked in pct mode, scaled-to-max in raw mode
     const showLabel = width >= 7;
-    const labelText = mfrMode === 'raw' ? units.toLocaleString('en-US') : pct.toFixed(0) + '%';
+    const labelText = mode === 'raw' ? units.toLocaleString('en-US') : pct.toFixed(0) + '%';
     return `<div class="bar-seg" style="width:${width}%; background:${FUEL_COLORS[key]}" data-label="${row.label}" data-key="${key}" data-units="${units}" data-pct="${pct.toFixed(1)}">${showLabel ? `<span class="seg-label">${labelText}</span>` : ''}</div>`;
   }
-  function currentMfrRows(){
-    if(mfrView === 'model' && mfrMonthly && hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[mfrCountry]){
+  // full (unsliced) row set for a given kind, used both to build the top-20 list and to total
+  // up a genuine "% of market" denominator -- the denominator must come from every tracked
+  // row, not just the 20 shown, or a market with a long tail of small brands/models would
+  // understate everyone's share
+  function fullMfrRows(kind){
+    if(kind === 'model'){
+      if(!(mfrMonthly && hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[mfrCountry])) return [];
       const ym = mfrMonthSelect.value;
       return MANUFACTURER_MODEL_MONTHLY[mfrCountry].filter(r => r.year_month === ym)
-        .map(r => ({ ...r, label: `${r.brand} ${r.model}` }))
-        .sort((a,b) => b.total - a.total).slice(0,20);
+        .map(r => ({ ...r, label: `${r.brand} ${r.model}` }));
     }
     if(mfrMonthly){
       const ym = mfrMonthSelect.value;
       return MANUFACTURER_MONTHLY[mfrCountry].filter(r => r.year_month === ym)
-        .map(r => ({ ...r, label: r.brand }))
-        .sort((a,b) => b.total - a.total).slice(0,20);
+        .map(r => ({ ...r, label: r.brand }));
     }
     return MANUFACTURER_YEARLY[mfrCountry].filter(r => r.year === mfrYear)
-      .map(r => ({ ...r, label: r.brand }))
-      .sort((a,b) => b.total - a.total).slice(0,20);
+      .map(r => ({ ...r, label: r.brand }));
   }
-  function renderManufacturerBars(){
-    if(!mfrCountry) return;
-    mfrRows.classList.toggle('raw-mode', mfrMode === 'raw');
-    const top20 = currentMfrRows();
+  function renderSection(kind){
+    const rowsEl = kind === 'model' ? mfrModelRows : mfrRows;
+    const mode = kind === 'model' ? mfrModelMode : mfrMode;
+    const all = fullMfrRows(kind);
+    if(!all.length){ rowsEl.innerHTML = ''; return; }
+    const marketTotal = all.reduce((s,r) => s + r.total, 0);
+    const top20 = [...all].sort((a,b) => b.total - a.total).slice(0,20);
+    rowsEl.classList.toggle('raw-mode', mode === 'raw');
     const globalMax = Math.max(1, ...top20.map(r => r.total));
-    mfrRows.innerHTML = top20.map(row => {
+    rowsEl.innerHTML = top20.map(row => {
       const bevPct = row.bev / row.total * 100;
-      const widthDenom = mfrMode === 'raw' ? globalMax : row.total;
+      const sharePct = marketTotal ? row.total / marketTotal * 100 : 0;
+      const widthDenom = mode === 'raw' ? globalMax : row.total;
       return `
-      <div class="rank-row" data-label="${row.label}">
+      <div class="rank-row" data-label="${row.label}" data-kind="${kind}">
         <div class="country-label">${row.label}</div>
         <div class="bar-track">
-          ${MFR_FUEL_KEYS.map(k => mfrSegHTML(row, k, widthDenom)).join('')}
+          ${MFR_FUEL_KEYS.map(k => mfrSegHTML(row, k, widthDenom, mode)).join('')}
         </div>
         <div class="pct-label" style="color:${FUEL_COLORS.bev}">${bevPct.toFixed(1)}%</div>
+        <div class="pct-label">${sharePct.toFixed(1)}%</div>
         <div class="total-label">${row.total.toLocaleString('en-US')}</div>
       </div>`;
     }).join('');
   }
-  function mfrNoteText(){
+  function mfrNoteText(kind){
     const sourceNote = mfrMonthly ? (MFR_MONTHLY_SOURCE_NOTE[mfrCountry] || '') : (MFR_SOURCE_NOTE[mfrCountry] || '');
-    return mfrView === 'model'
-      ? `Bars show each model's total new registrations across all brands; the green segment is its BEV share of that total. Sorted by total sales, top 20 models. ${sourceNote}`
-      : `Bars show each brand's total new registrations; the green segment is its BEV share of that total. Sorted by total sales, top 20 brands. ${sourceNote}`;
+    const noun = kind === 'model' ? 'model' : 'brand';
+    const scope = kind === 'model' ? 'across all brands' : '';
+    return `Bars show each ${noun}'s total new registrations ${scope}; the green segment is its BEV share of that total. Share is that ${noun}'s % of every ${noun} tracked here for this period (not just the top 20 shown), sorted by total sales, top 20 ${noun}s. ${sourceNote}`;
   }
-  function mfrTitleText(){
+  function mfrTitleText(kind){
     const period = mfrMonthly ? mfrMonthSelect.value : mfrYear;
-    return `Sales by Brand & Model — ${mfrCountry} (${period})`;
+    const noun = kind === 'model' ? 'Model' : 'Brand';
+    return `Sales by ${noun} — ${mfrCountry} (${period})`;
+  }
+  function renderBoth(){
+    renderSection('brand');
+    if(!mfrModelSection.classList.contains('hidden')) renderSection('model');
   }
   document.querySelectorAll('[data-mfr-mode]').forEach(btn => {
     btn.addEventListener('click', () => {
       if(btn.dataset.mfrMode === mfrMode) return;
       mfrMode = btn.dataset.mfrMode;
       document.querySelectorAll('[data-mfr-mode]').forEach(b => b.classList.toggle('active', b === btn));
-      renderManufacturerBars();
+      renderSection('brand');
     });
   });
-  document.querySelectorAll('[data-mfr-view]').forEach(btn => {
+  document.querySelectorAll('[data-mfr-model-mode]').forEach(btn => {
     btn.addEventListener('click', () => {
-      if(btn.dataset.mfrView === mfrView) return;
-      mfrView = btn.dataset.mfrView;
-      document.querySelectorAll('[data-mfr-view]').forEach(b => b.classList.toggle('active', b === btn));
-      mfrNote.textContent = mfrNoteText();
-      renderManufacturerBars();
+      if(btn.dataset.mfrModelMode === mfrModelMode) return;
+      mfrModelMode = btn.dataset.mfrModelMode;
+      document.querySelectorAll('[data-mfr-model-mode]').forEach(b => b.classList.toggle('active', b === btn));
+      renderSection('model');
     });
   });
   mfrMonthSelect.addEventListener('change', () => {
-    mfrTitle.textContent = mfrTitleText();
-    renderManufacturerBars();
+    mfrTitle.textContent = mfrTitleText('brand');
+    mfrModelTitle.textContent = mfrTitleText('model');
+    renderBoth();
   });
 
   // exposed globally so recompute() can call it whenever the period or country focus changes
   window.renderMfrSection = function(){
-    if(focusedCountry !== mfrCountry){
-      mfrView = 'brand';
-      document.querySelectorAll('[data-mfr-view]').forEach(b => b.classList.toggle('active', b.dataset.mfrView === 'brand'));
-    }
     // Monthly data takes priority over the annual dataset and uses its own independent month
     // picker rather than the page's main Period control -- there's only a short recent window
     // loaded so far, so tying it to the global multi-year period selector would mean it's
@@ -4359,16 +4388,20 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       mfrMonthly = true;
       mfrMonthSelect.classList.remove('hidden');
       const hasModelData = hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[mfrCountry] && MANUFACTURER_MODEL_MONTHLY[mfrCountry].length;
-      mfrViewToggle.classList.toggle('hidden', !hasModelData);
+      mfrModelSection.classList.toggle('hidden', !hasModelData);
       if(mfrMonthSelectWiredFor !== mfrCountry){
         const months = [...new Set(MANUFACTURER_MONTHLY[mfrCountry].map(r => r.year_month))].sort().reverse();
         mfrMonthSelect.innerHTML = months.map(ym => `<option value="${ym}">${ym}</option>`).join('');
         mfrMonthSelect.value = months[0];
         mfrMonthSelectWiredFor = mfrCountry;
       }
-      mfrTitle.textContent = mfrTitleText();
-      mfrNote.textContent = mfrNoteText();
-      renderManufacturerBars();
+      mfrTitle.textContent = mfrTitleText('brand');
+      mfrNote.textContent = mfrNoteText('brand');
+      if(hasModelData){
+        mfrModelTitle.textContent = mfrTitleText('model');
+        mfrModelNote.textContent = mfrNoteText('model');
+      }
+      renderBoth();
       return;
     }
 
@@ -4379,22 +4412,23 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       MANUFACTURER_YEARLY[focusedCountry].some(r => r.year === year);
     if(!hasData){
       mfrSection.classList.add('hidden');
+      mfrModelSection.classList.add('hidden');
       mfrCountry = null;
       mfrYear = null;
       mfrMonthly = false;
       mfrMonthSelect.classList.add('hidden');
-      mfrViewToggle.classList.add('hidden');
       return;
     }
+    // no model-level annual export exists -- model section only ever shows in monthly mode
     mfrSection.classList.remove('hidden');
+    mfrModelSection.classList.add('hidden');
     mfrCountry = focusedCountry;
     mfrYear = year;
     mfrMonthly = false;
     mfrMonthSelect.classList.add('hidden');
-    mfrViewToggle.classList.add('hidden');
-    mfrTitle.textContent = mfrTitleText();
-    mfrNote.textContent = mfrNoteText();
-    renderManufacturerBars();
+    mfrTitle.textContent = mfrTitleText('brand');
+    mfrNote.textContent = mfrNoteText('brand');
+    renderSection('brand');
   };
 
   mfrRows.addEventListener('pointermove', e => {
@@ -4407,6 +4441,16 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     mfrTooltip.innerHTML = `${seg.dataset.label} — ${FUEL_LABELS[seg.dataset.key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)`;
   });
   mfrRows.addEventListener('pointerleave', () => { mfrTooltip.style.opacity = 0; });
+  mfrModelRows.addEventListener('pointermove', e => {
+    const seg = e.target.closest('.bar-seg');
+    if(!seg){ mfrModelTooltip.style.opacity = 0; return; }
+    const cardRect = mfrModelSection.getBoundingClientRect();
+    mfrModelTooltip.style.left = (e.clientX - cardRect.left) + 'px';
+    mfrModelTooltip.style.top = (e.clientY - cardRect.top - 10) + 'px';
+    mfrModelTooltip.style.opacity = 1;
+    mfrModelTooltip.innerHTML = `${seg.dataset.label} — ${FUEL_LABELS[seg.dataset.key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)`;
+  });
+  mfrModelRows.addEventListener('pointerleave', () => { mfrModelTooltip.style.opacity = 0; });
 })();
 </script>
 <script src="assets/notes-toggle.js"></script>

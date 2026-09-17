@@ -1027,8 +1027,35 @@ ul.notes-body{
   .movers-columns{ grid-template-columns:1fr; }
 }
 
-#mfr-rank-rows .rank-row .total-label{ color:var(--text); font-weight:700; }
+#mfr-rank-rows .rank-row .total-label, #mfr-model-rank-rows .rank-row .total-label{ color:var(--text); font-weight:700; }
 .mfr-year-total{ font-size:12px; color:var(--text-muted); font-weight:500; margin-left:6px; }
+
+/* ---------- Sales by Brand/Model: in-section country filter + hover sales-preview popover ---------- */
+.mfr-country-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:14px;
+}
+.mfr-country-row .filter-label{ margin:0; white-space:nowrap; }
+.mfr-country-row .chart-legend{ margin-bottom:0; }
+.mfr-sales-preview{
+  position:fixed;
+  z-index:20;
+  width:280px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.18);
+  padding:10px 12px 6px;
+  pointer-events:none;
+}
+.mfr-sales-preview-title{
+  font-size:11.5px;
+  font-weight:700;
+  color:var(--text);
+  margin-bottom:4px;
+}
 
 /* ---------- Biggest Movers standalone page ---------- */
 .movers-page-grid{
