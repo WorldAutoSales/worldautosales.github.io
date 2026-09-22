@@ -286,6 +286,7 @@
             <a href="manufacturers.html" class="movers-see-all">Open the full Manufacturers page →</a>
           </div>
           <p class="note" id="mfr-note">Bars show each brand's total new registrations; the green segment is its BEV share of that total. Sorted by total sales, top 20 brands.</p>
+          <div class="mfr-coverage-note hidden" id="mfr-coverage-note"></div>
           <div class="mfr-country-row">
             <span class="filter-label">Country</span>
             <div class="chart-legend" id="mfr-country-filter"></div>
@@ -305,6 +306,24 @@
           </div>
           <div class="rank-rows" id="mfr-rank-rows"></div>
           <div class="tooltip" id="mfr-tooltip"></div>
+          <div class="table-scroll" style="margin-top:16px;">
+            <table id="mfr-table">
+              <thead>
+                <tr>
+                  <th data-key="label" data-type="str">Brand</th>
+                  <th data-key="bev" data-type="num">BEV</th>
+                  <th data-key="phev" data-type="num">PHEV</th>
+                  <th data-key="hev" data-type="num">HEV</th>
+                  <th data-key="petrol" data-type="num">Petrol</th>
+                  <th data-key="diesel" data-type="num">Diesel</th>
+                  <th data-key="total" data-type="num">Total</th>
+                  <th data-key="bevPct" data-type="num">BEV %</th>
+                  <th data-key="sharePct" data-type="num">Share</th>
+                </tr>
+              </thead>
+              <tbody id="mfr-table-body"></tbody>
+            </table>
+          </div>
           <div class="mfr-sales-preview hidden" id="mfr-sales-preview">
             <div class="mfr-sales-preview-title" id="mfr-sales-preview-title"></div>
             <svg class="chart" id="mfr-sales-preview-svg" viewBox="0 0 280 140" preserveAspectRatio="none"></svg>
@@ -331,6 +350,24 @@
           </div>
           <div class="rank-rows" id="mfr-model-rank-rows"></div>
           <div class="tooltip" id="mfr-model-tooltip"></div>
+          <div class="table-scroll" style="margin-top:16px;">
+            <table id="mfr-model-table">
+              <thead>
+                <tr>
+                  <th data-key="label" data-type="str">Model</th>
+                  <th data-key="bev" data-type="num">BEV</th>
+                  <th data-key="phev" data-type="num">PHEV</th>
+                  <th data-key="hev" data-type="num">HEV</th>
+                  <th data-key="petrol" data-type="num">Petrol</th>
+                  <th data-key="diesel" data-type="num">Diesel</th>
+                  <th data-key="total" data-type="num">Total</th>
+                  <th data-key="bevPct" data-type="num">BEV %</th>
+                  <th data-key="sharePct" data-type="num">Share</th>
+                </tr>
+              </thead>
+              <tbody id="mfr-model-table-body"></tbody>
+            </table>
+          </div>
         </div>
 
         <div class="card chart-card hidden" id="ev-regulations-card">
@@ -3923,6 +3960,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   const mfrSection = document.getElementById('mfr-section');
   const mfrTitle = document.getElementById('mfr-title');
   const mfrNote = document.getElementById('mfr-note');
+  const mfrCoverageNote = document.getElementById('mfr-coverage-note');
   const mfrMonthSelect = document.getElementById('mfr-month-select');
   const mfrModelRows = document.getElementById('mfr-model-rank-rows');
   const mfrModelTooltip = document.getElementById('mfr-model-tooltip');
@@ -4020,6 +4058,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const rowsEl = kind === 'model' ? mfrModelRows : mfrRows;
     const mode = kind === 'model' ? mfrModelMode : mfrMode;
     const all = fullMfrRows(kind);
+    renderMfrTable(kind, all);
     if(!all.length){ rowsEl.innerHTML = ''; return; }
     const marketTotal = all.reduce((s,r) => s + r.total, 0);
     // member set (which 20 brands/models appear) is always fixed by real total volume --
@@ -4048,6 +4087,55 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       </div>`;
     }).join('');
   }
+  // full sortable table below each chart -- shows every brand/model tracked for the period,
+  // not just the top 20 bars above (same unsliced fullMfrRows() set the Share % column uses),
+  // mirroring the "full brand table" pattern on manufacturers.html
+  let mfrTableSort = { key: 'total', dir: -1 };
+  let mfrModelTableSort = { key: 'total', dir: -1 };
+  function renderMfrTable(kind, all){
+    const tableId = kind === 'model' ? 'mfr-model-table' : 'mfr-table';
+    const tbodyEl = document.getElementById(`${tableId}-body`);
+    if(!tbodyEl) return;
+    const sortState = kind === 'model' ? mfrModelTableSort : mfrTableSort;
+    if(!all.length){ tbodyEl.innerHTML = ''; return; }
+    const marketTotal = all.reduce((s,r) => s + r.total, 0);
+    const rows = all.map(r => ({
+      ...r,
+      bevPct: r.total ? r.bev / r.total * 100 : 0,
+      sharePct: marketTotal ? r.total / marketTotal * 100 : 0,
+    })).sort((a,b) => {
+      const av = a[sortState.key], bv = b[sortState.key];
+      if(typeof av === 'string') return av.localeCompare(bv) * sortState.dir;
+      return ((av ?? -Infinity) - (bv ?? -Infinity)) * sortState.dir;
+    });
+    tbodyEl.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r.label}</td>
+        <td>${r.bev.toLocaleString('en-US')}</td>
+        <td>${r.phev.toLocaleString('en-US')}</td>
+        <td>${r.hev.toLocaleString('en-US')}</td>
+        <td>${r.petrol.toLocaleString('en-US')}</td>
+        <td>${r.diesel.toLocaleString('en-US')}</td>
+        <td>${r.total.toLocaleString('en-US')}</td>
+        <td>${r.bevPct.toFixed(1)}%</td>
+        <td>${r.sharePct.toFixed(1)}%</td>
+      </tr>`).join('');
+  }
+  function wireMfrTableSort(tableId, kind){
+    document.querySelectorAll(`#${tableId} thead th`).forEach(th => {
+      th.addEventListener('click', () => {
+        const sortState = kind === 'model' ? mfrModelTableSort : mfrTableSort;
+        const key = th.dataset.key;
+        sortState.dir = (sortState.key === key) ? -sortState.dir : (key === 'label' ? 1 : -1);
+        sortState.key = key;
+        document.querySelectorAll(`#${tableId} thead th`).forEach(t => t.classList.remove('sorted'));
+        th.classList.add('sorted');
+        renderMfrTable(kind, fullMfrRows(kind));
+      });
+    });
+  }
+  wireMfrTableSort('mfr-table', 'brand');
+  wireMfrTableSort('mfr-model-table', 'model');
   function renderMfrFuelLegend(){
     const html = MFR_FUEL_KEYS.map(k => `
       <div class="legend-chip${selectedFuels.has(k) ? '' : ' dimmed'}" data-fuel="${k}"><span class="swatch" style="background:${FUEL_COLORS[k]}"></span>${FUEL_LABELS[k]}</div>
@@ -4072,10 +4160,30 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const noun = kind === 'model' ? 'Model' : 'Brand';
     return `Sales by ${noun} — ${mfrCountry} (${period})`;
   }
+  // Some markets (Canada, USA) have real months where only a handful of brands still report
+  // sales monthly -- most automakers there moved to quarterly/annual reporting. Landing on
+  // one of those months by default (usually the newest) makes it look like Ford/GM/etc. are
+  // simply missing, so flag it plainly rather than leaving it to the note paragraph alone.
+  function updateMfrCoverageNote(){
+    if(!mfrCoverageNote) return;
+    if(!mfrMonthly || !MANUFACTURER_MONTHLY[mfrCountry]){ mfrCoverageNote.classList.add('hidden'); return; }
+    const allMonths = MANUFACTURER_MONTHLY[mfrCountry];
+    const byMonth = {};
+    allMonths.forEach(r => { (byMonth[r.year_month] = byMonth[r.year_month] || new Set()).add(r.brand); });
+    const rosterSize = Math.max(...Object.values(byMonth).map(s => s.size));
+    const ym = mfrMonthSelect.value;
+    const thisMonthSize = (byMonth[ym] || new Set()).size;
+    if(rosterSize <= 1 || thisMonthSize >= rosterSize * 0.6){ mfrCoverageNote.classList.add('hidden'); return; }
+    const fullMonths = Object.keys(byMonth).filter(m => byMonth[m].size >= rosterSize * 0.6).sort().reverse();
+    mfrCoverageNote.classList.remove('hidden');
+    mfrCoverageNote.innerHTML = `⚠ Only ${thisMonthSize} of ${rosterSize} brands tracked here report sales monthly in ${mfrCountry} for ${ym} — most automakers report quarterly/annually instead.` +
+      (fullMonths.length ? ` Select ${fullMonths.map(m => `<a href="#" data-mfr-goto-month="${m}">${m}</a>`).join(', ')} above for the full brand list.` : '');
+  }
   function renderBoth(){
     renderSection('brand');
     if(!mfrModelSection.classList.contains('hidden')) renderSection('model');
     renderMfrFuelLegend();
+    updateMfrCoverageNote();
   }
   document.querySelectorAll('[data-mfr-mode]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -4210,11 +4318,22 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     mfrYear = resolveMfrYear(mfrCountry);
     mfrMonthSelect.classList.add('hidden');
     mfrModelSection.classList.add('hidden');
+    if(mfrCoverageNote) mfrCoverageNote.classList.add('hidden');
     mfrTitle.textContent = mfrTitleText('brand');
     mfrNote.textContent = mfrNoteText('brand');
     renderSection('brand');
     renderMfrFuelLegend();
   };
+
+  if(mfrCoverageNote){
+    mfrCoverageNote.addEventListener('click', e => {
+      const link = e.target.closest('[data-mfr-goto-month]');
+      if(!link) return;
+      e.preventDefault();
+      mfrMonthSelect.value = link.dataset.mfrGotoMonth;
+      mfrMonthSelect.dispatchEvent(new Event('change'));
+    });
+  }
 
   mfrRows.addEventListener('pointermove', e => {
     const seg = e.target.closest('.bar-seg');

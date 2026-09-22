@@ -292,6 +292,7 @@
             <a href="manufacturers.html" class="movers-see-all">Open the full Manufacturers page →</a>
           </div>
           <p class="note" id="mfr-note">Bars show each brand's total new registrations; the green segment is its BEV share of that total. Sorted by total sales, top 20 brands.</p>
+          <div class="mfr-coverage-note hidden" id="mfr-coverage-note"></div>
           <div class="rank-rows-header">
             <span class="rrh-spacer"></span>
             <span class="rrh-total">BEV %</span>
@@ -4268,6 +4269,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   const mfrSection = document.getElementById('mfr-section');
   const mfrTitle = document.getElementById('mfr-title');
   const mfrNote = document.getElementById('mfr-note');
+  const mfrCoverageNote = document.getElementById('mfr-coverage-note');
   const mfrMonthSelect = document.getElementById('mfr-month-select');
   const mfrModelRows = document.getElementById('mfr-model-rank-rows');
   const mfrModelTooltip = document.getElementById('mfr-model-tooltip');
@@ -4350,9 +4352,29 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const noun = kind === 'model' ? 'Model' : 'Brand';
     return `Sales by ${noun} — ${mfrCountry} (${period})`;
   }
+  // Some markets (Canada, USA) have real months where only a handful of brands still report
+  // sales monthly -- most automakers there moved to quarterly/annual reporting. Landing on
+  // one of those months by default (usually the newest) makes it look like Ford/GM/etc. are
+  // simply missing, so flag it plainly rather than leaving it to the note paragraph alone.
+  function updateMfrCoverageNote(){
+    if(!mfrCoverageNote) return;
+    if(!mfrMonthly || !MANUFACTURER_MONTHLY[mfrCountry]){ mfrCoverageNote.classList.add('hidden'); return; }
+    const allMonths = MANUFACTURER_MONTHLY[mfrCountry];
+    const byMonth = {};
+    allMonths.forEach(r => { (byMonth[r.year_month] = byMonth[r.year_month] || new Set()).add(r.brand); });
+    const rosterSize = Math.max(...Object.values(byMonth).map(s => s.size));
+    const ym = mfrMonthSelect.value;
+    const thisMonthSize = (byMonth[ym] || new Set()).size;
+    if(rosterSize <= 1 || thisMonthSize >= rosterSize * 0.6){ mfrCoverageNote.classList.add('hidden'); return; }
+    const fullMonths = Object.keys(byMonth).filter(m => byMonth[m].size >= rosterSize * 0.6).sort().reverse();
+    mfrCoverageNote.classList.remove('hidden');
+    mfrCoverageNote.innerHTML = `⚠ Only ${thisMonthSize} of ${rosterSize} brands tracked here report sales monthly in ${mfrCountry} for ${ym} — most automakers report quarterly/annually instead.` +
+      (fullMonths.length ? ` Select ${fullMonths.map(m => `<a href="#" data-mfr-goto-month="${m}">${m}</a>`).join(', ')} above for the full brand list.` : '');
+  }
   function renderBoth(){
     renderSection('brand');
     if(!mfrModelSection.classList.contains('hidden')) renderSection('model');
+    updateMfrCoverageNote();
   }
   document.querySelectorAll('[data-mfr-mode]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -4417,6 +4439,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       mfrYear = null;
       mfrMonthly = false;
       mfrMonthSelect.classList.add('hidden');
+      if(mfrCoverageNote) mfrCoverageNote.classList.add('hidden');
       return;
     }
     // no model-level annual export exists -- model section only ever shows in monthly mode
@@ -4426,10 +4449,21 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     mfrYear = year;
     mfrMonthly = false;
     mfrMonthSelect.classList.add('hidden');
+    if(mfrCoverageNote) mfrCoverageNote.classList.add('hidden');
     mfrTitle.textContent = mfrTitleText('brand');
     mfrNote.textContent = mfrNoteText('brand');
     renderSection('brand');
   };
+
+  if(mfrCoverageNote){
+    mfrCoverageNote.addEventListener('click', e => {
+      const link = e.target.closest('[data-mfr-goto-month]');
+      if(!link) return;
+      e.preventDefault();
+      mfrMonthSelect.value = link.dataset.mfrGotoMonth;
+      mfrMonthSelect.dispatchEvent(new Event('change'));
+    });
+  }
 
   mfrRows.addEventListener('pointermove', e => {
     const seg = e.target.closest('.bar-seg');
