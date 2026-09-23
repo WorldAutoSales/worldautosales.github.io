@@ -284,6 +284,7 @@
         <div class="card chart-card hidden" id="mfr-section">
           <div class="chart-header-row">
             <h2 id="mfr-title">Sales by Brand</h2>
+            <select id="mfr-country-select" class="filter-search" style="width:auto;" title="Switch the focused country — applies to the whole page, not just this section."></select>
             <select id="mfr-month-select" class="filter-search hidden" style="width:auto;"></select>
             <div class="chart-mode-toggle" role="group" aria-label="Bar display mode">
               <button type="button" class="mode-btn active" data-mfr-mode="pct" title="Show each row's fuel mix as a % of its own total.">%</button>
@@ -301,11 +302,30 @@
           </div>
           <div class="rank-rows" id="mfr-rank-rows"></div>
           <div class="tooltip" id="mfr-tooltip"></div>
+          <div class="table-scroll" style="margin-top:16px;">
+            <table id="mfr-table">
+              <thead>
+                <tr>
+                  <th data-key="label" data-type="str">Brand</th>
+                  <th data-key="bev" data-type="num">BEV</th>
+                  <th data-key="phev" data-type="num">PHEV</th>
+                  <th data-key="hev" data-type="num">HEV</th>
+                  <th data-key="petrol" data-type="num">Petrol</th>
+                  <th data-key="diesel" data-type="num">Diesel</th>
+                  <th data-key="total" data-type="num">Total</th>
+                  <th data-key="bevPct" data-type="num">BEV %</th>
+                  <th data-key="sharePct" data-type="num">Share</th>
+                </tr>
+              </thead>
+              <tbody id="mfr-table-body"></tbody>
+            </table>
+          </div>
         </div>
 
         <div class="card chart-card hidden" id="mfr-model-section">
           <div class="chart-header-row">
             <h2 id="mfr-model-title">Sales by Model</h2>
+            <select id="mfr-model-country-select" class="filter-search" style="width:auto;" title="Switch the focused country — applies to the whole page, not just this section."></select>
             <div class="chart-mode-toggle" role="group" aria-label="Bar display mode">
               <button type="button" class="mode-btn active" data-mfr-model-mode="pct" title="Show each row's fuel mix as a % of its own total.">%</button>
               <button type="button" class="mode-btn" data-mfr-model-mode="raw" title="Show actual unit counts — bars scaled to the top-selling row shown."># of Units</button>
@@ -320,6 +340,24 @@
           </div>
           <div class="rank-rows" id="mfr-model-rank-rows"></div>
           <div class="tooltip" id="mfr-model-tooltip"></div>
+          <div class="table-scroll" style="margin-top:16px;">
+            <table id="mfr-model-table">
+              <thead>
+                <tr>
+                  <th data-key="label" data-type="str">Model</th>
+                  <th data-key="bev" data-type="num">BEV</th>
+                  <th data-key="phev" data-type="num">PHEV</th>
+                  <th data-key="hev" data-type="num">HEV</th>
+                  <th data-key="petrol" data-type="num">Petrol</th>
+                  <th data-key="diesel" data-type="num">Diesel</th>
+                  <th data-key="total" data-type="num">Total</th>
+                  <th data-key="bevPct" data-type="num">BEV %</th>
+                  <th data-key="sharePct" data-type="num">Share</th>
+                </tr>
+              </thead>
+              <tbody id="mfr-model-table-body"></tbody>
+            </table>
+          </div>
         </div>
 
         <div class="card chart-card hidden" id="ev-regulations-card">
@@ -4270,6 +4308,8 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   const mfrTitle = document.getElementById('mfr-title');
   const mfrNote = document.getElementById('mfr-note');
   const mfrCoverageNote = document.getElementById('mfr-coverage-note');
+  const mfrCountrySelect = document.getElementById('mfr-country-select');
+  const mfrModelCountrySelect = document.getElementById('mfr-model-country-select');
   const mfrMonthSelect = document.getElementById('mfr-month-select');
   const mfrModelRows = document.getElementById('mfr-model-rank-rows');
   const mfrModelTooltip = document.getElementById('mfr-model-tooltip');
@@ -4279,6 +4319,41 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   if(!mfrRows || !mfrSection || typeof MANUFACTURER_YEARLY === 'undefined') return;
   const hasMonthly = typeof MANUFACTURER_MONTHLY !== 'undefined';
   const hasModelMonthly = typeof MANUFACTURER_MODEL_MONTHLY !== 'undefined';
+
+  // Countries with BOTH brand-level and model-level data -- the only ones offered in the
+  // "switch country" dropdowns on these two sections (a brand-only country like India would
+  // make the By Model view disappear with no explanation if it were selectable here).
+  const MFR_COUNTRY_PRIORITY = ['Germany','United States','Canada','France'];
+  const mfrCountriesWithModelsSet = new Set(
+    hasModelMonthly
+      ? Object.keys(MANUFACTURER_MODEL_MONTHLY).filter(c =>
+          MANUFACTURER_MODEL_MONTHLY[c] && MANUFACTURER_MODEL_MONTHLY[c].length &&
+          hasMonthly && MANUFACTURER_MONTHLY[c] && MANUFACTURER_MONTHLY[c].length)
+      : []
+  );
+  const MFR_COUNTRIES_WITH_MODELS = [
+    ...MFR_COUNTRY_PRIORITY.filter(c => mfrCountriesWithModelsSet.has(c)),
+    ...[...mfrCountriesWithModelsSet].filter(c => !MFR_COUNTRY_PRIORITY.includes(c)).sort()
+  ];
+  function selectMfrCountry(c){
+    if(!c || c === focusedCountry) return;
+    selectedCountries = new Set([c]);
+    focusedCountry = c;
+    countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = cb.dataset.country === c; });
+    recompute();
+  }
+  function wireMfrCountrySelect(sel){
+    if(!sel || !MFR_COUNTRIES_WITH_MODELS.length) return;
+    sel.innerHTML = MFR_COUNTRIES_WITH_MODELS.map(c => `<option value="${c}">${c}</option>`).join('');
+    sel.addEventListener('change', () => selectMfrCountry(sel.value));
+  }
+  wireMfrCountrySelect(mfrCountrySelect);
+  wireMfrCountrySelect(mfrModelCountrySelect);
+  function syncMfrCountrySelects(){
+    [mfrCountrySelect, mfrModelCountrySelect].forEach(sel => {
+      if(sel && mfrCountry && mfrCountriesWithModelsSet.has(mfrCountry)) sel.value = mfrCountry;
+    });
+  }
 
   const MFR_FUEL_KEYS = ['bev','phev','hev','petrol','diesel'];
   let mfrCountry = null;
@@ -4316,10 +4391,60 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     return MANUFACTURER_YEARLY[mfrCountry].filter(r => r.year === mfrYear)
       .map(r => ({ ...r, label: r.brand }));
   }
+  // full sortable table below each chart -- shows every brand/model tracked for the period,
+  // not just the top 20 bars above (same unsliced fullMfrRows() set the Share % column uses),
+  // mirroring the pattern on individual-country.html / manufacturers.html
+  let mfrTableSort = { key: 'total', dir: -1 };
+  let mfrModelTableSort = { key: 'total', dir: -1 };
+  function renderMfrTable(kind, all){
+    const tableId = kind === 'model' ? 'mfr-model-table' : 'mfr-table';
+    const tbodyEl = document.getElementById(`${tableId}-body`);
+    if(!tbodyEl) return;
+    const sortState = kind === 'model' ? mfrModelTableSort : mfrTableSort;
+    if(!all.length){ tbodyEl.innerHTML = ''; return; }
+    const marketTotal = all.reduce((s,r) => s + r.total, 0);
+    const rows = all.map(r => ({
+      ...r,
+      bevPct: r.total ? r.bev / r.total * 100 : 0,
+      sharePct: marketTotal ? r.total / marketTotal * 100 : 0,
+    })).sort((a,b) => {
+      const av = a[sortState.key], bv = b[sortState.key];
+      if(typeof av === 'string') return av.localeCompare(bv) * sortState.dir;
+      return ((av ?? -Infinity) - (bv ?? -Infinity)) * sortState.dir;
+    });
+    tbodyEl.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r.label}</td>
+        <td>${r.bev.toLocaleString('en-US')}</td>
+        <td>${r.phev.toLocaleString('en-US')}</td>
+        <td>${r.hev.toLocaleString('en-US')}</td>
+        <td>${r.petrol.toLocaleString('en-US')}</td>
+        <td>${r.diesel.toLocaleString('en-US')}</td>
+        <td>${r.total.toLocaleString('en-US')}</td>
+        <td>${r.bevPct.toFixed(1)}%</td>
+        <td>${r.sharePct.toFixed(1)}%</td>
+      </tr>`).join('');
+  }
+  function wireMfrTableSort(tableId, kind){
+    document.querySelectorAll(`#${tableId} thead th`).forEach(th => {
+      th.addEventListener('click', () => {
+        const sortState = kind === 'model' ? mfrModelTableSort : mfrTableSort;
+        const key = th.dataset.key;
+        sortState.dir = (sortState.key === key) ? -sortState.dir : (key === 'label' ? 1 : -1);
+        sortState.key = key;
+        document.querySelectorAll(`#${tableId} thead th`).forEach(t => t.classList.remove('sorted'));
+        th.classList.add('sorted');
+        renderMfrTable(kind, fullMfrRows(kind));
+      });
+    });
+  }
+  wireMfrTableSort('mfr-table', 'brand');
+  wireMfrTableSort('mfr-model-table', 'model');
   function renderSection(kind){
     const rowsEl = kind === 'model' ? mfrModelRows : mfrRows;
     const mode = kind === 'model' ? mfrModelMode : mfrMode;
     const all = fullMfrRows(kind);
+    renderMfrTable(kind, all);
     if(!all.length){ rowsEl.innerHTML = ''; return; }
     const marketTotal = all.reduce((s,r) => s + r.total, 0);
     const top20 = [...all].sort((a,b) => b.total - a.total).slice(0,20);
@@ -4423,6 +4548,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
         mfrModelTitle.textContent = mfrTitleText('model');
         mfrModelNote.textContent = mfrNoteText('model');
       }
+      syncMfrCountrySelects();
       renderBoth();
       return;
     }
@@ -4452,6 +4578,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     if(mfrCoverageNote) mfrCoverageNote.classList.add('hidden');
     mfrTitle.textContent = mfrTitleText('brand');
     mfrNote.textContent = mfrNoteText('brand');
+    syncMfrCountrySelects();
     renderSection('brand');
   };
 
