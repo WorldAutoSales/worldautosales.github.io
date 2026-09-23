@@ -4362,6 +4362,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   let mfrMode = 'pct'; // 'pct' or 'raw' -- brand section
   let mfrModelMode = 'pct'; // 'pct' or 'raw' -- model section
   let mfrMonthSelectWiredFor = null; // country the month <select> options were last built for
+  let mfrLastSyncedPeriod = null; // last main-page period value this section synced to (avoids stomping a manual local pick outside VISIBLE_MONTHS)
 
   function mfrSegHTML(row, key, widthDenom, mode){
     const units = row[key];
@@ -4518,6 +4519,17 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     });
   });
   mfrMonthSelect.addEventListener('change', () => {
+    const val = mfrMonthSelect.value;
+    const radio = monthsBox.querySelector(`input[data-month="${val}"]`);
+    // when this value is also one of the page's own Period options, push it into the main
+    // filter too and let a full recompute() re-render everything (map/bars/table/trends
+    // included) -- not just this section -- so the two pickers can't drift apart.
+    if(radio && val !== [...selectedMonths][0]){
+      selectedMonths = new Set([val]);
+      monthsBox.querySelectorAll('input[type="radio"]').forEach(rb => { rb.checked = rb === radio; });
+      recompute();
+      return;
+    }
     mfrTitle.textContent = mfrTitleText('brand');
     mfrModelTitle.textContent = mfrTitleText('model');
     renderBoth();
@@ -4525,10 +4537,11 @@ const MFR_MONTHLY_SOURCE_NOTE = {
 
   // exposed globally so recompute() can call it whenever the period or country focus changes
   window.renderMfrSection = function(){
-    // Monthly data takes priority over the annual dataset and uses its own independent month
-    // picker rather than the page's main Period control -- there's only a short recent window
-    // loaded so far, so tying it to the global multi-year period selector would mean it's
-    // hidden or empty for almost every period a visitor might pick.
+    // Monthly data uses its own <select> rather than the page's main multi-year Period control
+    // (there's only a short recent window loaded so far, and the two use independent option
+    // lists), but the two stay synced whenever they overlap: this section's month follows the
+    // page's Period pick when that period is one of its own options, and picking a month here
+    // pushes it back into the page's Period filter too (see the mfrMonthSelect change handler).
     if(hasMonthly && focusedCountry && MANUFACTURER_MONTHLY[focusedCountry] && MANUFACTURER_MONTHLY[focusedCountry].length){
       mfrSection.classList.remove('hidden');
       mfrCountry = focusedCountry;
@@ -4536,12 +4549,17 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       mfrMonthSelect.classList.remove('hidden');
       const hasModelData = hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[mfrCountry] && MANUFACTURER_MODEL_MONTHLY[mfrCountry].length;
       mfrModelSection.classList.toggle('hidden', !hasModelData);
+      const pagePeriod = [...selectedMonths][0];
       if(mfrMonthSelectWiredFor !== mfrCountry){
         const months = [...new Set(MANUFACTURER_MONTHLY[mfrCountry].map(r => r.year_month))].sort().reverse();
         mfrMonthSelect.innerHTML = months.map(ym => `<option value="${ym}">${ym}</option>`).join('');
-        mfrMonthSelect.value = months[0];
+        mfrMonthSelect.value = months.includes(pagePeriod) ? pagePeriod : months[0];
         mfrMonthSelectWiredFor = mfrCountry;
+      } else if(pagePeriod !== mfrLastSyncedPeriod){
+        const months = [...mfrMonthSelect.options].map(o => o.value);
+        if(months.includes(pagePeriod)) mfrMonthSelect.value = pagePeriod;
       }
+      mfrLastSyncedPeriod = pagePeriod;
       mfrTitle.textContent = mfrTitleText('brand');
       mfrNote.textContent = mfrNoteText('brand');
       if(hasModelData){
