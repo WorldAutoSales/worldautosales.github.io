@@ -282,6 +282,10 @@
               <button type="button" class="mode-btn" data-mfr-sort-key="bevPct" title="Sort by battery-electric share of each row's own total.">% BEV</button>
               <button type="button" class="mode-btn" data-mfr-sort-key="icePct" title="Sort by combined petrol + diesel share of each row's own total.">% ICE</button>
             </div>
+            <div class="chart-mode-toggle hidden" role="group" aria-label="Monthly or yearly view" id="mfr-period-toggle">
+              <button type="button" class="mode-btn active" data-mfr-period="monthly" title="Show recent individual months.">Monthly</button>
+              <button type="button" class="mode-btn" data-mfr-period="yearly" title="Show full calendar years.">Yearly</button>
+            </div>
             <select id="mfr-month-select" class="filter-search hidden" style="width:auto;"></select>
             <a href="manufacturers.html" class="movers-see-all">Open the full Manufacturers page →</a>
           </div>
@@ -294,8 +298,8 @@
           <div class="legend-row">
             <div class="chart-legend" id="mfr-fuel-legend"></div>
             <div class="chart-mode-toggle lg" role="group" aria-label="Bar display mode">
-              <button type="button" class="mode-btn active" data-mfr-mode="pct" title="Show each row's fuel mix as a % of its own total.">%</button>
-              <button type="button" class="mode-btn" data-mfr-mode="raw" title="Show actual unit counts — bars scaled to the top-selling row shown."># of Units</button>
+              <button type="button" class="mode-btn" data-mfr-mode="pct" title="Show each row's fuel mix as a % of its own total.">%</button>
+              <button type="button" class="mode-btn active" data-mfr-mode="raw" title="Show actual unit counts — bars scaled to the top-selling row shown."># of Units</button>
             </div>
           </div>
           <div class="rank-rows-header">
@@ -328,6 +332,10 @@
             <div class="mfr-sales-preview-title" id="mfr-sales-preview-title"></div>
             <svg class="chart" id="mfr-sales-preview-svg" viewBox="0 0 280 140" preserveAspectRatio="none"></svg>
           </div>
+          <div class="mfr-sales-preview mfr-brand-model-preview hidden" id="mfr-brand-model-preview">
+            <div class="mfr-sales-preview-title" id="mfr-brand-model-preview-title"></div>
+            <svg class="chart" id="mfr-brand-model-preview-svg" viewBox="0 0 320 140" preserveAspectRatio="none"></svg>
+          </div>
         </div>
 
         <div class="card chart-card hidden" id="mfr-model-section">
@@ -338,8 +346,8 @@
           <div class="legend-row">
             <div class="chart-legend" id="mfr-model-fuel-legend"></div>
             <div class="chart-mode-toggle lg" role="group" aria-label="Bar display mode">
-              <button type="button" class="mode-btn active" data-mfr-model-mode="pct" title="Show each row's fuel mix as a % of its own total.">%</button>
-              <button type="button" class="mode-btn" data-mfr-model-mode="raw" title="Show actual unit counts — bars scaled to the top-selling row shown."># of Units</button>
+              <button type="button" class="mode-btn" data-mfr-model-mode="pct" title="Show each row's fuel mix as a % of its own total.">%</button>
+              <button type="button" class="mode-btn active" data-mfr-model-mode="raw" title="Show actual unit counts — bars scaled to the top-selling row shown."># of Units</button>
             </div>
           </div>
           <div class="rank-rows-header">
@@ -426,6 +434,8 @@
 <script src="assets/manufacturer-yearly-data.js"></script>
 <script src="assets/manufacturer-monthly-data.js"></script>
 <script src="assets/manufacturer-model-monthly-data.js"></script>
+<script src="assets/manufacturer-model-yearly-data.js"></script>
+<script src="assets/manufacturer-holdings-data.js"></script>
 <script>
 // month key -> { label, raw: { country: [BEV, PHEV, HEV, OTHERS, PETROL, DIESEL, TOTAL] } } — source: ACEA
 const MONTHLY_DATA = {
@@ -3940,13 +3950,22 @@ renderCanadaProvinceSection();
 // countries and is driven by the page's own focused-country state; monthly data
 // (MANUFACTURER_MONTHLY / MANUFACTURER_MODEL_MONTHLY) takes priority when present and uses
 // its own independent month picker instead, since only a short recent window is loaded so
-// far. "By Model" is only offered when model-level monthly data exists for the focused
-// country -- there's no model-level annual export, so it's brand-only in annual mode.
+// far. "By Model" in annual mode is backed by MANUFACTURER_MODEL_YEARLY, which so far only
+// covers Germany (2020-2025, KBA FZ10 December-cumulative files) -- countries without a
+// yearly-model export fall back to brand-only in annual mode.
+// Any model with more than one powertrain bucket present (BEV / PHEV / HEV+Petrol+Diesel)
+// is pre-split at the data layer into up to 3 separate rows suffixed " BEV" / " PHEV" / " ICE"
+// (e.g. BMW X1 -> "X1 BEV", "X1 PHEV", "X1 ICE") so each shows as its own bar/table row --
+// a model with only one bucket present is left unsuffixed. See split_models_by_powertrain.py
+// (session scratchpad) for the transform; this file's data is already split, not done at render time.
 // See the equivalent, more heavily-commented block on powertrain-mix-by-country.html.
 const MFR_SOURCE_NOTE = {
   Germany: 'source: Kraftfahrt-Bundesamt (KBA), Germany\'s federal motor authority, "Neuzulassungen von Personenkraftwagen nach Marken und Modellreihen".',
   Canada: 'source: merged from several presses/trackers (GoodCarBadCar, Toyota Canada Inc. newsroom, Transport Canada iZEV Program, GM Authority) since Canada has no single official per-brand release.',
   India: 'source: VAHAN Analytics Dashboard (analytics.parivahan.gov.in), the Government of India\'s official vehicle-registration portal -- Maker x Fuel table, calendar year 2025, all states. Single year only so far, no monthly breakdown loaded yet.',
+};
+const MFR_YEARLY_MODEL_SOURCE_NOTE = {
+  Germany: 'source: Kraftfahrt-Bundesamt (KBA), FZ 10 -- the December file\'s Jan-Dec cumulative column for each year. 2020 only has a combined Hybrid column (no PHEV/HEV split that year, so 2020 PHEV shows as 0 with the true plug-in count folded into HEV); 2025 reports SsangYong under its new "KGM" name for the full year following KBA\'s own April 2025 rebrand.',
 };
 const MFR_MONTHLY_SOURCE_NOTE = {
   Canada: 'source: BestSellingCarsBlog (bestsellingcarsblog.com), citing Manufacturers + DesRosiers Automotive. Only the brands that still report sales monthly in Canada are covered (most automakers moved to quarterly/annual-only reporting) -- this is a real market limitation, not a gap in this chart.',
@@ -3972,9 +3991,22 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   const mfrModelFuelLegendEl = document.getElementById('mfr-model-fuel-legend');
   const mfrSalesPreview = document.getElementById('mfr-sales-preview');
   const mfrSalesPreviewTitle = document.getElementById('mfr-sales-preview-title');
+  const mfrBrandModelPreview = document.getElementById('mfr-brand-model-preview');
+  const mfrBrandModelPreviewTitle = document.getElementById('mfr-brand-model-preview-title');
   if(!mfrRows || !mfrSection || typeof MANUFACTURER_YEARLY === 'undefined') return;
   const hasMonthly = typeof MANUFACTURER_MONTHLY !== 'undefined';
   const hasModelMonthly = typeof MANUFACTURER_MODEL_MONTHLY !== 'undefined';
+  const hasModelYearly = typeof MANUFACTURER_MODEL_YEARLY !== 'undefined';
+  // point-in-time brand -> holding-company lookup (MANUFACTURER_HOLDINGS[brand] is a sorted
+  // [year, holding] transition list -- returns whichever transition's year is the largest one
+  // <= the given year, i.e. "who owned this brand during that period")
+  function resolveHolding(brand, year){
+    const arr = typeof MANUFACTURER_HOLDINGS !== 'undefined' && MANUFACTURER_HOLDINGS[brand];
+    if(!arr || !arr.length) return null;
+    let result = null;
+    for(const [y, h] of arr){ if(y <= year) result = h; else break; }
+    return result;
+  }
 
   const MFR_FUEL_KEYS = ['bev','phev','hev','petrol','diesel'];
   // every country this section can show, in a fixed "richest data first" order, derived from
@@ -3995,8 +4027,8 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   let mfrCountry = null;
   let mfrYear = null;
   let mfrMonthly = false;
-  let mfrMode = 'pct'; // 'pct' or 'raw' -- brand section
-  let mfrModelMode = 'pct'; // 'pct' or 'raw' -- model section
+  let mfrMode = 'raw'; // 'pct' or 'raw' -- brand section
+  let mfrModelMode = 'raw'; // 'pct' or 'raw' -- model section
   let mfrSortKey = 'total'; // 'total' | 'bevPct' | 'icePct' -- shared by both sections
   let mfrMonthSelectWiredFor = null;
   // once the user picks a country from this section's own filter, this section detaches from
@@ -4041,9 +4073,14 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   // understate everyone's share
   function fullMfrRows(kind){
     if(kind === 'model'){
-      if(!(mfrMonthly && hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[mfrCountry])) return [];
-      const ym = mfrMonthSelect.value;
-      return MANUFACTURER_MODEL_MONTHLY[mfrCountry].filter(r => r.year_month === ym)
+      if(mfrMonthly){
+        if(!(hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[mfrCountry])) return [];
+        const ym = mfrMonthSelect.value;
+        return MANUFACTURER_MODEL_MONTHLY[mfrCountry].filter(r => r.year_month === ym)
+          .map(r => ({ ...r, label: `${r.brand} ${r.model}` }));
+      }
+      if(!(hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry])) return [];
+      return MANUFACTURER_MODEL_YEARLY[mfrCountry].filter(r => r.year === mfrYear)
         .map(r => ({ ...r, label: `${r.brand} ${r.model}` }));
     }
     if(mfrMonthly){
@@ -4150,10 +4187,13 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     `).join('');
   }
   function mfrNoteText(kind){
-    const sourceNote = mfrMonthly ? (MFR_MONTHLY_SOURCE_NOTE[mfrCountry] || '') : (MFR_SOURCE_NOTE[mfrCountry] || '');
+    const sourceNote = mfrMonthly
+      ? (MFR_MONTHLY_SOURCE_NOTE[mfrCountry] || '')
+      : (kind === 'model' ? (MFR_YEARLY_MODEL_SOURCE_NOTE[mfrCountry] || '') : (MFR_SOURCE_NOTE[mfrCountry] || ''));
     const noun = kind === 'model' ? 'model' : 'brand';
     const scope = kind === 'model' ? 'across all brands' : '';
-    return `Bars show each ${noun}'s total new registrations ${scope}; the green segment is its BEV share of that total. Share is that ${noun}'s % of every ${noun} tracked here for this period (not just the top 20 shown). Click a legend swatch or bar segment to isolate that powertrain, or a country chip above to switch markets. ${sourceNote}`;
+    const splitNote = kind === 'model' ? ' A model sold with more than one powertrain is split into separate BEV / PHEV / ICE rows (ICE combines hybrid, petrol and diesel).' : '';
+    return `Bars show each ${noun}'s total new registrations ${scope}; the green segment is its BEV share of that total. Share is that ${noun}'s % of every ${noun} tracked here for this period (not just the top 20 shown).${splitNote} Click a legend swatch or bar segment to isolate that powertrain, or a country chip above to switch markets. ${sourceNote}`;
   }
   function mfrTitleText(kind){
     const period = mfrMonthly ? mfrMonthSelect.value : mfrYear;
@@ -4276,6 +4316,53 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       .attr('y', d => y(d.total)).attr('height', d => innerH - y(d.total))
       .attr('fill', FUEL_COLORS.bev);
   }
+  // --- hover preview: sales by model for one brand, biggest sellers first, for the currently
+  // selected country + period (month or year) -- same popover mechanics as the country preview
+  // above, but a horizontal bar list since the number of models varies and names run long.
+  function buildMfrBrandModelRows(brand){
+    if(mfrMonthly){
+      if(!(hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[mfrCountry])) return [];
+      const ym = mfrMonthSelect.value;
+      return MANUFACTURER_MODEL_MONTHLY[mfrCountry].filter(r => r.year_month === ym && r.brand === brand);
+    }
+    if(!(hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry])) return [];
+    return MANUFACTURER_MODEL_YEARLY[mfrCountry].filter(r => r.year === mfrYear && r.brand === brand);
+  }
+  function renderMfrBrandModelChart(brand){
+    const svgEl = document.getElementById('mfr-brand-model-preview-svg');
+    if(!svgEl) return;
+    const svg = d3.select(svgEl);
+    svg.selectAll('*').remove();
+    const rows = buildMfrBrandModelRows(brand).slice().sort((a,b) => b.total - a.total).slice(0, 12);
+    if(!rows.length) return;
+    const W = 320, rowH = 20, M = { top: 4, right: 46, bottom: 4, left: 108 };
+    const innerW = W - M.left - M.right;
+    const H = rows.length * rowH + M.top + M.bottom;
+    svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const x = d3.scaleLinear().domain([0, Math.max(1, ...rows.map(r => r.total))]).range([0, innerW]);
+    const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+    g.selectAll('rect').data(rows).join('rect')
+      .attr('x', 0).attr('y', (d,i) => i * rowH + 3)
+      .attr('width', d => Math.max(1, x(d.total))).attr('height', rowH - 6)
+      .attr('fill', FUEL_COLORS.bev);
+    g.selectAll('.model-label').data(rows).join('text').attr('class', 'model-label')
+      .attr('x', -6).attr('y', (d,i) => i * rowH + rowH / 2).attr('dy', '0.32em').attr('text-anchor', 'end')
+      .style('font-size', '9.5px').style('fill', 'var(--text)').text(d => d.model);
+    g.selectAll('.value-label').data(rows).join('text').attr('class', 'value-label')
+      .attr('x', d => Math.max(1, x(d.total)) + 4).attr('y', (d,i) => i * rowH + rowH / 2).attr('dy', '0.32em')
+      .style('font-size', '9.5px').style('fill', 'var(--text)').text(d => d.total.toLocaleString('en-US'));
+  }
+  function showMfrBrandModelPreview(brand, anchorEl){
+    if(!mfrBrandModelPreview) return;
+    const rows = buildMfrBrandModelRows(brand);
+    if(!rows.length){ mfrBrandModelPreview.classList.add('hidden'); return; }
+    if(mfrBrandModelPreviewTitle) mfrBrandModelPreviewTitle.textContent = `${brand} — sales by model`;
+    renderMfrBrandModelChart(brand);
+    const rect = anchorEl.getBoundingClientRect();
+    mfrBrandModelPreview.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 340)) + 'px';
+    mfrBrandModelPreview.style.top = (rect.bottom + 8) + 'px';
+    mfrBrandModelPreview.classList.remove('hidden');
+  }
   function showMfrSalesPreview(country, anchorEl){
     if(!mfrSalesPreview) return;
     if(mfrSalesPreviewTitle) mfrSalesPreviewTitle.textContent = `${country} — total sales`;
@@ -4286,13 +4373,22 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     mfrSalesPreview.classList.remove('hidden');
   }
 
+  // toggled by the Monthly/Yearly buttons -- only meaningful (and only shown) for a country
+  // that has both a recent monthly window and a full-year annual series, e.g. Germany
+  let mfrForceYearly = false;
+  const mfrPeriodToggleEl = document.getElementById('mfr-period-toggle');
+
   window.renderMfrSection = function(){
     mfrSection.classList.remove('hidden');
     mfrCountry = resolveMfrCountry();
     renderMfrCountryFilter();
 
-    if(hasMonthly && MANUFACTURER_MONTHLY[mfrCountry] && MANUFACTURER_MONTHLY[mfrCountry].length){
-      mfrMonthly = true;
+    const hasMonthlyData = !!(hasMonthly && MANUFACTURER_MONTHLY[mfrCountry] && MANUFACTURER_MONTHLY[mfrCountry].length);
+    const hasYearlyData = !!(MANUFACTURER_YEARLY[mfrCountry] && MANUFACTURER_YEARLY[mfrCountry].length);
+    if(mfrPeriodToggleEl) mfrPeriodToggleEl.classList.toggle('hidden', !(hasMonthlyData && hasYearlyData));
+    mfrMonthly = hasMonthlyData && !(hasYearlyData && mfrForceYearly);
+
+    if(mfrMonthly){
       mfrMonthSelect.classList.remove('hidden');
       const hasModelData = hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[mfrCountry] && MANUFACTURER_MODEL_MONTHLY[mfrCountry].length;
       mfrModelSection.classList.toggle('hidden', !hasModelData);
@@ -4312,18 +4408,31 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       return;
     }
 
-    // no monthly breakdown for this country -- annual only (e.g. India), model section never
-    // shows here since there's no model-level annual export
-    mfrMonthly = false;
+    // annual mode -- either this country has no monthly breakdown at all (e.g. India), or the
+    // user explicitly switched to "Yearly" for a country that has both (e.g. Germany)
     mfrYear = resolveMfrYear(mfrCountry);
     mfrMonthSelect.classList.add('hidden');
-    mfrModelSection.classList.add('hidden');
-    if(mfrCoverageNote) mfrCoverageNote.classList.add('hidden');
+    const hasModelYearlyData = hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry] &&
+      MANUFACTURER_MODEL_YEARLY[mfrCountry].some(r => r.year === mfrYear);
+    mfrModelSection.classList.toggle('hidden', !hasModelYearlyData);
     mfrTitle.textContent = mfrTitleText('brand');
     mfrNote.textContent = mfrNoteText('brand');
-    renderSection('brand');
-    renderMfrFuelLegend();
+    if(hasModelYearlyData){
+      mfrModelTitle.textContent = mfrTitleText('model');
+      mfrModelNote.textContent = mfrNoteText('model');
+    }
+    renderBoth();
   };
+
+  if(mfrPeriodToggleEl){
+    mfrPeriodToggleEl.addEventListener('click', e => {
+      const btn = e.target.closest('[data-mfr-period]');
+      if(!btn || btn.classList.contains('active')) return;
+      mfrForceYearly = btn.dataset.mfrPeriod === 'yearly';
+      mfrPeriodToggleEl.querySelectorAll('[data-mfr-period]').forEach(b => b.classList.toggle('active', b === btn));
+      renderMfrSection();
+    });
+  }
 
   if(mfrCoverageNote){
     mfrCoverageNote.addEventListener('click', e => {
@@ -4342,9 +4451,23 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     mfrTooltip.style.left = (e.clientX - cardRect.left) + 'px';
     mfrTooltip.style.top = (e.clientY - cardRect.top - 10) + 'px';
     mfrTooltip.style.opacity = 1;
-    mfrTooltip.innerHTML = `${seg.dataset.label} — ${FUEL_LABELS[seg.dataset.key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)`;
+    const year = mfrMonthly ? +mfrMonthSelect.value.slice(0,4) : mfrYear;
+    const holding = resolveHolding(seg.dataset.label, year);
+    mfrTooltip.innerHTML = `${seg.dataset.label} — ${FUEL_LABELS[seg.dataset.key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)` +
+      (holding ? `<br><span class="tooltip-holding">${holding}</span>` : '');
   });
   mfrRows.addEventListener('pointerleave', () => { mfrTooltip.style.opacity = 0; });
+  mfrRows.addEventListener('pointerover', e => {
+    const label = e.target.closest('.country-label');
+    if(!label) return;
+    const row = label.closest('.rank-row');
+    if(row) showMfrBrandModelPreview(row.dataset.label, label);
+  });
+  mfrRows.addEventListener('pointerout', e => {
+    const label = e.target.closest('.country-label');
+    if(!label || (e.relatedTarget && mfrRows.contains(e.relatedTarget))) return;
+    if(mfrBrandModelPreview) mfrBrandModelPreview.classList.add('hidden');
+  });
   mfrRows.addEventListener('click', e => {
     const seg = e.target.closest('.bar-seg');
     if(seg) toggleFuelIsolation(seg.dataset.key);
