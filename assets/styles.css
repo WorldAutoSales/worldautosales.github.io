@@ -1076,7 +1076,7 @@ ul.notes-body{
   color:var(--text);
   margin-bottom:4px;
 }
-.mfr-brand-model-preview{ width:320px; }
+.mfr-brand-model-preview{ width:min(620px, 92vw); }
 .mfr-brand-model-preview .chart{ height:auto; }
 
 /* ---------- Biggest Movers standalone page ---------- */

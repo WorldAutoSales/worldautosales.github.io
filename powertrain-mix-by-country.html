@@ -296,7 +296,7 @@
             </div>
             <a href="manufacturers.html" class="movers-see-all">Open the full Manufacturers page →</a>
           </div>
-          <p class="note" id="mfr-note">Bars show each brand's total new registrations; the green segment is its BEV share of that total. Sorted by total sales, top 20 brands.</p>
+          <p class="note" id="mfr-note">Bars show each brand's total new registrations; the green segment is its BEV share of that total. Sorted by total sales.</p>
           <div class="mfr-coverage-note hidden" id="mfr-coverage-note"></div>
           <div class="rank-rows-header">
             <span class="rrh-spacer"></span>
@@ -306,24 +306,6 @@
           </div>
           <div class="rank-rows" id="mfr-rank-rows"></div>
           <div class="tooltip" id="mfr-tooltip"></div>
-          <div class="table-scroll" style="margin-top:16px;">
-            <table id="mfr-table">
-              <thead>
-                <tr>
-                  <th data-key="label" data-type="str">Brand</th>
-                  <th data-key="bev" data-type="num">BEV</th>
-                  <th data-key="phev" data-type="num">PHEV</th>
-                  <th data-key="hev" data-type="num">HEV</th>
-                  <th data-key="petrol" data-type="num">Petrol</th>
-                  <th data-key="diesel" data-type="num">Diesel</th>
-                  <th data-key="total" data-type="num">Total</th>
-                  <th data-key="bevPct" data-type="num">BEV %</th>
-                  <th data-key="sharePct" data-type="num">Share</th>
-                </tr>
-              </thead>
-              <tbody id="mfr-table-body"></tbody>
-            </table>
-          </div>
           <div class="mfr-sales-preview mfr-brand-model-preview hidden" id="mfr-brand-model-preview">
             <div class="mfr-sales-preview-title" id="mfr-brand-model-preview-title"></div>
             <svg class="chart" id="mfr-brand-model-preview-svg" viewBox="0 0 320 140" preserveAspectRatio="none"></svg>
@@ -339,7 +321,7 @@
               <button type="button" class="mode-btn active" data-mfr-model-mode="raw" title="Show actual unit counts — bars scaled to the top-selling row shown."># of Units</button>
             </div>
           </div>
-          <p class="note" id="mfr-model-note">Bars show each model's total new registrations; the green segment is its BEV share of that total. Sorted by total sales, top 20 models.</p>
+          <p class="note" id="mfr-model-note">Bars show each model's total new registrations; the green segment is its BEV share of that total. Sorted by total sales.</p>
           <div class="mfr-coverage-note hidden" id="mfr-model-coverage-note"></div>
           <div class="rank-rows-header">
             <span class="rrh-spacer"></span>
@@ -349,24 +331,6 @@
           </div>
           <div class="rank-rows" id="mfr-model-rank-rows"></div>
           <div class="tooltip" id="mfr-model-tooltip"></div>
-          <div class="table-scroll" style="margin-top:16px;">
-            <table id="mfr-model-table">
-              <thead>
-                <tr>
-                  <th data-key="label" data-type="str">Model</th>
-                  <th data-key="bev" data-type="num">BEV</th>
-                  <th data-key="phev" data-type="num">PHEV</th>
-                  <th data-key="hev" data-type="num">HEV</th>
-                  <th data-key="petrol" data-type="num">Petrol</th>
-                  <th data-key="diesel" data-type="num">Diesel</th>
-                  <th data-key="total" data-type="num">Total</th>
-                  <th data-key="bevPct" data-type="num">BEV %</th>
-                  <th data-key="sharePct" data-type="num">Share</th>
-                </tr>
-              </thead>
-              <tbody id="mfr-model-table-body"></tbody>
-            </table>
-          </div>
         </div>
 
         <div class="card chart-card hidden" id="ev-regulations-card">
@@ -4433,66 +4397,16 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     return MANUFACTURER_YEARLY[mfrCountry].filter(r => r.year === mfrYear)
       .map(r => ({ ...r, label: r.brand }));
   }
-  // full sortable table below each chart -- shows every brand/model tracked for the period,
-  // not just the top 20 bars above (same unsliced fullMfrRows() set the Share % column uses),
-  // mirroring the pattern on individual-country.html / manufacturers.html
-  let mfrTableSort = { key: 'total', dir: -1 };
-  let mfrModelTableSort = { key: 'total', dir: -1 };
-  function renderMfrTable(kind, all){
-    const tableId = kind === 'model' ? 'mfr-model-table' : 'mfr-table';
-    const tbodyEl = document.getElementById(`${tableId}-body`);
-    if(!tbodyEl) return;
-    const sortState = kind === 'model' ? mfrModelTableSort : mfrTableSort;
-    if(!all.length){ tbodyEl.innerHTML = ''; return; }
-    const marketTotal = all.reduce((s,r) => s + r.total, 0);
-    const rows = all.map(r => ({
-      ...r,
-      bevPct: r.total ? r.bev / r.total * 100 : 0,
-      sharePct: marketTotal ? r.total / marketTotal * 100 : 0,
-    })).sort((a,b) => {
-      const av = a[sortState.key], bv = b[sortState.key];
-      if(typeof av === 'string') return av.localeCompare(bv) * sortState.dir;
-      return ((av ?? -Infinity) - (bv ?? -Infinity)) * sortState.dir;
-    });
-    tbodyEl.innerHTML = rows.map(r => `
-      <tr>
-        <td>${r.label}</td>
-        <td>${r.bev.toLocaleString('en-US')}</td>
-        <td>${r.phev.toLocaleString('en-US')}</td>
-        <td>${r.hev.toLocaleString('en-US')}</td>
-        <td>${r.petrol.toLocaleString('en-US')}</td>
-        <td>${r.diesel.toLocaleString('en-US')}</td>
-        <td>${r.total.toLocaleString('en-US')}</td>
-        <td>${r.bevPct.toFixed(1)}%</td>
-        <td>${r.sharePct.toFixed(1)}%</td>
-      </tr>`).join('');
-  }
-  function wireMfrTableSort(tableId, kind){
-    document.querySelectorAll(`#${tableId} thead th`).forEach(th => {
-      th.addEventListener('click', () => {
-        const sortState = kind === 'model' ? mfrModelTableSort : mfrTableSort;
-        const key = th.dataset.key;
-        sortState.dir = (sortState.key === key) ? -sortState.dir : (key === 'label' ? 1 : -1);
-        sortState.key = key;
-        document.querySelectorAll(`#${tableId} thead th`).forEach(t => t.classList.remove('sorted'));
-        th.classList.add('sorted');
-        renderMfrTable(kind, fullMfrRows(kind));
-      });
-    });
-  }
-  wireMfrTableSort('mfr-table', 'brand');
-  wireMfrTableSort('mfr-model-table', 'model');
   function renderSection(kind){
     const rowsEl = kind === 'model' ? mfrModelRows : mfrRows;
     const mode = kind === 'model' ? mfrModelMode : mfrMode;
     const all = fullMfrRows(kind);
-    renderMfrTable(kind, all);
     if(!all.length){ rowsEl.innerHTML = ''; return; }
     const marketTotal = all.reduce((s,r) => s + r.total, 0);
-    const top20 = [...all].sort((a,b) => b.total - a.total).slice(0,20);
+    const sorted = [...all].sort((a,b) => b.total - a.total);
     rowsEl.classList.toggle('raw-mode', mode === 'raw');
-    const globalMax = Math.max(1, ...top20.map(r => r.total));
-    rowsEl.innerHTML = top20.map(row => {
+    const globalMax = Math.max(1, ...sorted.map(r => r.total));
+    rowsEl.innerHTML = sorted.map(row => {
       const bevPct = row.bev / row.total * 100;
       const sharePct = marketTotal ? row.total / marketTotal * 100 : 0;
       const widthDenom = mode === 'raw' ? globalMax : row.total;
@@ -4515,7 +4429,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const noun = kind === 'model' ? 'model' : 'brand';
     const scope = kind === 'model' ? 'across all brands' : '';
     const splitNote = kind === 'model' ? ' A model sold with more than one powertrain is split into separate BEV / PHEV / ICE rows (ICE combines hybrid, petrol and diesel).' : '';
-    return `Bars show each ${noun}'s total new registrations ${scope}; the green segment is its BEV share of that total. Share is that ${noun}'s % of every ${noun} tracked here for this period (not just the top 20 shown), sorted by total sales, top 20 ${noun}s.${splitNote} ${sourceNote}`;
+    return `Bars show each ${noun}'s total new registrations ${scope}; the green segment is its BEV share of that total. Share is that ${noun}'s % of every ${noun} tracked here for this period, sorted by total sales.${splitNote} ${sourceNote}`;
   }
   function mfrTitleText(kind){
     const period = mfrMonthly ? mfrMonthSelect.value : mfrYear;
@@ -4721,24 +4635,34 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     if(!svgEl) return;
     const svg = d3.select(svgEl);
     svg.selectAll('*').remove();
-    const rows = buildMfrBrandModelRows(brand).slice().sort((a,b) => b.total - a.total).slice(0, 12);
+    const rows = buildMfrBrandModelRows(brand).slice().sort((a,b) => b.total - a.total);
     if(!rows.length) return;
-    const W = 320, rowH = 20, M = { top: 4, right: 46, bottom: 4, left: 108 };
+    const W = 620, rowH = 28, M = { top: 4, right: 62, bottom: 4, left: 150 };
     const innerW = W - M.left - M.right;
     const H = rows.length * rowH + M.top + M.bottom;
     svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
     const x = d3.scaleLinear().domain([0, Math.max(1, ...rows.map(r => r.total))]).range([0, innerW]);
     const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
-    g.selectAll('rect').data(rows).join('rect')
-      .attr('x', 0).attr('y', (d,i) => i * rowH + 3)
-      .attr('width', d => Math.max(1, x(d.total))).attr('height', rowH - 6)
-      .attr('fill', FUEL_COLORS.bev);
+    // stacked segments per model, colored by powertrain (same MFR_FUEL_KEYS order/colors as the
+    // main brand/model bar charts) instead of one flat green bar per row
+    rows.forEach((d,i) => {
+      let cursor = 0;
+      MFR_FUEL_KEYS.forEach(k => {
+        const units = d[k] || 0;
+        if(units <= 0) return;
+        const w = Math.max(0, x(cursor + units) - x(cursor));
+        g.append('rect')
+          .attr('x', x(cursor)).attr('y', i * rowH + 4).attr('width', w).attr('height', rowH - 8)
+          .attr('fill', FUEL_COLORS[k]);
+        cursor += units;
+      });
+    });
     g.selectAll('.model-label').data(rows).join('text').attr('class', 'model-label')
       .attr('x', -6).attr('y', (d,i) => i * rowH + rowH / 2).attr('dy', '0.32em').attr('text-anchor', 'end')
-      .style('font-size', '9.5px').style('fill', 'var(--text)').text(d => d.model);
+      .style('font-size', '12px').style('fill', 'var(--text)').text(d => d.model);
     g.selectAll('.value-label').data(rows).join('text').attr('class', 'value-label')
-      .attr('x', d => Math.max(1, x(d.total)) + 4).attr('y', (d,i) => i * rowH + rowH / 2).attr('dy', '0.32em')
-      .style('font-size', '9.5px').style('fill', 'var(--text)').text(d => d.total.toLocaleString('en-US'));
+      .attr('x', d => Math.max(1, x(d.total)) + 5).attr('y', (d,i) => i * rowH + rowH / 2).attr('dy', '0.32em')
+      .style('font-size', '12px').style('fill', 'var(--text)').text(d => d.total.toLocaleString('en-US'));
   }
   function showMfrBrandModelPreview(brand, anchorEl){
     if(!mfrBrandModelPreview) return;
@@ -4747,7 +4671,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     if(mfrBrandModelPreviewTitle) mfrBrandModelPreviewTitle.textContent = `${brand} — sales by model`;
     renderMfrBrandModelChart(brand);
     const rect = anchorEl.getBoundingClientRect();
-    mfrBrandModelPreview.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 340)) + 'px';
+    mfrBrandModelPreview.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 640)) + 'px';
     mfrBrandModelPreview.style.top = (rect.bottom + 8) + 'px';
     mfrBrandModelPreview.classList.remove('hidden');
   }
