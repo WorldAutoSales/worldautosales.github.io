@@ -340,6 +340,7 @@
             </div>
           </div>
           <p class="note" id="mfr-model-note">Bars show each model's total new registrations; the green segment is its BEV share of that total. Sorted by total sales, top 20 models.</p>
+          <div class="mfr-coverage-note hidden" id="mfr-model-coverage-note"></div>
           <div class="rank-rows-header">
             <span class="rrh-spacer"></span>
             <span class="rrh-total">BEV %</span>
@@ -4325,6 +4326,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   const mfrTitle = document.getElementById('mfr-title');
   const mfrNote = document.getElementById('mfr-note');
   const mfrCoverageNote = document.getElementById('mfr-coverage-note');
+  const mfrModelCoverageNote = document.getElementById('mfr-model-coverage-note');
   const mfrCountrySelect = document.getElementById('mfr-country-select');
   const mfrModelCountrySelect = document.getElementById('mfr-model-country-select');
   const mfrMonthSelect = document.getElementById('mfr-month-select');
@@ -4539,10 +4541,38 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     mfrCoverageNote.innerHTML = `⚠ Only ${thisMonthSize} of ${rosterSize} brands tracked here report sales monthly in ${mfrCountry} for ${ym} — most automakers report quarterly/annually instead.` +
       (fullMonths.length ? ` Select ${fullMonths.map(m => `<a href="#" data-mfr-goto-month="${m}">${m}</a>`).join(', ')} above for the full brand list.` : '');
   }
+  // Some brands only report a quarterly/annual total (folded into the Q2-spread monthly rows
+  // via MANUFACTURER_MONTHLY / the yearly totals via MANUFACTURER_YEARLY) with no real
+  // model-level detail ever sourced for them -- e.g. Ram and Chevrolet in the USA still show a
+  // brand total in Sales by Brand, but individual nameplates like the Ram 1500 or Silverado
+  // never appear in Sales by Model because no tracker publishes that breakdown monthly. Flag
+  // it here rather than let it look like the model chart is just missing data.
+  function updateMfrModelCoverageNote(){
+    if(!mfrModelCoverageNote) return;
+    if(mfrModelSection.classList.contains('hidden')){ mfrModelCoverageNote.classList.add('hidden'); return; }
+    let brandRows, modelBrands;
+    if(mfrMonthly){
+      if(!(hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[mfrCountry])){ mfrModelCoverageNote.classList.add('hidden'); return; }
+      const ym = mfrMonthSelect.value;
+      brandRows = (MANUFACTURER_MONTHLY[mfrCountry] || []).filter(r => r.year_month === ym);
+      modelBrands = new Set(MANUFACTURER_MODEL_MONTHLY[mfrCountry].filter(r => r.year_month === ym).map(r => r.brand));
+    } else {
+      if(!(hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry])){ mfrModelCoverageNote.classList.add('hidden'); return; }
+      brandRows = (MANUFACTURER_YEARLY[mfrCountry] || []).filter(r => r.year === mfrYear);
+      modelBrands = new Set(MANUFACTURER_MODEL_YEARLY[mfrCountry].filter(r => r.year === mfrYear).map(r => r.brand));
+    }
+    const missing = brandRows.filter(r => !modelBrands.has(r.brand)).sort((a,b) => b.total - a.total);
+    if(!missing.length){ mfrModelCoverageNote.classList.add('hidden'); return; }
+    const period = mfrMonthly ? mfrMonthSelect.value : mfrYear;
+    const names = missing.map(r => r.brand).join(', ');
+    mfrModelCoverageNote.classList.remove('hidden');
+    mfrModelCoverageNote.innerHTML = `⚠ ${missing.length} brand${missing.length > 1 ? 's' : ''} shown in Sales by Brand for ${period} -- ${names} -- ${missing.length > 1 ? 'have' : 'has'} no model-level breakdown here. Their brand total above is real; it's just not split out by nameplate at the source.`;
+  }
   function renderBoth(){
     renderSection('brand');
     if(!mfrModelSection.classList.contains('hidden')) renderSection('model');
     updateMfrCoverageNote();
+    updateMfrModelCoverageNote();
   }
   document.querySelectorAll('[data-mfr-mode]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -4629,6 +4659,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       mfrMonthly = false;
       mfrMonthSelect.classList.add('hidden');
       if(mfrCoverageNote) mfrCoverageNote.classList.add('hidden');
+      if(mfrModelCoverageNote) mfrModelCoverageNote.classList.add('hidden');
       return;
     }
     // annual mode -- either this country has no monthly breakdown at all, or the user
