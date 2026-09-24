@@ -279,6 +279,7 @@
             <h2 id="mfr-title">Sales by Brand</h2>
             <div class="chart-mode-toggle" role="group" aria-label="Sort order" id="mfr-sort-toggle">
               <button type="button" class="mode-btn active" data-mfr-sort-key="total" title="Sort by total registrations.">Total</button>
+              <button type="button" class="mode-btn" data-mfr-sort-key="bev" title="Sort by total battery-electric units.">Total BEV</button>
               <button type="button" class="mode-btn" data-mfr-sort-key="bevPct" title="Sort by battery-electric share of each row's own total.">% BEV</button>
               <button type="button" class="mode-btn" data-mfr-sort-key="icePct" title="Sort by combined petrol + diesel share of each row's own total.">% ICE</button>
             </div>
@@ -287,6 +288,7 @@
               <button type="button" class="mode-btn" data-mfr-period="yearly" title="Show full calendar years.">Yearly</button>
             </div>
             <select id="mfr-month-select" class="filter-search hidden" style="width:auto;"></select>
+            <select id="mfr-year-select" class="filter-search hidden" style="width:auto;"></select>
             <a href="manufacturers.html" class="movers-see-all">Open the full Manufacturers page →</a>
           </div>
           <p class="note" id="mfr-note">Bars show each brand's total new registrations; the green segment is its BEV share of that total. Sorted by total sales.</p>
@@ -325,6 +327,7 @@
             <h2 id="mfr-model-title">Sales by Model</h2>
             <div class="chart-mode-toggle" role="group" aria-label="Sort order" id="mfr-model-sort-toggle">
               <button type="button" class="mode-btn active" data-mfr-sort-key="total" title="Sort by total registrations.">Total</button>
+              <button type="button" class="mode-btn" data-mfr-sort-key="bev" title="Sort by total battery-electric units.">Total BEV</button>
               <button type="button" class="mode-btn" data-mfr-sort-key="bevPct" title="Sort by battery-electric share of each row's own total.">% BEV</button>
               <button type="button" class="mode-btn" data-mfr-sort-key="icePct" title="Sort by combined petrol + diesel share of each row's own total.">% ICE</button>
             </div>
@@ -3937,8 +3940,8 @@ const MFR_YEARLY_MODEL_SOURCE_NOTE = {
   Germany: 'source: Kraftfahrt-Bundesamt (KBA), FZ 10 -- the December file\'s Jan-Dec cumulative column for each year. 2020 only has a combined Hybrid column (no PHEV/HEV split that year, so 2020 PHEV shows as 0 with the true plug-in count folded into HEV); 2025 reports SsangYong under its new "KGM" name for the full year following KBA\'s own April 2025 rebrand.',
 };
 const MFR_MONTHLY_SOURCE_NOTE = {
-  Canada: 'source: BestSellingCarsBlog (bestsellingcarsblog.com), citing Manufacturers + DesRosiers Automotive. Only the brands that still report sales monthly in Canada are covered (most automakers moved to quarterly/annual-only reporting) -- this is a real market limitation, not a gap in this chart.',
-  'United States': 'source: BestSellingCarsBlog (bestsellingcarsblog.com), citing Manufacturers. Only the brands that still report sales monthly in the USA are covered (most automakers moved to quarterly/annual-only reporting) -- this is a real market limitation, not a gap in this chart.',
+  Canada: 'source: manufacturer newsrooms for most brands -- Toyota/Lexus (media.toyota.ca), Honda/Acura (hondanews.ca), Hyundai/Genesis (hyundainews.ca), Mazda (en.media.mazda.ca), Subaru (subaru.ca/news) and Kia (via newswire.ca) each publish their own free monthly Canada sales release. Brands that only report quarterly (GM, Stellantis, Nissan, BMW/MINI, Mercedes-Benz, Mitsubishi, Infiniti, Volvo) are shown with that quarter\'s official total split evenly across its 3 months -- flagged in the tooltip when hovering that brand. A handful of brands (Ford, Volkswagen, Audi, Land Rover/Jaguar, Tesla, Rivian, Lucid, Polestar, VinFast) have no official Canada-specific release found, so BestSellingCarsBlog (bestsellingcarsblog.com) estimates are still used for those.',
+  'United States': 'source: manufacturer newsrooms for most brands -- Toyota/Lexus (pressroom.toyota.com), Honda/Acura (hondanews.com), Hyundai (hyundainews.com), Kia (kiamedia.com), Subaru (media.subaru.com) and Mazda (news.mazdausa.com) each publish their own free monthly US sales release; Ford/Lincoln (fromtheroad.ford.com + investor-relations PDFs) also report monthly. Genesis has no confirmed monthly release, so BestSellingCarsBlog (bestsellingcarsblog.com) is still used for it. Brands that only report quarterly (GM, Stellantis, Volkswagen, Nissan, BMW, Mercedes-Benz, Audi, Mitsubishi, Volvo, Infiniti, Porsche, Rivian) are shown with that quarter\'s official total split evenly across its 3 months -- flagged in the tooltip when hovering that brand. Tesla, Lucid, Polestar and Jaguar Land Rover disclose only global (not US-specific) figures, so an estimate is still used for those.',
   Germany: 'source: Kraftfahrt-Bundesamt (KBA), FZ 10 -- Neuzulassungen von Personenkraftwagen nach Marken und Modellreihen. Capped to 2026 onward here (full history back to 2008 is on the Manufacturers page); genuinely comprehensive, not brand-limited like Canada/USA.',
   France: 'source: PFA (pfa-auto.fr), citing AAA DATA. Brand-level figures are real single-month totals; model-level figures are derived by diffing two consecutive YTD Top-100 snapshots (PFA does not publish a standalone monthly model table), so only the Top 100 VP nameplates are covered -- smaller-volume models are not represented at model level. No per-brand powertrain split is published; BEV shares shown here are reconstructed from identified pure-BEV nameplates within that Top 100.',
 };
@@ -3950,6 +3953,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   const mfrNote = document.getElementById('mfr-note');
   const mfrCoverageNote = document.getElementById('mfr-coverage-note');
   const mfrMonthSelect = document.getElementById('mfr-month-select');
+  const mfrYearSelect = document.getElementById('mfr-year-select');
   const mfrModelRows = document.getElementById('mfr-model-rank-rows');
   const mfrModelTooltip = document.getElementById('mfr-model-tooltip');
   const mfrModelSection = document.getElementById('mfr-model-section');
@@ -3977,6 +3981,51 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     return result;
   }
 
+  // brands with no real monthly reporting in Canada/USA -- their Q2 2026 figure is that
+  // quarter's official (or, where noted, BSCB-estimated) total split evenly across Apr/May/Jun.
+  // Flagged per-brand in the mfr tooltip rather than as a single blanket note, since which
+  // brands this applies to differs country to country and source to source.
+  const MFR_QUARTERLY_SOURCE = {
+    Canada: {
+      Chevrolet: 'GM Canada (news.gm.ca)', GMC: 'GM Canada (news.gm.ca)', Buick: 'GM Canada (news.gm.ca)', Cadillac: 'GM Canada (news.gm.ca)',
+      Ram: 'Stellantis Canada (media.stellantisnorthamerica.com)', Jeep: 'Stellantis Canada (media.stellantisnorthamerica.com)', Chrysler: 'Stellantis Canada (media.stellantisnorthamerica.com)', Dodge: 'Stellantis Canada (media.stellantisnorthamerica.com)', Fiat: 'Stellantis Canada (media.stellantisnorthamerica.com, not separately reported)', 'Alfa Romeo': 'Stellantis Canada (media.stellantisnorthamerica.com, not separately reported)',
+      Nissan: 'Nissan Canada (canada.nissannews.com)', Infiniti: 'Nissan Group Canada (canada.nissannews.com)',
+      BMW: 'BMW Group Canada (press.bmwgroup.com/canada)', Mini: 'BMW Group Canada (press.bmwgroup.com/canada)',
+      'Mercedes-Benz': 'Mercedes-Benz Canada (media.mercedes-benz.ca)',
+      Mitsubishi: 'Mitsubishi Canada (mitsubishi-motors-pr.ca)',
+      Volvo: 'Volvo Car Canada (media.volvocars.com) -- moved from monthly to quarterly reporting in 2026',
+      Porsche: 'BestSellingCarsBlog estimate -- Porsche Canada only discloses annual results',
+      Ford: 'BestSellingCarsBlog estimate -- no official Canada sales release found since 2023',
+      Volkswagen: 'BestSellingCarsBlog estimate -- no official Canada sales release found',
+      Audi: 'BestSellingCarsBlog estimate -- no official Canada sales release found',
+      'Land Rover': 'BestSellingCarsBlog estimate -- JLR discloses only global/regional figures',
+      Jaguar: 'BestSellingCarsBlog estimate -- JLR discloses only global/regional figures',
+      Tesla: 'BestSellingCarsBlog estimate -- Tesla discloses only global deliveries',
+      Rivian: 'BestSellingCarsBlog estimate -- no Canada-specific release found', Lucid: 'BestSellingCarsBlog estimate -- no Canada-specific release found', Polestar: 'BestSellingCarsBlog estimate -- no Canada-specific release found', Vinfast: 'BestSellingCarsBlog estimate -- no Canada-specific release found',
+    },
+    'United States': {
+      Chevrolet: 'General Motors (news.gm.com)', GMC: 'General Motors (news.gm.com)', Buick: 'General Motors (news.gm.com)', Cadillac: 'General Motors (news.gm.com)',
+      Ram: 'Stellantis US (media.stellantisnorthamerica.com)', Jeep: 'Stellantis US (media.stellantisnorthamerica.com)', Chrysler: 'Stellantis US (media.stellantisnorthamerica.com)', Dodge: 'Stellantis US (media.stellantisnorthamerica.com)', Fiat: 'Stellantis US (media.stellantisnorthamerica.com, not separately reported)', 'Alfa Romeo': 'Stellantis US (media.stellantisnorthamerica.com, not separately reported)',
+      Volkswagen: 'Volkswagen of America (media.vw.com)',
+      Nissan: 'Nissan USA (usa.nissannews.com)', Infiniti: 'Nissan Group USA (usa.infinitinews.com)',
+      BMW: 'BMW of North America (press.bmwgroup.com/usa)', Mini: 'BMW of North America (press.bmwgroup.com/usa)',
+      'Mercedes-Benz': 'Mercedes-Benz USA (media.mbusa.com)',
+      Audi: 'Audi of America (media.audiusa.com)',
+      Mitsubishi: 'Mitsubishi Motors North America (media.mitsubishicars.com)',
+      Volvo: 'Volvo Car USA (media.volvocars.com)',
+      Porsche: 'Porsche Cars North America (newsroom.porsche.com) -- derived from H1 minus Q1, no standalone Q2 release',
+      Rivian: 'Rivian (rivian.com/newsroom) -- North America production/delivery, not formally US-only',
+      Tesla: 'BestSellingCarsBlog estimate -- Tesla discloses only global deliveries', Lucid: 'BestSellingCarsBlog estimate -- Lucid discloses only global deliveries', Polestar: 'BestSellingCarsBlog estimate -- Polestar discloses only global figures',
+      'Land Rover': 'BestSellingCarsBlog estimate -- JLR discloses only global/regional figures', Jaguar: 'BestSellingCarsBlog estimate -- JLR discloses only global/regional figures',
+    },
+  };
+  const MFR_QUARTERLY_MONTHS = new Set(['2026-04','2026-05','2026-06']);
+  function resolveQuarterlySource(brand, country, ym){
+    if(!ym || !MFR_QUARTERLY_MONTHS.has(ym)) return null;
+    const map = MFR_QUARTERLY_SOURCE[country];
+    return map ? (map[brand] || null) : null;
+  }
+
   const MFR_FUEL_KEYS = ['bev','phev','hev','petrol','diesel'];
   // every country this section can show, in a fixed "richest data first" order, derived from
   // whichever of MANUFACTURER_YEARLY/MANUFACTURER_MONTHLY actually carries that country --
@@ -3998,8 +4047,9 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   let mfrMonthly = false;
   let mfrMode = 'raw'; // 'pct' or 'raw' -- brand section
   let mfrModelMode = 'raw'; // 'pct' or 'raw' -- model section
-  let mfrSortKey = 'total'; // 'total' | 'bevPct' | 'icePct' -- shared by both sections
+  let mfrSortKey = 'total'; // 'total' | 'bev' | 'bevPct' | 'icePct' -- shared by both sections
   let mfrMonthSelectWiredFor = null;
+  let mfrYearSelectWiredFor = null; // country the year <select> options were last built for
   // once the user picks a country from this section's own filter, this section detaches from
   // the page's focused country entirely and follows this instead -- lets you browse brand/model
   // breakdowns for a different market without disturbing the map/other charts, or scrolling
@@ -4019,6 +4069,8 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const wantYear = yearMatch ? +yearMatch[1] : null;
     return (wantYear != null && years.includes(wantYear)) ? wantYear : Math.max(...years);
   }
+  const MFR_CURRENT_YEAR = new Date().getFullYear();
+  function mfrYearOptionLabel(y){ return y === MFR_CURRENT_YEAR ? `${y} (YTD)` : String(y); }
   // the sidebar's Powertrain filter (selectedFuels), synchronized into both this section and
   // the model section below -- same "isolate" convention as the Electrified Share by Country
   // chart: the bars re-normalize to 100% of whichever fuels are still selected, not the row's
@@ -4115,7 +4167,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     return `Bars show each ${noun}'s total new registrations ${scope}; the green segment is its BEV share of that total. Share is that ${noun}'s % of every ${noun} tracked here for this period, sorted by total sales.${splitNote} Click a legend swatch or bar segment to isolate that powertrain, or a country chip above to switch markets. ${sourceNote}`;
   }
   function mfrTitleText(kind){
-    const period = mfrMonthly ? mfrMonthSelect.value : mfrYear;
+    const period = mfrMonthly ? mfrMonthSelect.value : mfrYearOptionLabel(mfrYear);
     const noun = kind === 'model' ? 'Model' : 'Brand';
     return `Sales by ${noun} — ${mfrCountry} (${period})`;
   }
@@ -4322,6 +4374,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
 
     if(mfrMonthly){
       mfrMonthSelect.classList.remove('hidden');
+      mfrYearSelect.classList.add('hidden');
       const hasModelData = hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[mfrCountry] && MANUFACTURER_MODEL_MONTHLY[mfrCountry].length;
       mfrModelSection.classList.toggle('hidden', !hasModelData);
       if(mfrMonthSelectWiredFor !== mfrCountry){
@@ -4341,9 +4394,20 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     }
 
     // annual mode -- either this country has no monthly breakdown at all (e.g. India), or the
-    // user explicitly switched to "Yearly" for a country that has both (e.g. Germany)
-    mfrYear = resolveMfrYear(mfrCountry);
+    // user explicitly switched to "Yearly" for a country that has both (e.g. Germany). Shows
+    // its own year <select> (options rebuilt only when the country changes, so a manual pick
+    // survives toggling Monthly/Yearly back and forth for the same country); the latest year
+    // is labeled "(YTD)" since it's always a partial-year figure through this site's latest
+    // loaded month, not a closed full year.
     mfrMonthSelect.classList.add('hidden');
+    mfrYearSelect.classList.remove('hidden');
+    const availYears = [...new Set((MANUFACTURER_YEARLY[mfrCountry] || []).map(r => r.year))].sort((a,b) => b - a);
+    if(mfrYearSelectWiredFor !== mfrCountry){
+      mfrYearSelect.innerHTML = availYears.map(y => `<option value="${y}">${mfrYearOptionLabel(y)}</option>`).join('');
+      mfrYearSelect.value = resolveMfrYear(mfrCountry);
+      mfrYearSelectWiredFor = mfrCountry;
+    }
+    mfrYear = +mfrYearSelect.value;
     const hasModelYearlyData = hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry] &&
       MANUFACTURER_MODEL_YEARLY[mfrCountry].some(r => r.year === mfrYear);
     mfrModelSection.classList.toggle('hidden', !hasModelYearlyData);
@@ -4355,6 +4419,19 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     }
     renderBoth();
   };
+
+  mfrYearSelect.addEventListener('change', () => {
+    mfrYear = +mfrYearSelect.value;
+    const hasModelYearlyData = hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry] &&
+      MANUFACTURER_MODEL_YEARLY[mfrCountry].some(r => r.year === mfrYear);
+    mfrModelSection.classList.toggle('hidden', !hasModelYearlyData);
+    mfrTitle.textContent = mfrTitleText('brand');
+    if(hasModelYearlyData){
+      mfrModelTitle.textContent = mfrTitleText('model');
+      mfrModelNote.textContent = mfrNoteText('model');
+    }
+    renderBoth();
+  });
 
   if(mfrPeriodToggleEl){
     mfrPeriodToggleEl.addEventListener('click', e => {
@@ -4385,8 +4462,10 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     mfrTooltip.style.opacity = 1;
     const year = mfrMonthly ? +mfrMonthSelect.value.slice(0,4) : mfrYear;
     const holding = resolveHolding(seg.dataset.label, year);
+    const qSource = resolveQuarterlySource(seg.dataset.label, mfrCountry, mfrMonthly ? mfrMonthSelect.value : null);
     mfrTooltip.innerHTML = `${seg.dataset.label} — ${FUEL_LABELS[seg.dataset.key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)` +
-      (holding ? `<br><span class="tooltip-holding">${holding}</span>` : '');
+      (holding ? `<br><span class="tooltip-holding">${holding}</span>` : '') +
+      (qSource ? `<br><span class="tooltip-holding">Q2 2026 quarterly total split evenly across Apr/May/Jun -- ${qSource}</span>` : '');
   });
   mfrRows.addEventListener('pointerleave', () => { mfrTooltip.style.opacity = 0; });
   mfrRows.addEventListener('pointerover', e => {
