@@ -58,6 +58,35 @@ def fetch_country_rows(country, min_year_month=None):
     return rows
 
 
+def split_by_powertrain(rows):
+    """Any model row with more than one of {BEV, PHEV, HEV+Petrol+Diesel combined} present
+    as a non-zero bucket becomes up to 3 rows, suffixed " BEV" / " PHEV" / " ICE" (e.g. BMW
+    X1 -> "X1 BEV", "X1 PHEV", "X1 ICE") -- a row with only one non-zero bucket is left
+    unsuffixed. This is a site-display-only transform (KBA and every other source report the
+    combined row; the split has no DB representation) -- it MUST be re-applied here, as the
+    final step before writing the JS asset, every time this script regenerates from the DB,
+    or a future re-run silently reverts every site page back to unsplit models. Mirrors
+    manufacturer-model-yearly-data.js's equivalent split, applied when that file was built.
+    """
+    out = []
+    for r in rows:
+        bev, phev, hev, petrol, diesel = r["bev"], r["phev"], r["hev"], r["petrol"], r["diesel"]
+        ice = hev + petrol + diesel
+        buckets = [b for b in (bev, phev, ice) if b > 0]
+        if len(buckets) <= 1:
+            out.append(r)
+            continue
+        base = {k: v for k, v in r.items() if k not in ("bev", "phev", "hev", "petrol", "diesel", "total", "model")}
+        model = r["model"]
+        if bev > 0:
+            out.append({**base, "model": f"{model} BEV", "bev": bev, "phev": 0, "hev": 0, "petrol": 0, "diesel": 0, "total": bev})
+        if phev > 0:
+            out.append({**base, "model": f"{model} PHEV", "bev": 0, "phev": phev, "hev": 0, "petrol": 0, "diesel": 0, "total": phev})
+        if ice > 0:
+            out.append({**base, "model": f"{model} ICE", "bev": 0, "phev": 0, "hev": hev, "petrol": petrol, "diesel": diesel, "total": ice})
+    return out
+
+
 def build_rows(raw_rows):
     out = []
     for r in raw_rows:
@@ -74,7 +103,7 @@ def build_rows(raw_rows):
             "bev": bev, "phev": phev, "hev": hev, "petrol": petrol, "diesel": diesel,
             "total": total,
         })
-    return out
+    return split_by_powertrain(out)
 
 
 def main():
