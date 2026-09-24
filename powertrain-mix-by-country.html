@@ -420,7 +420,7 @@ const MONTHLY_DATA = {
       // source: SMMT monthly release -- see July comment for methodology. Absolute units derived from SMMT's stated percentages x its stated 94,236 total.
       "United Kingdom": [28082,13664,11968,0,35999,4523,94236],
       // source: auto-schweiz monthly press release, Switzerland -- Total (16,047) and every fuel share are auto-schweiz's own exact published August figures for the first time this year (BEV 30.2%, PHEV 12.4%, Petrol 20.6%, Diesel 5.5%); BEV unit count (4,843) independently cross-checked against press citations. HEV = residual (31.3%); temporary pending ACEA
-      "Switzerland": [4843,1990,5025,0,3306,883,16047],
+      "Switzerland": [4843,1903,5981,0,2566,754,16047],
       // source: UNRAE monthly bulletin via press -- see July comment for methodology. BEV=4,486 is UNRAE's own directly-cited figure (not percentage-derived, unlike the other categories this month); Others=GPL/metano residual against UNRAE's own 69,411 total.
       "Italy": [4486,8399,32346,6133,14021,4026,69411],
       // source: RDC/RAI Vereniging/BOVAG -- see July comment for methodology. Petrol (1,613) is the source's own directly-cited figure; Diesel and LPG were each reported as "under 1% of the market" without an exact split, shown here as an even 289/289 estimate.
@@ -444,7 +444,7 @@ const MONTHLY_DATA = {
       "Sweden": [10069,4988,2024,69,4270,1164,22584],      // Mobility Denmark press release (monthly) -- gives only Total and BEV (elbiler) exactly; no PHEV/HEV/Petrol/Diesel breakdown published, so the 2,278-unit non-BEV remainder is placed in Petrol per this project's established convention (see Russia) rather than fabricating a split
       "Denmark": [13887,0,0,0,2278,0,16165],
       // source: Tilastokeskus (Statistics Finland), PxWeb table 121d (Autojen ensirekisteröinnit), monthly -- BEV (Sähkö) and Diesel are exact official figures; PHEV = Bensiini/Sähkö + Diesel/Sähkö (616+8). Finland's own classification has no separate non-plug-in-hybrid code -- ordinary hybrids are folded into Bensiini (Petrol) -- so HEV/Petrol were split out of the combined Bensiini figure (2,405) using Finland's own real Jan-Jun 2026 ACEA ratio (77.5% HEV / 22.5% petrol of that combined bucket); temporary pending ACEA
-      "Finland": [3427,624,1863,0,542,187,6643],      // SIMI (Society of the Irish Motor Industry), Ireland (monthly) -- Total and BEV are SIMI's own exact published figures; HEV/PHEV/Petrol/Diesel/Others are DERIVED (not directly published): SIMI's press release only gives YTD market-share %, not month-only, so this month's split = (YTD-through-August % x YTD-through-August total) minus (YTD-through-July % x YTD-through-July total), per category, then rescaled to sum exactly to this month's real total
+      "Finland": [3427,624,2020,0,399,173,6643],      // SIMI (Society of the Irish Motor Industry), Ireland (monthly) -- Total and BEV are SIMI's own exact published figures; HEV/PHEV/Petrol/Diesel/Others are DERIVED (not directly published): SIMI's press release only gives YTD market-share %, not month-only, so this month's split = (YTD-through-August % x YTD-through-August total) minus (YTD-through-July % x YTD-through-July total), per category, then rescaled to sum exactly to this month's real total
       "Ireland": [2265,1618,1365,234,1222,1107,7811],      // JADA fuel-type registration stats, released 2026-09-04. others=FCV, consistent with prior months convention
       "Japan": [8351,3218,107134,70,48948,5118,172839],      // MTA (Motor Trade Association) vstat dashboard sourced from NZTA -- new passenger vehicle registrations only, released 2026-09-01
       "New Zealand": [1049,1174,3442,0,2889,583,9137],      // ODMD Basin Bulteni 2 Eylul 2026, Ek5 Agustos 2026 monthly column -- scope=Otomobil only, excludes HTA; genuine standalone-month table this time (not YTD-subtraction derived)
@@ -457,7 +457,25 @@ const MONTHLY_DATA = {
       "Vietnam": [20161,0,1388,0,18677,8258,48484],
       // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry -- genuine standalone month, from the electrified-vehicle monthly chart (BEV/PHEV/HEV) plus the light+heavy total table; no Petrol/Diesel split published, so the non-electrified remainder is placed in Petrol for this chart (Diesel=0), same convention as Peru's other loaded months
       "Peru": [67,229,1353,0,24679,0,26328],
-      "Colombia": [4542,0,9195,0,13387,0,27124]},
+      "Colombia": [4542,0,9195,0,13387,0,27124],      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Austria": [6316,2680,6166,0,4873,1753,21788],      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Belgium": [13069,1952,2720,254,9685,615,28295],      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Bulgaria": [429,252,364,0,3255,379,4679],      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Croatia": [158,367,1623,26,1388,402,3964],      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Cyprus": [33,45,450,0,175,9,712],      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Czechia": [1497,953,4762,496,7264,2746,17718],      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Estonia": [174,112,773,0,275,145,1479],      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Greece": [544,279,3086,211,965,68,5153],      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Hungary": [810,1033,4653,135,1804,920,9355],      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Latvia": [308,322,0,65,963,194,1852],      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Lithuania": [325,623,2148,66,684,244,4090],      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Luxembourg": [1132,248,956,0,586,181,3103],      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Malta": [302,73,199,0,133,38,745],      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Poland": [2189,4687,22377,1233,12842,2579,45907],      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Romania": [671,0,5525,1245,1595,516,9552],      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Slovakia": [508,359,2198,144,2488,571,6268],      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Slovenia": [1651,235,653,57,1908,447,4951],      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Iceland": [541,46,84,0,7,14,692]},
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY %
     priorYearBev: {
       "India": 20204, "South Korea": 23315,
@@ -1302,38 +1320,38 @@ const MONTHLY_DATA = {
       "Ecuador": [6367,0,17230,0,44362,25038,92997],
       "Malaysia": [38675, 0, 29776, 0, 399788, 21601, 489840],
       // source: world_auto_sales_annual, period_type='YTD' — each country summed only through its own latest available month/quarter (see asOf below), not a fixed common cutoff
-      "Austria": [40060,18023,49751,2,40509,16184,164529],
-      "Belgium": [95841,14272,35773,2416,104447,7206,259955],
-      "Bulgaria": [2042,454,1565,66,18731,3099,25957],
+      "Austria": [53449,24233,63109,2,51007,20340,212140],
+      "Belgium": [108879,17040,33283,2793,118433,7822,288250],
+      "Bulgaria": [2939,883,2328,49,26239,3135,35573],
       // source: FENALCO-ANDI, Colombia — Jan-Jul 2026 cumulative (dedicated monthly EV/Hybrid reports + ANDI monthly totals); PHEV folded into HEV; Petrol is the undifferentiated combustion remainder (Diesel=0). Total corrected 2026-09-02: 166,677 (an uncorroborated user-supplied figure) was wrong; 186,253 = confirmed H1 2026 total (157,620) + confirmed July total (28,633).
       "Colombia": [33888,0,63209,0,116277,0,213374],
-      "Croatia": [1781,2707,17496,380,16416,5384,44164],
-      "Cyprus": [911,411,3643,0,2174,161,7300],
-      "Czechia": [8630,6517,31060,2739,57043,23819,129808],
+      "Croatia": [2297,3727,21547,520,19937,6545,54573],
+      "Cyprus": [1003,542,4805,0,2832,142,9324],
+      "Czechia": [11665,8538,40827,3711,72683,30249,167673],
       "Denmark": [106266,706,11702,2,10759,2327,131762],
-      "Estonia": [617,864,5820,0,1556,1122,9979],
-      "Finland": [24338,6088,13806,0,4019,1692,49943],
+      "Estonia": [967,1122,7449,0,2070,1463,13071],
+      "Finland": [24339,6088,14033,0,3817,1669,49946],
       "France": [322099,61150,476065,39356,152942,26712,1078324],
       "Germany": [515545,219808,561505,9580,411281,247305,1965024],
-      "Greece": [5286,5199,47557,2533,21328,2094,83997],
-      "Hungary": [7493,6066,38433,392,15397,7124,74905],
-      "Iceland": [3180,1602,1838,0,468,414,7502],
+      "Greece": [6824,6502,59121,3045,24603,2275,102370],
+      "Hungary": [9224,8414,48695,624,19761,9211,95929],
+      "Iceland": [4337,1852,2114,0,540,499,9342],
       "Ireland": [32126,18555,31015,560,24509,15328,122093],
       "Italy": [91181,106175,553576,78550,222428,76722,1128632],
-      "Latvia": [839,1214,0,297,7640,1356,11346],
-      "Lithuania": [1852,2914,12652,446,3793,2454,24111],
-      "Luxembourg": [7745,1530,8908,0,6140,2186,26509],
-      "Malta": [1051,219,1141,0,1091,170,3671],
+      "Latvia": [1503,1920,0,430,10043,1745,15641],
+      "Lithuania": [2582,4262,17152,587,5325,2994,32902],
+      "Luxembourg": [10284,2069,11168,0,7704,2723,33948],
+      "Malta": [2147,486,1591,1,954,216,5395],
       "Netherlands": [90512,52609,66682,1042,17953,2551,231349],
       "Norway": [94307,593,610,0,172,774,96456],
-      "Poland": [16557,26603,154745,8038,87287,18803,312033],
+      "Poland": [20926,36568,206492,10613,115008,24536,414143],
       "Portugal": [45388,25306,45980,9987,36381,6281,169323],
-      "Romania": [5522,0,37563,5630,11998,4137,64850],
-      "Slovakia": [2678,1886,15228,903,17532,5277,43504],
-      "Slovenia": [6062,1354,6927,434,17415,4545,36737],
+      "Romania": [7018,0,49282,9154,15419,5269,86142],
+      "Slovakia": [3736,2698,19854,1141,22650,6633,56712],
+      "Slovenia": [9233,1778,8402,591,21849,5578,47431],
       "Spain": [83504,102175,386657,29201,188195,28468,818200],
       "Sweden": [76837,44366,15921,743,33770,11482,183119],
-      "Switzerland": [37631,18797,54198,6,32442,8515,151589],
+      "Switzerland": [37631,18772,55601,5,31202,8378,151589],
       "United Kingdom": [355718,185125,461634,159,354579,31521,1388736],
       // source: StatCan 20-10-0025-01 — only Q1 2026 published so far
       "Canada": [70393,31531,145452,0,659175,38723,945274],
@@ -1399,14 +1417,14 @@ const MONTHLY_DATA = {
       "Ecuador":"through Jul 2026",
       "Tunisia":"through Jul 2026",
       "Georgia":"through Jul 2026",
-      "Austria":"through Jun 2026","Belgium":"through Jul 2026 (national source, not yet ACEA)","Bulgaria":"through Jun 2026","Croatia":"through Jun 2026",
-      "Cyprus":"through Jun 2026","Czechia":"through Jun 2026","Denmark":"through Aug 2026","Estonia":"through Jun 2026",
-      "Finland":"through Aug 2026 (national source, not yet ACEA)","France":"through Aug 2026 (national source, not yet ACEA)","Germany":"through Aug 2026 (national source, not yet ACEA)","Greece":"through Jun 2026",
-      "Hungary":"through Jun 2026","Iceland":"through Jun 2026","Ireland":"through Aug 2026","Italy":"through Aug 2026 (national source, not yet ACEA)",
-      "Latvia":"through Jun 2026","Lithuania":"through Jun 2026","Luxembourg":"through Jun 2026","Malta":"through Jun 2026",
-      "Netherlands":"through Aug 2026 (national source, not yet ACEA)","Norway":"through Aug 2026","Poland":"through Jun 2026","Portugal":"through Aug 2026 (national source, not yet ACEA)",
-      "Romania":"through Jun 2026","Slovakia":"through Jun 2026","Slovenia":"through Jun 2026","Spain":"through Aug 2026 (national source, not yet ACEA)",
-      "Sweden":"through Aug 2026","Switzerland":"through Aug 2026 (national source, not yet ACEA)","United Kingdom":"through Aug 2026 (national source, not yet ACEA)",
+      "Austria":"through Aug 2026","Belgium":"through Aug 2026","Bulgaria":"through Aug 2026","Croatia":"through Aug 2026",
+      "Cyprus":"through Aug 2026","Czechia":"through Aug 2026","Denmark":"through Aug 2026","Estonia":"through Aug 2026",
+      "Finland":"through Aug 2026","France":"through Aug 2026 (national source, not yet ACEA)","Germany":"through Aug 2026 (national source, not yet ACEA)","Greece":"through Aug 2026",
+      "Hungary":"through Aug 2026","Iceland":"through Aug 2026","Ireland":"through Aug 2026","Italy":"through Aug 2026 (national source, not yet ACEA)",
+      "Latvia":"through Aug 2026","Lithuania":"through Aug 2026","Luxembourg":"through Aug 2026","Malta":"through Aug 2026",
+      "Netherlands":"through Aug 2026 (national source, not yet ACEA)","Norway":"through Aug 2026","Poland":"through Aug 2026","Portugal":"through Aug 2026 (national source, not yet ACEA)",
+      "Romania":"through Aug 2026","Slovakia":"through Aug 2026","Slovenia":"through Aug 2026","Spain":"through Aug 2026 (national source, not yet ACEA)",
+      "Sweden":"through Aug 2026","Switzerland":"through Aug 2026","United Kingdom":"through Aug 2026 (national source, not yet ACEA)",
       "Canada":"through Jun 2026",
       "Colombia":"through Aug 2026",
       "Mexico":"through Aug 2026",
@@ -1478,42 +1496,42 @@ const MONTHLY_DATA = {
       "Argentina": [8379, 0, 79938, 0, 460814, 0, 549131],
       "Australia": [265063, 124548, 219674, 0, 365509, 314434, 1289228],
       "China": [11718000, 5390333, 0, 0, 14496000, 0, 31604333],
-      "Austria": [85486, 37961, 101905, 6, 81018, 33090, 339466],
-      "Belgium": [166509, 24466, 64405, 4764, 179052, 12788, 451984],
+      "Austria": [82658, 37102, 94945, 3, 76511, 30510, 321729],
+      "Belgium": [166058, 25560, 54308, 4364, 177649, 11733, 439672],
       "Brazil": [242683, 189628, 180861, 0, 2060473, 267365, 2941010],
-      "Bulgaria": [4634, 986, 3407, 182, 38965, 6767, 54941],
+      "Bulgaria": [4631, 1463, 3663, 121, 39594, 5340, 54812],
       "Canada": [140786, 63062, 290904, 0, 1318350, 77446, 1890548],
-      "Croatia": [3783, 5933, 39910, 760, 36552, 11800, 98738],
-      "Cyprus": [1883, 851, 7286, 0, 4348, 322, 14690],
-      "Czechia": [19012, 13985, 64066, 5941, 117135, 48185, 268324],
+      "Croatia": [3445, 5719, 33550, 780, 31288, 10004, 84786],
+      "Cyprus": [1505, 825, 7207, 0, 4248, 218, 14003],
+      "Czechia": [18337, 13334, 62292, 5975, 109025, 45373, 254336],
       "Denmark": [163006, 1059, 17553, 3, 19198, 3491, 204310],
-      "Estonia": [1331, 1786, 12888, 0, 3112, 2398, 21515],
-      "Finland": [37915, 9132, 21183, 0, 6172, 2593, 76995],
+      "Estonia": [1522, 1683, 11541, 0, 3175, 2211, 20132],
+      "Finland": [37916, 9132, 21620, 0, 5780, 2552, 77000],
       "France": [503950,95263,714097,62401,229413,40068,1645192],
       "Germany": [824340,337444,851088,16236,616921,370957,3016986],
-      "Greece": [11270, 10967, 102795, 5971, 46872, 4492, 182367],
-      "Hungary": [16093, 13364, 76866, 1002, 31791, 14834, 153950],
-      "Iceland": [7296, 3204, 3676, 0, 1136, 952, 16264],
+      "Greece": [10612, 9753, 89136, 5358, 37848, 3413, 156120],
+      "Hungary": [14144, 13213, 73043, 1109, 29825, 13886, 145220],
+      "Iceland": [7189, 2778, 3171, 0, 923, 749, 14810],
       "Ireland": [49547, 27833, 46523, 1307, 36763, 22992, 184965],
       "Italy": [136771,159263,830364,121058,333642,115083,1696181],
       "Japan": [110292, 44424, 1614955, 504, 765439, 109170, 2644784],
-      "Latvia": [1871, 2668, 0, 631, 16066, 2816, 24052],
-      "Lithuania": [4040, 6418, 28136, 1094, 8107, 5396, 53191],
-      "Luxembourg": [16473, 3176, 18288, 0, 12458, 4372, 54767],
-      "Malta": [2381, 505, 2395, 0, 2182, 378, 7841],
+      "Latvia": [2438, 3064, 0, 691, 15191, 2652, 24036],
+      "Lithuania": [4033, 6670, 27084, 954, 8345, 4491, 51577],
+      "Luxembourg": [15568, 3134, 16752, 0, 11556, 4085, 51095],
+      "Malta": [3252, 749, 2411, 1, 1498, 369, 8280],
       "Mexico": [29612, 35018, 133605, 0, 1332612, 0, 1530847],
       "Netherlands": [148444,78913,100023,1829,26929,3827,359965],
       "New Zealand": [19232, 12381, 35975, 1223, 31545, 6625, 106981],
       "Norway": [149678, 969, 1226, 0, 263, 1161, 153297],
       "Philippines": [17959, 12161, 35513, 0, 348753, 0, 414386],
-      "Poland": [33114, 56663, 313357, 16076, 177125, 38003, 634338],
+      "Poland": [31389, 56121, 309738, 15919, 173597, 36827, 623591],
       "Portugal": [69727,38095,68970,14981,54571,9421,255765],
-      "Romania": [11392, 0, 81209, 12830, 26208, 8361, 140000],
-      "Slovakia": [6006, 4234, 30582, 2199, 36334, 11073, 90428],
-      "Slovenia": [13592, 2708, 15449, 994, 35445, 9135, 77323],
+      "Romania": [10971, 0, 77443, 14655, 24303, 7998, 135370],
+      "Slovakia": [5971, 4329, 29871, 2009, 34582, 10314, 87076],
+      "Slovenia": [15070, 2667, 12603, 966, 32773, 8367, 72446],
       "Spain": [129515,155115,579985,44357,282293,42702,1233967],
       "Sweden": [118237, 66967, 23881, 1115, 51610, 17298, 279108],
-      "Switzerland": [59490, 29161, 81297, 9, 48782, 13188, 231927],
+      "Switzerland": [59490, 29020, 83968, 8, 46803, 12879, 232168],
       "Turkey": [157921, 6072, 269627, 9961, 354459, 50292, 848332],
       "United Kingdom": [535837,277687,692451,368,545231,50958,2102532],
       // source: Argonne National Laboratory — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
