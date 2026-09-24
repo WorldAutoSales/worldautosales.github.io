@@ -323,6 +323,11 @@
         <div class="card chart-card hidden" id="mfr-model-section">
           <div class="chart-header-row">
             <h2 id="mfr-model-title">Sales by Model</h2>
+            <div class="chart-mode-toggle" role="group" aria-label="Sort order" id="mfr-model-sort-toggle">
+              <button type="button" class="mode-btn active" data-mfr-sort-key="total" title="Sort by total registrations.">Total</button>
+              <button type="button" class="mode-btn" data-mfr-sort-key="bevPct" title="Sort by battery-electric share of each row's own total.">% BEV</button>
+              <button type="button" class="mode-btn" data-mfr-sort-key="icePct" title="Sort by combined petrol + diesel share of each row's own total.">% ICE</button>
+            </div>
           </div>
           <p class="note" id="mfr-model-note">Bars show each model's total new registrations; the green segment is its BEV share of that total. Sorted by total sales.</p>
           <div class="legend-row">
@@ -4155,11 +4160,14 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       renderSection('model');
     });
   });
+  // mfrSortKey is shared by both sections -- either sort-toggle group (brand header or model
+  // header) reorders both, and both groups' "active" state stays in sync via the key's value
+  // rather than the specific button clicked, since there are two separate button groups for it
   document.querySelectorAll('[data-mfr-sort-key]').forEach(btn => {
     btn.addEventListener('click', () => {
       if(btn.dataset.mfrSortKey === mfrSortKey) return;
       mfrSortKey = btn.dataset.mfrSortKey;
-      document.querySelectorAll('[data-mfr-sort-key]').forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('[data-mfr-sort-key]').forEach(b => b.classList.toggle('active', b.dataset.mfrSortKey === mfrSortKey));
       renderSection('brand');
       if(!mfrModelSection.classList.contains('hidden')) renderSection('model');
     });

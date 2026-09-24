@@ -284,6 +284,11 @@
         <div class="card chart-card hidden" id="mfr-section">
           <div class="chart-header-row">
             <h2 id="mfr-title">Sales by Brand</h2>
+            <div class="chart-mode-toggle" role="group" aria-label="Sort order" id="mfr-sort-toggle">
+              <button type="button" class="mode-btn active" data-mfr-sort-key="total" title="Sort by total registrations.">Total</button>
+              <button type="button" class="mode-btn" data-mfr-sort-key="bevPct" title="Sort by battery-electric share of each row's own total.">% BEV</button>
+              <button type="button" class="mode-btn" data-mfr-sort-key="icePct" title="Sort by combined petrol + diesel share of each row's own total.">% ICE</button>
+            </div>
             <select id="mfr-country-select" class="filter-search" style="width:auto;" title="Switch the focused country — applies to the whole page, not just this section."></select>
             <div class="chart-mode-toggle hidden" role="group" aria-label="Monthly or yearly view" id="mfr-period-toggle">
               <button type="button" class="mode-btn active" data-mfr-period="monthly" title="Show recent individual months.">Monthly</button>
@@ -315,6 +320,11 @@
         <div class="card chart-card hidden" id="mfr-model-section">
           <div class="chart-header-row">
             <h2 id="mfr-model-title">Sales by Model</h2>
+            <div class="chart-mode-toggle" role="group" aria-label="Sort order" id="mfr-model-sort-toggle">
+              <button type="button" class="mode-btn active" data-mfr-sort-key="total" title="Sort by total registrations.">Total</button>
+              <button type="button" class="mode-btn" data-mfr-sort-key="bevPct" title="Sort by battery-electric share of each row's own total.">% BEV</button>
+              <button type="button" class="mode-btn" data-mfr-sort-key="icePct" title="Sort by combined petrol + diesel share of each row's own total.">% ICE</button>
+            </div>
             <select id="mfr-model-country-select" class="filter-search" style="width:auto;" title="Switch the focused country — applies to the whole page, not just this section."></select>
             <div class="chart-mode-toggle" role="group" aria-label="Bar display mode">
               <button type="button" class="mode-btn" data-mfr-model-mode="pct" title="Show each row's fuel mix as a % of its own total.">%</button>
@@ -4397,17 +4407,21 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     return MANUFACTURER_YEARLY[mfrCountry].filter(r => r.year === mfrYear)
       .map(r => ({ ...r, label: r.brand }));
   }
+  let mfrSortKey = 'total'; // 'total' | 'bevPct' | 'icePct' -- shared by both sections
   function renderSection(kind){
     const rowsEl = kind === 'model' ? mfrModelRows : mfrRows;
     const mode = kind === 'model' ? mfrModelMode : mfrMode;
     const all = fullMfrRows(kind);
     if(!all.length){ rowsEl.innerHTML = ''; return; }
     const marketTotal = all.reduce((s,r) => s + r.total, 0);
-    const sorted = [...all].sort((a,b) => b.total - a.total);
+    // member set (every brand/model tracked for the period) is always fixed by real total
+    // volume -- mfrSortKey only reorders that same set, it never swaps in a smaller/niche row
+    // just because it happens to score higher on % BEV or % ICE
+    const sorted = all.map(r => ({ ...r, bevPct: r.total ? r.bev / r.total * 100 : 0, icePct: r.total ? (r.petrol + r.diesel) / r.total * 100 : 0 }))
+      .sort((a,b) => b[mfrSortKey] - a[mfrSortKey]);
     rowsEl.classList.toggle('raw-mode', mode === 'raw');
     const globalMax = Math.max(1, ...sorted.map(r => r.total));
     rowsEl.innerHTML = sorted.map(row => {
-      const bevPct = row.bev / row.total * 100;
       const sharePct = marketTotal ? row.total / marketTotal * 100 : 0;
       const widthDenom = mode === 'raw' ? globalMax : row.total;
       return `
@@ -4416,7 +4430,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
         <div class="bar-track">
           ${MFR_FUEL_KEYS.map(k => mfrSegHTML(row, k, widthDenom, mode)).join('')}
         </div>
-        <div class="pct-label" style="color:${FUEL_COLORS.bev}">${bevPct.toFixed(1)}%</div>
+        <div class="pct-label" style="color:${FUEL_COLORS.bev}">${row.bevPct.toFixed(1)}%</div>
         <div class="pct-label">${sharePct.toFixed(1)}%</div>
         <div class="total-label">${row.total.toLocaleString('en-US')}</div>
       </div>`;
@@ -4504,6 +4518,18 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       renderSection('model');
     });
   });
+  // mfrSortKey is shared by both sections -- either sort-toggle group (brand header or model
+  // header) reorders both, and both groups' "active" state stays in sync via the key's value
+  // rather than the specific button clicked, since there are two separate button groups for it
+  document.querySelectorAll('[data-mfr-sort-key]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if(btn.dataset.mfrSortKey === mfrSortKey) return;
+      mfrSortKey = btn.dataset.mfrSortKey;
+      document.querySelectorAll('[data-mfr-sort-key]').forEach(b => b.classList.toggle('active', b.dataset.mfrSortKey === mfrSortKey));
+      renderSection('brand');
+      if(!mfrModelSection.classList.contains('hidden')) renderSection('model');
+    });
+  });
   mfrMonthSelect.addEventListener('change', () => {
     const val = mfrMonthSelect.value;
     const radio = monthsBox.querySelector(`input[data-month="${val}"]`);
@@ -4560,12 +4586,14 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       return;
     }
 
-    const periodKey = [...selectedMonths][0];
-    const yearMatch = periodKey && periodKey.match(/(\d{4})/);
-    const year = yearMatch ? +yearMatch[1] : null;
-    const hasData = focusedCountry && year != null && MANUFACTURER_YEARLY[focusedCountry] &&
-      MANUFACTURER_YEARLY[focusedCountry].some(r => r.year === year);
-    if(!hasData){
+    // Year resolution falls back to this country's latest available year when the page's
+    // current period doesn't match one exactly (e.g. global period is a 2026 month but this
+    // country's yearly data stops at 2025) -- only hide the section when the country has NO
+    // yearly data at all, not just a mismatch against today's global period. Mirrors
+    // resolveMfrYear() on individual-country.html.
+    const availYears = focusedCountry && MANUFACTURER_YEARLY[focusedCountry]
+      ? [...new Set(MANUFACTURER_YEARLY[focusedCountry].map(r => r.year))] : [];
+    if(!availYears.length){
       mfrSection.classList.add('hidden');
       mfrModelSection.classList.add('hidden');
       mfrCountry = null;
@@ -4576,6 +4604,10 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       if(mfrModelCoverageNote) mfrModelCoverageNote.classList.add('hidden');
       return;
     }
+    const periodKey = [...selectedMonths][0];
+    const yearMatch = periodKey && periodKey.match(/(\d{4})/);
+    const wantYear = yearMatch ? +yearMatch[1] : null;
+    const year = (wantYear != null && availYears.includes(wantYear)) ? wantYear : Math.max(...availYears);
     // annual mode -- either this country has no monthly breakdown at all, or the user
     // explicitly switched to "Yearly" for a country that has both (e.g. Germany). Model-level
     // annual data only exists for Germany so far (MANUFACTURER_MODEL_YEARLY).
