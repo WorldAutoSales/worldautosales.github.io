@@ -4323,6 +4323,15 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   // toggled by the Monthly/Yearly buttons -- only meaningful (and only shown) for a country
   // that has both a recent monthly window and a full-year annual series, e.g. Germany
   let mfrForceYearly = false;
+  // A period key is "monthly" as YYYY-MM (e.g. "2026-06"); anything else (e.g. "2025-annual",
+  // "2026-ytd", "2026-projection") is a yearly-granularity period.
+  function isYearlyPeriodKey(key){ return !/^\d{4}-\d{2}$/.test(key); }
+  // Tracks the main page's Period filter granularity so this section's Monthly/Yearly toggle
+  // can follow it: crossing the monthly<->yearly boundary on the page's own Period picker force-
+  // switches mfrForceYearly (and the toggle buttons) to match, but changing to a different period
+  // of the SAME granularity (e.g. June -> May, or one annual year -> another) leaves a manual
+  // in-section pick alone, since only a granularity change is meant to override it.
+  let mfrLastPeriodType = isYearlyPeriodKey(DEFAULT_MONTH) ? 'yearly' : 'monthly';
   // point-in-time brand -> holding-company lookup (MANUFACTURER_HOLDINGS[brand] is a sorted
   // [year, holding] transition list -- returns whichever transition's year is the largest one
   // <= the given year, i.e. "who owned this brand during that period")
@@ -4601,6 +4610,19 @@ const MFR_MONTHLY_SOURCE_NOTE = {
 
   // exposed globally so recompute() can call it whenever the period or country focus changes
   window.renderMfrSection = function(){
+    // If the page's own Period filter just crossed the monthly<->yearly boundary (e.g. "June
+    // 2026" -> "2025 (Annual)"), force this section's Monthly/Yearly toggle to follow -- see
+    // mfrLastPeriodType above. A period change that stays within the same granularity doesn't
+    // touch mfrForceYearly, so a manual in-section pick survives everything else (filters,
+    // country switches, etc.) that doesn't cross that boundary.
+    const currentPeriodType = isYearlyPeriodKey([...selectedMonths][0]) ? 'yearly' : 'monthly';
+    if(currentPeriodType !== mfrLastPeriodType){
+      mfrForceYearly = currentPeriodType === 'yearly';
+      if(mfrPeriodToggleEl){
+        mfrPeriodToggleEl.querySelectorAll('[data-mfr-period]').forEach(b => b.classList.toggle('active', b.dataset.mfrPeriod === currentPeriodType));
+      }
+      mfrLastPeriodType = currentPeriodType;
+    }
     // Monthly data uses its own <select> rather than the page's main multi-year Period control
     // (there's only a short recent window loaded so far, and the two use independent option
     // lists), but the two stay synced whenever they overlap: this section's month follows the
@@ -4670,14 +4692,21 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     mfrMonthSelect.classList.add('hidden');
     mfrYearSelect.classList.remove('hidden');
     const sortedYears = [...availYears].sort((a,b) => b - a);
+    const pagePeriod = [...selectedMonths][0];
     if(mfrYearSelectWiredFor !== mfrCountry){
       mfrYearSelect.innerHTML = sortedYears.map(y => `<option value="${y}">${mfrYearOptionLabel(y)}</option>`).join('');
-      const periodKey = [...selectedMonths][0];
-      const yearMatch = periodKey && periodKey.match(/(\d{4})/);
+      const yearMatch = pagePeriod && pagePeriod.match(/(\d{4})/);
       const wantYear = yearMatch ? +yearMatch[1] : null;
       mfrYearSelect.value = (wantYear != null && availYears.includes(wantYear)) ? wantYear : Math.max(...availYears);
       mfrYearSelectWiredFor = mfrCountry;
+    } else if(pagePeriod !== mfrLastSyncedPeriod){
+      // same country as last render -- still follow the page's Period pick to a different
+      // year, same as the monthly branch does, as long as it's one of this country's real years
+      const yearMatch = pagePeriod && pagePeriod.match(/(\d{4})/);
+      const wantYear = yearMatch ? +yearMatch[1] : null;
+      if(wantYear != null && availYears.includes(wantYear)) mfrYearSelect.value = wantYear;
     }
+    mfrLastSyncedPeriod = pagePeriod;
     mfrYear = +mfrYearSelect.value;
     if(mfrCoverageNote) mfrCoverageNote.classList.add('hidden');
     const hasModelYearlyData = hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry] &&
@@ -4694,7 +4723,17 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   };
 
   mfrYearSelect.addEventListener('change', () => {
-    mfrYear = +mfrYearSelect.value;
+    const val = mfrYearSelect.value;
+    const radio = monthsBox.querySelector(`input[data-month="${val}-annual"]`);
+    // same push-back-to-the-main-filter pattern as the month select above, so the two pickers
+    // can't drift apart -- lets a full recompute() re-render everything, not just this section
+    if(radio && `${val}-annual` !== [...selectedMonths][0]){
+      selectedMonths = new Set([`${val}-annual`]);
+      monthsBox.querySelectorAll('input[type="radio"]').forEach(rb => { rb.checked = rb === radio; });
+      recompute();
+      return;
+    }
+    mfrYear = +val;
     const hasModelYearlyData = hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry] &&
       MANUFACTURER_MODEL_YEARLY[mfrCountry].some(r => r.year === mfrYear);
     mfrModelSection.classList.toggle('hidden', !hasModelYearlyData);

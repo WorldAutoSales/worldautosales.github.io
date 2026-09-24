@@ -4061,14 +4061,6 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     if(focusedCountry && MFR_AVAILABLE_COUNTRIES.includes(focusedCountry)) return focusedCountry;
     return MFR_AVAILABLE_COUNTRIES[0];
   }
-  function resolveMfrYear(country){
-    const years = [...new Set((MANUFACTURER_YEARLY[country] || []).map(r => r.year))];
-    if(!years.length) return null;
-    const periodKey = [...selectedMonths][0];
-    const yearMatch = periodKey && periodKey.match(/(\d{4})/);
-    const wantYear = yearMatch ? +yearMatch[1] : null;
-    return (wantYear != null && years.includes(wantYear)) ? wantYear : Math.max(...years);
-  }
   const MFR_CURRENT_YEAR = new Date().getFullYear();
   function mfrYearOptionLabel(y){ return y === MFR_CURRENT_YEAR ? `${y} (YTD)` : String(y); }
   // the sidebar's Powertrain filter (selectedFuels), synchronized into both this section and
@@ -4225,6 +4217,17 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     });
   });
   mfrMonthSelect.addEventListener('change', () => {
+    const val = mfrMonthSelect.value;
+    const radio = monthsBox.querySelector(`input[data-month="${val}"]`);
+    // when this value is also one of the page's own Period options, push it into the main
+    // filter too and let a full recompute() re-render everything, not just this section, so
+    // the two pickers can't drift apart
+    if(radio && val !== [...selectedMonths][0]){
+      selectedMonths = new Set([val]);
+      monthsBox.querySelectorAll('input[type="radio"]').forEach(rb => { rb.checked = rb === radio; });
+      recompute();
+      return;
+    }
     mfrTitle.textContent = mfrTitleText('brand');
     mfrModelTitle.textContent = mfrTitleText('model');
     renderBoth();
@@ -4361,28 +4364,55 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   // that has both a recent monthly window and a full-year annual series, e.g. Germany
   let mfrForceYearly = false;
   const mfrPeriodToggleEl = document.getElementById('mfr-period-toggle');
+  // A period key is "monthly" as YYYY-MM (e.g. "2026-06"); anything else (e.g. "2025-annual",
+  // "2026-ytd", "2026-projection") is a yearly-granularity period.
+  function isYearlyPeriodKey(key){ return !/^\d{4}-\d{2}$/.test(key); }
+  // Tracks the main page's Period filter granularity so this section's Monthly/Yearly toggle
+  // can follow it: crossing the monthly<->yearly boundary on the page's own Period picker force-
+  // switches mfrForceYearly (and the toggle buttons) to match, but changing to a different period
+  // of the SAME granularity (e.g. June -> May, or one annual year -> another) leaves a manual
+  // in-section pick alone, since only a granularity change is meant to override it.
+  let mfrLastPeriodType = isYearlyPeriodKey(DEFAULT_MONTH) ? 'yearly' : 'monthly';
+  // last main-page period value this section synced its month/year <select> to, independent of
+  // mfrLastPeriodType above -- avoids re-syncing to the same value on every unrelated re-render
+  let mfrLastSyncedPeriod = null;
 
   window.renderMfrSection = function(){
     mfrSection.classList.remove('hidden');
     mfrCountry = resolveMfrCountry();
     renderMfrCountryFilter();
 
+    // If the page's own Period filter just crossed the monthly<->yearly boundary (e.g. "June
+    // 2026" -> "2025 (Annual)"), force this section's Monthly/Yearly toggle to follow.
+    const currentPeriodType = isYearlyPeriodKey([...selectedMonths][0]) ? 'yearly' : 'monthly';
+    if(currentPeriodType !== mfrLastPeriodType){
+      mfrForceYearly = currentPeriodType === 'yearly';
+      if(mfrPeriodToggleEl){
+        mfrPeriodToggleEl.querySelectorAll('[data-mfr-period]').forEach(b => b.classList.toggle('active', b.dataset.mfrPeriod === currentPeriodType));
+      }
+      mfrLastPeriodType = currentPeriodType;
+    }
+
     const hasMonthlyData = !!(hasMonthly && MANUFACTURER_MONTHLY[mfrCountry] && MANUFACTURER_MONTHLY[mfrCountry].length);
     const hasYearlyData = !!(MANUFACTURER_YEARLY[mfrCountry] && MANUFACTURER_YEARLY[mfrCountry].length);
     if(mfrPeriodToggleEl) mfrPeriodToggleEl.classList.toggle('hidden', !(hasMonthlyData && hasYearlyData));
     mfrMonthly = hasMonthlyData && !(hasYearlyData && mfrForceYearly);
+    const pagePeriod = [...selectedMonths][0];
 
     if(mfrMonthly){
       mfrMonthSelect.classList.remove('hidden');
       mfrYearSelect.classList.add('hidden');
       const hasModelData = hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[mfrCountry] && MANUFACTURER_MODEL_MONTHLY[mfrCountry].length;
       mfrModelSection.classList.toggle('hidden', !hasModelData);
+      const months = [...new Set(MANUFACTURER_MONTHLY[mfrCountry].map(r => r.year_month))].sort().reverse();
       if(mfrMonthSelectWiredFor !== mfrCountry){
-        const months = [...new Set(MANUFACTURER_MONTHLY[mfrCountry].map(r => r.year_month))].sort().reverse();
         mfrMonthSelect.innerHTML = months.map(ym => `<option value="${ym}">${ym}</option>`).join('');
-        mfrMonthSelect.value = months[0];
+        mfrMonthSelect.value = months.includes(pagePeriod) ? pagePeriod : months[0];
         mfrMonthSelectWiredFor = mfrCountry;
+      } else if(pagePeriod !== mfrLastSyncedPeriod && months.includes(pagePeriod)){
+        mfrMonthSelect.value = pagePeriod;
       }
+      mfrLastSyncedPeriod = pagePeriod;
       mfrTitle.textContent = mfrTitleText('brand');
       mfrNote.textContent = mfrNoteText('brand');
       if(hasModelData){
@@ -4402,11 +4432,16 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     mfrMonthSelect.classList.add('hidden');
     mfrYearSelect.classList.remove('hidden');
     const availYears = [...new Set((MANUFACTURER_YEARLY[mfrCountry] || []).map(r => r.year))].sort((a,b) => b - a);
+    const yearMatch = pagePeriod && pagePeriod.match(/(\d{4})/);
+    const wantYear = yearMatch ? +yearMatch[1] : null;
     if(mfrYearSelectWiredFor !== mfrCountry){
       mfrYearSelect.innerHTML = availYears.map(y => `<option value="${y}">${mfrYearOptionLabel(y)}</option>`).join('');
-      mfrYearSelect.value = resolveMfrYear(mfrCountry);
+      mfrYearSelect.value = (wantYear != null && availYears.includes(wantYear)) ? wantYear : Math.max(...availYears);
       mfrYearSelectWiredFor = mfrCountry;
+    } else if(pagePeriod !== mfrLastSyncedPeriod && wantYear != null && availYears.includes(wantYear)){
+      mfrYearSelect.value = wantYear;
     }
+    mfrLastSyncedPeriod = pagePeriod;
     mfrYear = +mfrYearSelect.value;
     const hasModelYearlyData = hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry] &&
       MANUFACTURER_MODEL_YEARLY[mfrCountry].some(r => r.year === mfrYear);
@@ -4421,7 +4456,17 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   };
 
   mfrYearSelect.addEventListener('change', () => {
-    mfrYear = +mfrYearSelect.value;
+    const val = mfrYearSelect.value;
+    const radio = monthsBox.querySelector(`input[data-month="${val}-annual"]`);
+    // same push-back-to-the-main-filter pattern as the month select below, so the two pickers
+    // can't drift apart -- lets a full recompute() re-render everything, not just this section
+    if(radio && `${val}-annual` !== [...selectedMonths][0]){
+      selectedMonths = new Set([`${val}-annual`]);
+      monthsBox.querySelectorAll('input[type="radio"]').forEach(rb => { rb.checked = rb === radio; });
+      recompute();
+      return;
+    }
+    mfrYear = +val;
     const hasModelYearlyData = hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry] &&
       MANUFACTURER_MODEL_YEARLY[mfrCountry].some(r => r.year === mfrYear);
     mfrModelSection.classList.toggle('hidden', !hasModelYearlyData);
