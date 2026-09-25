@@ -315,7 +315,20 @@
           <div class="tooltip" id="mfr-tooltip"></div>
           <div class="mfr-sales-preview mfr-brand-model-preview hidden" id="mfr-brand-model-preview">
             <div class="mfr-sales-preview-title" id="mfr-brand-model-preview-title"></div>
-            <svg class="chart" id="mfr-brand-model-preview-svg" viewBox="0 0 320 140" preserveAspectRatio="none"></svg>
+            <div class="mfr-preview-panels">
+              <div class="mfr-preview-panel">
+                <div class="mfr-preview-panel-title">Sales by year</div>
+                <svg class="chart" id="mfr-brand-year-preview-svg" viewBox="0 0 260 240" preserveAspectRatio="none"></svg>
+              </div>
+              <div class="mfr-preview-panel mfr-preview-panel-wide">
+                <div class="mfr-preview-panel-title">Sales by model, this period</div>
+                <svg class="chart" id="mfr-brand-model-preview-svg" viewBox="0 0 320 140" preserveAspectRatio="none"></svg>
+              </div>
+            </div>
+          </div>
+          <div class="mfr-sales-preview mfr-brand-model-preview hidden" id="mfr-model-year-preview">
+            <div class="mfr-sales-preview-title" id="mfr-model-year-preview-title"></div>
+            <svg class="chart" id="mfr-model-year-preview-svg" viewBox="0 0 780 240" preserveAspectRatio="none"></svg>
           </div>
         </div>
 
@@ -336,6 +349,9 @@
           </div>
           <p class="note" id="mfr-model-note">Bars show each model's total new registrations; the green segment is its BEV share of that total. Sorted by total sales.</p>
           <div class="mfr-coverage-note hidden" id="mfr-model-coverage-note"></div>
+          <div class="mfr-country-row">
+            <div class="chart-legend" id="mfr-category-filter"></div>
+          </div>
           <div class="rank-rows-header">
             <span class="rrh-spacer"></span>
             <span class="rrh-total">BEV %</span>
@@ -409,6 +425,12 @@ const MONTHLY_DATA = {
   "2026-08": {
     label: "August 2026",
     raw: {
+      // Added 2026-09-25: Indonesia (GAIKINDO wholesale, no petrol/diesel split published -- residual folded into petrol), Taiwan (real BEV+total; HEV/Petrol/Diesel split ESTIMATED by scaling July 2026's proportional mix onto August's actual total, since no official August breakdown beyond BEV+total was published), Malaysia (MAA headline total, HEV/Diesel/BEV derived by applying JPJ registration-category ratios per this project's usual method -- JPJ's "EV" category does not separate BEV from PHEV so phev is left 0 here to avoid double count), United States (Argonne National Laboratory monthly EV data + Cox/Wards/NADA total, diesel folded into petrol per existing US convention), and Ukraine (Ukravtoprom-reported ~5,000 total with fuel-type % shares -- approximate, PHEV not separated from HEV by the source).
+      "Indonesia":[17413,1993,7667,0,54683,0,81756],
+      "Taiwan":[3259,0,12480,0,13163,320,29222],
+      "Malaysia":[8168,0,4588,0,55600,3072,71428],
+      "United States":[86186,20103,216324,36,1057729,0,1380378],
+      "Ukraine":[510,0,1645,15,1955,875,5000],
       // source: AAA DATA (communique-de-presse-du-1er-septembre-2026, aaa-data.fr) -- see July comment for methodology. MHEV(18,849)+HEV(16,837) combined into hev; Others=Essence-GPL(3,361) + a small unitemized residual against AAA DATA's own 94,351 total.
       "France": [36159,5824,35686,3963,10903,1816,94351],
       // source: KBA (Kraftfahrt-Bundesamt) monthly Pressemitteilung -- see July comment for methodology. Hybrid total (84,603) split into PHEV (25,406, KBA-stated) and HEV=84,603-25,406=59,197; Others = residual against KBA's own 212,563 total.
@@ -495,6 +517,24 @@ const MONTHLY_DATA = {
   "2026-07": {
     label: "July 2026",
     raw: {
+      // ACEA-derived 2026-09-24: these 17 countries were skipped by ACEA's July monthly release (ACEA takes a "summer break" in July, publishing only an H1 Jan-Jun cumulative report instead of a standalone July report). Figures below are DERIVED: ACEA's August 2026 press release Jan-Aug year-to-date column, minus that same release's August-2026-only column, minus this site's own already-loaded Jan-Jun 2026 monthly sum -- i.e. July = YTD(Jan-Aug) - August - H1(Jan-Jun). A few countries (Bulgaria, Cyprus, Malta) hit a small negative residual in one sub-category from ACEA's cross-month data revisions; that sub-category was clamped to 0 and the gap absorbed into the country's largest remaining bucket so the total stays exact -- affects only single-digit-to-low-hundreds units, not the total.
+      "Austria":[7073,3530,7192,0,5625,2403,25823],
+      "Bulgaria":[468,177,399,0,3893,0,4937],
+      "Croatia":[358,653,2428,114,2133,759,6445],
+      "Cyprus":[59,86,684,0,483,0,1312],
+      "Czechia":[1538,1068,5005,476,8376,3684,20147],
+      "Estonia":[176,146,856,0,239,196,1613],
+      "Greece":[994,1024,8478,301,2310,113,13220],
+      "Hungary":[921,1315,5609,97,2560,1167,11669],
+      "Iceland":[616,204,192,0,65,71,1148],
+      "Latvia":[356,384,0,68,1440,195,2443],
+      "Lithuania":[405,725,2352,75,848,296,4701],
+      "Luxembourg":[1407,291,1304,0,978,356,4336],
+      "Malta":[525,194,251,1,0,8,979],
+      "Poland":[2180,5278,29370,1342,14879,3154,56203],
+      "Romania":[825,0,6194,2279,1826,616,11740],
+      "Slovakia":[550,453,2428,94,2630,785,6940],
+      "Slovenia":[1520,189,822,100,2526,586,5743],
       // source: AAA DATA (communique-de-presse-du-1er-aout-2026, aaa-data.fr) -- France's own registration-data provider, published well before ACEA's EU-wide release. Essence=13,903 (pure petrol only, HEV+MHEV pulled out); MHEV(26,933)+HEV(25,163) combined into hev per project convention; Others = GPL/E85 + ~4.9% unitemized residual against AAA DATA's own 126,808 total.
       "France": [44378,7461,52096,6220,13903,2750,126808],
       // source: KBA (Kraftfahrt-Bundesamt) monthly Pressemitteilung -- Germany's official federal motor authority, published within the first days of the following month, well ahead of ACEA. Hybrid total (105,284) split into PHEV (30,609, KBA-stated) and HEV=105,284-30,609=74,675; Others = residual against KBA's own 268,068 total (Sonstige/other fuels).
@@ -4335,6 +4375,9 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   const mfrModelNote = document.getElementById('mfr-model-note');
   const mfrBrandModelPreview = document.getElementById('mfr-brand-model-preview');
   const mfrBrandModelPreviewTitle = document.getElementById('mfr-brand-model-preview-title');
+  const mfrModelYearPreview = document.getElementById('mfr-model-year-preview');
+  const mfrModelYearPreviewTitle = document.getElementById('mfr-model-year-preview-title');
+  const mfrCategoryFilterEl = document.getElementById('mfr-category-filter');
   const mfrPeriodToggleEl = document.getElementById('mfr-period-toggle');
   if(!mfrRows || !mfrSection || typeof MANUFACTURER_YEARLY === 'undefined') return;
   const hasMonthly = typeof MANUFACTURER_MONTHLY !== 'undefined';
@@ -4489,6 +4532,18 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       .map(r => ({ ...r, label: r.brand }));
   }
   let mfrSortKey = 'total'; // 'total' | 'bevPct' | 'icePct' -- shared by both sections
+  // A model row is, by the BEV/PHEV/ICE split transform already baked into the data, always
+  // dominated by exactly one of these three buckets (ICE = hev+petrol+diesel combined) -- used
+  // both for the model section's category filter chips and its per-category rank column.
+  function mfrRowCategory(row){
+    if(row.bev > 0) return 'bev';
+    if(row.phev > 0) return 'phev';
+    return 'ice';
+  }
+  const MFR_CATEGORY_COLORS = { bev: FUEL_COLORS.bev, phev: FUEL_COLORS.phev, ice: FUEL_COLORS.petrol };
+  const MFR_CATEGORY_LABELS = { bev: 'BEV', phev: 'PHEV', ice: 'ICE' };
+  let mfrModelCategoryFilter = new Set(['bev', 'phev', 'ice']); // multi-select; model section only
+
   function renderSection(kind){
     const rowsEl = kind === 'model' ? mfrModelRows : mfrRows;
     const mode = kind === 'model' ? mfrModelMode : mfrMode;
@@ -4498,15 +4553,34 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     // member set (every brand/model tracked for the period) is always fixed by real total
     // volume -- mfrSortKey only reorders that same set, it never swaps in a smaller/niche row
     // just because it happens to score higher on % BEV or % ICE
-    const sorted = all.map(r => ({ ...r, bevPct: r.total ? r.bev / r.total * 100 : 0, icePct: r.total ? (r.petrol + r.diesel) / r.total * 100 : 0 }))
-      .sort((a,b) => b[mfrSortKey] - a[mfrSortKey]);
+    const withPct = all.map(r => ({ ...r, bevPct: r.total ? r.bev / r.total * 100 : 0, icePct: r.total ? (r.petrol + r.diesel) / r.total * 100 : 0 }));
+    // category rank is fixed per row (e.g. "the #2 best-selling BEV model") regardless of the
+    // section's current sort key or category-filter selection -- computed from the full,
+    // unfiltered set so hiding other categories never renumbers the ones still shown
+    let categoryRank = null;
+    if(kind === 'model'){
+      categoryRank = new Map();
+      ['bev', 'phev', 'ice'].forEach(cat => {
+        withPct.filter(r => mfrRowCategory(r) === cat).sort((a,b) => b.total - a.total)
+          .forEach((r,i) => categoryRank.set(r, i + 1));
+      });
+    }
+    const visible = kind === 'model' ? withPct.filter(r => mfrModelCategoryFilter.has(mfrRowCategory(r))) : withPct;
+    const sorted = visible.slice().sort((a,b) => b[mfrSortKey] - a[mfrSortKey]);
     rowsEl.classList.toggle('raw-mode', mode === 'raw');
     const globalMax = Math.max(1, ...sorted.map(r => r.total));
-    rowsEl.innerHTML = sorted.map(row => {
+    rowsEl.innerHTML = sorted.map((row, i) => {
       const sharePct = marketTotal ? row.total / marketTotal * 100 : 0;
       const widthDenom = mode === 'raw' ? globalMax : row.total;
+      const cat = kind === 'model' ? mfrRowCategory(row) : null;
+      const rankNum = kind === 'model' ? categoryRank.get(row) : i + 1;
+      const rankHTML = kind === 'model'
+        ? `<div class="mfr-rank-num" style="color:${MFR_CATEGORY_COLORS[cat]}" title="#${rankNum} best-selling ${MFR_CATEGORY_LABELS[cat]} model">${rankNum}</div>`
+        : `<div class="mfr-rank-num">${rankNum}</div>`;
+      const brandAttr = kind === 'model' ? ` data-brand="${row.brand}" data-model="${row.model}"` : '';
       return `
-      <div class="rank-row" data-label="${row.label}" data-kind="${kind}">
+      <div class="rank-row" data-label="${row.label}" data-kind="${kind}"${brandAttr}>
+        ${rankHTML}
         <div class="country-label">${row.label}</div>
         <div class="bar-track">
           ${MFR_FUEL_KEYS.map(k => mfrSegHTML(row, k, widthDenom, mode)).join('')}
@@ -4516,6 +4590,14 @@ const MFR_MONTHLY_SOURCE_NOTE = {
         <div class="total-label">${row.total.toLocaleString('en-US')}</div>
       </div>`;
     }).join('');
+  }
+  // multi-select filter, model section only: which powertrain categories (BEV/PHEV/ICE) show
+  // up as rows at all.
+  function renderMfrCategoryFilter(){
+    if(!mfrCategoryFilterEl) return;
+    mfrCategoryFilterEl.innerHTML = ['bev','phev','ice'].map(cat => `
+      <div class="legend-chip${mfrModelCategoryFilter.has(cat) ? '' : ' dimmed'}" data-mfr-category="${cat}"><span class="swatch" style="background:${MFR_CATEGORY_COLORS[cat]}"></span>${MFR_CATEGORY_LABELS[cat]}</div>
+    `).join('');
   }
   function mfrNoteText(kind){
     const sourceNote = mfrMonthly
@@ -4580,6 +4662,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   function renderBoth(){
     renderSection('brand');
     if(!mfrModelSection.classList.contains('hidden')) renderSection('model');
+    renderMfrCategoryFilter();
     updateMfrCoverageNote();
     updateMfrModelCoverageNote();
   }
@@ -4610,6 +4693,14 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       renderSection('brand');
       if(!mfrModelSection.classList.contains('hidden')) renderSection('model');
     });
+  });
+  if(mfrCategoryFilterEl) mfrCategoryFilterEl.addEventListener('click', e => {
+    const chip = e.target.closest('[data-mfr-category]');
+    if(!chip) return;
+    const cat = chip.dataset.mfrCategory;
+    if(mfrModelCategoryFilter.has(cat)) mfrModelCategoryFilter.delete(cat); else mfrModelCategoryFilter.add(cat);
+    renderMfrCategoryFilter();
+    renderSection('model');
   });
   mfrMonthSelect.addEventListener('change', () => {
     const val = mfrMonthSelect.value;
@@ -4797,6 +4888,75 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     if(!(hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry])) return [];
     return MANUFACTURER_MODEL_YEARLY[mfrCountry].filter(r => r.year === mfrYear && r.brand === brand);
   }
+  // months of real monthly data on file for this country in the current calendar year --
+  // the denominator for every "YTD -> projected full year" rule-of-three extrapolation below
+  function mfrCountryMonthsCoveredThisYear(country){
+    if(!hasMonthly || !MANUFACTURER_MONTHLY[country]) return 0;
+    const y = String(MFR_CURRENT_YEAR);
+    return new Set(MANUFACTURER_MONTHLY[country].filter(r => r.year_month.startsWith(y)).map(r => r.year_month)).size;
+  }
+  function mfrRuleOfThreeProjection(ytdTotal, monthsCovered){
+    if(!monthsCovered || monthsCovered >= 12) return null;
+    return Math.round(ytdTotal * 12 / monthsCovered);
+  }
+  // shared renderer for both the brand-by-year and model-by-year panels: solid bar = real YTD
+  // (or full-year, for a closed year), a paler continuation on the current year only = the
+  // rule-of-three projection to a full 12 months; optional per-bar rank labels for the model
+  // popup (category rank, i.e. among other rows of the same BEV/PHEV/ICE bucket that year,
+  // since a raw model row is always single-category)
+  function renderMfrYearBarChart(svgEl, rows, opts){
+    const svg = d3.select(svgEl);
+    svg.selectAll('*').remove();
+    if(!rows.length) return;
+    const monthsCovered = mfrCountryMonthsCoveredThisYear(mfrCountry);
+    const hasCurrentYearMonthly = opts.hasMonthlyThisYear;
+    const data = rows.map(r => {
+      const isCurrent = r.year === MFR_CURRENT_YEAR;
+      const projected = (isCurrent && hasCurrentYearMonthly) ? mfrRuleOfThreeProjection(r.total, monthsCovered) : null;
+      return { year: r.year, total: r.total, projected, rank: opts.rankByYear ? opts.rankByYear.get(r.year) : null };
+    });
+    const W = 260, H = 240, M = { top: 18, right: 10, bottom: 26, left: 42 };
+    const innerW = W - M.left - M.right, innerH = H - M.top - M.bottom;
+    svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const x = d3.scaleBand().domain(data.map(d => d.year)).range([0, innerW]).padding(0.28);
+    const yMax = Math.max(1, ...data.map(d => d.projected || d.total));
+    const y = d3.scaleLinear().domain([0, yMax]).nice().range([innerH, 0]);
+    const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+    g.append('g').attr('class', 'bubble-axis').call(d3.axisLeft(y).ticks(4).tickFormat(d3.format('~s')));
+    g.append('g').attr('class', 'bubble-axis').attr('transform', `translate(0,${innerH})`)
+      .call(d3.axisBottom(x).tickSize(4).tickFormat(d3.format('d')))
+      .selectAll('text').style('font-size', '9px');
+    g.selectAll('.bar-actual').data(data).join('rect').attr('class', 'bar-actual')
+      .attr('x', d => x(d.year)).attr('width', x.bandwidth())
+      .attr('y', d => y(d.total)).attr('height', d => innerH - y(d.total))
+      .attr('fill', FUEL_COLORS.bev);
+    g.selectAll('.bar-projected').data(data.filter(d => d.projected != null)).join('rect').attr('class', 'bar-projected')
+      .attr('x', d => x(d.year)).attr('width', x.bandwidth())
+      .attr('y', d => y(d.projected)).attr('height', d => Math.max(0, y(d.total) - y(d.projected)))
+      .attr('fill', FUEL_COLORS.bev).attr('opacity', 0.32);
+    if(opts.rankByYear){
+      g.selectAll('.rank-label').data(data).join('text').attr('class', 'rank-label')
+        .attr('x', d => x(d.year) + x.bandwidth() / 2).attr('y', d => y(d.projected || d.total) - 5)
+        .attr('text-anchor', 'middle').style('font-size', '9px').style('font-weight', '700')
+        .style('fill', 'var(--text-muted)').text(d => d.rank ? `#${d.rank}` : '');
+    }
+  }
+  function buildMfrBrandYearRows(brand){
+    if(!MANUFACTURER_YEARLY[mfrCountry]) return [];
+    return MANUFACTURER_YEARLY[mfrCountry].filter(r => r.brand === brand).sort((a,b) => a.year - b.year);
+  }
+  function mfrHasMonthlyThisYear(monthlyData, matchFn){
+    if(!hasMonthly || !monthlyData) return false;
+    const y = String(MFR_CURRENT_YEAR);
+    return monthlyData.some(r => r.year_month.startsWith(y) && matchFn(r));
+  }
+  function renderMfrBrandYearChart(brand){
+    const svgEl = document.getElementById('mfr-brand-year-preview-svg');
+    if(!svgEl) return;
+    const rows = buildMfrBrandYearRows(brand);
+    const hasMonthlyThisYear = mfrHasMonthlyThisYear(MANUFACTURER_MONTHLY[mfrCountry], r => r.brand === brand);
+    renderMfrYearBarChart(svgEl, rows, { hasMonthlyThisYear });
+  }
   function renderMfrBrandModelChart(brand){
     const svgEl = document.getElementById('mfr-brand-model-preview-svg');
     if(!svgEl) return;
@@ -4804,7 +4964,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     svg.selectAll('*').remove();
     const rows = buildMfrBrandModelRows(brand).slice().sort((a,b) => b.total - a.total);
     if(!rows.length) return;
-    const W = 620, rowH = 28, M = { top: 4, right: 62, bottom: 4, left: 150 };
+    const W = 560, rowH = 28, M = { top: 4, right: 62, bottom: 4, left: 150 };
     const innerW = W - M.left - M.right;
     const H = rows.length * rowH + M.top + M.bottom;
     svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
@@ -4836,11 +4996,53 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const rows = buildMfrBrandModelRows(brand);
     if(!rows.length){ mfrBrandModelPreview.classList.add('hidden'); return; }
     if(mfrBrandModelPreviewTitle) mfrBrandModelPreviewTitle.textContent = `${brand} — sales by model`;
+    renderMfrBrandYearChart(brand);
     renderMfrBrandModelChart(brand);
     const rect = anchorEl.getBoundingClientRect();
-    mfrBrandModelPreview.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 640)) + 'px';
+    mfrBrandModelPreview.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 920)) + 'px';
     mfrBrandModelPreview.style.top = (rect.bottom + 8) + 'px';
     mfrBrandModelPreview.classList.remove('hidden');
+  }
+  // --- hover preview: sales by year for one model, biggest sellers first, with each year's
+  // category rank (BEV/PHEV/ICE, matching the model rank-rows column) -- same popup size as
+  // the brand one above, but a single chart since a model has no sub-items to pair it with.
+  function buildMfrModelYearRows(brand, model){
+    if(!hasModelYearly || !MANUFACTURER_MODEL_YEARLY[mfrCountry]) return [];
+    return MANUFACTURER_MODEL_YEARLY[mfrCountry].filter(r => r.brand === brand && r.model === model).sort((a,b) => a.year - b.year);
+  }
+  function mfrModelCategoryRankByYear(brand, model){
+    const rankByYear = new Map();
+    if(!hasModelYearly || !MANUFACTURER_MODEL_YEARLY[mfrCountry]) return rankByYear;
+    const years = [...new Set(MANUFACTURER_MODEL_YEARLY[mfrCountry].map(r => r.year))];
+    years.forEach(year => {
+      const yearRows = MANUFACTURER_MODEL_YEARLY[mfrCountry].filter(r => r.year === year);
+      const target = yearRows.find(r => r.brand === brand && r.model === model);
+      if(!target) return;
+      const cat = mfrRowCategory(target);
+      const sameCategory = yearRows.filter(r => mfrRowCategory(r) === cat).sort((a,b) => b.total - a.total);
+      const idx = sameCategory.findIndex(r => r.brand === brand && r.model === model);
+      if(idx !== -1) rankByYear.set(year, idx + 1);
+    });
+    return rankByYear;
+  }
+  function renderMfrModelYearChart(brand, model){
+    const svgEl = document.getElementById('mfr-model-year-preview-svg');
+    if(!svgEl) return;
+    const rows = buildMfrModelYearRows(brand, model);
+    const hasMonthlyThisYear = mfrHasMonthlyThisYear(MANUFACTURER_MODEL_MONTHLY[mfrCountry], r => r.brand === brand && r.model === model);
+    const rankByYear = mfrModelCategoryRankByYear(brand, model);
+    renderMfrYearBarChart(svgEl, rows, { hasMonthlyThisYear, rankByYear });
+  }
+  function showMfrModelYearPreview(brand, model, anchorEl){
+    if(!mfrModelYearPreview) return;
+    const rows = buildMfrModelYearRows(brand, model);
+    if(!rows.length){ mfrModelYearPreview.classList.add('hidden'); return; }
+    if(mfrModelYearPreviewTitle) mfrModelYearPreviewTitle.textContent = `${brand} ${model} — sales by year (rank = among same-category models)`;
+    renderMfrModelYearChart(brand, model);
+    const rect = anchorEl.getBoundingClientRect();
+    mfrModelYearPreview.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 920)) + 'px';
+    mfrModelYearPreview.style.top = (rect.bottom + 8) + 'px';
+    mfrModelYearPreview.classList.remove('hidden');
   }
 
   mfrRows.addEventListener('pointermove', e => {
@@ -4879,6 +5081,17 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     mfrModelTooltip.innerHTML = `${seg.dataset.label} — ${FUEL_LABELS[seg.dataset.key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)`;
   });
   mfrModelRows.addEventListener('pointerleave', () => { mfrModelTooltip.style.opacity = 0; });
+  mfrModelRows.addEventListener('pointerover', e => {
+    const label = e.target.closest('.country-label');
+    if(!label) return;
+    const row = label.closest('.rank-row');
+    if(row) showMfrModelYearPreview(row.dataset.brand, row.dataset.model, label);
+  });
+  mfrModelRows.addEventListener('pointerout', e => {
+    const label = e.target.closest('.country-label');
+    if(!label || (e.relatedTarget && mfrModelRows.contains(e.relatedTarget))) return;
+    if(mfrModelYearPreview) mfrModelYearPreview.classList.add('hidden');
+  });
 })();
 </script>
 <script src="assets/notes-toggle.js"></script>
