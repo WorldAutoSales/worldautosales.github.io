@@ -425,6 +425,11 @@ const MONTHLY_DATA = {
   "2026-08": {
     label: "August 2026",
     raw: {
+      // Added 2026-09-25: Chile (ANAC real BEV/PHEV/HEV for August; ANAC's "MHEV" bucket (2,338 units) is bundled by ANAC itself into conventional combustion, so it stays in the unsplit petrol+diesel residual, divided using July 2026's own petrol/diesel ratio), Ecuador (AEADE/press real BEV + combined-hybrid total; petrol/diesel residual split via July 2026's ratio, matching this country's existing no-PHEV-split convention), Uruguay (ACAU headline total 6,781 -- other outlets report 6,477/5,933 for what may be narrower vehicle-category scopes, flagged as a data-quality caveat; the reported combined "electricos" figure of 3,471 was split into bev/phev using July 2026's bev:phev ratio since ACAU did not separate them for August), South Africa (naamsa's August release only republishes July's NEV mix -- no fresh August EV breakdown exists yet -- so bev/phev/hev were ESTIMATED by scaling July 2026's ratios onto August's real total of 57,898; replace with real figures once naamsa publishes an August-specific NEV breakdown).
+      "Chile":[696,593,1324,0,18027,7256,27896],
+      "Ecuador":[2034,0,3308,0,6082,3857,15281],
+      "Uruguay":[3107,364,0,0,3286,24,6781],
+      "South Africa":[459,1232,1416,0,54791,0,57898],
       // Added 2026-09-25: Indonesia (GAIKINDO wholesale, no petrol/diesel split published -- residual folded into petrol), Taiwan (real BEV+total; HEV/Petrol/Diesel split ESTIMATED by scaling July 2026's proportional mix onto August's actual total, since no official August breakdown beyond BEV+total was published), Malaysia (MAA headline total, HEV/Diesel/BEV derived by applying JPJ registration-category ratios per this project's usual method -- JPJ's "EV" category does not separate BEV from PHEV so phev is left 0 here to avoid double count), United States (Argonne National Laboratory monthly EV data + Cox/Wards/NADA total, diesel folded into petrol per existing US convention), and Ukraine (Ukravtoprom-reported ~5,000 total with fuel-type % shares -- approximate, PHEV not separated from HEV by the source).
       "Indonesia":[17413,1993,7667,0,54683,0,81756],
       "Taiwan":[3259,0,12480,0,13163,320,29222],
@@ -3047,6 +3052,7 @@ const DOM_TOM_COORDS = {
   "France - Mayotte": [45.16, -12.83],
   "Mauritius": [57.50, -20.16],
   "Singapore": [103.82, 1.35],
+  "Taiwan": [120.97, 23.70],
 };
 
 // shared tooltip line for a country's source-quality grade (AA/A/B/C/D) + rationale, wherever it's known
