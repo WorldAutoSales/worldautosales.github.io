@@ -274,6 +274,35 @@
           <div class="tooltip" id="cars-on-road-tooltip"></div>
         </div>
 
+        <div class="card chart-card hidden" id="mfr-country-section">
+          <div class="chart-header-row">
+            <h2 id="mfr-country-title">Sales by Manufacturing Country</h2>
+            <div class="chart-mode-toggle" role="group" aria-label="Sort order" id="mfr-country-sort-toggle">
+              <button type="button" class="mode-btn active" data-mfr-sort-key="total" title="Sort by total registrations.">Total</button>
+              <button type="button" class="mode-btn" data-mfr-sort-key="bev" title="Sort by total battery-electric units.">Total BEV</button>
+              <button type="button" class="mode-btn" data-mfr-sort-key="bevPct" title="Sort by battery-electric share of each row's own total.">% BEV</button>
+              <button type="button" class="mode-btn" data-mfr-sort-key="icePct" title="Sort by combined petrol + diesel share of each row's own total.">% ICE</button>
+            </div>
+          </div>
+          <p class="note" id="mfr-country-group-note">Bars show each manufacturing country's total new registrations, summed across all its brands sold here; the green segment is its BEV share of that total. Sorted by total sales.</p>
+          <div class="mfr-coverage-note hidden" id="mfr-country-group-coverage-note"></div>
+          <div class="legend-row">
+            <span></span>
+            <div class="chart-mode-toggle lg" role="group" aria-label="Bar display mode">
+              <button type="button" class="mode-btn" data-mfr-country-group-mode="pct" title="Show each row's fuel mix as a % of its own total.">%</button>
+              <button type="button" class="mode-btn active" data-mfr-country-group-mode="raw" title="Show actual unit counts — bars scaled to the top-selling row shown."># of Units</button>
+            </div>
+          </div>
+          <div class="rank-rows-header">
+            <span class="rrh-spacer"></span>
+            <span class="rrh-total">BEV %</span>
+            <span class="rrh-total">Share</span>
+            <span class="rrh-total">Total</span>
+          </div>
+          <div class="rank-rows" id="mfr-country-group-rank-rows"></div>
+          <div class="tooltip" id="mfr-country-group-tooltip"></div>
+        </div>
+
         <div class="card chart-card hidden" id="mfr-section">
           <div class="chart-header-row">
             <h2 id="mfr-title">Sales by Brand</h2>
@@ -3990,6 +4019,12 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   const mfrBrandModelPreviewTitle = document.getElementById('mfr-brand-model-preview-title');
   const mfrModelYearPreview = document.getElementById('mfr-model-year-preview');
   const mfrModelYearPreviewTitle = document.getElementById('mfr-model-year-preview-title');
+  const mfrCountrySection = document.getElementById('mfr-country-section');
+  const mfrCountryGroupTitle = document.getElementById('mfr-country-title');
+  const mfrCountryGroupNote = document.getElementById('mfr-country-group-note');
+  const mfrCountryGroupCoverageNote = document.getElementById('mfr-country-group-coverage-note');
+  const mfrCountryGroupRows = document.getElementById('mfr-country-group-rank-rows');
+  const mfrCountryGroupTooltip = document.getElementById('mfr-country-group-tooltip');
   if(!mfrRows || !mfrSection || typeof MANUFACTURER_YEARLY === 'undefined') return;
   const hasMonthly = typeof MANUFACTURER_MONTHLY !== 'undefined';
   const hasModelMonthly = typeof MANUFACTURER_MODEL_MONTHLY !== 'undefined';
@@ -4051,6 +4086,15 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   }
 
   const MFR_FUEL_KEYS = ['bev','phev','hev','petrol','diesel'];
+  // brand -> country where that brand's vehicles are manufactured/HQ'd (from the `manufacturers`
+  // table); feeds the "Sales by Manufacturing Country" section, which sums each period's brand
+  // rows (see fullMfrRows('mfgcountry')) into per-country totals. A few brand labels in the sales
+  // data are combined multi-brand reporting entities (e.g. a group that only discloses "BMW,
+  // Mini" together) rather than real `manufacturers` rows, so those are mapped by hand below;
+  // "Other (unclassified)" has no knowable country and is intentionally left unmapped, which
+  // excludes it from this section's totals (its units still count in Sales by Brand).
+  const MFR_BRAND_COUNTRY = {"Abarth":"Italy","Acura":"Japan","AITO":"China","Aiways":"China","Alfa Romeo":"Italy","Alpine":"France","Aston Martin":"United Kingdom","Audi":"Germany","Avatr":"China","Baojun":"China","Belgee":"Belarus","Bentley":"United Kingdom","Bestune":"China","BMW":"Germany","Buick":"United States","BYD":"China","Cadillac":"United States","Changan":"China","Chery":"China","Chevrolet":"United States","Chrysler":"United States","Citroen":"France","Cupra":"Spain","Dacia":"Romania","Daewoo":"South Korea","DAF Trucks":"Netherlands","Daihatsu":"Japan","Deepal":"China","Denza":"China","Dodge":"United States","Dongfeng":"China","DS":"France","Ferrari":"Italy","Fiat":"Italy","Fisker":"United States","Ford":"United States","GAC Motor":"China","Geely":"China","General Motors":"United States","Genesis":"South Korea","GMC":"United States","Great Wall Motors":"China","Honda":"Japan","Hongqi":"China","Hyundai":"South Korea","INEOS":"United Kingdom","Infiniti":"Japan","Iran Khodro":"Iran","Isuzu":"Japan","Iveco":"Italy","JAC":"China","Jaecoo":"China","Jaguar":"United Kingdom","Jeep":"United States","Karma":"United States","KGM":"South Korea","Kia":"South Korea","Lada":"Russia","Lamborghini":"Italy","Lancia":"Italy","Land Rover":"United Kingdom","Leapmotor":"China","Lexus":"Japan","Lincoln":"United States","Lotus":"United Kingdom","Lucid":"United States","Lynk & Co":"China","Mahindra":"India","MAN":"Germany","Maruti Suzuki":"Japan","Maserati":"Italy","Maxus":"China","Maybach":"Germany","Mazda":"Japan","McLaren":"United Kingdom","Mercedes-Benz":"Germany","MG":"China","MG Roewe":"China","Mini":"United Kingdom","Mitsubishi":"Japan","Mitsubishi Fuso":"Japan","Morgan":"United Kingdom","Neta":"China","NIO":"China","Nissan":"Japan","Omoda":"China","Opel":"Germany","Perodua":"Malaysia","Peugeot":"France","Polestar":"Sweden","Porsche":"Germany","Proton":"Malaysia","Ram":"United States","Renault":"France","Rivian":"United States","Roewe":"China","Rolls-Royce":"United Kingdom","Saab":"Sweden","Saipa":"Iran","Seat":"Spain","Skoda":"Czech Republic","smart":"Germany","SsangYong":"South Korea","Subaru":"Japan","Suzuki":"Japan","Tata Motors":"India","Tesla":"United States","TOGG":"Turkey","Toyota":"Japan","VinFast":"Vietnam","Volkswagen":"Germany","Volvo":"Sweden","Voyah":"China","Wiesmann":"Germany","Wuling":"China","Xiaomi Auto":"China","XPeng":"China","Zeekr":"China","BMW, Mini":"Germany","Chrysler, Jeep, Dodge":"United States","Nissan, Infiniti":"Japan","Renault, Dacia":"France","Toyota, Lexus":"Japan","Toyota (TCI: Toyota+Lexus combined)":"Japan","Jaguar Land Rover":"United Kingdom","Bollore":"France","Bugatti":"France","Mobilize":"France","Skoda-Volkswagen India":"Germany","Ssangyong":"South Korea"};
+  let mfrCountryGroupMode = 'raw'; // 'pct' or 'raw' -- manufacturing-country section
   // every country this section can show, in a fixed "richest data first" order, derived from
   // whichever of MANUFACTURER_YEARLY/MANUFACTURER_MONTHLY actually carries that country --
   // stays correct as more countries are added to either file, no hardcoded country list to
@@ -4109,6 +4153,18 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   // row, not just the 20 shown, or a market with a long tail of small brands/models would
   // understate everyone's share
   function fullMfrRows(kind){
+    if(kind === 'mfgcountry'){
+      const byCountry = new Map();
+      fullMfrRows('brand').forEach(r => {
+        const country = MFR_BRAND_COUNTRY[r.brand];
+        if(!country) return; // e.g. "Other (unclassified)" -- no knowable manufacturing country
+        if(!byCountry.has(country)) byCountry.set(country, { label: country, bev: 0, phev: 0, hev: 0, petrol: 0, diesel: 0, total: 0 });
+        const agg = byCountry.get(country);
+        MFR_FUEL_KEYS.forEach(k => { agg[k] += r[k] || 0; });
+        agg.total += r.total || 0;
+      });
+      return [...byCountry.values()];
+    }
     if(kind === 'model'){
       if(mfrMonthly){
         if(!(hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[mfrCountry])) return [];
@@ -4141,8 +4197,8 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   let mfrModelCategoryFilter = new Set(['bev', 'phev', 'ice']); // multi-select; model section only
 
   function renderSection(kind){
-    const rowsEl = kind === 'model' ? mfrModelRows : mfrRows;
-    const mode = kind === 'model' ? mfrModelMode : mfrMode;
+    const rowsEl = kind === 'model' ? mfrModelRows : kind === 'mfgcountry' ? mfrCountryGroupRows : mfrRows;
+    const mode = kind === 'model' ? mfrModelMode : kind === 'mfgcountry' ? mfrCountryGroupMode : mfrMode;
     const all = fullMfrRows(kind);
     if(!all.length){ rowsEl.innerHTML = ''; return; }
     const marketTotal = all.reduce((s,r) => s + r.total, 0);
@@ -4226,6 +4282,10 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const noun = kind === 'model' ? 'Model' : 'Brand';
     return `Sales by ${noun} — ${mfrCountry} (${period})`;
   }
+  function mfrCountryGroupTitleText(){
+    const period = mfrMonthly ? mfrMonthSelect.value : mfrYearOptionLabel(mfrYear);
+    return `Sales by Manufacturing Country — ${mfrCountry} (${period})`;
+  }
   // Some markets (Canada, USA) have real months where only a handful of brands still report
   // sales monthly -- most automakers there moved to quarterly/annual reporting. Landing on
   // one of those months by default (usually the newest) makes it look like Ford/GM/etc. are
@@ -4245,12 +4305,32 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     mfrCoverageNote.innerHTML = `⚠ Only ${thisMonthSize} of ${rosterSize} brands tracked here report sales monthly in ${mfrCountry} for ${ym} — most automakers report quarterly/annually instead.` +
       (fullMonths.length ? ` Select ${fullMonths.map(m => `<a href="#" data-mfr-goto-month="${m}">${m}</a>`).join(', ')} above for the full brand list.` : '');
   }
+  // A handful of brand rows (mainly "Other (unclassified)" -- a catch-all a source lumps small/
+  // minor brands into) have no knowable manufacturing country (see MFR_BRAND_COUNTRY), so this
+  // section's total is a few percent below Sales by Brand's total whenever one of those brands
+  // has real volume in the current period. Flagged here rather than leaving the two totals to
+  // silently disagree.
+  function updateMfrCountryGroupCoverageNote(){
+    if(!mfrCountryGroupCoverageNote) return;
+    if(mfrCountrySection.classList.contains('hidden')){ mfrCountryGroupCoverageNote.classList.add('hidden'); return; }
+    const excluded = fullMfrRows('brand').filter(r => !MFR_BRAND_COUNTRY[r.brand] && r.total > 0);
+    if(!excluded.length){ mfrCountryGroupCoverageNote.classList.add('hidden'); return; }
+    const excludedTotal = excluded.reduce((s, r) => s + r.total, 0);
+    const names = excluded.map(r => r.brand).join(', ');
+    mfrCountryGroupCoverageNote.classList.remove('hidden');
+    mfrCountryGroupCoverageNote.innerHTML = `⚠ ${excludedTotal.toLocaleString('en-US')} units (${names}) have no known manufacturing country and are excluded here -- Sales by Brand's total for this period is real and includes them.`;
+  }
   function renderBoth(){
     renderSection('brand');
     if(!mfrModelSection.classList.contains('hidden')) renderSection('model');
+    if(!mfrCountrySection.classList.contains('hidden')){
+      mfrCountryGroupTitle.textContent = mfrCountryGroupTitleText();
+      renderSection('mfgcountry');
+    }
     renderMfrFuelLegend();
     renderMfrCategoryFilter();
     updateMfrCoverageNote();
+    updateMfrCountryGroupCoverageNote();
   }
   document.querySelectorAll('[data-mfr-mode]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -4268,6 +4348,14 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       renderSection('model');
     });
   });
+  document.querySelectorAll('[data-mfr-country-group-mode]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if(btn.dataset.mfrCountryGroupMode === mfrCountryGroupMode) return;
+      mfrCountryGroupMode = btn.dataset.mfrCountryGroupMode;
+      document.querySelectorAll('[data-mfr-country-group-mode]').forEach(b => b.classList.toggle('active', b === btn));
+      renderSection('mfgcountry');
+    });
+  });
   // mfrSortKey is shared by both sections -- either sort-toggle group (brand header or model
   // header) reorders both, and both groups' "active" state stays in sync via the key's value
   // rather than the specific button clicked, since there are two separate button groups for it
@@ -4278,6 +4366,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       document.querySelectorAll('[data-mfr-sort-key]').forEach(b => b.classList.toggle('active', b.dataset.mfrSortKey === mfrSortKey));
       renderSection('brand');
       if(!mfrModelSection.classList.contains('hidden')) renderSection('model');
+      if(!mfrCountrySection.classList.contains('hidden')) renderSection('mfgcountry');
     });
   });
   mfrMonthSelect.addEventListener('change', () => {
@@ -4562,6 +4651,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
 
   window.renderMfrSection = function(){
     mfrSection.classList.remove('hidden');
+    mfrCountrySection.classList.remove('hidden');
     mfrCountry = resolveMfrCountry();
     renderMfrCountryFilter();
 
@@ -4722,6 +4812,20 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   });
   mfrModelRows.addEventListener('pointerleave', () => { mfrModelTooltip.style.opacity = 0; });
   mfrModelRows.addEventListener('click', e => {
+    const seg = e.target.closest('.bar-seg');
+    if(seg) toggleFuelIsolation(seg.dataset.key);
+  });
+  mfrCountryGroupRows.addEventListener('pointermove', e => {
+    const seg = e.target.closest('.bar-seg');
+    if(!seg){ mfrCountryGroupTooltip.style.opacity = 0; return; }
+    const cardRect = mfrCountrySection.getBoundingClientRect();
+    mfrCountryGroupTooltip.style.left = (e.clientX - cardRect.left) + 'px';
+    mfrCountryGroupTooltip.style.top = (e.clientY - cardRect.top - 10) + 'px';
+    mfrCountryGroupTooltip.style.opacity = 1;
+    mfrCountryGroupTooltip.innerHTML = `${seg.dataset.label} — ${FUEL_LABELS[seg.dataset.key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)`;
+  });
+  mfrCountryGroupRows.addEventListener('pointerleave', () => { mfrCountryGroupTooltip.style.opacity = 0; });
+  mfrCountryGroupRows.addEventListener('click', e => {
     const seg = e.target.closest('.bar-seg');
     if(seg) toggleFuelIsolation(seg.dataset.key);
   });
