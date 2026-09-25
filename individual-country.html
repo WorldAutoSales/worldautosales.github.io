@@ -283,6 +283,12 @@
               <button type="button" class="mode-btn" data-mfr-sort-key="bevPct" title="Sort by battery-electric share of each row's own total.">% BEV</button>
               <button type="button" class="mode-btn" data-mfr-sort-key="icePct" title="Sort by combined petrol + diesel share of each row's own total.">% ICE</button>
             </div>
+            <div class="chart-mode-toggle hidden" role="group" aria-label="Monthly or yearly view" id="mfr-period-toggle">
+              <button type="button" class="mode-btn active" data-mfr-period="monthly" title="Show recent individual months.">Monthly</button>
+              <button type="button" class="mode-btn" data-mfr-period="yearly" title="Show full calendar years.">Yearly</button>
+            </div>
+            <select id="mfr-month-select" class="filter-search hidden" style="width:auto;"></select>
+            <select id="mfr-year-select" class="filter-search hidden" style="width:auto;"></select>
           </div>
           <p class="note" id="mfr-country-group-note">Bars show each manufacturing country's total new registrations, summed across all its brands sold here; the green segment is its BEV share of that total. Sorted by total sales.</p>
           <div class="mfr-coverage-note hidden" id="mfr-country-group-coverage-note"></div>
@@ -312,12 +318,6 @@
               <button type="button" class="mode-btn" data-mfr-sort-key="bevPct" title="Sort by battery-electric share of each row's own total.">% BEV</button>
               <button type="button" class="mode-btn" data-mfr-sort-key="icePct" title="Sort by combined petrol + diesel share of each row's own total.">% ICE</button>
             </div>
-            <div class="chart-mode-toggle hidden" role="group" aria-label="Monthly or yearly view" id="mfr-period-toggle">
-              <button type="button" class="mode-btn active" data-mfr-period="monthly" title="Show recent individual months.">Monthly</button>
-              <button type="button" class="mode-btn" data-mfr-period="yearly" title="Show full calendar years.">Yearly</button>
-            </div>
-            <select id="mfr-month-select" class="filter-search hidden" style="width:auto;"></select>
-            <select id="mfr-year-select" class="filter-search hidden" style="width:auto;"></select>
             <a href="manufacturers.html" class="movers-see-all">Open the full Manufacturers page →</a>
           </div>
           <p class="note" id="mfr-note">Bars show each brand's total new registrations; the green segment is its BEV share of that total. Sorted by total sales.</p>

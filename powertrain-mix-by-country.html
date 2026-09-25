@@ -291,6 +291,12 @@
               <button type="button" class="mode-btn" data-mfr-sort-key="icePct" title="Sort by combined petrol + diesel share of each row's own total.">% ICE</button>
             </div>
             <select id="mfr-country-group-country-select" class="filter-search" style="width:auto;" title="Switch the focused country — applies to the whole page, not just this section."></select>
+            <div class="chart-mode-toggle hidden" role="group" aria-label="Monthly or yearly view" id="mfr-period-toggle">
+              <button type="button" class="mode-btn active" data-mfr-period="monthly" title="Show recent individual months.">Monthly</button>
+              <button type="button" class="mode-btn" data-mfr-period="yearly" title="Show full calendar years.">Yearly</button>
+            </div>
+            <select id="mfr-month-select" class="filter-search hidden" style="width:auto;"></select>
+            <select id="mfr-year-select" class="filter-search hidden" style="width:auto;"></select>
             <div class="chart-mode-toggle" role="group" aria-label="Bar display mode">
               <button type="button" class="mode-btn" data-mfr-country-group-mode="pct" title="Show each row's fuel mix as a % of its own total.">%</button>
               <button type="button" class="mode-btn active" data-mfr-country-group-mode="raw" title="Show actual unit counts — bars scaled to the top-selling row shown."># of Units</button>
@@ -318,12 +324,6 @@
               <button type="button" class="mode-btn" data-mfr-sort-key="icePct" title="Sort by combined petrol + diesel share of each row's own total.">% ICE</button>
             </div>
             <select id="mfr-country-select" class="filter-search" style="width:auto;" title="Switch the focused country — applies to the whole page, not just this section."></select>
-            <div class="chart-mode-toggle hidden" role="group" aria-label="Monthly or yearly view" id="mfr-period-toggle">
-              <button type="button" class="mode-btn active" data-mfr-period="monthly" title="Show recent individual months.">Monthly</button>
-              <button type="button" class="mode-btn" data-mfr-period="yearly" title="Show full calendar years.">Yearly</button>
-            </div>
-            <select id="mfr-month-select" class="filter-search hidden" style="width:auto;"></select>
-            <select id="mfr-year-select" class="filter-search hidden" style="width:auto;"></select>
             <div class="chart-mode-toggle" role="group" aria-label="Bar display mode">
               <button type="button" class="mode-btn" data-mfr-mode="pct" title="Show each row's fuel mix as a % of its own total.">%</button>
               <button type="button" class="mode-btn active" data-mfr-mode="raw" title="Show actual unit counts — bars scaled to the top-selling row shown."># of Units</button>
