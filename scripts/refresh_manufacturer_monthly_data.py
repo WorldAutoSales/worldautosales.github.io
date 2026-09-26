@@ -33,7 +33,7 @@ TABLE = "sales_manufacturer_country_month"
 # Germany's KBA data goes back to 2008 -- this page's month picker is meant for a
 # short list of recent months (unlike the full-history annual view on manufacturers.html,
 # which is untouched), so Germany is capped to 2026 onward to keep the payload sane.
-COUNTRIES = ["Canada", "United States", "Germany", "France"]
+COUNTRIES = ["Canada", "United States", "Germany", "France", "Japan"]
 MIN_YEAR_MONTH = {"Germany": "2026-01"}
 
 COLUMNS = "year_month,brand,nb_bev,nb_phev,nb_hev,nb_petrol,nb_diesel"
