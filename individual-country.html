@@ -307,6 +307,19 @@
           </div>
           <div class="rank-rows" id="mfr-country-group-rank-rows"></div>
           <div class="tooltip" id="mfr-country-group-tooltip"></div>
+          <div class="mfr-sales-preview mfr-brand-model-preview hidden" id="mfr-country-group-preview">
+            <div class="mfr-sales-preview-title" id="mfr-country-group-preview-title"></div>
+            <div class="mfr-preview-panels">
+              <div class="mfr-preview-panel">
+                <div class="mfr-preview-panel-title">Sales by year</div>
+                <svg class="chart" id="mfr-country-group-year-preview-svg" viewBox="0 0 260 240" preserveAspectRatio="none"></svg>
+              </div>
+              <div class="mfr-preview-panel mfr-preview-panel-wide">
+                <div class="mfr-preview-panel-title">Brands from here, this period</div>
+                <svg class="chart" id="mfr-country-group-brands-preview-svg" viewBox="0 0 320 140" preserveAspectRatio="none"></svg>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="card chart-card hidden" id="mfr-section">
@@ -4025,6 +4038,8 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   const mfrCountryGroupCoverageNote = document.getElementById('mfr-country-group-coverage-note');
   const mfrCountryGroupRows = document.getElementById('mfr-country-group-rank-rows');
   const mfrCountryGroupTooltip = document.getElementById('mfr-country-group-tooltip');
+  const mfrCountryGroupPreview = document.getElementById('mfr-country-group-preview');
+  const mfrCountryGroupPreviewTitle = document.getElementById('mfr-country-group-preview-title');
   if(!mfrRows || !mfrSection || typeof MANUFACTURER_YEARLY === 'undefined') return;
   const hasMonthly = typeof MANUFACTURER_MONTHLY !== 'undefined';
   const hasModelMonthly = typeof MANUFACTURER_MODEL_MONTHLY !== 'undefined';
@@ -4622,6 +4637,73 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     mfrModelYearPreview.style.top = (rect.bottom + 8) + 'px';
     mfrModelYearPreview.classList.remove('hidden');
   }
+  // --- hover preview: for one manufacturing country, sales by year (summed across every brand
+  // mapped to it) on the left, and this period's brands from that country ordered by sales desc
+  // on the right -- same two-panel layout as the brand popup above.
+  function buildMfrCountryGroupYearRows(country){
+    if(!MANUFACTURER_YEARLY[mfrCountry]) return [];
+    const byYear = new Map();
+    MANUFACTURER_YEARLY[mfrCountry].forEach(r => {
+      if(MFR_BRAND_COUNTRY[r.brand] !== country) return;
+      if(!byYear.has(r.year)) byYear.set(r.year, { year: r.year, total: 0 });
+      byYear.get(r.year).total += r.total || 0;
+    });
+    return [...byYear.values()].sort((a,b) => a.year - b.year);
+  }
+  function renderMfrCountryGroupYearChart(country){
+    const svgEl = document.getElementById('mfr-country-group-year-preview-svg');
+    if(!svgEl) return;
+    const rows = buildMfrCountryGroupYearRows(country);
+    const hasMonthlyThisYear = mfrHasMonthlyThisYear(MANUFACTURER_MONTHLY[mfrCountry], r => MFR_BRAND_COUNTRY[r.brand] === country);
+    renderMfrYearBarChart(svgEl, rows, { hasMonthlyThisYear });
+  }
+  function buildMfrCountryGroupBrandRows(country){
+    return fullMfrRows('brand').filter(r => MFR_BRAND_COUNTRY[r.brand] === country).sort((a,b) => b.total - a.total);
+  }
+  function renderMfrCountryGroupBrandsChart(country){
+    const svgEl = document.getElementById('mfr-country-group-brands-preview-svg');
+    if(!svgEl) return;
+    const svg = d3.select(svgEl);
+    svg.selectAll('*').remove();
+    const rows = buildMfrCountryGroupBrandRows(country);
+    if(!rows.length) return;
+    const W = 560, rowH = 28, M = { top: 4, right: 62, bottom: 4, left: 150 };
+    const innerW = W - M.left - M.right;
+    const H = rows.length * rowH + M.top + M.bottom;
+    svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const x = d3.scaleLinear().domain([0, Math.max(1, ...rows.map(r => r.total))]).range([0, innerW]);
+    const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+    rows.forEach((d,i) => {
+      let cursor = 0;
+      MFR_FUEL_KEYS.forEach(k => {
+        const units = d[k] || 0;
+        if(units <= 0) return;
+        const w = Math.max(0, x(cursor + units) - x(cursor));
+        g.append('rect')
+          .attr('x', x(cursor)).attr('y', i * rowH + 4).attr('width', w).attr('height', rowH - 8)
+          .attr('fill', FUEL_COLORS[k]);
+        cursor += units;
+      });
+    });
+    g.selectAll('.model-label').data(rows).join('text').attr('class', 'model-label')
+      .attr('x', -6).attr('y', (d,i) => i * rowH + rowH / 2).attr('dy', '0.32em').attr('text-anchor', 'end')
+      .style('font-size', '12px').style('fill', 'var(--text)').text(d => d.brand);
+    g.selectAll('.value-label').data(rows).join('text').attr('class', 'value-label')
+      .attr('x', d => Math.max(1, x(d.total)) + 5).attr('y', (d,i) => i * rowH + rowH / 2).attr('dy', '0.32em')
+      .style('font-size', '12px').style('fill', 'var(--text)').text(d => d.total.toLocaleString('en-US'));
+  }
+  function showMfrCountryGroupPreview(country, anchorEl){
+    if(!mfrCountryGroupPreview) return;
+    const rows = buildMfrCountryGroupBrandRows(country);
+    if(!rows.length){ mfrCountryGroupPreview.classList.add('hidden'); return; }
+    if(mfrCountryGroupPreviewTitle) mfrCountryGroupPreviewTitle.textContent = `${country} — brands sold here`;
+    renderMfrCountryGroupYearChart(country);
+    renderMfrCountryGroupBrandsChart(country);
+    const rect = anchorEl.getBoundingClientRect();
+    mfrCountryGroupPreview.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 920)) + 'px';
+    mfrCountryGroupPreview.style.top = (rect.bottom + 8) + 'px';
+    mfrCountryGroupPreview.classList.remove('hidden');
+  }
   function showMfrSalesPreview(country, anchorEl){
     if(!mfrSalesPreview) return;
     if(mfrSalesPreviewTitle) mfrSalesPreviewTitle.textContent = `${country} — total sales`;
@@ -4829,6 +4911,17 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const seg = e.target.closest('.bar-seg');
     if(seg) toggleFuelIsolation(seg.dataset.key);
   });
+  mfrCountryGroupRows.addEventListener('pointerover', e => {
+    const label = e.target.closest('.country-label');
+    if(!label) return;
+    const row = label.closest('.rank-row');
+    if(row) showMfrCountryGroupPreview(row.dataset.label, label);
+  });
+  mfrCountryGroupRows.addEventListener('pointerout', e => {
+    const label = e.target.closest('.country-label');
+    if(!label || (e.relatedTarget && mfrCountryGroupRows.contains(e.relatedTarget))) return;
+    if(mfrCountryGroupPreview) mfrCountryGroupPreview.classList.add('hidden');
+  });
   mfrModelRows.addEventListener('pointerover', e => {
     const label = e.target.closest('.country-label');
     if(!label) return;
@@ -4839,6 +4932,15 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const label = e.target.closest('.country-label');
     if(!label || (e.relatedTarget && mfrModelRows.contains(e.relatedTarget))) return;
     if(mfrModelYearPreview) mfrModelYearPreview.classList.add('hidden');
+  });
+
+  // These popups only open on hover, so a pointerout that never fires cleanly (fast mouse
+  // movement, scrolling while hovering, touch devices with no real hover state) can leave one
+  // stuck open with no way to dismiss it -- closing on any outside click is the safety net.
+  document.addEventListener('click', e => {
+    [mfrSalesPreview, mfrBrandModelPreview, mfrModelYearPreview, mfrCountryGroupPreview].forEach(p => {
+      if(p && !p.classList.contains('hidden') && !p.contains(e.target)) p.classList.add('hidden');
+    });
   });
 })();
 
