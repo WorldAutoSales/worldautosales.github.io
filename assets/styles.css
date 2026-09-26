@@ -1089,6 +1089,11 @@ ul.notes-body{
 }
 .mfr-brand-model-preview .mfr-sales-preview-title{ font-size:14px; margin-bottom:8px; }
 .mfr-brand-model-preview .chart{ height:auto; }
+/* Model-section "sales by year" popup has only one small chart (unlike the two-panel brand
+   popup it shares a class with) -- override the shared 900px width so its 260-unit-wide chart
+   isn't stretched (preserveAspectRatio="none") into an oversized, distorted-looking bar chart. */
+#mfr-model-year-preview{ width:300px; padding:14px 16px 10px; }
+#mfr-model-year-preview .mfr-sales-preview-title{ font-size:13px; margin-bottom:6px; }
 .mfr-preview-panels{ display:flex; gap:22px; align-items:flex-start; }
 .mfr-preview-panel{ flex:0 0 260px; }
 .mfr-preview-panel-wide{ flex:1 1 auto; min-width:0; }
