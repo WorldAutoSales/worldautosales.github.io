@@ -33,10 +33,12 @@ TABLE = "sales_manufacturer_country_month"
 # Germany's KBA data goes back to 2008 -- this page's month picker is meant for a
 # short list of recent months (unlike the full-history annual view on manufacturers.html,
 # which is untouched), so Germany is capped to 2026 onward to keep the payload sane.
-COUNTRIES = ["Canada", "United States", "Germany", "France", "Japan", "Spain"]
+# Panama: ADAP publishes no fuel split at all -- its units sit in nb_others and are
+# exported as "others" (powertrain unknown), never folded into petrol.
+COUNTRIES = ["Canada", "United States", "Germany", "France", "Japan", "Spain", "Panama"]
 MIN_YEAR_MONTH = {"Germany": "2026-01"}
 
-COLUMNS = "year_month,brand,nb_bev,nb_phev,nb_hev,nb_petrol,nb_diesel"
+COLUMNS = "year_month,brand,nb_bev,nb_phev,nb_hev,nb_petrol,nb_diesel,nb_others"
 
 
 def fetch_country_rows(country, min_year_month=None):
@@ -67,14 +69,18 @@ def build_rows(raw_rows):
         hev = r["nb_hev"] or 0
         petrol = r["nb_petrol"] or 0
         diesel = r["nb_diesel"] or 0
-        total = bev + phev + hev + petrol + diesel
+        others = r.get("nb_others") or 0
+        total = bev + phev + hev + petrol + diesel + others
         if total <= 0:
             continue
-        out.append({
+        row = {
             "year_month": r["year_month"], "brand": r["brand"],
             "bev": bev, "phev": phev, "hev": hev, "petrol": petrol, "diesel": diesel,
             "total": total,
-        })
+        }
+        if others:  # only emitted where a source has no fuel split, keeps other countries' rows unchanged
+            row["others"] = others
+        out.append(row)
     return out
 
 
