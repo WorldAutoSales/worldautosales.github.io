@@ -465,6 +465,7 @@ const MONTHLY_DATA = {
   "2026-08": {
     label: "August 2026",
     raw: {
+      "Kazakhstan": [317,855,257,0,17675,0,19104],
       // Added 2026-09-25: Chile (ANAC real BEV/PHEV/HEV for August; ANAC's "MHEV" bucket (2,338 units) is bundled by ANAC itself into conventional combustion, so it stays in the unsplit petrol+diesel residual, divided using July 2026's own petrol/diesel ratio), Ecuador (AEADE/press real BEV + combined-hybrid total; petrol/diesel residual split via July 2026's ratio, matching this country's existing no-PHEV-split convention), Uruguay (ACAU headline total 6,781 -- other outlets report 6,477/5,933 for what may be narrower vehicle-category scopes, flagged as a data-quality caveat; the reported combined "electricos" figure of 3,471 was split into bev/phev using July 2026's bev:phev ratio since ACAU did not separate them for August), South Africa (naamsa's August release only republishes July's NEV mix -- no fresh August EV breakdown exists yet -- so bev/phev/hev were ESTIMATED by scaling July 2026's ratios onto August's real total of 57,898; replace with real figures once naamsa publishes an August-specific NEV breakdown).
       "Chile": [696,593,1324,0,18027,7256,27896],
       "Ecuador": [2034,0,3308,0,6082,3857,15281],
@@ -562,6 +563,7 @@ const MONTHLY_DATA = {
   "2026-07": {
     label: "July 2026",
     raw: {
+      "Kazakhstan":[318,856,257,0,19940,0,21371],
       // ACEA-derived 2026-09-24: these 17 countries were skipped by ACEA's July monthly release (ACEA takes a "summer break" in July, publishing only an H1 Jan-Jun cumulative report instead of a standalone July report). Figures below are DERIVED: ACEA's August 2026 press release Jan-Aug year-to-date column, minus that same release's August-2026-only column, minus this site's own already-loaded Jan-Jun 2026 monthly sum -- i.e. July = YTD(Jan-Aug) - August - H1(Jan-Jun). A few countries (Bulgaria, Cyprus, Malta) hit a small negative residual in one sub-category from ACEA's cross-month data revisions; that sub-category was clamped to 0 and the gap absorbed into the country's largest remaining bucket so the total stays exact -- affects only single-digit-to-low-hundreds units, not the total.
       "Austria": [7073,3530,7192,0,5625,2403,25823],
       "Bulgaria": [468,177,399,0,3893,0,4937],
@@ -1480,7 +1482,7 @@ const MONTHLY_DATA = {
       "Vietnam": [137773,0,12501,0,146729,44313,341316],
       "Israel": [27748,57708,73563,1,66507,12204,237731],
       // source: KAO (kao.kz), Jan-Jun 2026 summed from the bimonthly-derived monthly figures — HEV is a floor from March on; Diesel=0
-      "Kazakhstan": [1017,2640,825,0,101386,0,105868],
+      "Kazakhstan": [1652,4351,1339,0,139001,0,146343],
       // source: AAP (Asociacion Automotriz del Peru), Jan-Aug 2026 summed from the monthly figures — HEV includes MHEV combined; Diesel folded into Petrol
       "Peru": [661,1229,9469,0,177457,0,188816],
       // source: ACAU (Uruguay), Compilado 2026 — Jan-Jul 2026 summed from the monthly figures; HEV includes MHEV combined
@@ -1534,7 +1536,7 @@ const MONTHLY_DATA = {
       "Taiwan":"through Aug 2026",
       "Nepal":"through Jul 2026",
       "Israel":"through Aug 2026",
-      "Kazakhstan":"through Jun 2026",
+      "Kazakhstan":"through Aug 2026",
       "Peru":"through Jul 2026",
       "Uruguay":"through Aug 2026",
       "Albania":"through Aug 2026",
@@ -1645,7 +1647,7 @@ const MONTHLY_DATA = {
       // source: Israel Ministry of Transport (data.gov.il) — each fuel trended from the last 3 actual months' average (or the 8-mo YTD average if higher), applied to the remaining 4 months; Petrol/HEV split via I-VIA's quarterly ratio
       "Israel": [41871,86562,110344,2,99760,18306,356845],
       // source: KAO (kao.kz) — each fuel trended from the last 3 actual months' average (or the 6-mo YTD average if higher), applied to the remaining 6 months; HEV projection inherits the floor bias from Mar-Jun actuals
-      "Kazakhstan": [2159,5984,2057,0,217890,0,228090],
+      "Kazakhstan": [2761, 7394, 2367, 0, 216936, 0, 229458],
       // source: AAP (Asociacion Automotriz del Peru) — each fuel trended from the last 3 actual months' average (or the 8-mo YTD average if higher), applied to the remaining 4 months; HEV projection inherits the HEV+MHEV combined basis
       "Peru": [949,2125,14617,0,269338,0,287029],
       // source: ACAU (Uruguay) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
@@ -4394,17 +4396,20 @@ const MFR_SOURCE_NOTE = {
   France: '2020 onward source: PFA (pfa-auto.fr), citing AAA DATA. 2008-2019 backfilled from fiches-auto.fr\'s CCFA-sourced historical brand tables (fiches-auto.fr/articles-auto/chiffres-de-l-auto/s-1106-...php) -- real total-unit brand figures, but no brand-level powertrain split exists for those years, so each brand\'s BEV/PHEV/HEV/Petrol/Diesel mix is approximated from France\'s national year-specific fuel-type ratio (Eurostat/ACEA for 2013-2019, L\'Argus/SDES-sourced diesel share for 2008-2012) rather than a real per-brand split -- treat BEV/PHEV/HEV shares shown for individual brands before 2020 as a national average, not brand-specific fact.',
   'United States': '2020-2025 source: goodcarbadcar.net (GCBC), a free automotive sales-tracking site with a dedicated annual-totals page per brand -- real total-unit brand figures. BEV mix for 2024-2025 is now real, per-brand figures from Cox Automotive/Kelley Blue Book\'s quarterly "Electric Vehicle Sales Report" (coxautoinc.com), a dedicated BEV brand+model report (fixing a prior bug where every mixed-lineup brand showed the identical national-average BEV% -- e.g. Infiniti and Ram, which sell no BEV in the US, were shown with a fabricated nonzero share). PHEV/HEV/Petrol/Diesel mix for every year, and BEV mix for 2020-2023, are still approximated from the US national year-specific fuel-type ratio (Argonne National Laboratory) -- Argonne stopped reporting sales by make/model after November 2019, so no brand-level split is available from it at all. Brands that are entirely electric (Tesla, Rivian, Lucid, Polestar) remain 100% BEV by construction, unaffected by any of this. A few ultra-low-volume/exotic brands (Maserati, Bentley, Fisker, Rolls-Royce) are excluded -- GCBC\'s own tracking for them has a multi-year gap or no dedicated page.',
   Japan: 'source: JADA (Japan Automobile Dealers Association) official statistics. Most brands use JADA\'s combined ブランド別 (regular+kei+commercial) totals; Suzuki, Daihatsu, Honda, Nissan, Mazda, Subaru and Mitsubishi -- which have meaningful kei (mini-vehicle) volume -- instead use JADA\'s separate メーカー別統計 registered-vehicles-only report (excluding kei), to match the scope of this site\'s existing monthly Japan data. BEV/PHEV/HEV/Petrol/Diesel mix approximated from Japan\'s national year-specific ratio except for Tesla and BYD (100% BEV).',
+  Spain: 'source: ANFAC/FACONAUTO/GANVAM joint press notes (anfac.com), exhaustive brand-level DGT registration totals. Fuel-type split from real DGT Top-60 model ground truth (this project\'s own auto_sales_by_country_model table, sourced from datos.gob.es vehicle-registration microdata) aggregated to base-model ratios, else nameplate-pattern fallback classification. Several major European brands (BMW, Mercedes-Benz, Audi, Volvo, Porsche) fold a PHEV trim into one combined ANFAC row with its ICE sibling with no way to split it by model -- captured at brand level, a disclosed model-level limitation.',
 };
 const MFR_YEARLY_MODEL_SOURCE_NOTE = {
   Germany: 'source: Kraftfahrt-Bundesamt (KBA), FZ 10 -- the December file\'s Jan-Dec cumulative column for each year. 2020 only has a combined Hybrid column (no PHEV/HEV split that year, so 2020 PHEV shows as 0 with the true plug-in count folded into HEV); 2025 reports SsangYong under its new "KGM" name for the full year following KBA\'s own April 2025 rebrand.',
   France: '2020 onward source: PFA (pfa-auto.fr) Top 100 VP France ranking. 2008-2019 backfilled from fiches-auto.fr\'s CCFA-sourced historical Top 100 model tables (fiches-auto.fr/articles-auto/chiffres-de-l-auto/s-651-...php), ~99-100 models/year -- real total-unit figures, but (like the brand-level yearly data) no per-model powertrain split exists for those years, so each model\'s mix is approximated from France\'s national year-specific fuel-type ratio rather than a real per-model split.',
   Canada: 'source: each automaker\'s own free official Canada newsroom where one exists (not BSCB) -- Honda (hondanews.ca, 2020-2024), Mazda (en.media.mazda.ca, 2020-2024), Nissan/Infiniti (canada.nissannews.com, 2020-2024), Hyundai/Genesis (hyundainews.ca, 2024 only so far). Toyota, Lexus, Kia, Subaru and Acura don\'t publish a usable free full-model table on their own newsroom, so those five are instead sourced from goodcarbadcar.net (GCBC)\'s per-model Canada pages -- also free, no BSCB involved. Several nameplates\' hybrid/PHEV/EV variant is a memo figure already included in that nameplate\'s own total rather than an additive separate line (verified per-brand by reconciling every year\'s figures against that brand\'s own published Canada total) -- e.g. Honda Civic Hybrid, Hyundai TUCSON HEV/PHEV and KONA EV. Where GCBC\'s per-model pages don\'t fully reconcile to the known brand total (Lexus UX/RZ have no Canada page on GCBC at all; Subaru Outback/Crosstrek data is missing or unreliable for several years), the gap is shown as an "Other (unclassified)" line rather than silently dropped or guessed at the model level.',
+  Spain: 'source: ANFAC/FACONAUTO/GANVAM joint press notes (anfac.com), exhaustive brand+model DGT registration totals (December "COMPLETA" press note\'s YTD column for each year). Fuel-type split from real DGT Top-60 model ground truth where the model appears there, else nameplate-pattern fallback classification -- see the brand-level note for the disclosed mixed-lineup PHEV limitation, which applies here too.',
 };
 const MFR_MONTHLY_SOURCE_NOTE = {
   Canada: 'source: manufacturer newsrooms for most brands -- Toyota/Lexus (media.toyota.ca), Honda/Acura (hondanews.ca), Hyundai/Genesis (hyundainews.ca), Mazda (en.media.mazda.ca), Subaru (subaru.ca/news) and Kia (via newswire.ca) each publish their own free monthly Canada sales release. Brands that only report quarterly (GM, Stellantis, Nissan, BMW/MINI, Mercedes-Benz, Mitsubishi, Infiniti, Volvo) are shown with that quarter\'s official total split evenly across its 3 months -- flagged in the tooltip when hovering that brand. A handful of brands (Ford, Volkswagen, Audi, Land Rover/Jaguar, Tesla, Rivian, Lucid, Polestar, VinFast) have no official Canada-specific release found, so BestSellingCarsBlog (bestsellingcarsblog.com) estimates are still used for those.',
   'United States': 'source: manufacturer newsrooms for most brands -- Toyota/Lexus (pressroom.toyota.com), Honda/Acura (hondanews.com), Hyundai (hyundainews.com), Kia (kiamedia.com), Subaru (media.subaru.com) and Mazda (news.mazdausa.com) each publish their own free monthly US sales release; Ford/Lincoln (fromtheroad.ford.com + investor-relations PDFs) also report monthly. Genesis has no confirmed monthly release, so BestSellingCarsBlog (bestsellingcarsblog.com) is still used for it. Brands that only report quarterly (GM, Stellantis, Volkswagen, Nissan, BMW, Mercedes-Benz, Audi, Mitsubishi, Volvo, Infiniti, Porsche, Rivian) are shown with that quarter\'s official total split evenly across its 3 months -- flagged in the tooltip when hovering that brand. Tesla, Lucid, Polestar and Jaguar Land Rover disclose only global (not US-specific) figures, so an estimate is still used for those.',
   Germany: 'source: Kraftfahrt-Bundesamt (KBA), FZ 10 -- Neuzulassungen von Personenkraftwagen nach Marken und Modellreihen. Capped to 2026 onward here (full history back to 2008 is on the Manufacturers page); genuinely comprehensive, not brand-limited like Canada/USA.',
   France: 'source: PFA (pfa-auto.fr), citing AAA DATA. Brand-level figures are real single-month totals; model-level figures are derived by diffing two consecutive YTD Top-100 snapshots (PFA does not publish a standalone monthly model table), so only the Top 100 VP nameplates are covered -- smaller-volume models are not represented at model level. No per-brand powertrain split is published; BEV shares shown here are reconstructed from identified pure-BEV nameplates within that Top 100.',
+  Spain: 'source: ANFAC/FACONAUTO/GANVAM joint monthly press notes (anfac.com) -- exhaustive brand AND model registration tables each month, no Top-N cutoff (unlike France). No per-brand/model powertrain split published by ANFAC itself; fuel-type mix comes from this project\'s own DGT Top-60 model ground truth (auto_sales_by_country_model table) plus nameplate-pattern fallback. Several major European brands\' PHEV trims are folded into one combined ANFAC row with their ICE sibling with no way to split by model -- a disclosed source limitation, not a classification error.',
 };
 (function(){
   const mfrRows = document.getElementById('mfr-rank-rows');
@@ -5054,7 +5059,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     g.selectAll('.bar-projected').data(data.filter(d => d.projected != null)).join('rect').attr('class', 'bar-projected')
       .attr('x', d => x(d.year)).attr('width', x.bandwidth())
       .attr('y', d => y(d.projected)).attr('height', d => Math.max(0, y(d.total) - y(d.projected)))
-      .attr('fill', FUEL_COLORS.bev).attr('opacity', 0.32);
+      .attr('fill', FUEL_COLORS.phev);
     if(opts.rankByYear){
       g.selectAll('.rank-label').data(data).join('text').attr('class', 'rank-label')
         .attr('x', d => x(d.year) + x.bandwidth() / 2).attr('y', d => y(d.projected || d.total) - 5)
