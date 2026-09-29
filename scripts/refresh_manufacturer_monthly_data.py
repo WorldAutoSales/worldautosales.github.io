@@ -35,7 +35,17 @@ TABLE = "sales_manufacturer_country_month"
 # which is untouched), so Germany is capped to 2026 onward to keep the payload sane.
 # Panama: ADAP publishes no fuel split at all -- its units sit in nb_others and are
 # exported as "others" (powertrain unknown), never folded into petrol.
-COUNTRIES = ["Canada", "United States", "Germany", "France", "Japan", "Spain", "Panama"]
+# France is deliberately NOT in this list. Its real Jan-Aug 2026 monthly data (PFA/AAA
+# DATA) lives only in this JS asset -- sales_manufacturer_country_month never had more
+# than a single stray month for France -- so running this script with France included
+# regenerates the file FROM that near-empty DB slice and silently wipes 7 of 8 real
+# months (this happened once already, 2026-09-23, merge commit 164ab7e; restored
+# 2026-09-29 from the last good pre-clobber commit, c9b76b8). Matches the same
+# DB-bypassed convention already established for France's/Germany's *yearly* model
+# data -- see [[project_world_auto_sales]]/[[feedback_shared_repo_git_caution]]. Do not
+# add "France" back here unless its monthly data is first fully loaded into
+# sales_manufacturer_country_month/_model_month to match.
+COUNTRIES = ["Canada", "United States", "Germany", "Japan", "Spain", "Panama"]
 MIN_YEAR_MONTH = {"Germany": "2026-01"}
 
 COLUMNS = "year_month,brand,nb_bev,nb_phev,nb_hev,nb_petrol,nb_diesel,nb_others"
