@@ -493,7 +493,8 @@ const MONTHLY_DATA = {
       // source: Mobility Denmark press release (monthly) — gives only Total and BEV (elbiler) exactly; no PHEV/HEV/Petrol/Diesel breakdown published, so the 2,278-unit non-BEV remainder is placed in Petrol per this project's established convention (see Russia) rather than fabricating a split
       "Denmark": [13887,0,0,0,2278,0,16165],
       // source: SIMI (Society of the Irish Motor Industry), Ireland (monthly) — Total and BEV are SIMI's own exact published figures; HEV/PHEV/Petrol/Diesel/Others are DERIVED (SIMI's release only gives YTD market-share %, not month-only): this month's split = (YTD-through-Aug % x YTD-through-Aug total) minus (YTD-through-Jul % x YTD-through-Jul total) per category, rescaled to sum exactly to this month's real total
-      "Ireland": [2265,1618,1365,234,1222,1107,7811]},
+      "Ireland": [2265,1618,1365,234,1222,1107,7811],      // FTI Automotive Industry Club via mreport.co.th (545-thai-auto-sales-august-2026), total 59,809 = light+medium market; bev = 19,721 passenger + 204 double-cab + 3 single-cab BEV pickups; hev = 14,807 + 3 HEV pickups; others(REEV) = 220 + 4 pickups; petrol = passenger ICE; diesel = commercial residual (5-10t truck BEV not given monthly, folded into diesel)
+      "Thailand": [19928,1053,14810,224,7973,15821,59809]},
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY %
     priorYearBev: {
       "India": 20204, "South Korea": 23315,
@@ -1357,7 +1358,7 @@ const MONTHLY_DATA = {
       // source: CAAM, monthly wholesale via CnEVPost, Jan-Jul 2026 summed — Total = all vehicle wholesale sales, incl. exports; no Petrol/Diesel split published (Diesel=0); HEV not part of China's official NEV classification (folded into Petrol, HEV=0)
       "China": [6057000,2947000,0,0,8595000,0,17599000],
       // source: world_auto_sales_annual, period_type='YTD' — FTI Automotive Industry Club, Jan-Jul 2026 summed; Total includes pickups/PPV, not passenger-cars-only; Diesel is a residual
-      "Thailand": [126727,7335,87590,993,62034,121443,406122],
+      "Thailand": [146655,8388,102400,1217,70007,137264,465931],
       // source: TS/KOTSA new-registration API, Jan-Aug 2026 summed — PHEV folded into HEV
       "South Korea": [266172,0,370315,99944,351406,28773,1116610],
       // source: world_auto_sales_annual, period_type='YTD' — GAIKINDO, Jan-Jul 2026 summed; no diesel split published (Diesel=0)
@@ -1418,7 +1419,7 @@ const MONTHLY_DATA = {
       "South Korea":"through Aug 2026",
       "Singapore":"through Jul 2026",
       "Malaysia":"through Jul 2026",
-      "Thailand":"through Jul 2026",
+      "Thailand":"through Aug 2026",
       "Indonesia":"through Jul 2026",
       "Chile":"through Jul 2026",
       "Vietnam":"through Jul 2026",
@@ -1517,7 +1518,7 @@ const MONTHLY_DATA = {
       // source: Vahan Dashboard — each fuel trended from the last 3 actual months' average (or the 8-mo YTD average if higher), applied to the remaining 4 months
       "India": [339586, 30, 432008, 1235690, 2297342, 926937, 5231593],
       // source: world_auto_sales_annual, period_type='PROJECTED' — plain run-rate (YTD x 12/7) from FTI Automotive Industry Club data; Total includes pickups/PPV, not passenger-cars-only
-      "Thailand": [217246, 12574, 150154, 1702, 106344, 208188, 696209],
+      "Thailand": [231911, 13384, 153600, 1825, 105011, 205896, 711627],
       // source: TS/KOTSA — each fuel trended from the last 3 actual months' average (or the 8-mo YTD average if higher), applied to the remaining 4 months; PHEV folded into HEV
       "South Korea": [411865, 0, 555472, 149916, 527109, 43160, 1687522],
       // source: world_auto_sales_annual, period_type='PROJECTED' — plain run-rate (YTD x 12/7) from GAIKINDO data; no diesel split published (Diesel=0)
