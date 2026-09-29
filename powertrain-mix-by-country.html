@@ -544,8 +544,15 @@ const MONTHLY_DATA = {
       "Slovakia": [508,359,2198,144,2488,571,6268],      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
       "Slovenia": [1651,235,653,57,1908,447,4951],      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
       "Iceland": [541,46,84,0,7,14,692],      // AEB (Association of European Businesses, aebrus.ru) monthly total (PPK/EPTS full-market figure) + Avtostat BEV; PHEV/HEV monthly detail not available for Russia in 2026 (Avtostat only gives a non-separable Jun-Aug combined hybrid figure), diesel is a rough share-based estimate (1.4% H1, 1.7% Jul-Aug per Avtostat commentary, no unit counts published)
-      "Russian Federation": [2216,0,0,0,112028,1976,116220],      // FTI Automotive Industry Club via mreport.co.th (545-thai-auto-sales-august-2026), total 59,809 = light+medium market; bev = 19,721 passenger + 204 double-cab + 3 single-cab BEV pickups; hev = 14,807 + 3 HEV pickups; others(REEV) = 220 + 4 pickups; petrol = passenger ICE; diesel = commercial residual (5-10t truck BEV not given monthly, folded into diesel)
-      "Thailand": [19928,1053,14810,224,7973,15821,59809]},
+      "Russian Federation": [2216,0,0,0,112028,1976,116220],
+      // FTI Automotive Industry Club via mreport.co.th (545-thai-auto-sales-august-2026), total 59,809 = light+medium market; bev = 19,721 passenger + 204 double-cab + 3 single-cab BEV pickups; hev = 14,807 + 3 HEV pickups; others(REEV) = 220 + 4 pickups; petrol = passenger ICE; diesel = commercial residual (5-10t truck BEV not given monthly, folded into diesel)
+      "Thailand": [19928,1053,14810,224,7973,15821,59809],
+      // GEOSTAT External Trade Portal (ex-trade.geostat.ge), HS 8703 import units by tariff sub-heading (870321-24 petrol, 870331-33 diesel, 870340/50 HEV, 870360/70 PHEV, 870380 BEV, 870310+870390 others) -- August 2026 is PRELIMINARY (Geostat revises upward as late declarations arrive; Jan-Jul re-pulled 2026-09-29 at revised values)
+      "Georgia": [1454,110,3958,669,7737,640,14568],
+      // source: ATTT via webdo.tn -- August = Jan-Aug cumulative (official market 47,002; BEV 2,391; PHEV 2,678) minus the Jan-Jul values already loaded (41,692 / 1,540 / 2,177), so Jan-Aug sums to the published cumulative; HEV (113) from the same Q1 ratio method (Jan-Aug est. 974 = 47,002 x 442/21,334); REEV (381 Jan-Aug) not separable per month, left in Petrol like Jan-Jul; Essence+Diesel combined into Petrol
+      "Tunisia": [851,501,113,0,3845,0,5310],
+      // source: CAMPI-TMA via Manila Times -- industry total incl. non-member estimates (Aug 34,390); BEV/PHEV/HEV are CAMPI-TMA's own category totals (Aug 2,449/1,606/3,000, xEV 7,066 -> 11 unassigned in others); non-member EVs (e.g. BYD) fall into Petrol; Diesel not published
+      "Philippines": [2449,1606,3000,11,27324,0,34390]},
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY %
     priorYearBev: {
       "India": 20204, "South Korea": 23315,
@@ -603,7 +610,7 @@ const MONTHLY_DATA = {
       "Italy": [7268,13058,58512,13057,23405,7884,123184],
       // source: RDC registration data, analysed by RAI Vereniging and BOVAG (bovag.nl/mijn.bovag.nl) -- the Dutch industry bodies' monthly release, published in the first days of the following month, ahead of ACEA. Hybrid (12,342) not split into PHEV/HEV by any national-source press release found for this month, so it is split using the ~44.1%/55.9% PHEV/HEV ratio computed from the Netherlands' own real, ACEA-sourced Jan-Jun 2026 monthly data already in this dataset (42,165 PHEV / 53,445 HEV over those 6 months) -- flagged as an estimate, not a directly-cited split. (An earlier version of this row used phev=0, which was wrong: this country genuinely has a large PHEV share, confirmed by its own Jan-Jun figures, corrected 2026-09-07.) Petrol/Diesel/LPG make up the small remainder (2,457 units) undifferentiated by the source for this month -- split ~90/6/4 as a rough estimate based on August's own reported split, flagged as such rather than a directly-cited figure.
       "Netherlands": [13267,5443,6899,107,2200,150,28066],
-      "Georgia": [1735,104,5139,642,11758,850,20228],
+      "Georgia": [1759,104,5538,642,13579,887,22509],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month, from the "VENTAS DE VEHÍCULOS POR TIPO DE ENERGÍA" table in AEADE's monthly press bulletin; Hibrido = MHEV+HEV+PHEV+EREV combined (AEADE's bulletin gives one Hibrido figure, PHEV folded in)
       "Ecuador": [910,0,3091,0,6616,4195,14812],
       // source: ATTT via webdo.tn/kapitalis.com — Jan-Jul 2026 combined total (BEV 1,543 and PHEV 2,177 real; Total 41,690 real, per webdo.tn) divided evenly across the 7 months per user request; HEV (864 for the 7-mo period) is itself an estimate, scaled from Q1 2026's real HEV/Total ratio (442/21,334, Le Temps News/webdo.tn) since no 7-month HEV figure was published; Essence+Diesel combined into Petrol (Diesel=0) per user instruction
@@ -647,7 +654,7 @@ const MONTHLY_DATA = {
       // source: FENALCO-ANDI, Colombia — genuine standalone month, directly reported in full; PHEV folded into HEV
       "Colombia": [4870,0,9410,0,14353,0,28633],
       // source: TopGear.com.ph "PH car sales report" (CAMPI-TMA data), Philippines — genuine standalone month; BEV/PHEV/HEV are the source's own exact published figures (BEV: VinFast 813 + Geely 509 + Omoda/Jaecoo 428; PHEV: Jetour 480 + MG 421 + Geely 312; HEV: Toyota 1,709 + Ford 333 + Omoda/Jaecoo 320); Diesel not separately published, folded into Petrol
-      "Philippines": [1750,1213,2362,0,37555,0,42880],
+      "Philippines": [2520,1602,2964,0,35794,0,42880],
       // source: Department of Customs Nepal (customs.gov.np), HS 8703 imports — day-weighted blend of Ashadh (16d) + Shrawan (15d) BS fiscal months (Nepal's calendar never aligns to Gregorian months); three-wheelers excluded; imports not registrations
       "Nepal": [721,8,5,0,297,47,1078],
       // source: VAMA + VinFast + TC Group (merged) — VAMA member-brand sales (PC+Special→Petrol, CV→Diesel) plus VinFast (100% BEV, not a VAMA member) plus TC Group/Hyundai (independent of VAMA, folded into Petrol)
@@ -699,7 +706,7 @@ const MONTHLY_DATA = {
       "Canada": [13528,6075,30623,0,125271,7060,182557],
       // source: TopGear.com.ph "PH car sales report" (CAMPI-TMA data), Philippines — Q2 2026 delta (H1 2026 minus Q1 2026) split evenly across Apr-Jun (no finer intra-quarter split published); Diesel not separately published, folded into Petrol
       "Philippines": [2138,1427,2962,0,26445,0,32972],
-      "Georgia": [1389,168,5066,613,12586,864,20686],
+      "Georgia": [1416,168,5286,613,13966,969,22418],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [1438,0,2693,0,6426,3855,14412],
       // source: ATTT via webdo.tn/kapitalis.com — Jan-Jul 2026 combined total divided evenly across the 7 months per user request; HEV is an estimate scaled from Q1 2026's HEV/Total ratio; Essence+Diesel combined into Petrol (Diesel=0) per user instruction; see 2026-01 comment for full methodology
@@ -825,7 +832,7 @@ const MONTHLY_DATA = {
       "Canada": [13528,6075,30623,0,125271,7060,182557],
       // source: TopGear.com.ph "PH car sales report" (CAMPI-TMA data), Philippines — Q2 2026 delta (H1 2026 minus Q1 2026) split evenly across Apr-Jun (no finer intra-quarter split published); Diesel not separately published, folded into Petrol
       "Philippines": [2138,1427,2962,0,26445,0,32972],
-      "Georgia": [1303,222,4286,528,12294,819,19452],
+      "Georgia": [1312,223,4380,528,13034,834,20311],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [927,0,2240,0,6304,3622,13093],
       // source: ATTT via webdo.tn/kapitalis.com — Jan-Jul 2026 combined total divided evenly across the 7 months per user request; HEV is an estimate scaled from Q1 2026's HEV/Total ratio; Essence+Diesel combined into Petrol (Diesel=0) per user instruction; see 2026-01 comment for full methodology
@@ -939,7 +946,7 @@ const MONTHLY_DATA = {
     label: "April 2026",
     raw: {
       "Russian Federation":[906,0,0,0,114709,1642,117257],
-      "Georgia": [1205,184,3813,766,11576,911,18455],
+      "Georgia": [1207,184,3834,766,11805,913,18709],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [894,0,2627,0,6882,3895,14298],
       // source: ATTT via webdo.tn/kapitalis.com — Jan-Jul 2026 combined total divided evenly across the 7 months per user request; HEV is an estimate scaled from Q1 2026's HEV/Total ratio; Essence+Diesel combined into Petrol (Diesel=0) per user instruction; see 2026-01 comment for full methodology
@@ -1055,7 +1062,7 @@ const MONTHLY_DATA = {
     label: "March 2026",
     raw: {
       "Russian Federation":[706,0,0,0,99942,1429,102077],
-      "Georgia": [1106,211,4361,477,13329,779,20263],
+      "Georgia": [1106,211,4375,477,13484,779,20432],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [925,0,2628,0,6761,3836,14150],
       // source: ATTT via webdo.tn/kapitalis.com — Jan-Jul 2026 combined total divided evenly across the 7 months per user request; HEV is an estimate scaled from Q1 2026's HEV/Total ratio; Essence+Diesel combined into Petrol (Diesel=0) per user instruction; see 2026-01 comment for full methodology
@@ -1171,7 +1178,7 @@ const MONTHLY_DATA = {
     label: "February 2026",
     raw: {
       "Russian Federation":[731,0,0,0,75352,1080,77163],
-      "Georgia": [625,78,3080,369,10136,535,14823],
+      "Georgia": [626,78,3086,369,10200,535,14894],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [661,0,2043,0,5481,2705,10890],
       // source: ATTT via webdo.tn/kapitalis.com — Jan-Jul 2026 combined total divided evenly across the 7 months per user request; HEV is an estimate scaled from Q1 2026's HEV/Total ratio; Essence+Diesel combined into Petrol (Diesel=0) per user instruction; see 2026-01 comment for full methodology
@@ -1287,7 +1294,7 @@ const MONTHLY_DATA = {
     raw: {
       "Russian Federation":[835,0,0,0,73738,1059,75632],
       // source: GEOSTAT External Trade Portal (ex-trade.geostat.ge), HS 8703 import microdata by exact tariff sub-heading (870321-24 petrol, 870331-33 diesel, 870340/870350 HEV, 870360 PHEV, 870380 BEV; 870310+870390 folded into Others), monthly, in units. CAVEAT: this is customs IMPORT quantity, a different metric than the annual GEOSTAT registration series used above -- Georgia's import volume runs higher than its registration volume (not every imported vehicle is registered domestically; some are reconditioned and re-exported), so the two series will not reconcile smoothly month-to-month.
-      "Georgia": [536,56,2450,499,8383,675,12599],
+      "Georgia": [537,56,2452,499,8398,675,12617],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [612,0,1908,0,5892,2930,11342],
       // source: ATTT via webdo.tn/kapitalis.com — Jan-Jul 2026 combined total divided evenly across the 7 months per user request; HEV is an estimate scaled from Q1 2026's HEV/Total ratio; Essence+Diesel combined into Petrol (Diesel=0) per user instruction; see 2026-07 comment for full methodology
@@ -1411,7 +1418,7 @@ const MONTHLY_DATA = {
     label: "2026 YTD",
     raw: {
       // source: GEOSTAT ex-trade.geostat.ge, HS 8703 import microdata -- Jan-Jul 2026 summed directly from the 7 monthly entries above (no separate YTD figure published; this project computes it as the plain sum)
-      "Georgia": [7899,1023,28195,3894,80062,5433,126506],
+      "Georgia": [9417,1134,32909,4563,92203,6232,146458],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — Jan-Jul 2026, from the July bulletin's own "Ene-Jul 26" YTD column, not summed from separately-revised months; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [8401,0,20538,0,50444,28895,108278],
       "Malaysia": [46843,0,34364,0,455388,24673,561268],
@@ -1466,7 +1473,7 @@ const MONTHLY_DATA = {
       // source: ODMD — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
       "Turkey": [105281,4048,179751,5482,236306,33373,564241],
       // source: CAMPI-TMA — petrol is the ICE remainder (no petrol/diesel split published; diesel share is negligible in PH passenger vehicles)
-      "Philippines": [10476,7094,20716,0,203439,0,241725],
+      "Philippines": [13672,8740,23112,11,236293,0,281828],
       // source: NZTA Waka Kotahi — light passenger vehicles (cars/vans) only, excludes commercial vehicles
       "New Zealand": [11771,7586,23583,815,21030,4417,69202],
       // source: Argonne National Laboratory (Wards Auto), monthly, Jan-Jul 2026 summed — no Petrol/Diesel split published, Diesel=0
@@ -1501,7 +1508,7 @@ const MONTHLY_DATA = {
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, Jan-Aug 2026 summed from the monthly figures — fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
       "Paraguay": [1138,2024,5130,485,19955,2399,31131],
       // source: ATTT via webdo.tn/kapitalis.com — the real Jan-Jul 2026 combined total itself (the 7 identical monthly figures elsewhere are that same total split evenly, not independent months, so this reproduces it exactly: 7x220=1540 etc.)
-      "Tunisia": [1540,2177,861,0,37114,0,41692],
+      "Tunisia": [2391,2678,974,0,40959,0,47002],
       // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles); 2026 figure is Jan-Jul YTD
       "Mauritius": [1441,0,5735,0,11150,0,18326],
       // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team -- H1 2026 (Jan-Jun), real: Petrol 8,168, Diesel 1,992, Hybrid 8,511 (petrol-hybrid+diesel-hybrid combined), Electric 535, Other/LPG 309. PHEV not separately tracked, folded into HEV.
@@ -1513,8 +1520,8 @@ const MONTHLY_DATA = {
     asOf: {
       "Serbia":"through Jun 2026 (H1)",
       "Ecuador":"through Aug 2026",
-      "Tunisia":"through Jul 2026",
-      "Georgia":"through Jul 2026",
+      "Tunisia":"through Aug 2026",
+      "Georgia":"through Aug 2026",
       "Austria":"through Aug 2026","Belgium":"through Aug 2026","Bulgaria":"through Aug 2026","Croatia":"through Aug 2026",
       "Cyprus":"through Aug 2026","Czechia":"through Aug 2026","Denmark":"through Aug 2026","Estonia":"through Aug 2026",
       "Finland":"through Aug 2026","France":"through Aug 2026 (national source, not yet ACEA)","Germany":"through Aug 2026 (national source, not yet ACEA)","Greece":"through Aug 2026",
@@ -1532,7 +1539,7 @@ const MONTHLY_DATA = {
       "Brazil":"through Aug 2026",
       "Argentina":"through Jun 2026",
       "Turkey":"through Aug 2026",
-      "Philippines":"through Jul 2026",
+      "Philippines":"through Aug 2026",
       "New Zealand":"through Aug 2026",
       "United States":"through Aug 2026",
       "China":"through Aug 2026",
@@ -1587,7 +1594,7 @@ const MONTHLY_DATA = {
     label: "2026 (Projected)",
     raw: {
       // source: derived, not published -- each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher) applied to the remaining 5 months, per this project's standard projection method (see Ecuador comment above); customs import quantity, not registrations
-      "Georgia": [15277,1846,52347,6866,141125,9655,227116],
+      "Georgia": [15589, 1701, 52618, 7128, 139246, 9560, 225842],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [14244, 0, 32661, 0, 75943, 44771, 167619],
       "Malaysia": [75270, 0, 55515, 0, 692576, 37613, 860974],
@@ -1621,7 +1628,7 @@ const MONTHLY_DATA = {
       "Netherlands": [148444,78913,100023,1829,26929,3827,359965],
       "New Zealand": [19232, 12381, 35975, 1223, 31545, 6625, 106981],
       "Norway": [149678, 969, 1226, 0, 263, 1161, 153297],
-      "Philippines": [17959, 12161, 35513, 0, 348753, 0, 414386],
+      "Philippines": [23148, 14920, 35013, 26, 355710, 0, 428817],
       "Poland": [31389, 57024, 313313, 16125, 174643, 37005, 629499],
       "Portugal": [69727,38095,68970,14981,54571,9421,255765],
       "Romania": [11007, 0, 76578, 16230, 24355, 7903, 136073],
@@ -1669,7 +1676,7 @@ const MONTHLY_DATA = {
       // source: DNA (Direccion Nacional de Aduanas) Paraguay — each fuel trended from the last 3 actual months' average (Jun-Aug) or the 8-mo YTD average if higher, applied to the remaining 4 months
       "Paraguay": [1805,3320,8985,765,31763,3838,50476],
       // source: ATTT via webdo.tn/kapitalis.com — plain run-rate (YTD x 12/7), same method as Philippines/Turkey: the underlying Jan-Jul figures are already a flat estimate (one combined total split evenly), so there's no real month-to-month variation to trend from
-      "Tunisia": [2640,3732,1476,0,63624,0,71472],
+      "Tunisia": [4112, 4175, 1461, 0, 61439, 0, 71187],
       // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team — flat annualization (H1 2026 x2), not the standard trend method: H1 2026 has no internal monthly granularity to trend from (it's itself an even split of the H1 total), so a plain doubling is the least-fabricated option available
       "Serbia": [1070,0,17022,618,16336,3984,39030],
           "South Africa": [5460, 13934, 16798, 0, 629966, 0, 666158],      "Russian Federation": [14367, 0, 0, 0, 1285189, 20162, 1319718]},

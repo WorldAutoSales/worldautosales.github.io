@@ -232,10 +232,13 @@ def upsert_array_entry(text, obj_start, obj_end, country, new_value_literal, com
     insertion += f'      "{country}": {new_value_literal}'
     # section currently ends with the previous entry's trailing content (often ending in a value with
     # no trailing comma, since it was the last key) -- ensure a comma separates it from our insertion.
+    # the new entry (and its comment) always starts on its own line -- appending straight after the
+    # previous last entry used to glue the comment onto that entry's line
     stripped = section.rstrip()
+    trail = section[len(stripped):]
     if stripped and not stripped.endswith(("{", ",")):
-        section = section[:len(stripped)] + "," + section[len(stripped):]
-    new_section = section + insertion
+        stripped += ","
+    new_section = stripped + LINE_ENDING + insertion + trail
     return text[:obj_start] + new_section + text[obj_end:], "INSERT"
 
 
