@@ -1660,8 +1660,8 @@ const MONTHLY_DATA = {
       "Argentina": [1332,533,24767,3983,446972,134704,612291],
       // source: ODMD — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
       "Turkey": [189868,50061,247409,7595,509217,80346,1084496],
-      // source: CAMPI-TMA — Jan-Nov 2025 only (11 of 12 months), see asOf below; petrol is the ICE remainder
-      "Philippines": [4261,1814,22027,0,392674,0,420776],
+      // source: WHOLE MARKET (incl. non-CAMPI brands such as BYD) -- total 491,395 and xEV 58,905 (CAMPI-TMA via TheAutoPH/CarGuide.ph); BEV 15,000 and PHEV 15,000 from IEA Global EV Data Explorer (public API, rounded, all brands); HEV 28,905 = CAMPI-member HEV 25,737 (CAMPI split 25,737 HEV / 4,613 BEV / 2,139 PHEV = 32,489, via Manila Bulletin) + non-member remainder 3,168 (58,905 - 15,000 - 15,000 - 25,737); petrol = remainder; diesel not published
+      "Philippines": [15000,15000,28905,0,432490,0,491395],
       // source: NZTA Waka Kotahi — light passenger vehicles (cars/vans) only, excludes commercial vehicles
       "New Zealand": [6818,4634,37217,1840,38667,8286,97462],
       // source: world_auto_sales_annual — aggregated from 12 monthly ACEA press releases per country (Jan-Dec 2025)
@@ -1737,7 +1737,6 @@ const MONTHLY_DATA = {
     },
     // per-country "as of" override — every country here is a genuine full year except Philippines (11 of 12 months)
     asOf: {
-      "Philippines": "through Nov 2025 (11 mo)",
       "Nepal": "FY2081/82 (BS), ~mid-Jul 2024 to mid-Jul 2025"
     },
     // BEV units for full-year 2024, for YoY %
@@ -1771,8 +1770,8 @@ const MONTHLY_DATA = {
       "Hungary":8567,"Iceland":2661,"Ireland":17500,"Italy":65413,"Latvia":1250,"Lithuania":1772,
       "Luxembourg":12780,"Malta":2130,"Netherlands":132422,"Norway":114396,"Poland":16571,"Portugal":41914,
       "Romania":9795,"Slovakia":2270,"Slovenia":3166,"Spain":57377,"Sweden":94366,"Switzerland":46147,
-      "United Kingdom":381970,"Canada":202333,"Taiwan":37629,"Singapore":14448
-    },
+      "United Kingdom":381970,"Canada":202333,"Taiwan":37629,"Singapore":14448,
+          "Philippines":2200},
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Ecuador":108266,
@@ -1784,8 +1783,8 @@ const MONTHLY_DATA = {
       "France - Martinique":12874,
       "France - Guyane":5115,
       "France - Reunion":24740,
-      "France - Mayotte":1970
-    }
+      "France - Mayotte":1970,
+          "Philippines":473842}
   },
   "2024-annual": {
     label: "2024 (Annual)",
@@ -1870,7 +1869,9 @@ const MONTHLY_DATA = {
       "France - Reunion": [2832,986,7934,467,9059,3462,24740],
       "France - Mayotte": [40,11,756,8,918,237,1970],
       // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles)
-      "Mauritius": [1553,0,12087,0,22275,0,35915]
+      "Mauritius": [1553,0,12087,0,22275,0,35915],
+      // source: WHOLE MARKET (incl. non-CAMPI brands), partly estimated -- total 473,842 (CAMPI-TMA 467,252 + non-member brands, per CarGuide.ph); BEV 2,200 and PHEV 1,000 from IEA Global EV Data Explorer (public API, rounded, all brands); HEV 15,490 = CAMPI's reported 2024 xEV total 18,690 (CAMPI president R. Gutierrez) minus IEA's 3,200 plug-ins (an upper bound -- CAMPI only said hybrids were 'about 75%'); petrol = remainder; diesel not published
+      "Philippines": [2200,1000,15490,0,455152,0,473842]
     },
     // per-country "as of" override for a source whose fiscal year doesn't match the calendar year
     asOf: {
@@ -1890,8 +1891,8 @@ const MONTHLY_DATA = {
       "France - Guyane":179,
       "France - Reunion":3633,
       "France - Mayotte":57,
-      "Australia":87212,"Austria":47621,"Belgium":93285,"Brazil":19277,"Bulgaria":1467,"Canada":143666,"Chile":1588,"China":6685000,"Croatia":1624,"Cyprus":788,"Czechia":6702,"Denmark":62759,"Estonia":1445,"Finland":29534,"France":298219,"Germany":524219,"Greece":6379,"Hungary":5748,"Iceland":8781,"India":89227,"Indonesia":17058,"Ireland":22842,"Italy":66278,"Japan":43991,"Latvia":1790,"Lithuania":2060,"Luxembourg":11052,"Malta":982,"Mexico":14172,"Morocco":463,"Netherlands":114455,"New Zealand":20729,"Norway":104587,"Poland":17081,"Portugal":36390,"Romania":15368,"Slovakia":2346,"Slovenia":4332,"South Korea":163000,"Spain":51714,"Sweden":112208,"Switzerland":52728,"Thailand":73567,"Turkey":65562,"United Kingdom":314684,"United States":1164638,"Taiwan":24706,"Singapore":5468
-    },
+      "Australia":87212,"Austria":47621,"Belgium":93285,"Brazil":19277,"Bulgaria":1467,"Canada":143666,"Chile":1588,"China":6685000,"Croatia":1624,"Cyprus":788,"Czechia":6702,"Denmark":62759,"Estonia":1445,"Finland":29534,"France":298219,"Germany":524219,"Greece":6379,"Hungary":5748,"Iceland":8781,"India":89227,"Indonesia":17058,"Ireland":22842,"Italy":66278,"Japan":43991,"Latvia":1790,"Lithuania":2060,"Luxembourg":11052,"Malta":982,"Mexico":14172,"Morocco":463,"Netherlands":114455,"New Zealand":20729,"Norway":104587,"Poland":17081,"Portugal":36390,"Romania":15368,"Slovakia":2346,"Slovenia":4332,"South Korea":163000,"Spain":51714,"Sweden":112208,"Switzerland":52728,"Thailand":73567,"Turkey":65562,"United Kingdom":314684,"United States":1164638,"Taiwan":24706,"Singapore":5468,
+          "Philippines":462},
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Ecuador":132402,
@@ -1903,8 +1904,8 @@ const MONTHLY_DATA = {
       "France - Martinique":14201,
       "France - Guyane":5464,
       "France - Reunion":27524,
-      "France - Mayotte":2066
-    }
+      "France - Mayotte":2066,
+          "Philippines":429807}
   },
   "2023-annual": {
     label: "2023 (Annual)",
