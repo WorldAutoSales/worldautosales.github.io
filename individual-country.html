@@ -500,8 +500,8 @@ const MONTHLY_DATA = {
       "Georgia": [1454,110,3958,669,7737,640,14568],
       // source: ATTT via webdo.tn -- August = Jan-Aug cumulative (official market 47,002; BEV 2,391; PHEV 2,678) minus the Jan-Jul values already loaded (41,692 / 1,540 / 2,177), so Jan-Aug sums to the published cumulative; HEV (113) from the same Q1 ratio method (Jan-Aug est. 974 = 47,002 x 442/21,334); REEV (381 Jan-Aug) not separable per month, left in Petrol like Jan-Jul; Essence+Diesel combined into Petrol
       "Tunisia": [851,501,113,0,3845,0,5310],
-      // source: CAMPI-TMA via Manila Times -- industry total incl. non-member estimates (Aug 34,390); BEV/PHEV/HEV are CAMPI-TMA's own category totals (Aug 2,449/1,606/3,000, xEV 7,066 -> 11 unassigned in others); non-member EVs (e.g. BYD) fall into Petrol; Diesel not published
-      "Philippines": [2449,1606,3000,11,27324,0,34390]},
+      // source: WHOLE MARKET -- total incl. non-member estimates (34,390); CAMPI-TMA BEV/PHEV/HEV 2,449/1,617/3,000 (Philstar/Manila Times) PLUS non-member xEV 4,799 (= whole-market xEV share 34.5% x total - CAMPI xEV), split BEV/PHEV/HEV by 2025 non-member mix (39/49/12%, estimate); petrol = remainder; diesel not published
+      "Philippines": [4336,3953,3576,0,22525,0,34390]},
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY %
     priorYearBev: {
       "India": 20204, "South Korea": 23315,
@@ -587,8 +587,8 @@ const MONTHLY_DATA = {
       "Denmark": [11672,0,0,0,2890,0,14562],
       // source: SIMI (Society of the Irish Motor Industry), Ireland (monthly) — Total and BEV are SIMI's own exact published figures; HEV/PHEV/Petrol/Diesel/Others are DERIVED (SIMI's release only gives YTD market-share %, not month-only): this month's split = (YTD-through-Jul % x YTD-through-Jul total) minus (YTD-through-Jun % x YTD-through-Jun total) per category, rescaled to sum exactly to this month's real total
       "Ireland": [9682,4401,6034,326,5346,3257,29046],
-      // source: CAMPI-TMA via Manila Times -- industry total incl. non-member estimates (Aug 34,390); BEV/PHEV/HEV are CAMPI-TMA's own category totals (Aug 2,449/1,606/3,000, xEV 7,066 -> 11 unassigned in others); non-member EVs (e.g. BYD) fall into Petrol; Diesel not published
-      "Philippines": [2520,1602,2964,0,35794,0,42880]},
+      // source: WHOLE MARKET -- total incl. non-member estimates (42,880); CAMPI-TMA BEV/PHEV/HEV 2,520/1,602/2,964 (Philstar/Manila Times) PLUS non-member xEV 5,564 (= whole-market xEV share 29.5% x total - CAMPI xEV), split BEV/PHEV/HEV by 2025 non-member mix (39/49/12%, estimate); petrol = remainder; diesel not published
+      "Philippines": [4708,4311,3631,0,30230,0,42880]},
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY % (Argentina, China,
     // Indonesia, Australia, Singapore omitted — no matching July 2025 monthly figure sourced for those five)
     priorYearBev: {
@@ -702,8 +702,8 @@ const MONTHLY_DATA = {
       "Albania": [728,0,177,486,1883,4671,7945],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
       "Paraguay": [144,90,721,1,2620,271,3847],
-      // source: TopGear.com.ph (CAMPI-TMA) -- Q2 2026 delta (H1 minus Q1) split evenly across Apr-Jun (copied from powertrain-mix-by-country.html)
-      "Philippines": [2138,1427,2962,0,26445,0,32972]
+      // source: WHOLE MARKET, partly estimated -- CAMPI-TMA part = TopGear.com.ph quarterly figures spread evenly (Q2 2026 (H1 minus Q1) / 3); PLUS non-member brands (BYD etc., not in CAMPI): Jan-Jun non-member xEV = whole-market Jan-Aug xEV 74,600 (Philstar) - CAMPI Jan-Aug 45,403 - Jul 5,564 - Aug 4,799 = 18,834, spread evenly (3139/mo), split BEV/PHEV/HEV by 2025 non-member mix (IEA minus CAMPI: 39/49/12%); non-member sales assumed ~all electrified (Jul/Aug non-member xEV 5,564/4,799 vs non-member total 5,561/4,779); petrol = CAMPI ICE remainder; diesel not published
+      "Philippines": [3372,2955,3339,0,26445,0,36111]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-06), for YoY %
     priorYearBev: {
@@ -814,8 +814,8 @@ const MONTHLY_DATA = {
       "Albania": [723,0,251,327,1454,3603,6358],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
       "Paraguay": [173,176,671,0,2255,223,3498],
-      // source: TopGear.com.ph (CAMPI-TMA) -- Q2 2026 delta (H1 minus Q1) split evenly across Apr-Jun (copied from powertrain-mix-by-country.html)
-      "Philippines": [2138,1427,2962,0,26445,0,32972]
+      // source: WHOLE MARKET, partly estimated -- CAMPI-TMA part = TopGear.com.ph quarterly figures spread evenly (Q2 2026 (H1 minus Q1) / 3); PLUS non-member brands (BYD etc., not in CAMPI): Jan-Jun non-member xEV = whole-market Jan-Aug xEV 74,600 (Philstar) - CAMPI Jan-Aug 45,403 - Jul 5,564 - Aug 4,799 = 18,834, spread evenly (3139/mo), split BEV/PHEV/HEV by 2025 non-member mix (IEA minus CAMPI: 39/49/12%); non-member sales assumed ~all electrified (Jul/Aug non-member xEV 5,564/4,799 vs non-member total 5,561/4,779); petrol = CAMPI ICE remainder; diesel not published
+      "Philippines": [3372,2955,3339,0,26445,0,36111]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-05), for YoY %
     priorYearBev: {
@@ -926,8 +926,8 @@ const MONTHLY_DATA = {
       "Albania": [1115,0,207,366,1381,3663,6732],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
       "Paraguay": [95,277,497,3,2342,196,3410],
-      // source: TopGear.com.ph (CAMPI-TMA) -- Q2 2026 delta (H1 minus Q1) split evenly across Apr-Jun (copied from powertrain-mix-by-country.html)
-      "Philippines": [2138,1427,2962,0,26445,0,32972]
+      // source: WHOLE MARKET, partly estimated -- CAMPI-TMA part = TopGear.com.ph quarterly figures spread evenly (Q2 2026 (H1 minus Q1) / 3); PLUS non-member brands (BYD etc., not in CAMPI): Jan-Jun non-member xEV = whole-market Jan-Aug xEV 74,600 (Philstar) - CAMPI Jan-Aug 45,403 - Jul 5,564 - Aug 4,799 = 18,834, spread evenly (3139/mo), split BEV/PHEV/HEV by 2025 non-member mix (IEA minus CAMPI: 39/49/12%); non-member sales assumed ~all electrified (Jul/Aug non-member xEV 5,564/4,799 vs non-member total 5,561/4,779); petrol = CAMPI ICE remainder; diesel not published
+      "Philippines": [3372,2955,3339,0,26445,0,36111]
     },
     priorYearBev: {
       "Austria":5690,"Belgium":12469,"Bulgaria":144,"Croatia":60,"Cyprus":90,"Czechia":1229,"Denmark":9567,
@@ -1041,8 +1041,8 @@ const MONTHLY_DATA = {
       "Albania": [1153,0,194,350,1069,3337,6103],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
       "Paraguay": [180,295,478,78,2368,247,3646],
-      // source: TopGear.com.ph (CAMPI-TMA) -- Q1 2026 total divided evenly across Jan-Mar (copied from powertrain-mix-by-country.html)
-      "Philippines": [763,417,2754,0,31280,0,35214]
+      // source: WHOLE MARKET, partly estimated -- CAMPI-TMA part = TopGear.com.ph quarterly figures spread evenly (Q1 2026 / 3); PLUS non-member brands (BYD etc., not in CAMPI): Jan-Jun non-member xEV = whole-market Jan-Aug xEV 74,600 (Philstar) - CAMPI Jan-Aug 45,403 - Jul 5,564 - Aug 4,799 = 18,834, spread evenly (3139/mo), split BEV/PHEV/HEV by 2025 non-member mix (IEA minus CAMPI: 39/49/12%); non-member sales assumed ~all electrified (Jul/Aug non-member xEV 5,564/4,799 vs non-member total 5,561/4,779); petrol = CAMPI ICE remainder; diesel not published
+      "Philippines": [1997,1945,3131,0,31280,0,38353]
     },
     priorYearBev: {
       "Canada":8800,
@@ -1156,8 +1156,8 @@ const MONTHLY_DATA = {
       "Albania": [858,0,156,294,1202,3395,5905],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
       "Paraguay": [126,127,288,75,2343,300,3259],
-      // source: TopGear.com.ph (CAMPI-TMA) -- Q1 2026 total divided evenly across Jan-Mar (copied from powertrain-mix-by-country.html)
-      "Philippines": [763,417,2754,0,31280,0,35214]
+      // source: WHOLE MARKET, partly estimated -- CAMPI-TMA part = TopGear.com.ph quarterly figures spread evenly (Q1 2026 / 3); PLUS non-member brands (BYD etc., not in CAMPI): Jan-Jun non-member xEV = whole-market Jan-Aug xEV 74,600 (Philstar) - CAMPI Jan-Aug 45,403 - Jul 5,564 - Aug 4,799 = 18,834, spread evenly (3139/mo), split BEV/PHEV/HEV by 2025 non-member mix (IEA minus CAMPI: 39/49/12%); non-member sales assumed ~all electrified (Jul/Aug non-member xEV 5,564/4,799 vs non-member total 5,561/4,779); petrol = CAMPI ICE remainder; diesel not published
+      "Philippines": [1997,1945,3131,0,31280,0,38353]
     },
     priorYearBev: {
       "Canada":8800,
@@ -1280,8 +1280,8 @@ const MONTHLY_DATA = {
       "Albania": [753,0,130,260,958,3572,5673],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
       "Paraguay": [64,177,305,119,1791,354,2810],
-      // source: TopGear.com.ph (CAMPI-TMA) -- Q1 2026 total divided evenly across Jan-Mar (copied from powertrain-mix-by-country.html)
-      "Philippines": [763,417,2754,0,31280,0,35214]
+      // source: WHOLE MARKET, partly estimated -- CAMPI-TMA part = TopGear.com.ph quarterly figures spread evenly (Q1 2026 / 3); PLUS non-member brands (BYD etc., not in CAMPI): Jan-Jun non-member xEV = whole-market Jan-Aug xEV 74,600 (Philstar) - CAMPI Jan-Aug 45,403 - Jul 5,564 - Aug 4,799 = 18,834, spread evenly (3139/mo), split BEV/PHEV/HEV by 2025 non-member mix (IEA minus CAMPI: 39/49/12%); non-member sales assumed ~all electrified (Jul/Aug non-member xEV 5,564/4,799 vs non-member total 5,561/4,779); petrol = CAMPI ICE remainder; diesel not published
+      "Philippines": [1997,1945,3131,0,31280,0,38353]
     },
     // BEV units for the same month/quarter a year prior — source: ACEA (world_auto_sales, 2025-01) / same StatCan table for Canada, for YoY %
     priorYearBev: {
@@ -1371,7 +1371,7 @@ const MONTHLY_DATA = {
       // source: ODMD — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
       "Turkey": [93403,3804,162763,3906,208046,30790,502712],
       // source: CAMPI-TMA — petrol is the ICE remainder (no petrol/diesel split published; diesel share is negligible in PH passenger vehicles)
-      "Philippines": [13672,8740,23112,11,236293,0,281828],
+      "Philippines": [25151,22964,26617,0,225930,0,300662],
       // source: NZTA Waka Kotahi — light passenger vehicles (cars/vans) only, excludes commercial vehicles
       "New Zealand": [10722,6412,20141,815,18141,3834,60065],
       // source: Argonne National Laboratory (Wards Auto), monthly, Jan-Jul 2026 summed — no Petrol/Diesel split published, Diesel=0
@@ -1521,7 +1521,7 @@ const MONTHLY_DATA = {
       "Netherlands": [142792, 84339, 106890, 1596, 28280, 4310, 368207],
       "New Zealand": [20882, 11887, 34527, 1487, 31099, 6573, 106455],
       "Norway": [149678, 969, 1226, 0, 263, 1161, 153297],
-      "Philippines": [23148, 14920, 35013, 26, 355710, 0, 428817],
+      "Philippines": [41706, 37923, 40678, 0, 338895, 0, 459202],
       "Poland": [33114, 56663, 313357, 16076, 177125, 38003, 634338],
       "Portugal": [73846, 41725, 77858, 19333, 63329, 10008, 286099],
       "Romania": [11392, 0, 81209, 12830, 26208, 8361, 140000],
