@@ -4873,7 +4873,12 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       const months = [...mfrSyntheticPeriodKeysForCountry(mfrCountry), ...realMonths];
       if(mfrMonthSelectWiredFor !== mfrCountry){
         mfrMonthSelect.innerHTML = months.map(ym => `<option value="${ym}">${mfrPeriodLabel(ym)}</option>`).join('');
-        mfrMonthSelect.value = months.includes(pagePeriod) ? pagePeriod : months[0];
+        // fall back to the latest REAL month, not months[0] -- since the synthetic YTD/Projected
+        // keys were prepended to `months`, months[0] is one of those whenever this country has
+        // any partial-current-year data, which wrongly jumped every unmatched pagePeriod (e.g. a
+        // real month this country doesn't have, like France outside its one loaded month) into
+        // "Projected" instead of the single most-recent real month it actually has data for.
+        mfrMonthSelect.value = months.includes(pagePeriod) ? pagePeriod : realMonths[0];
         mfrMonthSelectWiredFor = mfrCountry;
       } else if(pagePeriod !== mfrLastSyncedPeriod && months.includes(pagePeriod)){
         mfrMonthSelect.value = pagePeriod;
