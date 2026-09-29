@@ -498,6 +498,8 @@ const MONTHLY_DATA = {
       "Thailand": [19928,1053,14810,224,7973,15821,59809],
       // GEOSTAT External Trade Portal (ex-trade.geostat.ge), HS 8703 import units by tariff sub-heading (870321-24 petrol, 870331-33 diesel, 870340/50 HEV, 870360/70 PHEV, 870380 BEV, 870310+870390 others) -- August 2026 is PRELIMINARY (Geostat revises upward as late declarations arrive; Jan-Jul re-pulled 2026-09-29 at revised values)
       "Georgia": [1454,110,3958,669,7737,640,14568],
+      // source: AAA DATA (communique-de-presse-du-1er-septembre-2026, aaa-data.fr) -- MHEV+HEV combined into hev; Others=Essence-GPL + a small unitemized residual against AAA DATA's own total. Ported from powertrain-mix-by-country.html 2026-09-29 -- this page was missing France for July/August entirely (a separate bug from the brand-level Sales-by-Brand/Model data fixed the same day), which also left the "2026 (Projected)" figure below stale (computed from an incomplete month count before this port).
+      "France": [36159,5824,35686,3963,10903,1816,94351],
       // source: ATTT via webdo.tn -- August = Jan-Aug cumulative (official market 47,002; BEV 2,391; PHEV 2,678) minus the Jan-Jul values already loaded (41,692 / 1,540 / 2,177), so Jan-Aug sums to the published cumulative; HEV (113) from the same Q1 ratio method (Jan-Aug est. 974 = 47,002 x 442/21,334); REEV (381 Jan-Aug) not separable per month, left in Petrol like Jan-Jul; Essence+Diesel combined into Petrol
       "Tunisia": [851,501,113,0,3845,0,5310],
       // source: WHOLE MARKET -- total incl. non-member estimates (34,390); CAMPI-TMA BEV/PHEV/HEV 2,449/1,617/3,000 (Philstar/Manila Times) PLUS non-member xEV 4,799 (= whole-market xEV share 34.5% x total - CAMPI xEV), split BEV/PHEV/HEV by 2025 non-member mix (39/49/12%, estimate); petrol = remainder; diesel not published
@@ -523,6 +525,8 @@ const MONTHLY_DATA = {
     raw: {
       "Russian Federation":[1540,0,0,0,120761,2115,124416],
       "Georgia": [1759,104,5538,642,13579,887,22509],
+      // source: AAA DATA -- see August comment for methodology. Ported from powertrain-mix-by-country.html 2026-09-29, same missing-month fix as August.
+      "France": [44378,7461,52096,6220,13903,2750,126808],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — genuine standalone month, from the "VENTAS DE VEHÍCULOS POR TIPO DE ENERGÍA" table in AEADE's monthly press bulletin; Hibrido = MHEV+HEV+PHEV+EREV combined (AEADE's bulletin gives one Hibrido figure, PHEV folded in)
       "Ecuador": [910,0,3091,0,6616,4195,14812],
       // source: ATTT via webdo.tn/kapitalis.com — Jan-Jul 2026 combined total (BEV 1,543 and PHEV 2,177 real; Total 41,690 real, per webdo.tn) divided evenly across the 7 months per user request; HEV (864 for the 7-mo period) is itself an estimate, scaled from Q1 2026's real HEV/Total ratio (442/21,334, Le Temps News/webdo.tn) since no 7-month HEV figure was published; Essence+Diesel combined into Petrol (Diesel=0) per user instruction
@@ -1332,7 +1336,7 @@ const MONTHLY_DATA = {
       "Denmark": [106266,706,11702,2,10759,2327,131762],
       "Estonia": [617,864,5820,0,1556,1122,9979],
       "Finland": [17797,4753,10375,0,3020,1309,37254],
-      "France": [241562,47865,388283,29173,128136,22146,857165],
+      "France": [322099,61150,476065,39356,152942,26712,1078324],
       "Germany": [368006,163793,427633,6724,325080,193157,1484393],
       "Greece": [5286,5199,47557,2533,21328,2094,83997],
       "Hungary": [7493,6066,38433,392,15397,7124,74905],
@@ -1418,7 +1422,7 @@ const MONTHLY_DATA = {
       "Georgia":"through Aug 2026",
       "Austria":"through Jun 2026","Belgium":"through Jun 2026","Bulgaria":"through Jun 2026","Croatia":"through Jun 2026",
       "Cyprus":"through Jun 2026","Czechia":"through Jun 2026","Denmark":"through Aug 2026","Estonia":"through Jun 2026",
-      "Finland":"through Jun 2026","France":"through Jun 2026","Germany":"through Jun 2026","Greece":"through Jun 2026",
+      "Finland":"through Jun 2026","France":"through Aug 2026 (national source, not yet ACEA)","Germany":"through Jun 2026","Greece":"through Jun 2026",
       "Hungary":"through Jun 2026","Iceland":"through Jun 2026","Ireland":"through Aug 2026","Italy":"through Jun 2026",
       "Latvia":"through Jun 2026","Lithuania":"through Jun 2026","Luxembourg":"through Jun 2026","Malta":"through Jun 2026",
       "Netherlands":"through Jun 2026","Norway":"through Aug 2026","Poland":"through Jun 2026","Portugal":"through Jun 2026",
@@ -1505,7 +1509,7 @@ const MONTHLY_DATA = {
       "Denmark": [163006, 1059, 17553, 3, 19198, 3491, 204310],
       "Estonia": [1331, 1786, 12888, 0, 3112, 2398, 21515],
       "Finland": [37265, 9506, 21881, 0, 6222, 2695, 77569],
-      "France": [500520, 104427, 785047, 64557, 267528, 46306, 1768385],
+      "France": [503950, 95263, 714097, 62401, 229413, 40068, 1645192],
       "Germany": [784758, 339151, 869767, 16722, 657124, 386849, 3054371],
       "Greece": [11270, 10967, 102795, 5971, 46872, 4492, 182367],
       "Hungary": [16093, 13364, 76866, 1002, 31791, 14834, 153950],
