@@ -1055,6 +1055,15 @@ ul.notes-body{
   color:var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
+/* secondary motorisation-rank badge, model rows only -- colored via inline style (BEV green /
+   PHEV blue), sits right of .mfr-rank-num; rendered as an empty placeholder for ICE rows so
+   the country-label column still lines up whether or not a row has a badge */
+#mfr-model-rank-rows .rank-row .mfr-rank-badge{
+  width:22px; flex-shrink:0;
+  text-align:left;
+  font-size:10.5px; font-weight:700;
+  font-variant-numeric: tabular-nums;
+}
 .mfr-year-total{ font-size:12px; color:var(--text-muted); font-weight:500; margin-left:6px; }
 
 /* ---------- Sales by Brand/Model: in-section country filter + hover sales-preview popover ---------- */
@@ -1084,15 +1093,15 @@ ul.notes-body{
   margin-bottom:4px;
 }
 .mfr-brand-model-preview{
-  width:min(900px, 95vw);
+  width:min(1080px, 96vw);
   padding:14px 18px 10px;
 }
 .mfr-brand-model-preview .mfr-sales-preview-title{ font-size:14px; margin-bottom:8px; }
 .mfr-brand-model-preview .chart{ height:auto; }
 /* Model-section "sales by year" popup has only one small chart (unlike the two-panel brand
-   popup it shares a class with) -- override the shared 900px width so its 260-unit-wide chart
-   isn't stretched (preserveAspectRatio="none") into an oversized, distorted-looking bar chart. */
-#mfr-model-year-preview{ width:300px; padding:14px 16px 10px; }
+   popup it shares a class with) -- override the shared width so its narrower, taller (wide-mode)
+   chart isn't stretched (preserveAspectRatio="none") into an oversized, distorted-looking bar chart. */
+#mfr-model-year-preview{ width:340px; padding:14px 16px 10px; }
 #mfr-model-year-preview .mfr-sales-preview-title{ font-size:13px; margin-bottom:6px; }
 .mfr-preview-panels{ display:flex; gap:22px; align-items:flex-start; }
 .mfr-preview-panel{ flex:0 0 260px; }

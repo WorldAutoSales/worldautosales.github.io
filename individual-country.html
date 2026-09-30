@@ -315,7 +315,7 @@
                 <svg class="chart" id="mfr-country-group-year-preview-svg" viewBox="0 0 260 240" preserveAspectRatio="none"></svg>
               </div>
               <div class="mfr-preview-panel mfr-preview-panel-wide">
-                <div class="mfr-preview-panel-title">Brands from here, this period</div>
+                <div class="mfr-preview-panel-title" id="mfr-country-group-brands-panel-title">Brands from here, this period</div>
                 <svg class="chart" id="mfr-country-group-brands-preview-svg" viewBox="0 0 320 140" preserveAspectRatio="none"></svg>
               </div>
             </div>
@@ -366,7 +366,7 @@
                 <svg class="chart" id="mfr-brand-year-preview-svg" viewBox="0 0 260 240" preserveAspectRatio="none"></svg>
               </div>
               <div class="mfr-preview-panel mfr-preview-panel-wide">
-                <div class="mfr-preview-panel-title">Sales by model, this period</div>
+                <div class="mfr-preview-panel-title" id="mfr-brand-model-panel-title">Sales by model, this period</div>
                 <svg class="chart" id="mfr-brand-model-preview-svg" viewBox="0 0 320 140" preserveAspectRatio="none"></svg>
               </div>
             </div>
@@ -4081,6 +4081,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   const mfrSalesPreviewTitle = document.getElementById('mfr-sales-preview-title');
   const mfrBrandModelPreview = document.getElementById('mfr-brand-model-preview');
   const mfrBrandModelPreviewTitle = document.getElementById('mfr-brand-model-preview-title');
+  const mfrBrandModelPanelTitle = document.getElementById('mfr-brand-model-panel-title');
   const mfrModelYearPreview = document.getElementById('mfr-model-year-preview');
   const mfrModelYearPreviewTitle = document.getElementById('mfr-model-year-preview-title');
   const mfrCountrySection = document.getElementById('mfr-country-section');
@@ -4091,6 +4092,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   const mfrCountryGroupTooltip = document.getElementById('mfr-country-group-tooltip');
   const mfrCountryGroupPreview = document.getElementById('mfr-country-group-preview');
   const mfrCountryGroupPreviewTitle = document.getElementById('mfr-country-group-preview-title');
+  const mfrCountryGroupBrandsPanelTitle = document.getElementById('mfr-country-group-brands-panel-title');
   if(!mfrRows || !mfrSection || typeof MANUFACTURER_YEARLY === 'undefined') return;
   const hasMonthly = typeof MANUFACTURER_MONTHLY !== 'undefined';
   const hasModelMonthly = typeof MANUFACTURER_MODEL_MONTHLY !== 'undefined';
@@ -4316,6 +4318,27 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   const MFR_CATEGORY_COLORS = { bev: FUEL_COLORS.bev, phev: FUEL_COLORS.phev, ice: FUEL_COLORS.petrol };
   const MFR_CATEGORY_LABELS = { bev: 'BEV', phev: 'PHEV', ice: 'ICE' };
   let mfrModelCategoryFilter = new Set(['bev', 'phev', 'ice']); // multi-select; model section only
+  // brand+model rows aren't stable object references across the different callers that build
+  // them (fullMfrRows('model') vs buildMfrBrandModelRows), so rank maps are keyed by this
+  // composite string instead of the row object itself
+  function mfrModelKey(row){ return `${row.brand}\u0001${row.model}`; }
+  // shared source of truth for "sales by model" ranks, for the current period: total rank across
+  // every model tracked here, and each model's rank within its own BEV/PHEV/ICE category (its
+  // "motorisation rank"). Used by the main Sales by Model list and by the model list inside the
+  // Sales by Brand hover popup, so both show the same numbers for the same period.
+  function mfrModelRankMaps(){
+    const all = fullMfrRows('model');
+    const totalRank = new Map();
+    const categoryRank = new Map();
+    if(!all.length) return { totalRank, categoryRank };
+    all.slice().sort((a,b) => b.total - a.total)
+      .forEach((r,i) => totalRank.set(mfrModelKey(r), i + 1));
+    ['bev', 'phev', 'ice'].forEach(cat => {
+      all.filter(r => mfrRowCategory(r) === cat).sort((a,b) => b.total - a.total)
+        .forEach((r,i) => categoryRank.set(mfrModelKey(r), i + 1));
+    });
+    return { totalRank, categoryRank };
+  }
 
   function renderSection(kind){
     const rowsEl = kind === 'model' ? mfrModelRows : kind === 'mfgcountry' ? mfrCountryGroupRows : mfrRows;
@@ -4327,16 +4350,13 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     // reorders this same full set, it never swaps in a smaller/niche row just because it
     // happens to score higher on % BEV or % ICE
     const withPct = all.map(r => ({ ...r, bevPct: r.total ? r.bev / r.total * 100 : 0, icePct: r.total ? (r.petrol + r.diesel) / r.total * 100 : 0 }));
-    // category rank is fixed per row (e.g. "the #2 best-selling BEV model") regardless of the
-    // section's current sort key or category-filter selection -- computed from the full,
-    // unfiltered set so hiding other categories never renumbers the ones still shown
-    let categoryRank = null;
+    // both ranks are fixed per row (e.g. "the #14 best-selling model overall, #2 best-selling
+    // BEV model") regardless of the section's current sort key or category-filter selection --
+    // computed from the full, unfiltered set so sorting/hiding other categories never renumbers
+    // the rows still shown
+    let categoryRank = null, totalRank = null;
     if(kind === 'model'){
-      categoryRank = new Map();
-      ['bev', 'phev', 'ice'].forEach(cat => {
-        withPct.filter(r => mfrRowCategory(r) === cat).sort((a,b) => b.total - a.total)
-          .forEach((r,i) => categoryRank.set(r, i + 1));
-      });
+      ({ totalRank, categoryRank } = mfrModelRankMaps());
     }
     const visible = kind === 'model' ? withPct.filter(r => mfrModelCategoryFilter.has(mfrRowCategory(r))) : withPct;
     const sortedRows = visible.slice().sort((a,b) => b[mfrSortKey] - a[mfrSortKey]);
@@ -4349,9 +4369,18 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       const denom = denoms[i];
       const widthDenom = mode === 'raw' ? globalMax : denom;
       const cat = kind === 'model' ? mfrRowCategory(row) : null;
-      const rankNum = kind === 'model' ? categoryRank.get(row) : i + 1;
+      const rankNum = kind === 'model' ? totalRank.get(mfrModelKey(row)) : i + 1;
+      const catRankNum = kind === 'model' ? categoryRank.get(mfrModelKey(row)) : null;
+      // primary number is always the row's rank by total sales; BEV/PHEV models also get a
+      // colored secondary badge with their rank among same-powertrain models only (ICE models
+      // get an empty placeholder instead, so the country-label column still lines up)
+      const catBadgeHTML = kind === 'model'
+        ? ((cat === 'bev' || cat === 'phev')
+            ? `<div class="mfr-rank-badge" style="color:${MFR_CATEGORY_COLORS[cat]}" title="#${catRankNum} best-selling ${MFR_CATEGORY_LABELS[cat]} model">${catRankNum}</div>`
+            : `<div class="mfr-rank-badge"></div>`)
+        : '';
       const rankHTML = kind === 'model'
-        ? `<div class="mfr-rank-num" style="color:${MFR_CATEGORY_COLORS[cat]}" title="#${rankNum} best-selling ${MFR_CATEGORY_LABELS[cat]} model">${rankNum}</div>`
+        ? `<div class="mfr-rank-num" title="#${rankNum} best-selling model overall">${rankNum}</div>${catBadgeHTML}`
         : `<div class="mfr-rank-num">${rankNum}</div>`;
       const brandAttr = kind === 'model' ? ` data-brand="${row.brand}" data-model="${row.model}"` : '';
       return `
@@ -4398,14 +4427,15 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const splitNote = kind === 'model' ? ' A model sold with more than one powertrain is split into separate BEV / PHEV / ICE rows (ICE combines hybrid, petrol and diesel).' : '';
     return `Bars show each ${noun}'s total new registrations ${scope}; the green segment is its BEV share of that total. Share is that ${noun}'s % of every ${noun} tracked here for this period, sorted by total sales.${splitNote} Click a legend swatch or bar segment to isolate that powertrain, or a country chip above to switch markets. ${sourceNote}`;
   }
+  function mfrCurrentPeriodLabel(){
+    return mfrMonthly ? mfrPeriodLabel(mfrMonthSelect.value) : mfrYearOptionLabel(mfrYear);
+  }
   function mfrTitleText(kind){
-    const period = mfrMonthly ? mfrPeriodLabel(mfrMonthSelect.value) : mfrYearOptionLabel(mfrYear);
     const noun = kind === 'model' ? 'Model' : 'Brand';
-    return `Sales by ${noun} — ${mfrCountry} (${period})`;
+    return `Sales by ${noun} — ${mfrCountry} (${mfrCurrentPeriodLabel()})`;
   }
   function mfrCountryGroupTitleText(){
-    const period = mfrMonthly ? mfrPeriodLabel(mfrMonthSelect.value) : mfrYearOptionLabel(mfrYear);
-    return `Sales by Manufacturing Country — ${mfrCountry} (${period})`;
+    return `Sales by Manufacturing Country — ${mfrCountry} (${mfrCurrentPeriodLabel()})`;
   }
   // Some markets (Canada, USA) have real months where only a handful of brands still report
   // sales monthly -- most automakers there moved to quarterly/annual reporting. Landing on
@@ -4608,8 +4638,10 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   // shared renderer for both the brand-by-year and model-by-year panels: solid bar = real YTD
   // (or full-year, for a closed year), a paler continuation on the current year only = the
   // rule-of-three projection to a full 12 months; optional per-bar rank labels for the model
-  // popup ("its rank" per the user's request -- category rank, i.e. among other rows of the
-  // same BEV/PHEV/ICE bucket that year, since a raw model row is always single-category)
+  // popup -- a muted number for that year's overall rank, plus (for BEV/PHEV years only) a
+  // smaller colored number alongside it for the rank among that year's same-powertrain models.
+  // opts.wide gives the chart extra width/height/top-margin for that second label; only the
+  // model popup passes it, since the brand/country-group year charts never carry rank labels.
   function renderMfrYearBarChart(svgEl, rows, opts){
     const svg = d3.select(svgEl);
     svg.selectAll('*').remove();
@@ -4619,9 +4651,10 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const data = rows.map(r => {
       const isCurrent = r.year === MFR_CURRENT_YEAR;
       const projected = (isCurrent && hasCurrentYearMonthly) ? mfrRuleOfThreeProjection(r.total, monthsCovered) : null;
-      return { year: r.year, total: r.total, projected, rank: opts.rankByYear ? opts.rankByYear.get(r.year) : null };
+      return { year: r.year, total: r.total, projected, rankInfo: opts.rankByYear ? opts.rankByYear.get(r.year) : null };
     });
-    const W = 260, H = 240, M = { top: 18, right: 10, bottom: 26, left: 42 };
+    const W = opts.wide ? 320 : 260, H = opts.wide ? 260 : 240;
+    const M = { top: opts.wide ? 26 : 18, right: 10, bottom: 26, left: 42 };
     const innerW = W - M.left - M.right, innerH = H - M.top - M.bottom;
     svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
     const x = d3.scaleBand().domain(data.map(d => d.year)).range([0, innerW]).padding(0.28);
@@ -4641,10 +4674,19 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       .attr('y', d => y(d.projected)).attr('height', d => Math.max(0, y(d.total) - y(d.projected)))
       .attr('fill', FUEL_COLORS.phev);
     if(opts.rankByYear){
-      g.selectAll('.rank-label').data(data).join('text').attr('class', 'rank-label')
+      const rankLabels = g.selectAll('.rank-label').data(data).join('text').attr('class', 'rank-label')
         .attr('x', d => x(d.year) + x.bandwidth() / 2).attr('y', d => y(d.projected || d.total) - 5)
-        .attr('text-anchor', 'middle').style('font-size', '9px').style('font-weight', '700')
-        .style('fill', 'var(--text-muted)').text(d => d.rank ? `#${d.rank}` : '');
+        .attr('text-anchor', 'middle').style('font-size', '9px').style('font-weight', '700');
+      rankLabels.each(function(d){
+        const sel = d3.select(this);
+        sel.selectAll('tspan').remove();
+        if(!d.rankInfo) return;
+        sel.append('tspan').style('fill', 'var(--text-muted)').text(`#${d.rankInfo.totalRank}`);
+        if((d.rankInfo.cat === 'bev' || d.rankInfo.cat === 'phev') && d.rankInfo.catRank){
+          sel.append('tspan').attr('dx', 3).style('font-size', '8px')
+            .style('fill', MFR_CATEGORY_COLORS[d.rankInfo.cat]).text(`#${d.rankInfo.catRank}`);
+        }
+      });
     }
   }
   function buildMfrBrandYearRows(brand){
@@ -4670,7 +4712,13 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     svg.selectAll('*').remove();
     const rows = buildMfrBrandModelRows(brand).slice().sort((a,b) => b.total - a.total);
     if(!rows.length) return;
-    const W = 560, rowH = 28, M = { top: 4, right: 62, bottom: 4, left: 150 };
+    const { categoryRank } = mfrModelRankMaps();
+    // wide left margin: a fixed-width rank column (this brand's own model list, #1 = its
+    // best seller), a fixed-width colored motorisation-rank column (market-wide BEV/PHEV rank,
+    // same numbers as the main Sales by Model list), then the model name -- in that order,
+    // widened well past the old flat 150px margin so long model names don't clip off the left
+    // edge of the popup (see mfr-brand-model-preview / .mfr-preview-panel-wide sizing)
+    const W = 700, rowH = 30, M = { top: 4, right: 62, bottom: 4, left: 230 };
     const innerW = W - M.left - M.right;
     const H = rows.length * rowH + M.top + M.bottom;
     svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
@@ -4690,6 +4738,20 @@ const MFR_MONTHLY_SOURCE_NOTE = {
         cursor += units;
       });
     });
+    g.selectAll('.rank-num-label').data(rows).join('text').attr('class', 'rank-num-label')
+      .attr('x', -(M.left - 34)).attr('y', (d,i) => i * rowH + rowH / 2).attr('dy', '0.32em').attr('text-anchor', 'end')
+      .style('font-size', '11px').style('font-weight', '700').style('fill', 'var(--text-muted)')
+      .text((d,i) => `#${i + 1}`);
+    g.selectAll('.rank-cat-label').data(rows).join('text').attr('class', 'rank-cat-label')
+      .attr('x', -(M.left - 40)).attr('y', (d,i) => i * rowH + rowH / 2).attr('dy', '0.32em').attr('text-anchor', 'start')
+      .style('font-size', '9.5px').style('font-weight', '700')
+      .style('fill', d => MFR_CATEGORY_COLORS[mfrRowCategory(d)])
+      .text(d => {
+        const cat = mfrRowCategory(d);
+        if(cat !== 'bev' && cat !== 'phev') return '';
+        const r = categoryRank.get(mfrModelKey(d));
+        return r ? `#${r}` : '';
+      });
     g.selectAll('.model-label').data(rows).join('text').attr('class', 'model-label')
       .attr('x', -6).attr('y', (d,i) => i * rowH + rowH / 2).attr('dy', '0.32em').attr('text-anchor', 'end')
       .style('font-size', '12px').style('fill', 'var(--text)').text(d => d.model);
@@ -4702,21 +4764,22 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const rows = buildMfrBrandModelRows(brand);
     if(!rows.length){ mfrBrandModelPreview.classList.add('hidden'); return; }
     if(mfrBrandModelPreviewTitle) mfrBrandModelPreviewTitle.textContent = `${brand} — sales by model`;
+    if(mfrBrandModelPanelTitle) mfrBrandModelPanelTitle.textContent = `Sales by model, ${mfrCurrentPeriodLabel()}`;
     renderMfrBrandYearChart(brand);
     renderMfrBrandModelChart(brand);
     const rect = anchorEl.getBoundingClientRect();
-    mfrBrandModelPreview.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 920)) + 'px';
+    mfrBrandModelPreview.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 1120)) + 'px';
     mfrBrandModelPreview.style.top = (rect.bottom + 8) + 'px';
     mfrBrandModelPreview.classList.remove('hidden');
   }
   // --- hover preview: sales by year for one model, biggest sellers first, with each year's
-  // category rank (BEV/PHEV/ICE, matching the model rank-rows column) -- same popup size as
-  // the brand one above, but a single chart since a model has no sub-items to pair it with.
+  // rank (overall, plus BEV/PHEV models' rank among same-powertrain models) -- same popup size
+  // as the brand one above, but a single chart since a model has no sub-items to pair it with.
   function buildMfrModelYearRows(brand, model){
     if(!hasModelYearly || !MANUFACTURER_MODEL_YEARLY[mfrCountry]) return [];
     return MANUFACTURER_MODEL_YEARLY[mfrCountry].filter(r => r.brand === brand && r.model === model).sort((a,b) => a.year - b.year);
   }
-  function mfrModelCategoryRankByYear(brand, model){
+  function mfrModelRankByYear(brand, model){
     const rankByYear = new Map();
     if(!hasModelYearly || !MANUFACTURER_MODEL_YEARLY[mfrCountry]) return rankByYear;
     const years = [...new Set(MANUFACTURER_MODEL_YEARLY[mfrCountry].map(r => r.year))];
@@ -4725,9 +4788,11 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       const target = yearRows.find(r => r.brand === brand && r.model === model);
       if(!target) return;
       const cat = mfrRowCategory(target);
+      const totalSorted = yearRows.slice().sort((a,b) => b.total - a.total);
+      const totalIdx = totalSorted.findIndex(r => r.brand === brand && r.model === model);
       const sameCategory = yearRows.filter(r => mfrRowCategory(r) === cat).sort((a,b) => b.total - a.total);
-      const idx = sameCategory.findIndex(r => r.brand === brand && r.model === model);
-      if(idx !== -1) rankByYear.set(year, idx + 1);
+      const catIdx = sameCategory.findIndex(r => r.brand === brand && r.model === model);
+      if(totalIdx !== -1) rankByYear.set(year, { totalRank: totalIdx + 1, catRank: catIdx !== -1 ? catIdx + 1 : null, cat });
     });
     return rankByYear;
   }
@@ -4736,14 +4801,14 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     if(!svgEl) return;
     const rows = buildMfrModelYearRows(brand, model);
     const hasMonthlyThisYear = mfrHasMonthlyThisYear(MANUFACTURER_MODEL_MONTHLY[mfrCountry], r => r.brand === brand && r.model === model);
-    const rankByYear = mfrModelCategoryRankByYear(brand, model);
-    renderMfrYearBarChart(svgEl, rows, { hasMonthlyThisYear, rankByYear });
+    const rankByYear = mfrModelRankByYear(brand, model);
+    renderMfrYearBarChart(svgEl, rows, { hasMonthlyThisYear, rankByYear, wide: true });
   }
   function showMfrModelYearPreview(brand, model, anchorEl){
     if(!mfrModelYearPreview) return;
     const rows = buildMfrModelYearRows(brand, model);
     if(!rows.length){ mfrModelYearPreview.classList.add('hidden'); return; }
-    if(mfrModelYearPreviewTitle) mfrModelYearPreviewTitle.textContent = `${brand} ${model} — sales by year (rank = among same-category models)`;
+    if(mfrModelYearPreviewTitle) mfrModelYearPreviewTitle.textContent = `${brand} ${model} — sales by year (# = overall rank, colored # = rank among same-powertrain models)`;
     renderMfrModelYearChart(brand, model);
     const rect = anchorEl.getBoundingClientRect();
     mfrModelYearPreview.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 920)) + 'px';
@@ -4780,7 +4845,10 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     svg.selectAll('*').remove();
     const rows = buildMfrCountryGroupBrandRows(country);
     if(!rows.length) return;
-    const W = 560, rowH = 28, M = { top: 4, right: 62, bottom: 4, left: 150 };
+    // same widened margin as the brand popup's model list, minus its colored motorisation
+    // column -- a brand mixes powertrains, so there's no single-category rank to show for it,
+    // just its rank (by total sales) among the other brands manufactured in this country
+    const W = 700, rowH = 30, M = { top: 4, right: 62, bottom: 4, left: 230 };
     const innerW = W - M.left - M.right;
     const H = rows.length * rowH + M.top + M.bottom;
     svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
@@ -4798,6 +4866,10 @@ const MFR_MONTHLY_SOURCE_NOTE = {
         cursor += units;
       });
     });
+    g.selectAll('.rank-num-label').data(rows).join('text').attr('class', 'rank-num-label')
+      .attr('x', -(M.left - 34)).attr('y', (d,i) => i * rowH + rowH / 2).attr('dy', '0.32em').attr('text-anchor', 'end')
+      .style('font-size', '11px').style('font-weight', '700').style('fill', 'var(--text-muted)')
+      .text((d,i) => `#${i + 1}`);
     g.selectAll('.model-label').data(rows).join('text').attr('class', 'model-label')
       .attr('x', -6).attr('y', (d,i) => i * rowH + rowH / 2).attr('dy', '0.32em').attr('text-anchor', 'end')
       .style('font-size', '12px').style('fill', 'var(--text)').text(d => d.brand);
@@ -4810,10 +4882,11 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const rows = buildMfrCountryGroupBrandRows(country);
     if(!rows.length){ mfrCountryGroupPreview.classList.add('hidden'); return; }
     if(mfrCountryGroupPreviewTitle) mfrCountryGroupPreviewTitle.textContent = `${country} — brands sold here`;
+    if(mfrCountryGroupBrandsPanelTitle) mfrCountryGroupBrandsPanelTitle.textContent = `Brands from here, ${mfrCurrentPeriodLabel()}`;
     renderMfrCountryGroupYearChart(country);
     renderMfrCountryGroupBrandsChart(country);
     const rect = anchorEl.getBoundingClientRect();
-    mfrCountryGroupPreview.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 920)) + 'px';
+    mfrCountryGroupPreview.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 1120)) + 'px';
     mfrCountryGroupPreview.style.top = (rect.bottom + 8) + 'px';
     mfrCountryGroupPreview.classList.remove('hidden');
   }
