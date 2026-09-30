@@ -284,6 +284,7 @@
         <div class="card chart-card hidden" id="mfr-country-section">
           <div class="chart-header-row">
             <h2 id="mfr-country-title">Sales by Manufacturing Country</h2>
+            <strong class="mfr-coming-soon hidden" id="mfr-country-coming-soon">Data coming soon…</strong>
             <div class="chart-mode-toggle" role="group" aria-label="Sort order" id="mfr-country-sort-toggle">
               <button type="button" class="mode-btn active" data-mfr-sort-key="total" title="Sort by total registrations.">Total</button>
               <button type="button" class="mode-btn" data-mfr-sort-key="bev" title="Sort by total battery-electric units.">Total BEV</button>
@@ -330,6 +331,7 @@
         <div class="card chart-card hidden" id="mfr-section">
           <div class="chart-header-row">
             <h2 id="mfr-title">Sales by Brand</h2>
+            <strong class="mfr-coming-soon hidden" id="mfr-coming-soon">Data coming soon…</strong>
             <div class="chart-mode-toggle" role="group" aria-label="Sort order" id="mfr-sort-toggle">
               <button type="button" class="mode-btn active" data-mfr-sort-key="total" title="Sort by total registrations.">Total</button>
               <button type="button" class="mode-btn" data-mfr-sort-key="bev" title="Sort by total battery-electric units.">Total BEV</button>
@@ -375,6 +377,7 @@
         <div class="card chart-card hidden" id="mfr-model-section">
           <div class="chart-header-row">
             <h2 id="mfr-model-title">Sales by Model</h2>
+            <strong class="mfr-coming-soon hidden" id="mfr-model-coming-soon">Data coming soon…</strong>
             <div class="chart-mode-toggle" role="group" aria-label="Sort order" id="mfr-model-sort-toggle">
               <button type="button" class="mode-btn active" data-mfr-sort-key="total" title="Sort by total registrations.">Total</button>
               <button type="button" class="mode-btn" data-mfr-sort-key="bev" title="Sort by total battery-electric units.">Total BEV</button>
@@ -4441,6 +4444,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   const mfrTooltip = document.getElementById('mfr-tooltip');
   const mfrSection = document.getElementById('mfr-section');
   const mfrTitle = document.getElementById('mfr-title');
+  const mfrComingSoon = document.getElementById('mfr-coming-soon');
   const mfrNote = document.getElementById('mfr-note');
   const mfrCoverageNote = document.getElementById('mfr-coverage-note');
   const mfrModelCoverageNote = document.getElementById('mfr-model-coverage-note');
@@ -4453,6 +4457,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   const mfrModelSection = document.getElementById('mfr-model-section');
   const mfrModelTitle = document.getElementById('mfr-model-title');
   const mfrModelNote = document.getElementById('mfr-model-note');
+  const mfrModelComingSoon = document.getElementById('mfr-model-coming-soon');
   const mfrBrandModelPreview = document.getElementById('mfr-brand-model-preview');
   const mfrBrandModelPreviewTitle = document.getElementById('mfr-brand-model-preview-title');
   const mfrBrandModelPanelTitle = document.getElementById('mfr-brand-model-panel-title');
@@ -4462,6 +4467,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   const mfrPeriodToggleEl = document.getElementById('mfr-period-toggle');
   const mfrCountrySection = document.getElementById('mfr-country-section');
   const mfrCountryGroupTitle = document.getElementById('mfr-country-title');
+  const mfrCountryGroupComingSoon = document.getElementById('mfr-country-coming-soon');
   const mfrCountryGroupNote = document.getElementById('mfr-country-group-note');
   const mfrCountryGroupRows = document.getElementById('mfr-country-group-rank-rows');
   const mfrCountryGroupTooltip = document.getElementById('mfr-country-group-tooltip');
@@ -4471,6 +4477,19 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   const mfrCountryGroupPreviewTitle = document.getElementById('mfr-country-group-preview-title');
   const mfrCountryGroupBrandsPanelTitle = document.getElementById('mfr-country-group-brands-panel-title');
   if(!mfrRows || !mfrSection || typeof MANUFACTURER_YEARLY === 'undefined') return;
+  // Shows a section's card with just its header + a bold "Data coming soon..." in place of the
+  // old behavior of hiding the whole card when this country/period has no data for it -- keeps
+  // the page's set of sections visually consistent across countries instead of some cards just
+  // not existing. `.mfr-card-empty` (styles.css) hides everything in the card except the h2 and
+  // the coming-soon element via CSS, so this never fights with the many OTHER places that toggle
+  // individual controls'/popups' own `hidden` class -- those keep working unchanged underneath,
+  // they're just visually suppressed while the card is marked empty, and reappear correctly
+  // (already in the right state) the moment `.mfr-card-empty` comes back off.
+  function setMfrCardEmpty(card, comingSoonEl, isEmpty){
+    card.classList.remove('hidden');
+    card.classList.toggle('mfr-card-empty', isEmpty);
+    if(comingSoonEl) comingSoonEl.classList.toggle('hidden', !isEmpty);
+  }
   const hasMonthly = typeof MANUFACTURER_MONTHLY !== 'undefined';
   const hasModelMonthly = typeof MANUFACTURER_MODEL_MONTHLY !== 'undefined';
   const hasModelYearly = typeof MANUFACTURER_MODEL_YEARLY !== 'undefined';
@@ -4853,7 +4872,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   // it here rather than let it look like the model chart is just missing data.
   function updateMfrModelCoverageNote(){
     if(!mfrModelCoverageNote) return;
-    if(mfrModelSection.classList.contains('hidden')){ mfrModelCoverageNote.classList.add('hidden'); return; }
+    if(mfrModelSection.classList.contains('mfr-card-empty')){ mfrModelCoverageNote.classList.add('hidden'); return; }
     let brandRows, modelBrands;
     if(mfrMonthly){
       if(!(hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[mfrCountry])){ mfrModelCoverageNote.classList.add('hidden'); return; }
@@ -4879,7 +4898,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   // silently disagree.
   function updateMfrCountryGroupCoverageNote(){
     if(!mfrCountryGroupCoverageNote) return;
-    if(mfrCountrySection.classList.contains('hidden')){ mfrCountryGroupCoverageNote.classList.add('hidden'); return; }
+    if(mfrCountrySection.classList.contains('mfr-card-empty')){ mfrCountryGroupCoverageNote.classList.add('hidden'); return; }
     const excluded = fullMfrRows('brand').filter(r => !MFR_BRAND_COUNTRY[r.brand] && r.total > 0);
     if(!excluded.length){ mfrCountryGroupCoverageNote.classList.add('hidden'); return; }
     const excludedTotal = excluded.reduce((s, r) => s + r.total, 0);
@@ -4889,8 +4908,8 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   }
   function renderBoth(){
     renderSection('brand');
-    if(!mfrModelSection.classList.contains('hidden')) renderSection('model');
-    if(!mfrCountrySection.classList.contains('hidden')){
+    if(!mfrModelSection.classList.contains('mfr-card-empty')) renderSection('model');
+    if(!mfrCountrySection.classList.contains('mfr-card-empty')){
       mfrCountryGroupTitle.textContent = mfrCountryGroupTitleText();
       renderSection('mfgcountry');
     }
@@ -4932,8 +4951,8 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       mfrSortKey = btn.dataset.mfrSortKey;
       document.querySelectorAll('[data-mfr-sort-key]').forEach(b => b.classList.toggle('active', b.dataset.mfrSortKey === mfrSortKey));
       renderSection('brand');
-      if(!mfrModelSection.classList.contains('hidden')) renderSection('model');
-      if(!mfrCountrySection.classList.contains('hidden')) renderSection('mfgcountry');
+      if(!mfrModelSection.classList.contains('mfr-card-empty')) renderSection('model');
+      if(!mfrCountrySection.classList.contains('mfr-card-empty')) renderSection('mfgcountry');
     });
   });
   if(mfrCategoryFilterEl) mfrCategoryFilterEl.addEventListener('click', e => {
@@ -4985,14 +5004,14 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const hasYearlyData = !!(focusedCountry && MANUFACTURER_YEARLY[focusedCountry] && MANUFACTURER_YEARLY[focusedCountry].length);
     if(mfrPeriodToggleEl) mfrPeriodToggleEl.classList.toggle('hidden', !(hasMonthlyData && hasYearlyData));
     if(hasMonthlyData && !(hasYearlyData && mfrForceYearly)){
-      mfrSection.classList.remove('hidden');
-      mfrCountrySection.classList.remove('hidden');
+      setMfrCardEmpty(mfrSection, mfrComingSoon, false);
+      setMfrCardEmpty(mfrCountrySection, mfrCountryGroupComingSoon, false);
       mfrCountry = focusedCountry;
       mfrMonthly = true;
       mfrMonthSelect.classList.remove('hidden');
       mfrYearSelect.classList.add('hidden');
       const hasModelData = hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[mfrCountry] && MANUFACTURER_MODEL_MONTHLY[mfrCountry].length;
-      mfrModelSection.classList.toggle('hidden', !hasModelData);
+      setMfrCardEmpty(mfrModelSection, mfrModelComingSoon, !hasModelData);
       const pagePeriod = [...selectedMonths][0];
       if(mfrMonthSelectWiredFor !== mfrCountry){
         const realMonths = [...new Set(MANUFACTURER_MONTHLY[mfrCountry].map(r => r.year_month))].sort().reverse();
@@ -5012,8 +5031,8 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       mfrLastSyncedPeriod = pagePeriod;
       mfrTitle.textContent = mfrTitleText('brand');
       mfrNote.textContent = mfrNoteText('brand');
+      mfrModelTitle.textContent = mfrTitleText('model');
       if(hasModelData){
-        mfrModelTitle.textContent = mfrTitleText('model');
         mfrModelNote.textContent = mfrNoteText('model');
       }
       syncMfrCountrySelects();
@@ -5029,9 +5048,12 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const availYears = focusedCountry && MANUFACTURER_YEARLY[focusedCountry]
       ? [...new Set(MANUFACTURER_YEARLY[focusedCountry].map(r => r.year))] : [];
     if(!availYears.length){
-      mfrSection.classList.add('hidden');
-      mfrModelSection.classList.add('hidden');
-      mfrCountrySection.classList.add('hidden');
+      setMfrCardEmpty(mfrSection, mfrComingSoon, true);
+      setMfrCardEmpty(mfrModelSection, mfrModelComingSoon, true);
+      setMfrCardEmpty(mfrCountrySection, mfrCountryGroupComingSoon, true);
+      mfrTitle.textContent = `Sales by Brand — ${focusedCountry}`;
+      mfrModelTitle.textContent = `Sales by Model — ${focusedCountry}`;
+      mfrCountryGroupTitle.textContent = `Sales by Manufacturing Country — ${focusedCountry}`;
       mfrCountry = null;
       mfrYear = null;
       mfrMonthly = false;
@@ -5047,8 +5069,8 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     // own year <select> (options rebuilt only when the country changes, so a manual pick
     // survives toggling Monthly/Yearly back and forth); the latest year is labeled "(YTD)"
     // since it's always a partial-year figure through this site's latest loaded month.
-    mfrSection.classList.remove('hidden');
-    mfrCountrySection.classList.remove('hidden');
+    setMfrCardEmpty(mfrSection, mfrComingSoon, false);
+    setMfrCardEmpty(mfrCountrySection, mfrCountryGroupComingSoon, false);
     mfrCountry = focusedCountry;
     mfrMonthly = false;
     mfrMonthSelect.classList.add('hidden');
@@ -5073,11 +5095,11 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     if(mfrCoverageNote) mfrCoverageNote.classList.add('hidden');
     const hasModelYearlyData = hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry] &&
       MANUFACTURER_MODEL_YEARLY[mfrCountry].some(r => r.year === mfrYear);
-    mfrModelSection.classList.toggle('hidden', !hasModelYearlyData);
+    setMfrCardEmpty(mfrModelSection, mfrModelComingSoon, !hasModelYearlyData);
     mfrTitle.textContent = mfrTitleText('brand');
     mfrNote.textContent = mfrNoteText('brand');
+    mfrModelTitle.textContent = mfrTitleText('model');
     if(hasModelYearlyData){
-      mfrModelTitle.textContent = mfrTitleText('model');
       mfrModelNote.textContent = mfrNoteText('model');
     }
     syncMfrCountrySelects();
@@ -5098,10 +5120,10 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     mfrYear = +val;
     const hasModelYearlyData = hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry] &&
       MANUFACTURER_MODEL_YEARLY[mfrCountry].some(r => r.year === mfrYear);
-    mfrModelSection.classList.toggle('hidden', !hasModelYearlyData);
+    setMfrCardEmpty(mfrModelSection, mfrModelComingSoon, !hasModelYearlyData);
     mfrTitle.textContent = mfrTitleText('brand');
+    mfrModelTitle.textContent = mfrTitleText('model');
     if(hasModelYearlyData){
-      mfrModelTitle.textContent = mfrTitleText('model');
       mfrModelNote.textContent = mfrNoteText('model');
     }
     renderBoth();

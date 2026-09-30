@@ -1066,6 +1066,17 @@ ul.notes-body{
 }
 .mfr-year-total{ font-size:12px; color:var(--text-muted); font-weight:500; margin-left:6px; }
 
+/* A section card marked empty for the focused country/period (powertrain-mix-by-country.html
+   only, so far) stays visible with just its header row -- everything else in the card is
+   suppressed here, in one place, rather than by hunting down and re-toggling every individual
+   control/popup's own `hidden` class. Those keep being managed exactly as before underneath;
+   removing `mfr-card-empty` just stops this override and reveals whatever state they're
+   already correctly in. `!important` is needed since some of those elements set their own
+   inline/`hidden`-class display and this rule must win regardless of which one. */
+.chart-card.mfr-card-empty > *:not(.chart-header-row){ display:none !important; }
+.chart-card.mfr-card-empty .chart-header-row > *:not(h2):not(.mfr-coming-soon){ display:none !important; }
+.mfr-coming-soon{ font-weight:700; font-size:13px; color:var(--text); }
+
 /* ---------- Sales by Brand/Model: in-section country filter + hover sales-preview popover ---------- */
 .mfr-country-row{
   display:flex;
