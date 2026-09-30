@@ -4484,11 +4484,16 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   // the coming-soon element via CSS, so this never fights with the many OTHER places that toggle
   // individual controls'/popups' own `hidden` class -- those keep working unchanged underneath,
   // they're just visually suppressed while the card is marked empty, and reappear correctly
-  // (already in the right state) the moment `.mfr-card-empty` comes back off.
-  function setMfrCardEmpty(card, comingSoonEl, isEmpty){
+  // (already in the right state) the moment `.mfr-card-empty` comes back off. Also actually
+  // clears the rank-rows list (rather than just relying on the CSS to hide it) so the previous
+  // country's rows -- never re-rendered while a section is marked empty, since renderBoth()
+  // skips a `.mfr-card-empty` section entirely -- can't linger in the DOM at all, not even
+  // invisibly, if a stylesheet ever fails to load.
+  function setMfrCardEmpty(card, comingSoonEl, isEmpty, rankRowsEl){
     card.classList.remove('hidden');
     card.classList.toggle('mfr-card-empty', isEmpty);
     if(comingSoonEl) comingSoonEl.classList.toggle('hidden', !isEmpty);
+    if(isEmpty && rankRowsEl) rankRowsEl.innerHTML = '';
   }
   const hasMonthly = typeof MANUFACTURER_MONTHLY !== 'undefined';
   const hasModelMonthly = typeof MANUFACTURER_MODEL_MONTHLY !== 'undefined';
@@ -5004,14 +5009,14 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const hasYearlyData = !!(focusedCountry && MANUFACTURER_YEARLY[focusedCountry] && MANUFACTURER_YEARLY[focusedCountry].length);
     if(mfrPeriodToggleEl) mfrPeriodToggleEl.classList.toggle('hidden', !(hasMonthlyData && hasYearlyData));
     if(hasMonthlyData && !(hasYearlyData && mfrForceYearly)){
-      setMfrCardEmpty(mfrSection, mfrComingSoon, false);
-      setMfrCardEmpty(mfrCountrySection, mfrCountryGroupComingSoon, false);
+      setMfrCardEmpty(mfrSection, mfrComingSoon, false, mfrRows);
+      setMfrCardEmpty(mfrCountrySection, mfrCountryGroupComingSoon, false, mfrCountryGroupRows);
       mfrCountry = focusedCountry;
       mfrMonthly = true;
       mfrMonthSelect.classList.remove('hidden');
       mfrYearSelect.classList.add('hidden');
       const hasModelData = hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[mfrCountry] && MANUFACTURER_MODEL_MONTHLY[mfrCountry].length;
-      setMfrCardEmpty(mfrModelSection, mfrModelComingSoon, !hasModelData);
+      setMfrCardEmpty(mfrModelSection, mfrModelComingSoon, !hasModelData, mfrModelRows);
       const pagePeriod = [...selectedMonths][0];
       if(mfrMonthSelectWiredFor !== mfrCountry){
         const realMonths = [...new Set(MANUFACTURER_MONTHLY[mfrCountry].map(r => r.year_month))].sort().reverse();
@@ -5048,9 +5053,9 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const availYears = focusedCountry && MANUFACTURER_YEARLY[focusedCountry]
       ? [...new Set(MANUFACTURER_YEARLY[focusedCountry].map(r => r.year))] : [];
     if(!availYears.length){
-      setMfrCardEmpty(mfrSection, mfrComingSoon, true);
-      setMfrCardEmpty(mfrModelSection, mfrModelComingSoon, true);
-      setMfrCardEmpty(mfrCountrySection, mfrCountryGroupComingSoon, true);
+      setMfrCardEmpty(mfrSection, mfrComingSoon, true, mfrRows);
+      setMfrCardEmpty(mfrModelSection, mfrModelComingSoon, true, mfrModelRows);
+      setMfrCardEmpty(mfrCountrySection, mfrCountryGroupComingSoon, true, mfrCountryGroupRows);
       mfrTitle.textContent = `Sales by Brand — ${focusedCountry}`;
       mfrModelTitle.textContent = `Sales by Model — ${focusedCountry}`;
       mfrCountryGroupTitle.textContent = `Sales by Manufacturing Country — ${focusedCountry}`;
@@ -5069,8 +5074,8 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     // own year <select> (options rebuilt only when the country changes, so a manual pick
     // survives toggling Monthly/Yearly back and forth); the latest year is labeled "(YTD)"
     // since it's always a partial-year figure through this site's latest loaded month.
-    setMfrCardEmpty(mfrSection, mfrComingSoon, false);
-    setMfrCardEmpty(mfrCountrySection, mfrCountryGroupComingSoon, false);
+    setMfrCardEmpty(mfrSection, mfrComingSoon, false, mfrRows);
+    setMfrCardEmpty(mfrCountrySection, mfrCountryGroupComingSoon, false, mfrCountryGroupRows);
     mfrCountry = focusedCountry;
     mfrMonthly = false;
     mfrMonthSelect.classList.add('hidden');
@@ -5095,7 +5100,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     if(mfrCoverageNote) mfrCoverageNote.classList.add('hidden');
     const hasModelYearlyData = hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry] &&
       MANUFACTURER_MODEL_YEARLY[mfrCountry].some(r => r.year === mfrYear);
-    setMfrCardEmpty(mfrModelSection, mfrModelComingSoon, !hasModelYearlyData);
+    setMfrCardEmpty(mfrModelSection, mfrModelComingSoon, !hasModelYearlyData, mfrModelRows);
     mfrTitle.textContent = mfrTitleText('brand');
     mfrNote.textContent = mfrNoteText('brand');
     mfrModelTitle.textContent = mfrTitleText('model');
@@ -5120,7 +5125,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     mfrYear = +val;
     const hasModelYearlyData = hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry] &&
       MANUFACTURER_MODEL_YEARLY[mfrCountry].some(r => r.year === mfrYear);
-    setMfrCardEmpty(mfrModelSection, mfrModelComingSoon, !hasModelYearlyData);
+    setMfrCardEmpty(mfrModelSection, mfrModelComingSoon, !hasModelYearlyData, mfrModelRows);
     mfrTitle.textContent = mfrTitleText('brand');
     mfrModelTitle.textContent = mfrTitleText('model');
     if(hasModelYearlyData){
