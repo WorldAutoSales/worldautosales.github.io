@@ -470,6 +470,29 @@
 <script>
 // month key -> { label, raw: { country: [BEV, PHEV, HEV, OTHERS, PETROL, DIESEL, TOTAL] } } — source: ACEA
 const MONTHLY_DATA = {
+  "2026-09": {
+    label: "September 2026",
+    raw: {
+      // source: AAA DATA (communique-de-presse-du-1er-octobre-2026, aaa-data.fr) -- MHEV+HEV combined into hev (full 28,672 + micro 27,707); Others=Essence-GPL (5,234) + a small unitemized residual (EREV ~1%) against AAA DATA's own total.
+      "France": [65243,10028,56379,6176,16391,2412,156629],
+      // source: OFV (Opplysningsradet for veitrafikken), Norway (monthly) -- PHEV = Bensin+Diesel Plugin Hybrid combined (29+3), HEV = Bensin+Diesel Hybrid combined (99+0). Record 98.8% EV share this month.
+      "Norway": [18511,32,99,0,14,77,18733],
+      // source: KBA (Kraftfahrt-Bundesamt) monthly Pressemitteilung Nr. 41/2026 -- Hybrid total (98,871) split into PHEV (27,861, KBA-stated) and HEV=98,871-27,861=71,010; Others=Flussiggas/LPG (1,602) + small residual against KBA's own 256,774 total.
+      "Germany": [88599,27861,71010,1614,44632,23058,256774],
+      // source: DGT registration data via IEA/GANVAM (ANFAC press note) -- BEV (17,366) and PHEV (14,579) are ANFAC's own exact turismos-only figures; HEV and Others are the remainder of the official "Resto combustibles" total (76,311) minus BEV/PHEV, split using a ~3.6% GLP share estimate -- flagged as derived for these two fields only.
+      "Spain": [17366,14579,40987,3379,15184,2363,93858],
+      // source: ACAP monthly press release (energia table) -- Ligeiros (light vehicles) only. PHEV=PHEV/Gasolina+PHEV/Gasoleo (2,806+238); HEV=HEV/Gasolina+HEV/Gasoleo (3,344+123); Others=Gasolina/GPL (1,249); figures reconcile exactly to ACAP's own 22,423 Ligeiros total.
+      "Portugal": [10120,3044,3467,1249,2015,2528,22423],
+      // source: Mobility Denmark press release (monthly) -- gives only Total and BEV (elbiler) exactly; the 2,241-unit non-BEV remainder is placed in Petrol per this project's established convention (see Russia). Record 88.8% EV share this month.
+      "Denmark": [17785,0,0,0,2241,0,20026],
+      // source: Mobility Sweden (monthly) -- from the official Manadsrapport Nyregistreringar Excel's PB - Drivmedel sheet; others = Etanol+Gas+Ospec.
+      "Sweden": [14034,6289,1907,49,5304,1084,28667],
+      // source: UNRAE "La struttura del mercato" monthly PDF, page 1 (Per alimentazione, WITH rental) -- GPL (11,406) + Metano (0) folded into petrol; Others=Idrogeno (FCEV=0).
+      "Italy": [10782,15669,71604,0,36185,6937,141177]
+    },
+    priorYearBev: {},
+    priorYearTotal: {}
+  },
   "2026-08": {
     label: "August 2026",
     raw: {
@@ -500,6 +523,14 @@ const MONTHLY_DATA = {
       "Georgia": [1454,110,3958,669,7737,640,14568],
       // source: AAA DATA (communique-de-presse-du-1er-septembre-2026, aaa-data.fr) -- MHEV+HEV combined into hev; Others=Essence-GPL + a small unitemized residual against AAA DATA's own total. Ported from powertrain-mix-by-country.html 2026-09-29 -- this page was missing France for July/August entirely (a separate bug from the brand-level Sales-by-Brand/Model data fixed the same day), which also left the "2026 (Projected)" figure below stale (computed from an incomplete month count before this port).
       "France": [36159,5824,35686,3963,10903,1816,94351],
+      // source: KBA (Kraftfahrt-Bundesamt) monthly Pressemitteilung -- Hybrid total (84,603) split into PHEV (25,406, KBA-stated) and HEV=84,603-25,406=59,197; Others = residual against KBA's own 212,563 total. Ported from powertrain-mix-by-country.html 2026-10-05 -- this page was missing Germany/Spain/Portugal/Italy for August entirely.
+      "Germany": [68930,25406,59197,978,35536,22516,212563],
+      // source: DGT registration data via IEA/GANVAM -- HEV (32,353) and Others (2,568, GLP+residual) computed as the remainder of GANVAM's own "Resto combustibles" total (54,114) minus the separately-cited BEV/PHEV figures. Ported 2026-10-05.
+      "Spain": [9562,9631,32353,2568,12587,1843,68544],
+      // source: ACAP monthly press release -- this month's percentages (BEV 36.1%/HEV 20.2%/PHEV 17.5%/combustao 26.2%) summed cleanly to 100% of ACAP's own 14,086 total; Petrol/Diesel split within the 26.2% combustao bucket estimated from July's own ~83/17 ratio. Ported 2026-10-05.
+      "Portugal": [5079,2465,2845,6,3049,642,14086],
+      // source: UNRAE monthly bulletin via press -- BEV=4,486 is UNRAE's own directly-cited figure; Others=GPL/metano residual against UNRAE's own 69,411 total. Ported 2026-10-05.
+      "Italy": [4486,8399,32346,6133,14021,4026,69411],
       // source: ATTT via webdo.tn -- August = Jan-Aug cumulative (official market 47,002; BEV 2,391; PHEV 2,678) minus the Jan-Jul values already loaded (41,692 / 1,540 / 2,177), so Jan-Aug sums to the published cumulative; HEV (113) from the same Q1 ratio method (Jan-Aug est. 974 = 47,002 x 442/21,334); REEV (381 Jan-Aug) not separable per month, left in Petrol like Jan-Jul; Essence+Diesel combined into Petrol
       "Tunisia": [851,501,113,0,3845,0,5310],
       // source: WHOLE MARKET -- total incl. non-member estimates (34,390); CAMPI-TMA BEV/PHEV/HEV 2,449/1,617/3,000 (Philstar/Manila Times) PLUS non-member xEV 4,799 (= whole-market xEV share 34.5% x total - CAMPI xEV), split BEV/PHEV/HEV by 2025 non-member mix (39/49/12%, estimate); petrol = remainder; diesel not published
