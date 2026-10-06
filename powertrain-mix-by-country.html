@@ -483,7 +483,9 @@ const MONTHLY_DATA = {
       // source: Mobility Sweden (monthly) -- from the official Manadsrapport Nyregistreringar Excel's PB - Drivmedel sheet; others = Etanol+Gas+Ospec.
       "Sweden": [14034,6289,1907,49,5304,1084,28667],
       // source: UNRAE "La struttura del mercato" monthly PDF, page 1 ("Per alimentazione", WITH rental -- matches the per-marca report's total) -- see August comment for methodology. GPL (11,406) + Metano (0) folded into petrol; Others=Idrogeno (FCEV=0).
-      "Italy": [10782,15669,71604,0,36185,6937,141177]
+      "Italy": [10782,15669,71604,0,36185,6937,141177],
+      // ODMD (Otomotiv Distributorleri ve Mobilite Dernegi) Basin Bulteni, 2 Ekim 2026 -- Ek 5 motor tipi table, Otomobil (passenger car) only, excludes Hafif Ticari. BEV=Saf Elektrik(15,074)+Uzatilmis Menzil/EREV(54); PHEV=Plug-In Hibrit(175); HEV=Hibrit(3,718)+Mild Hibrit(14,018); Others=Otogaz/LPG(1,419); figures reconcile exactly to ODMD's own 63,736 Otomobil total
+      "Turkey": [15128,175,17736,1419,28112,1166,63736]
     },
     priorYearBev: {},
     priorYearTotal: {}
@@ -1497,7 +1499,7 @@ const MONTHLY_DATA = {
       // source: ACARA/SIOMAA — from the report's own cumulative "Acum 2026" columns, not summed from separately-revised months
       "Argentina": [4063,0,39969,0,230407,0,274439],
       // source: ODMD — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
-      "Turkey": [105281,4048,179751,5482,236306,33373,564241],
+      "Turkey": [120409,4223,197487,6901,264418,34539,627977],
       // source: CAMPI-TMA — petrol is the ICE remainder (no petrol/diesel split published; diesel share is negligible in PH passenger vehicles)
       "Philippines": [25151,22964,26617,0,225930,0,300662],
       // source: NZTA Waka Kotahi — light passenger vehicles (cars/vans) only, excludes commercial vehicles
@@ -1564,7 +1566,7 @@ const MONTHLY_DATA = {
       "Australia":"through Aug 2026",
       "Brazil":"through Aug 2026",
       "Argentina":"through Jun 2026",
-      "Turkey":"through Aug 2026",
+      "Turkey":"through Sep 2026",
       "Philippines":"through Aug 2026",
       "New Zealand":"through Aug 2026",
       "United States":"through Aug 2026",
@@ -1663,7 +1665,7 @@ const MONTHLY_DATA = {
       "Spain": [138520, 155672, 570192, 43440, 271172, 41108, 1220104],
       "Sweden": [122941, 67540, 23771, 1056, 52155, 16755, 284218],
       "Switzerland": [59490, 29020, 83968, 8, 46803, 12879, 232168],
-      "Turkey": [157921, 6072, 269627, 9961, 354459, 50292, 848332],
+      "Turkey": [160545, 5631, 263316, 10680, 352557, 46052, 838781],
       "United Kingdom": [535837,277687,692451,368,545231,50958,2102532],
       // source: Argonne National Laboratory — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
       "United States": [966009, 201904, 2504565, 84, 12468299, 0, 16140861],
