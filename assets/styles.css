@@ -1126,6 +1126,20 @@ ul.notes-body{
   margin-bottom:4px;
 }
 
+/* ---------- Electrified Share by Country/Continent: big hover preview (yearly BEV chart + top 10 BEV models) ---------- */
+.elec-share-preview{
+  width:min(1200px, 96vw);
+  padding:16px 20px 12px;
+}
+.elec-share-preview .mfr-sales-preview-title{ font-size:15px; margin-bottom:10px; }
+.elec-share-preview .mfr-preview-panel{ flex:0 0 320px; }
+.elec-share-no-models{
+  margin:0;
+  padding:18px 4px;
+  font-size:12.5px;
+  color:var(--text-muted);
+}
+
 /* ---------- Biggest Movers standalone page ---------- */
 .movers-page-grid{
   display:grid;

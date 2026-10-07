@@ -216,6 +216,50 @@
           <div class="tooltip" id="tooltip"></div>
         </div>
 
+        <div class="card chart-card">
+          <div class="chart-header-row">
+            <h2>Electrified Share by Continent</h2>
+            <div class="chart-mode-toggle" role="group" aria-label="Sort order">
+              <button type="button" class="mode-btn active" data-continent-sort-key="bevPct" title="Sort by battery-electric share of each continent's total registrations.">% BEV</button>
+              <button type="button" class="mode-btn" data-continent-sort-key="icePct" title="Sort by combined petrol + diesel share of each continent's total registrations.">% ICE</button>
+              <button type="button" class="mode-btn" data-continent-sort-key="bev" title="Sort by the raw number of battery-electric registrations.">Nb Reg. BEV</button>
+              <button type="button" class="mode-btn" data-continent-sort-key="total" title="Sort by total registrations, all powertrains combined.">Nb Reg. Units</button>
+              <button type="button" class="mode-btn" data-continent-sort-key="bevYoyPct" title="Sort by BEV registration growth vs. the same period last year.">YoY %</button>
+              <button type="button" class="mode-btn" data-continent-sort-key="threeYrPct" title="Sort by BEV registration growth vs. 2023 (full year).">3Y %</button>
+            </div>
+          </div>
+          <p class="note" id="continent-bars-note">Each bar is 100% of the selected powertrains for that continent -- every tracked country, summed, grouped by continent (same filters as Electrified Share by Country above). Sorted by BEV share, high to low. Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that continent's combined BEV registration growth -- hover any segment for exact figures.</p>
+          <div class="legend-row">
+            <div class="chart-legend" id="continent-legend"></div>
+            <div class="chart-mode-toggle lg" role="group" aria-label="Bar display mode">
+              <button type="button" class="mode-btn active" data-continent-bar-mode="pct" title="Show each continent's mix as a % of its own total — 100%-stacked bars.">%</button>
+              <button type="button" class="mode-btn" data-continent-bar-mode="raw" title="Show actual unit counts — bars scaled to the biggest continent shown."># of Units</button>
+            </div>
+          </div>
+          <div class="rank-rows-header">
+            <span class="rrh-spacer"></span>
+            <span class="rrh-yoy" title="BEV registrations vs. the same period last year">YoY %</span>
+            <span class="rrh-yoy" title="BEV registrations vs. 2023 (full year)">3Y %</span>
+          </div>
+          <div class="rank-rows" id="continent-rank-rows"></div>
+          <div class="tooltip" id="continent-tooltip"></div>
+        </div>
+
+        <div class="mfr-sales-preview elec-share-preview hidden" id="elec-share-preview">
+          <div class="mfr-sales-preview-title" id="elec-share-preview-title"></div>
+          <div class="mfr-preview-panels">
+            <div class="mfr-preview-panel">
+              <div class="mfr-preview-panel-title">BEV sales by year (2020 on)</div>
+              <svg class="chart" id="elec-share-year-svg" viewBox="0 0 320 260" preserveAspectRatio="none"></svg>
+            </div>
+            <div class="mfr-preview-panel mfr-preview-panel-wide">
+              <div class="mfr-preview-panel-title" id="elec-share-models-panel-title">Top 10 best-selling BEV models</div>
+              <svg class="chart hidden" id="elec-share-models-svg" viewBox="0 0 440 300" preserveAspectRatio="none"></svg>
+              <p class="note elec-share-no-models hidden" id="elec-share-no-models"></p>
+            </div>
+          </div>
+        </div>
+
         <div class="card chart-card hidden" id="elec-bars-card">
           <h2 id="elec-bars-title">Electrification Mix — Recent</h2>
           <p class="note" id="elec-bars-note"></p>
@@ -2819,6 +2863,56 @@ function buildFocusStats(){
   }).filter(Boolean);
 }
 
+// Continent-grouped equivalent of buildFocusStats() above, for the "Electrified Share by
+// Continent" section's YoY%/3Y% columns. Unlike buildFocusStats (which deliberately ignores the
+// sidebar filters, since a country's own rank/growth is a fact about that country), this ONE
+// respects selectedCountries/selectedContinents/passesRankFilter/focusedCountry -- so a
+// continent's displayed growth always matches the sum of exactly the countries currently summed
+// into its bev/total bar above, not a different, filter-independent set. The same per-country
+// fallback cascade as buildFocusStats (selected period -> 2026 projection -> each country's own
+// last available period) is applied PER COUNTRY before summing into continent buckets -- growth
+// percentages are computed from the summed raw bev/bevPrior/base-year figures, never averaged
+// directly (averaging percentages across countries of very different size would be meaningless).
+function buildContinentFocusStats(){
+  const currentKey = [...selectedMonths][0];
+  const projected = MONTHLY_DATA['2026-projection'] ? aggregateByCountry(['2026-projection']) : null;
+  const base3yr = MONTHLY_DATA['2023-annual'] ? aggregateByCountry(['2023-annual']) : null;
+  const current = aggregateByCountry();
+  const currentIsFullYear = /^\d{4}-annual$/.test(currentKey);
+
+  const filteredCountries = ALL_COUNTRIES.filter(c =>
+    selectedCountries.has(c) && selectedContinents.has(COUNTRY_CONTINENT[c] || "OTHER") &&
+    passesRankFilter(c) && (!focusedCountry || c === focusedCountry));
+
+  const buckets = {};
+  filteredCountries.forEach(country => {
+    let d = current[country];
+    if((!d || d.total <= 0) && projected && projected[country] && projected[country].total > 0) d = projected[country];
+    if((!d || d.total <= 0) && LAST_AVAILABLE_PERIOD_KEY[country]){
+      const own = aggregateByCountry([LAST_AVAILABLE_PERIOD_KEY[country]])[country];
+      if(own && own.total > 0) d = own;
+    }
+    if(!d || d.total <= 0) return;
+
+    const projHasData = projected && projected[country] && projected[country].total > 0;
+    const yearNow = projHasData ? projected[country] : (currentIsFullYear ? d : null);
+    const base = base3yr ? base3yr[country] : null;
+
+    const code = COUNTRY_CONTINENT[country] || "OTHER";
+    if(!buckets[code]) buckets[code] = { continentCode: code, bev:0, total:0, bevPrior:0, yearNowBev:0, baseBev:0, hasYearNow:false, hasBase:false };
+    const b = buckets[code];
+    b.bev += d.bev; b.total += d.total; b.bevPrior += d.bevPrior || 0;
+    if(yearNow){ b.yearNowBev += yearNow.bev; b.hasYearNow = true; }
+    if(base && base.bev > 0){ b.baseBev += base.bev; b.hasBase = true; }
+  });
+
+  return Object.values(buckets).map(b => ({
+    continentCode: b.continentCode,
+    bevYoyPct: b.bevPrior ? +((b.bev - b.bevPrior) / b.bevPrior * 100).toFixed(1) : null,
+    threeYrPct: (b.hasYearNow && b.hasBase && b.baseBev > 0) ? +(((b.yearNowBev - b.baseBev) / b.baseBev) * 100).toFixed(1) : null,
+  }));
+}
+
 // rank of `country` within `list` by `key`, high to low (nulls excluded from the ranking pool)
 function rankWithin(list, country, key){
   const ranked = list.filter(d => d[key] != null).sort((a,b) => b[key] - a[key]);
@@ -3058,6 +3152,31 @@ function buildData(){
 // full (country-filtered, month-filtered) data — used for the map & sort order, independent of powertrain filter
 let DATA = [];
 const DATA_BY_NAME = {};
+
+// Continent-grouped version of DATA, for "Electrified Share by Continent" -- built by re-grouping
+// DATA itself (not re-deriving from raw aggregateByCountry), so a continent's bar is always
+// guaranteed to sum to exactly what's currently shown per-country above it, under whatever
+// filters are active. `country` is reused (rather than a separate field) to hold the continent's
+// display name, so every existing row-rendering helper (segHTML, etc.) works unchanged.
+function buildContinentData(){
+  const buckets = {};
+  DATA.forEach(d => {
+    const code = COUNTRY_CONTINENT[d.country] || "OTHER";
+    if(!buckets[code]) buckets[code] = { continentCode: code, country: CONTINENT_LABELS[code] || code, bev:0, phev:0, hev:0, others:0, petrol:0, diesel:0, total:0, bevPrior:0, totalPrior:0 };
+    const c = buckets[code];
+    FUEL_KEYS.forEach(k => { c[k] += d[k] || 0; });
+    c.total += d.total; c.bevPrior += d.bevPrior || 0; c.totalPrior += d.totalPrior || 0;
+  });
+  return Object.values(buckets)
+    .filter(c => c.total > 0)
+    .map(c => ({
+      ...c,
+      bevPct: c.total ? +(c.bev/c.total*100).toFixed(1) : 0,
+      icePct: c.total ? +((c.petrol+c.diesel)/c.total*100).toFixed(1) : 0,
+      bevYoyPct: c.bevPrior ? +((c.bev - c.bevPrior)/c.bevPrior*100).toFixed(1) : null,
+    }));
+}
+let CONTINENT_DATA = [];
 
 // --- color scale for the map: continuous, pale -> dark green by BEV% (0% = palest) ---
 // Domain is the true GLOBAL BEV% ceiling across every period AND every country ever tracked —
@@ -3611,6 +3730,7 @@ function toggleFuelIsolation(key){
   selectedFuels = (selectedFuels.size === 1 && selectedFuels.has(key)) ? new Set(FUEL_KEYS) : new Set([key]);
   fuelsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = selectedFuels.has(cb.dataset.fuel); });
   renderBars();
+  if(typeof renderContinentBars === 'function') renderContinentBars();
   updateURL();
 }
 document.getElementById('legend').addEventListener('click', e => {
@@ -3738,6 +3858,338 @@ rankRows.addEventListener('pointermove', e => {
   tooltip.innerHTML = mapTooltipHTML(entry, country);
 });
 rankRows.addEventListener('pointerleave', () => { tooltip.style.opacity = 0; });
+
+// --- Electrified Share by Continent: same bars/legend/sort/tooltip machinery as Electrified
+// Share by Country just above, grouped by continent instead of by country (CONTINENT_DATA,
+// built in recompute() by re-grouping DATA itself -- see buildContinentData()). Kept as a fully
+// separate copy (own state, own DOM, own listeners) rather than parameterizing renderBars()
+// itself, matching how this project already duplicates rather than abstracts near-identical
+// per-page chart blocks (see the file-level comments on electrification-bars.js).
+const continentRankRows = document.getElementById('continent-rank-rows');
+const continentTooltip = document.getElementById('continent-tooltip');
+const continentBarsNote = document.getElementById('continent-bars-note');
+const continentBarChartCard = continentRankRows.closest('.chart-card');
+const CONTINENT_PCT_NOTE = continentBarsNote.textContent;
+const CONTINENT_RAW_NOTE = 'Bar length now reflects actual registrations (scaled to the biggest continent shown), so continents are comparable by volume, not just mix. Sorted by BEV share, high to low. Segment labels show unit counts -- hover any segment for exact figures.';
+
+let continentBarMode = 'pct';
+let continentBarSortKey = 'bevPct';
+
+function renderContinentFuelLegend(){
+  document.getElementById('continent-legend').innerHTML = FUEL_KEYS.map(k => `
+    <div class="legend-chip${selectedFuels.has(k) ? '' : ' dimmed'}" data-fuel="${k}"><span class="swatch" style="background:${FUEL_COLORS[k]}"></span>${FUEL_LABELS[k]}</div>
+  `).join('');
+}
+document.getElementById('continent-legend').addEventListener('click', e => {
+  const chip = e.target.closest('.legend-chip');
+  if(chip) toggleFuelIsolation(chip.dataset.fuel);
+});
+
+function renderContinentBars(){
+  continentRankRows.classList.toggle('raw-mode', continentBarMode === 'raw');
+  const threeYrByContinent = Object.fromEntries(buildContinentFocusStats().map(f => [f.continentCode, f.threeYrPct]));
+  const withGrowth = CONTINENT_DATA.map(d => ({ ...d, threeYrPct: threeYrByContinent[d.continentCode] ?? null }));
+  const sorted = [...withGrowth].sort((a,b) => {
+    const av = a[continentBarSortKey], bv = b[continentBarSortKey];
+    if(av == null) return bv == null ? 0 : 1;
+    if(bv == null) return -1;
+    return bv - av;
+  });
+  const fuels = FUEL_KEYS.filter(k => selectedFuels.has(k));
+  const denoms = sorted.map(d => fuels.reduce((s,k) => s + d[k], 0));
+  const globalMax = Math.max(1, ...denoms);
+  continentRankRows.innerHTML = sorted.map((d,i) => {
+    const denom = denoms[i];
+    const widthDenom = continentBarMode === 'raw' ? globalMax : denom;
+    const yoy = d.bevYoyPct;
+    const yoyText = yoy == null ? '—' : `${yoy > 0 ? '+' : ''}${yoy}%`;
+    const yoyClass = yoy == null ? '' : (yoy >= 0 ? 'yoy-up' : 'yoy-down');
+    const y3 = d.threeYrPct;
+    const y3Text = y3 == null ? '—' : `${y3 > 0 ? '+' : ''}${y3}%`;
+    const y3Class = y3 == null ? '' : (y3 >= 0 ? 'yoy-up' : 'yoy-down');
+    const bevWidth = (fuels.includes('bev') && denom > 0) ? d.bev / widthDenom * 100 : 0;
+    const bevNarrow = fuels.includes('bev') && d.bev > 0 && denom > 0 && bevWidth < 7;
+    const bevOutsideText = continentBarMode === 'raw' ? d.bev.toLocaleString('en-US') : (d.bev/denom*100).toFixed(1) + '%';
+    return `
+    <div class="rank-row" data-country="${d.country}" data-continent-code="${d.continentCode}">
+      <div class="country-label">${d.country}</div>
+      <span class="bev-outside-label" style="color:${FUEL_COLORS.bev}">${bevNarrow ? `BEV ${bevOutsideText}` : ''}</span>
+      <div class="bar-track">
+        ${fuels.map(k => segHTML(d,k,denom,widthDenom)).join('')}
+      </div>
+      <div class="pct-label ${yoyClass}" title="BEV vs. same period last year">${yoyText}</div>
+      <div class="pct-label ${y3Class}" title="BEV vs. 2023 (full year)">${y3Text}</div>
+    </div>`;
+  }).join('');
+  renderContinentFuelLegend();
+}
+
+document.querySelectorAll('[data-continent-bar-mode]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if(btn.dataset.continentBarMode === continentBarMode) return;
+    continentBarMode = btn.dataset.continentBarMode;
+    document.querySelectorAll('[data-continent-bar-mode]').forEach(b => b.classList.toggle('active', b === btn));
+    continentBarsNote.textContent = continentBarMode === 'raw' ? CONTINENT_RAW_NOTE : CONTINENT_PCT_NOTE;
+    renderContinentBars();
+  });
+});
+document.querySelectorAll('[data-continent-sort-key]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if(btn.dataset.continentSortKey === continentBarSortKey) return;
+    continentBarSortKey = btn.dataset.continentSortKey;
+    document.querySelectorAll('[data-continent-sort-key]').forEach(b => b.classList.toggle('active', b === btn));
+    renderContinentBars();
+  });
+});
+continentRankRows.addEventListener('click', e => {
+  const seg = e.target.closest('.bar-seg');
+  if(seg) toggleFuelIsolation(seg.dataset.key);
+});
+continentRankRows.addEventListener('pointermove', e => {
+  const seg = e.target.closest('.bar-seg');
+  const cardRect = continentBarChartCard.getBoundingClientRect();
+  if(seg){
+    const key = seg.dataset.key;
+    continentTooltip.style.left = (e.clientX - cardRect.left) + 'px';
+    continentTooltip.style.top = (e.clientY - cardRect.top - 10) + 'px';
+    continentTooltip.style.opacity = 1;
+    continentTooltip.innerHTML = `${seg.dataset.country} — ${FUEL_LABELS[key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)`;
+    return;
+  }
+  const row = e.target.closest('.rank-row');
+  if(!row){ continentTooltip.style.opacity = 0; return; }
+  continentTooltip.style.left = (e.clientX - cardRect.left) + 'px';
+  continentTooltip.style.top = (e.clientY - cardRect.top - 10) + 'px';
+  continentTooltip.style.opacity = 1;
+  continentTooltip.innerHTML = `<strong>${row.dataset.country}</strong>`;
+});
+continentRankRows.addEventListener('pointerleave', () => { continentTooltip.style.opacity = 0; });
+
+// --- big hover preview (8b): shared by both Electrified Share sections above -- hovering a
+// country's (or continent's) name shows a much larger popup than the small cursor-following
+// tooltip wired above: a yearly BEV bar chart (COUNTRY_YEARLY, every real annual year from 2020
+// on) on the left, and that country's/continent's top 10 best-selling BEV models on the right
+// (MANUFACTURER_MODEL_YEARLY, each country's own latest loaded year -- only loaded for a handful
+// of countries so far, see MODEL_YEARLY_COUNTRIES below; shows an honest explanatory message
+// instead of an empty panel everywhere else, the same convention this project already uses for
+// e.g. Canada's un-published-by-source provinces). Same open-on-hover/close-on-leave interaction
+// as the Sales by Brand/Model preview popups (see showMfrBrandModelPreview et al. further down
+// this file), just anchored off the .country-label inside each rank-row here instead of there.
+const elecSharePreview = document.getElementById('elec-share-preview');
+const MODEL_YEARLY_COUNTRIES = typeof MANUFACTURER_MODEL_YEARLY !== 'undefined' ? Object.keys(MANUFACTURER_MODEL_YEARLY) : [];
+
+function elecShareCountries(kind, key){
+  return kind === 'continent' ? ALL_COUNTRIES.filter(c => (COUNTRY_CONTINENT[c] || 'OTHER') === key) : [key];
+}
+
+function buildBevYearRows(countries){
+  const byYear = new Map();
+  countries.forEach(c => {
+    (COUNTRY_YEARLY[c] || []).filter(r => r.period_type === 'ANNUAL' && r.year >= 2020).forEach(r => {
+      byYear.set(r.year, (byYear.get(r.year) || 0) + (r.bev || 0));
+    });
+  });
+  return [...byYear.entries()].sort((a,b) => a[0] - b[0]).map(([year, bev]) => ({ year, bev }));
+}
+
+function renderElecShareYearChart(rows){
+  const svgEl = document.getElementById('elec-share-year-svg');
+  const svg = d3.select(svgEl);
+  svg.selectAll('*').remove();
+  if(!rows.length) return;
+  const W = 320, H = 260, M = { top: 16, right: 10, bottom: 28, left: 46 };
+  const innerW = W - M.left - M.right, innerH = H - M.top - M.bottom;
+  const x = d3.scaleBand().domain(rows.map(d => d.year)).range([0, innerW]).padding(0.25);
+  const yMax = Math.max(1, ...rows.map(d => d.bev));
+  const y = d3.scaleLinear().domain([0, yMax]).nice().range([innerH, 0]);
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+  g.append('g').attr('class', 'bubble-axis').call(d3.axisLeft(y).ticks(5).tickFormat(d3.format('~s')));
+  g.append('g').attr('class', 'bubble-axis').attr('transform', `translate(0,${innerH})`)
+    .call(d3.axisBottom(x).tickSize(4).tickFormat(d3.format('d')))
+    .selectAll('text').style('font-size', '9.5px');
+  g.selectAll('.bar-actual').data(rows).join('rect').attr('class', 'bar-actual')
+    .attr('x', d => x(d.year)).attr('width', x.bandwidth())
+    .attr('y', d => y(d.bev)).attr('height', d => innerH - y(d.bev))
+    .attr('fill', FUEL_COLORS.bev);
+  g.selectAll('.bev-year-value').data(rows).join('text').attr('class', 'bev-year-value')
+    .attr('x', d => x(d.year) + x.bandwidth() / 2).attr('y', d => y(d.bev) - 5)
+    .attr('text-anchor', 'middle').style('font-size', '9px').style('font-weight', '700')
+    .style('fill', 'var(--text)').text(d => d3.format('~s')(d.bev));
+}
+
+// Every country's source spells the same car differently ("Model Y" / "MODEL Y" / "MODEL Y BEV",
+// "ID.3" / "ID3" / "Id.3", Renault "5" / "R5", Mercedes "EQA" / "CLASE EQA" / "EQA CLASS", Citroen
+// "e-C3" / "C3 BEV"...), so listing models by their raw brand|model string shows one car several
+// times. canonicalModelKey() collapses all of those to one identity: lowercase, accents and
+// punctuation dropped, the " BEV"/" EV" powertrain-split suffix and any trailing generation
+// numeral (II-VII) removed, plus a few per-brand rewrites for genuine renames/regional names.
+// Only run on BEV rows (bev > 0), so folding "C3 BEV" into "e-C3" etc. can't merge a petrol
+// model into its electric twin. Deliberately NOT merged: models a source itself lumps together
+// ("ID.4, ID.5") or that are separate nameplates (Q4 vs Q4 Sportback, MG4 vs MG4 Urban).
+function stripDiacritics(s){ return String(s).normalize('NFKD').replace(/[̀-ͯ]/g, ''); }
+const MODEL_POWERTRAIN_SUFFIX_RE = /\s+(bev|ev|electric)$/i;
+function canonicalModelKey(brand, model){
+  const b = stripDiacritics(brand).toLowerCase().replace(/[^a-z0-9]/g, '');
+  let m = stripDiacritics(model).toLowerCase().trim();
+  m = m.replace(MODEL_POWERTRAIN_SUFFIX_RE, '').replace(/\s+(ii|iii|iv|v|vi|vii)$/, '');
+  switch(b){
+    case 'mercedesbenz': m = m.replace(/^clase\s+/, '').replace(/[\s-]*(class|klasse)$/, ''); break;
+    case 'audi': m = m.replace(/^(.+?)\s+e-?tron$/, '$1'); break; // "Q4 e-tron" = "Q4"; bare "e-tron" has no stem so stays
+    case 'ford': m = m.replace(/^explorer-e$/, 'explorer').replace(/^mustang(\s+mk-e)?$/, 'mustang mach-e'); break;
+    case 'toyota': m = ({ 'bz4': 'bz4x', 'c-hr': 'c-hr+' })[m] || m; break; // BEV rows of C-HR are the C-HR+
+    case 'renault': m = m.replace(/^r(\d)$/, '$1').replace(/\s+e-?tech$/, ''); break;
+    case 'citroen': m = m.replace(/^e-(?=\S)/, ''); break; // e-C3 = C3 BEV, e-Berlingo = Berlingo BEV
+    case 'volvo': if(m === 'ec40') m = 'c40'; break; // C40 was renamed EC40
+    case 'volkswagen': m = m.replace(/\s+neo$/, ''); break;
+    case 'xpeng': m = m.replace(/\s+(long|standard)\s+range$/, ''); break;
+    case 'vinfast': m = m.replace(/\s+plus$/, ''); break;
+    case 'mazda': m = m.replace(/^(mazda\s?)?6e?$/, '6e').replace(/^cx-6e?$/, 'cx-6e'); break;
+    case 'suzuki': m = m.replace(/^e[\s-]vitara$/, 'vitara'); break;
+    case 'opel': m = m.replace(/^grandland x$/, 'grandland'); break;
+  }
+  return b + '|' + m.replace(/[^a-z0-9+]/g, '');
+}
+// display label for a raw model string: drop the redundant powertrain suffix (this list is
+// BEV-only anyway), Mercedes' "class" wording, and tame SHOUTED words (ELROQ -> Elroq) while
+// leaving codes alone (CLA, EQA, X1, ID.3 -- anything under 4 letters or containing a digit)
+function tidyModelLabel(brand, raw){
+  let s = raw.trim().replace(MODEL_POWERTRAIN_SUFFIX_RE, '');
+  if(stripDiacritics(brand).toLowerCase().replace(/[^a-z0-9]/g, '') === 'mercedesbenz'){
+    s = s.replace(/^clase\s+/i, '').replace(/[\s-]*(class|klasse)$/i, '');
+  }
+  return s.replace(/[A-Za-z0-9+.#?]+/g, t => /^[A-Z]{4,}$/.test(t) ? t[0] + t.slice(1).toLowerCase() : t);
+}
+function topVariant(map){
+  let best = null, bestUnits = -1;
+  map.forEach((units, key) => { if(units > bestUnits){ best = key; bestUnits = units; } });
+  return best;
+}
+
+// top 10 BEV models summed across `countries`, each country contributing its OWN latest loaded
+// model-year (years genuinely differ by country -- disclosed in the panel subtitle rather than
+// forced to a shared year none of them may actually have). Models are identified by
+// canonicalModelKey(), so one car is one row however each country's source spells it.
+function buildTopBevModels(countries){
+  const byModel = new Map();
+  const yearsUsed = new Set();
+  let anyModelData = false;
+  countries.forEach(c => {
+    const rows = typeof MANUFACTURER_MODEL_YEARLY !== 'undefined' && MANUFACTURER_MODEL_YEARLY[c];
+    if(!rows || !rows.length) return;
+    anyModelData = true;
+    const latestYear = Math.max(...rows.map(r => r.year));
+    yearsUsed.add(latestYear);
+    rows.filter(r => r.year === latestYear && r.bev > 0).forEach(r => {
+      const key = canonicalModelKey(r.brand, r.model);
+      if(!byModel.has(key)) byModel.set(key, { bev: 0, forms: new Map(), brands: new Map() });
+      const e = byModel.get(key);
+      e.bev += r.bev;
+      // spellings grouped by their suffix-stripped lowercase form first, so the label follows
+      // the spelling most units used ("e-C3") rather than one split across casings/suffixes
+      const form = r.model.trim().replace(MODEL_POWERTRAIN_SUFFIX_RE, '').toLowerCase();
+      if(!e.forms.has(form)) e.forms.set(form, new Map());
+      e.forms.get(form).set(r.model, (e.forms.get(form).get(r.model) || 0) + r.bev);
+      e.brands.set(r.brand, (e.brands.get(r.brand) || 0) + r.bev);
+    });
+  });
+  const rows = [...byModel.values()].map(e => {
+    const formTotals = new Map([...e.forms].map(([form, spellings]) => [form, [...spellings.values()].reduce((a, b) => a + b, 0)]));
+    const brand = topVariant(e.brands);
+    return { brand, model: tidyModelLabel(brand, topVariant(e.forms.get(topVariant(formTotals)))), bev: e.bev };
+  });
+  return { rows: rows.sort((a,b) => b.bev - a.bev).slice(0, 10), anyModelData, years: [...yearsUsed].sort() };
+}
+
+function renderElecShareModelsChart(rows){
+  const svgEl = document.getElementById('elec-share-models-svg');
+  const svg = d3.select(svgEl);
+  svg.selectAll('*').remove();
+  if(!rows.length) return;
+  const W = 440, rowH = 28, M = { top: 4, right: 56, bottom: 4, left: 190 };
+  const innerW = W - M.left - M.right;
+  const H = rows.length * rowH + M.top + M.bottom;
+  svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const x = d3.scaleLinear().domain([0, Math.max(1, ...rows.map(r => r.bev))]).range([0, innerW]);
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+  g.selectAll('.elec-model-bar').data(rows).join('rect').attr('class', 'elec-model-bar')
+    .attr('x', 0).attr('y', (d,i) => i * rowH + 4).attr('width', d => Math.max(1, x(d.bev))).attr('height', rowH - 8)
+    .attr('fill', FUEL_COLORS.bev);
+  g.selectAll('.rank-num-label').data(rows).join('text').attr('class', 'rank-num-label')
+    .attr('x', -(M.left - 34)).attr('y', (d,i) => i * rowH + rowH / 2).attr('dy', '0.32em').attr('text-anchor', 'end')
+    .style('font-size', '11px').style('font-weight', '700').style('fill', 'var(--text-muted)')
+    .text((d,i) => `#${i + 1}`);
+  g.selectAll('.model-label').data(rows).join('text').attr('class', 'model-label')
+    .attr('x', -6).attr('y', (d,i) => i * rowH + rowH / 2).attr('dy', '0.32em').attr('text-anchor', 'end')
+    .style('font-size', '11.5px').style('fill', 'var(--text)').text(d => `${d.brand} ${d.model}`);
+  g.selectAll('.value-label').data(rows).join('text').attr('class', 'value-label')
+    .attr('x', d => Math.max(1, x(d.bev)) + 5).attr('y', (d,i) => i * rowH + rowH / 2).attr('dy', '0.32em')
+    .style('font-size', '11.5px').style('fill', 'var(--text)').text(d => d.bev.toLocaleString('en-US'));
+}
+
+function showElecSharePreview(kind, key, anchorEl){
+  if(!elecSharePreview) return;
+  const countries = elecShareCountries(kind, key);
+  const yearRows = buildBevYearRows(countries);
+  if(!yearRows.length){ elecSharePreview.classList.add('hidden'); return; }
+  const displayName = kind === 'continent' ? (CONTINENT_LABELS[key] || key) : key;
+  document.getElementById('elec-share-preview-title').textContent = `${displayName} — BEV sales`;
+  renderElecShareYearChart(yearRows);
+
+  const modelsSvg = document.getElementById('elec-share-models-svg');
+  const noModelsEl = document.getElementById('elec-share-no-models');
+  const panelTitle = document.getElementById('elec-share-models-panel-title');
+  const { rows: modelRows, anyModelData, years } = buildTopBevModels(countries);
+  if(modelRows.length){
+    const yearLabel = years.length > 1 ? `each country's latest year: ${years.join(', ')}` : years[0];
+    panelTitle.textContent = `Top 10 best-selling BEV models — ${yearLabel}`;
+    renderElecShareModelsChart(modelRows);
+    modelsSvg.classList.remove('hidden');
+    noModelsEl.classList.add('hidden');
+  } else {
+    panelTitle.textContent = 'Top 10 best-selling BEV models';
+    noModelsEl.textContent = anyModelData
+      ? `${displayName} has model-level data loaded, but no BEV models in it yet.`
+      : `No model-level sales data loaded yet for ${kind === 'continent' ? 'any country in ' + displayName : displayName} — so far this level of detail only exists for ${MODEL_YEARLY_COUNTRIES.join(', ')}.`;
+    modelsSvg.classList.add('hidden');
+    noModelsEl.classList.remove('hidden');
+  }
+
+  const rect = anchorEl.getBoundingClientRect();
+  elecSharePreview.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 1220)) + 'px';
+  elecSharePreview.style.top = (rect.bottom + 8) + 'px';
+  elecSharePreview.classList.remove('hidden');
+}
+
+rankRows.addEventListener('pointerover', e => {
+  const label = e.target.closest('.country-label');
+  if(!label) return;
+  const row = label.closest('.rank-row');
+  if(row) showElecSharePreview('country', row.dataset.country, label);
+});
+rankRows.addEventListener('pointerout', e => {
+  const label = e.target.closest('.country-label');
+  if(!label || (e.relatedTarget && rankRows.contains(e.relatedTarget))) return;
+  elecSharePreview.classList.add('hidden');
+});
+continentRankRows.addEventListener('pointerover', e => {
+  const label = e.target.closest('.country-label');
+  if(!label) return;
+  const row = label.closest('.rank-row');
+  if(row) showElecSharePreview('continent', row.dataset.continentCode, label);
+});
+continentRankRows.addEventListener('pointerout', e => {
+  const label = e.target.closest('.country-label');
+  if(!label || (e.relatedTarget && continentRankRows.contains(e.relatedTarget))) return;
+  elecSharePreview.classList.add('hidden');
+});
+// safety net: a hover-only popup can get stuck open if pointerout never fires cleanly (fast
+// mouse movement, scrolling mid-hover, touch devices with no real hover state) -- same pattern
+// as the Sales by Brand/Model popups' own safety net further down this file.
+document.addEventListener('click', e => {
+  if(elecSharePreview && !elecSharePreview.classList.contains('hidden') && !elecSharePreview.contains(e.target)){
+    elecSharePreview.classList.add('hidden');
+  }
+});
 
 // --- bubble chart: total volume (x) vs BEV share (y), bubble size = BEV units ---
 const bubbleSvg = d3.select('#bubble-svg');
@@ -4197,11 +4649,13 @@ function recompute(){
   DATA = buildData();
   Object.keys(DATA_BY_NAME).forEach(k => delete DATA_BY_NAME[k]);
   DATA.forEach(d => { DATA_BY_NAME[d.country] = d; });
+  CONTINENT_DATA = buildContinentData();
   colorScale = makeColorScale();
   updateFocusSectionVisibility();
   renderStats();
   renderMovers();
   renderBars();
+  renderContinentBars();
   renderTable();
   renderMap();
   renderLegend();
