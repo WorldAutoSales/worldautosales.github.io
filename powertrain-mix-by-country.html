@@ -543,7 +543,9 @@ const MONTHLY_DATA = {
       // FCAI (VFACTS) via CarExpert, Australia (monthly) -- light vehicles only, excludes heavy commercial; others=0
       "Australia": [26287,10072,17843,0,26018,25173,105393],
       // INEGI RAIAVL open data CSVs (venta mensual + hibrido mensual), Mexico (monthly) -- summed directly from the raw files
-      "Mexico": [2494,3267,11063,0,112451,0,129275]
+      "Mexico": [2494,3267,11063,0,112451,0,129275],
+      // ACARA/DNRPA, Argentina (monthly) -- BEV/HEV real (Infobae + Autoxarg, both citing ACARA/DNRPA); PHEV and Diesel always 0 (not meaningfully tracked/negligible); Petrol=residual
+      "Argentina": [865,0,8322,0,37530,0,46717]
     },
     priorYearBev: {      "Finland":2591,      "Belgium":11966,      "Netherlands":12008,      "Poland":4452,      "Brazil":8195,      "Mexico":2041},
     priorYearTotal: {      "Finland":5996,      "Belgium":31519,      "Netherlands":32199,      "Poland":49853,      "Brazil":231479,      "Mexico":119766}
@@ -1555,7 +1557,7 @@ const MONTHLY_DATA = {
       // source: ANFAVEA — "Carta da Anfavea"; Brazil's dominant Flex-fuel (gasoline/ethanol) vehicles mapped into petrol
       "Brazil": [166084,131994,135811,0,1526608,197751,2158248],
       // source: ACARA/SIOMAA — from the report's own cumulative "Acum 2026" columns, not summed from separately-revised months
-      "Argentina": [4063,0,39969,0,230407,0,274439],
+      "Argentina": [4928,0,48291,0,267937,0,321156],
       // source: ODMD — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
       "Turkey": [120409,4223,197487,6901,264418,34539,627977],
       // source: CAMPI-TMA — petrol is the ICE remainder (no petrol/diesel split published; diesel share is negligible in PH passenger vehicles)
@@ -1623,7 +1625,7 @@ const MONTHLY_DATA = {
       "Japan":"through Aug 2026",
       "Australia":"through Sep 2026",
       "Brazil":"through Sep 2026",
-      "Argentina":"through Jun 2026",
+      "Argentina":"through Jul 2026",
       "Turkey":"through Sep 2026",
       "Philippines":"through Aug 2026",
       "New Zealand":"through Aug 2026",
@@ -1684,7 +1686,7 @@ const MONTHLY_DATA = {
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [14244, 0, 32661, 0, 75943, 44771, 167619],
       "Malaysia": [75270, 0, 55515, 0, 692576, 37613, 860974],
-      "Argentina": [8379, 0, 79938, 0, 460814, 0, 549131],
+      "Argentina": [8496, 0, 84254, 0, 459321, 0, 552071],
       "Australia": [257364, 116285, 215257, 0, 359588, 310285, 1258779],
       "China": [11718000, 5390333, 0, 0, 14496000, 0, 31604333],
       "Austria": [83292, 37900, 94882, 3, 76511, 30510, 323098],
