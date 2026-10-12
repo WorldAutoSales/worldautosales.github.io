@@ -189,6 +189,35 @@
 
         <div class="card chart-card">
           <div class="chart-header-row">
+            <h2>Electrified Share by Continent</h2>
+            <div class="chart-mode-toggle" role="group" aria-label="Sort order">
+              <button type="button" class="mode-btn active" data-continent-sort-key="bevPct" title="Sort by battery-electric share of each continent's total registrations.">% BEV</button>
+              <button type="button" class="mode-btn" data-continent-sort-key="icePct" title="Sort by combined petrol + diesel share of each continent's total registrations.">% ICE</button>
+              <button type="button" class="mode-btn" data-continent-sort-key="bev" title="Sort by the raw number of battery-electric registrations.">Nb Reg. BEV</button>
+              <button type="button" class="mode-btn" data-continent-sort-key="total" title="Sort by total registrations, all powertrains combined.">Nb Reg. Units</button>
+              <button type="button" class="mode-btn" data-continent-sort-key="bevYoyPct" title="Sort by BEV registration growth vs. the same period last year.">YoY %</button>
+              <button type="button" class="mode-btn" data-continent-sort-key="threeYrPct" title="Sort by BEV registration growth vs. 2023 (full year).">3Y %</button>
+            </div>
+          </div>
+          <p class="note" id="continent-bars-note">Each bar is 100% of the selected powertrains for that continent -- every tracked country, summed, grouped by continent (same filters as Electrified Share by Country below). Sorted by BEV share, high to low. Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that continent's combined BEV registration growth -- hover any segment for exact figures.</p>
+          <div class="legend-row">
+            <div class="chart-legend" id="continent-legend"></div>
+            <div class="chart-mode-toggle lg" role="group" aria-label="Bar display mode">
+              <button type="button" class="mode-btn active" data-continent-bar-mode="pct" title="Show each continent's mix as a % of its own total — 100%-stacked bars.">%</button>
+              <button type="button" class="mode-btn" data-continent-bar-mode="raw" title="Show actual unit counts — bars scaled to the biggest continent shown."># of Units</button>
+            </div>
+          </div>
+          <div class="rank-rows-header">
+            <span class="rrh-spacer"></span>
+            <span class="rrh-yoy" title="BEV registrations vs. the same period last year">YoY %</span>
+            <span class="rrh-yoy" title="BEV registrations vs. 2023 (full year)">3Y %</span>
+          </div>
+          <div class="rank-rows" id="continent-rank-rows"></div>
+          <div class="tooltip" id="continent-tooltip"></div>
+        </div>
+
+        <div class="card chart-card">
+          <div class="chart-header-row">
             <h2>Electrified Share by Country</h2>
             <div class="chart-mode-toggle" role="group" aria-label="Sort order">
               <button type="button" class="mode-btn active" data-sort-key="bevPct" title="Sort by battery-electric share of each country's total registrations.">% BEV</button>
@@ -214,35 +243,6 @@
           </div>
           <div class="rank-rows" id="rank-rows"></div>
           <div class="tooltip" id="tooltip"></div>
-        </div>
-
-        <div class="card chart-card">
-          <div class="chart-header-row">
-            <h2>Electrified Share by Continent</h2>
-            <div class="chart-mode-toggle" role="group" aria-label="Sort order">
-              <button type="button" class="mode-btn active" data-continent-sort-key="bevPct" title="Sort by battery-electric share of each continent's total registrations.">% BEV</button>
-              <button type="button" class="mode-btn" data-continent-sort-key="icePct" title="Sort by combined petrol + diesel share of each continent's total registrations.">% ICE</button>
-              <button type="button" class="mode-btn" data-continent-sort-key="bev" title="Sort by the raw number of battery-electric registrations.">Nb Reg. BEV</button>
-              <button type="button" class="mode-btn" data-continent-sort-key="total" title="Sort by total registrations, all powertrains combined.">Nb Reg. Units</button>
-              <button type="button" class="mode-btn" data-continent-sort-key="bevYoyPct" title="Sort by BEV registration growth vs. the same period last year.">YoY %</button>
-              <button type="button" class="mode-btn" data-continent-sort-key="threeYrPct" title="Sort by BEV registration growth vs. 2023 (full year).">3Y %</button>
-            </div>
-          </div>
-          <p class="note" id="continent-bars-note">Each bar is 100% of the selected powertrains for that continent -- every tracked country, summed, grouped by continent (same filters as Electrified Share by Country above). Sorted by BEV share, high to low. Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that continent's combined BEV registration growth -- hover any segment for exact figures.</p>
-          <div class="legend-row">
-            <div class="chart-legend" id="continent-legend"></div>
-            <div class="chart-mode-toggle lg" role="group" aria-label="Bar display mode">
-              <button type="button" class="mode-btn active" data-continent-bar-mode="pct" title="Show each continent's mix as a % of its own total — 100%-stacked bars.">%</button>
-              <button type="button" class="mode-btn" data-continent-bar-mode="raw" title="Show actual unit counts — bars scaled to the biggest continent shown."># of Units</button>
-            </div>
-          </div>
-          <div class="rank-rows-header">
-            <span class="rrh-spacer"></span>
-            <span class="rrh-yoy" title="BEV registrations vs. the same period last year">YoY %</span>
-            <span class="rrh-yoy" title="BEV registrations vs. 2023 (full year)">3Y %</span>
-          </div>
-          <div class="rank-rows" id="continent-rank-rows"></div>
-          <div class="tooltip" id="continent-tooltip"></div>
         </div>
 
         <div class="mfr-sales-preview elec-share-preview hidden" id="elec-share-preview">
