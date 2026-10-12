@@ -537,10 +537,16 @@ const MONTHLY_DATA = {
       // RDC via CBS StatLine table 85898NED (passenger cars, 2026MM09 -- the dataset behind the BOVAG/RAI Vereniging release of 2026-10-01) -- exact single-month counts: BEV 19,149; PHEV 6,383; HEV = CBS total hybrids 15,010 minus PHEV (full hybrid 5,253 + mild hybrid 3,348 + 26 unknown), same combined 'hybride' bucket as August; Others = LPG 105 + 1 unknown fuel; Petrol 1,832; Diesel 162. YTD uses CBS's current-vintage Jan-Sep sum (264,701 = BOVAG's own YTD), which restates earlier months slightly
       "Netherlands": [19149,6383,8627,106,1832,162,36259],
       // PZPM (pzpm.org.pl, Informacja prasowa 5 Oct 2026, CEPiK data), passenger cars -- BEV 3,478; PHEV = 4,891 + 67 EREV; HEV = classic hybrids 14,535 + mild hybrids 12,826; Petrol 15,492; Diesel 3,007; Others = 2,058 residual (LPG/other, not itemized by PZPM). Same convention as the ACEA-based Jan-Aug rows (PHEV incl. EREV, HEV incl. MHEV): PZPM Jan-Sep minus September reproduces ACEA's Jan-Aug BEV YTD exactly (20,926)
-      "Poland": [3478,4958,27361,2058,15492,3007,56354]
+      "Poland": [3478,4958,27361,2058,15492,3007,56354],
+      // ANFAVEA, Brazil (monthly) -- automoveis+comerciais leves only (excludes trucks/buses); Petrol=Gasolina+Etanol+Flex fuel
+      "Brazil": [22316,17470,22291,0,183456,23227,268760],
+      // FCAI (VFACTS) via CarExpert, Australia (monthly) -- light vehicles only, excludes heavy commercial; others=0
+      "Australia": [26287,10072,17843,0,26018,25173,105393],
+      // INEGI RAIAVL open data CSVs (venta mensual + hibrido mensual), Mexico (monthly) -- summed directly from the raw files
+      "Mexico": [2494,3267,11063,0,112451,0,129275]
     },
-    priorYearBev: {      "Finland":2591,      "Belgium":11966,      "Netherlands":12008,      "Poland":4452},
-    priorYearTotal: {      "Finland":5996,      "Belgium":31519,      "Netherlands":32199,      "Poland":49853}
+    priorYearBev: {      "Finland":2591,      "Belgium":11966,      "Netherlands":12008,      "Poland":4452,      "Brazil":8195,      "Mexico":2041},
+    priorYearTotal: {      "Finland":5996,      "Belgium":31519,      "Netherlands":32199,      "Poland":49853,      "Brazil":231479,      "Mexico":119766}
   },
   "2026-08": {
     label: "August 2026",
@@ -1539,15 +1545,15 @@ const MONTHLY_DATA = {
       // source: StatCan 20-10-0025-01 — only Q1 2026 published so far
       "Canada": [70393,31531,145452,0,659175,38723,945274],
       // source: INEGI RAIAVL, monthly — 7 of 12 months published so far
-      "Mexico": [19300,21901,88158,0,885356,0,1014715],
+      "Mexico": [21794,25168,99221,0,997807,0,1143990],
       // source: Vahan Dashboard, monthly, Jan-Aug 2026 summed
       "India": [213571,20,288005,823793,1531561,617958,3474908],
       // source: JADA — registered passenger cars only, excludes kei-cars (~35-40% of Japan's market) and commercial vehicles
       "Japan": [69441,29132,1069108,321,510293,72780,1751075],
       // source: FCAI (VFACTS) — light-vehicle market only (excludes heavy trucks/buses), Jan-Aug 2026 summed from monthly
-      "Australia": [154252,75191,142225,0,243673,207541,822882],
+      "Australia": [180539,85263,160068,0,269691,232714,928275],
       // source: ANFAVEA — "Carta da Anfavea"; Brazil's dominant Flex-fuel (gasoline/ethanol) vehicles mapped into petrol
-      "Brazil": [143768,114524,113520,0,1343152,174524,1889488],
+      "Brazil": [166084,131994,135811,0,1526608,197751,2158248],
       // source: ACARA/SIOMAA — from the report's own cumulative "Acum 2026" columns, not summed from separately-revised months
       "Argentina": [4063,0,39969,0,230407,0,274439],
       // source: ODMD — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
@@ -1612,11 +1618,11 @@ const MONTHLY_DATA = {
       "Sweden":"through Sep 2026","Switzerland":"through Aug 2026","United Kingdom":"through Aug 2026 (national source, not yet ACEA)",
       "Canada":"through Jun 2026",
       "Colombia":"through Aug 2026",
-      "Mexico":"through Aug 2026",
+      "Mexico":"through Sep 2026",
       "India":"through Aug 2026",
       "Japan":"through Aug 2026",
-      "Australia":"through Aug 2026",
-      "Brazil":"through Aug 2026",
+      "Australia":"through Sep 2026",
+      "Brazil":"through Sep 2026",
       "Argentina":"through Jun 2026",
       "Turkey":"through Sep 2026",
       "Philippines":"through Aug 2026",
@@ -1679,11 +1685,11 @@ const MONTHLY_DATA = {
       "Ecuador": [14244, 0, 32661, 0, 75943, 44771, 167619],
       "Malaysia": [75270, 0, 55515, 0, 692576, 37613, 860974],
       "Argentina": [8379, 0, 79938, 0, 460814, 0, 549131],
-      "Australia": [265063, 124548, 219674, 0, 365509, 314434, 1289228],
+      "Australia": [257364, 116285, 215257, 0, 359588, 310285, 1258779],
       "China": [11718000, 5390333, 0, 0, 14496000, 0, 31604333],
       "Austria": [83292, 37900, 94882, 3, 76511, 30510, 323098],
       "Belgium": [167240, 23903, 56464, 3859, 164812, 11113, 427391],
-      "Brazil": [242683, 189628, 180861, 0, 2060473, 267365, 2941010],
+      "Brazil": [241438, 187727, 193300, 0, 2065562, 267210, 2955237],
       "Bulgaria": [4772, 1626, 3805, 99, 40227, 5217, 55746],
       "Canada": [140786, 63062, 290904, 0, 1318350, 77446, 1890548],
       "Croatia": [3445, 5826, 32321, 780, 29905, 9817, 82094],
@@ -1704,7 +1710,7 @@ const MONTHLY_DATA = {
       "Lithuania": [4189, 6913, 26491, 924, 8498, 4491, 51506],
       "Luxembourg": [15780, 3209, 16752, 0, 11556, 4085, 51382],
       "Malta": [3295, 918, 2388, 2, 1836, 340, 8779],
-      "Mexico": [29612, 35018, 133605, 0, 1332612, 0, 1530847],
+      "Mexico": [29820, 34872, 132637, 0, 1336133, 0, 1533462],
       "Netherlands": [154365, 78601, 98005, 1512, 25991, 3625, 362099],
       "New Zealand": [19232, 12381, 35975, 1223, 31545, 6625, 106981],
       "Norway": [153982, 833, 945, 0, 248, 1135, 157143],
