@@ -4897,14 +4897,19 @@ document.querySelectorAll('.filter-bulk-btn').forEach(btn => {
     } else if(target === 'continents'){
       selectedContinents = check ? new Set(ALL_CONTINENTS) : new Set();
       continentsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = check);
+      // same as this group's individual checkboxes: a bulk check/uncheck here changes which
+      // countries are in view, so any single-country map focus is stale and must be dropped too
+      if(focusedCountry) clearSelection();
       recompute();
     } else if(target === 'countries'){
       selectedCountries = check ? new Set(ALL_COUNTRIES) : new Set();
       countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = check);
+      focusedCountry = null;
       recompute();
     } else if(target === 'ranktiers'){
       selectedRankTiers = check ? new Set(RANK_TIER_KEYS) : new Set();
       rankTiersBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = check);
+      if(focusedCountry) clearSelection();
       recompute();
     }
   });
@@ -5628,15 +5633,21 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       const wantYear = yearMatch ? +yearMatch[1] : null;
       mfrYearSelect.value = (wantYear != null && availYears.includes(wantYear)) ? wantYear : Math.max(...availYears);
       mfrYearSelectWiredFor = mfrCountry;
+      mfrYear = +mfrYearSelect.value;
     } else if(pagePeriod !== mfrLastSyncedPeriod){
-      // same country as last render -- still follow the page's Period pick to a different
-      // year, same as the monthly branch does, as long as it's one of this country's real years
+      // same country as last render -- still follow the page's Period pick to a different year,
+      // same as the monthly branch does, even when this country has no brand/model data for that
+      // exact year, so the section correctly renders empty instead of silently leaving whatever
+      // year was last displayed on screen (a real bug: switching the page to e.g. 2022 for a
+      // country whose earliest brand data starts in 2023 used to leave 2024's figures on screen)
       const yearMatch = pagePeriod && pagePeriod.match(/(\d{4})/);
       const wantYear = yearMatch ? +yearMatch[1] : null;
-      if(wantYear != null && availYears.includes(wantYear)) mfrYearSelect.value = wantYear;
+      if(wantYear != null){
+        mfrYear = wantYear;
+        if(availYears.includes(wantYear)) mfrYearSelect.value = wantYear;
+      }
     }
     mfrLastSyncedPeriod = pagePeriod;
-    mfrYear = +mfrYearSelect.value;
     if(mfrCoverageNote) mfrCoverageNote.classList.add('hidden');
     const hasModelYearlyData = hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry] &&
       MANUFACTURER_MODEL_YEARLY[mfrCountry].some(r => r.year === mfrYear);
