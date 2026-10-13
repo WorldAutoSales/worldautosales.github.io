@@ -555,7 +555,9 @@ const MONTHLY_DATA = {
       // FENALCO-ANDI joint release, directly reported standalone September figures (new monthly records for total/BEV/HEV); Petrol = residual, no PHEV/Diesel distinguished (established convention)
       "Colombia": [5895,0,11261,0,16679,0,33835],
       // JPJ-direct method (data.gov.my daily registrations, category=car), same convention as prior months; bev=electric, hev=hybrid_petrol+hybrid_diesel, diesel=diesel+greendiesel
-      "Malaysia": [6029,0,5452,0,59252,3671,74404]
+      "Malaysia": [6029,0,5452,0,59252,3671,74404],
+      // NZTA Motor Vehicle Register live-fleet-snapshot reconstruction (vstat hadn't published Sept yet); cross-validated closely against MIA's own release (BEV 2,593, PHEV 1,203 exact, total 13,243 vs 13,239)
+      "New Zealand": [2592,1236,4866,0,3948,597,13239]
     },
     priorYearBev: {      "Finland":2591,      "Belgium":11966,      "Netherlands":12008,      "Poland":4452,      "Brazil":8195,      "Mexico":2041,      "United Kingdom":72779},
     priorYearTotal: {      "Finland":5996,      "Belgium":31519,      "Netherlands":32199,      "Poland":49853,      "Brazil":231479,      "Mexico":119766,      "United Kingdom":312891}
@@ -1573,7 +1575,7 @@ const MONTHLY_DATA = {
       // source: CAMPI-TMA — petrol is the ICE remainder (no petrol/diesel split published; diesel share is negligible in PH passenger vehicles)
       "Philippines": [25151,22964,26617,0,225930,0,300662],
       // source: NZTA Waka Kotahi — light passenger vehicles (cars/vans) only, excludes commercial vehicles
-      "New Zealand": [11771,7586,23583,815,21030,4417,69202],
+      "New Zealand": [14363,8822,28449,815,24978,5014,82441],
       // source: Argonne National Laboratory (Wards Auto), monthly, Jan-Jul 2026 summed — no Petrol/Diesel split published, Diesel=0
       "United States": [640341,126321,1645233,36,8246460,0,10658391],
       // source: CAAM, monthly wholesale via CnEVPost, Jan-Jul 2026 summed — Total = all vehicle wholesale sales, incl. exports; no Petrol/Diesel split published (Diesel=0); HEV not part of China's official NEV classification (folded into Petrol, HEV=0)
@@ -1638,7 +1640,7 @@ const MONTHLY_DATA = {
       "Argentina":"through Jul 2026",
       "Turkey":"through Sep 2026",
       "Philippines":"through Aug 2026",
-      "New Zealand":"through Aug 2026",
+      "New Zealand":"through Sep 2026",
       "United States":"through Aug 2026",
       "China":"through Aug 2026",
       "South Korea":"through Sep 2026",
@@ -1724,7 +1726,7 @@ const MONTHLY_DATA = {
       "Malta": [3295, 918, 2388, 2, 1836, 340, 8779],
       "Mexico": [29820, 34872, 132637, 0, 1336133, 0, 1533462],
       "Netherlands": [154365, 78601, 98005, 1512, 25991, 3625, 362099],
-      "New Zealand": [19232, 12381, 35975, 1223, 31545, 6625, 106981],
+      "New Zealand": [19950, 12490, 39644, 1087, 33903, 6685, 113759],
       "Norway": [153982, 833, 945, 0, 248, 1135, 157143],
       "Philippines": [41706, 37923, 40678, 0, 338895, 0, 459202],
       "Poland": [32539, 56449, 312961, 17304, 174000, 36724, 629977],
