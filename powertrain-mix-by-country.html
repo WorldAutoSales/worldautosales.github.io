@@ -551,7 +551,11 @@ const MONTHLY_DATA = {
       // TS/KOTSA new-registration API (registYy=2026 registMt=09), national all-vehicle-type totals; PHEV folded into HEV (no PHEV split in this source, same MOLIT convention)
       "South Korea": [31499,0,44431,11090,40748,3151,130919],
       // JADA fuel-type-by-manufacturer grid (Jan-Sep 2026 release), registered passenger cars only (excludes kei-cars + commercial); others=FCV+other. Cross-validated exactly against JADA's own announced total (236,293)
-      "Japan": [13440,4660,147496,53,62863,7781,236293]
+      "Japan": [13440,4660,147496,53,62863,7781,236293],
+      // FENALCO-ANDI joint release, directly reported standalone September figures (new monthly records for total/BEV/HEV); Petrol = residual, no PHEV/Diesel distinguished (established convention)
+      "Colombia": [5895,0,11261,0,16679,0,33835],
+      // JPJ-direct method (data.gov.my daily registrations, category=car), same convention as prior months; bev=electric, hev=hybrid_petrol+hybrid_diesel, diesel=diesel+greendiesel
+      "Malaysia": [6029,0,5452,0,59252,3671,74404]
     },
     priorYearBev: {      "Finland":2591,      "Belgium":11966,      "Netherlands":12008,      "Poland":4452,      "Brazil":8195,      "Mexico":2041,      "United Kingdom":72779},
     priorYearTotal: {      "Finland":5996,      "Belgium":31519,      "Netherlands":32199,      "Poland":49853,      "Brazil":231479,      "Mexico":119766,      "United Kingdom":312891}
@@ -568,7 +572,7 @@ const MONTHLY_DATA = {
       // Added 2026-09-25: Indonesia (GAIKINDO wholesale, no petrol/diesel split published -- residual folded into petrol), Taiwan (real BEV+total; HEV/Petrol/Diesel split ESTIMATED by scaling July 2026's proportional mix onto August's actual total, since no official August breakdown beyond BEV+total was published), Malaysia (MAA headline total, HEV/Diesel/BEV derived by applying JPJ registration-category ratios per this project's usual method -- JPJ's "EV" category does not separate BEV from PHEV so phev is left 0 here to avoid double count), United States (Argonne National Laboratory monthly EV data + Cox/Wards/NADA total, diesel folded into petrol per existing US convention), and Ukraine (Ukravtoprom-reported ~5,000 total with fuel-type % shares -- approximate, PHEV not separated from HEV by the source).
       "Indonesia": [17413,1993,7667,0,54683,0,81756],
       "Taiwan": [3259,0,12480,0,13163,320,29222],
-      "Malaysia": [8168,0,4588,0,55600,3072,71428],
+      "Malaysia": [8834,0,4964,0,60281,3327,77406],
       "United States": [86186,20103,216324,36,1057729,0,1380378],
       "Ukraine":[510,0,1645,15,1955,875,5000],
       // source: AAA DATA (communique-de-presse-du-1er-septembre-2026, aaa-data.fr) -- see July comment for methodology. MHEV(18,849)+HEV(16,837) combined into hev; Others=Essence-GPL(3,361) + a small unitemized residual against AAA DATA's own 94,351 total.
@@ -1515,13 +1519,13 @@ const MONTHLY_DATA = {
       "Georgia": [9417,1134,32909,4563,92203,6232,146458],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — Jan-Jul 2026, from the July bulletin's own "Ene-Jul 26" YTD column, not summed from separately-revised months; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [8401,0,20538,0,50444,28895,108278],
-      "Malaysia": [46843,0,34364,0,455388,24673,561268],
+      "Malaysia": [53538,0,40192,0,519321,28599,641650],
       // source: world_auto_sales_annual, period_type='YTD' — each country summed only through its own latest available month/quarter (see asOf below), not a fixed common cutoff
       "Austria": [53449,24233,63109,2,51007,20340,212140],
       "Belgium": [125261,17927,42348,2894,123609,8335,320374],
       "Bulgaria": [2939,883,2328,66,25879,3478,35573],
       // source: FENALCO-ANDI, Colombia — Jan-Jul 2026 cumulative (dedicated monthly EV/Hybrid reports + ANDI monthly totals); PHEV folded into HEV; Petrol is the undifferentiated combustion remainder (Diesel=0). Total corrected 2026-09-02: 166,677 (an uncorroborated user-supplied figure) was wrong; 186,253 = confirmed H1 2026 total (157,620) + confirmed July total (28,633).
-      "Colombia": [33888,0,63209,0,116277,0,213374],
+      "Colombia": [39783,0,74470,0,132956,0,247209],
       "Croatia": [2297,3727,21547,520,19937,6545,54573],
       "Cyprus": [1003,542,4777,0,2832,170,9324],
       "Czechia": [11665,8538,40827,3711,72683,30249,167673],
@@ -1625,7 +1629,7 @@ const MONTHLY_DATA = {
       "Romania":"through Aug 2026","Slovakia":"through Aug 2026","Slovenia":"through Aug 2026","Spain":"through Sep 2026",
       "Sweden":"through Sep 2026","Switzerland":"through Aug 2026","United Kingdom":"through Sep 2026",
       "Canada":"through Jun 2026",
-      "Colombia":"through Aug 2026",
+      "Colombia":"through Sep 2026",
       "Mexico":"through Sep 2026",
       "India":"through Aug 2026",
       "Japan":"through Sep 2026",
@@ -1639,7 +1643,7 @@ const MONTHLY_DATA = {
       "China":"through Aug 2026",
       "South Korea":"through Sep 2026",
       "Singapore":"through Aug 2026",
-      "Malaysia":"through Aug 2026",
+      "Malaysia":"through Sep 2026",
       "Thailand":"through Aug 2026",
       "Indonesia":"through Aug 2026",
       "Chile":"through Aug 2026",
@@ -1691,7 +1695,7 @@ const MONTHLY_DATA = {
       "Georgia": [15589, 1701, 52618, 7128, 139246, 9560, 225842],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; Hibrido = MHEV+HEV+PHEV+EREV combined
       "Ecuador": [14244, 0, 32661, 0, 75943, 44771, 167619],
-      "Malaysia": [75270, 0, 55515, 0, 692576, 37613, 860974],
+      "Malaysia": [75338, 0, 56233, 0, 702831, 39314, 873716],
       "Argentina": [8496, 0, 84254, 0, 459321, 0, 552071],
       "Australia": [257364, 116285, 215257, 0, 359588, 310285, 1258779],
       "China": [11718000, 5390333, 0, 0, 14496000, 0, 31604333],
@@ -1764,7 +1768,7 @@ const MONTHLY_DATA = {
       // source: ACAU (Uruguay) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
       "Uruguay": [28091, 3249, 6414, 0, 23158, 122, 61034],
       // source: FENALCO-ANDI, Colombia — each fuel trended from the last 3 actual months' average (May-Jul, all genuine/near-genuine single months) or the 7-mo YTD average if higher, applied to the remaining 5 months; PHEV folded into HEV, Petrol is the undifferentiated combustion remainder (Diesel=0)
-      "Colombia": [53017, 0, 99270, 0, 174415, 0, 326702],
+      "Colombia": [55090, 0, 104336, 0, 177375, 0, 336801],
       // source: DPSHTRR (Albania) — each fuel trended from the last 3 actual months' average (Jun-Aug) or the 8-mo YTD average if higher, applied to the remaining 4 months
       "Albania": [9840,0,2062,4565,17698,49303,83468],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay — each fuel trended from the last 3 actual months' average (Jun-Aug) or the 8-mo YTD average if higher, applied to the remaining 4 months
