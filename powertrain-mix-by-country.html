@@ -547,7 +547,11 @@ const MONTHLY_DATA = {
       // ACARA/DNRPA, Argentina (monthly) -- BEV/HEV real (Infobae + Autoxarg, both citing ACARA/DNRPA); PHEV and Diesel always 0 (not meaningfully tracked/negligible); Petrol=residual
       "Argentina": [865,0,8322,0,37530,0,46717],
       // SMMT, United Kingdom (monthly) -- record BEV month (36.3% YoY, 28.3% share) and record PHEV share (55.7% YoY)
-      "United Kingdom": [99201,59571,45839,0,131864,14061,350536]
+      "United Kingdom": [99201,59571,45839,0,131864,14061,350536],
+      // TS/KOTSA new-registration API (registYy=2026 registMt=09), national all-vehicle-type totals; PHEV folded into HEV (no PHEV split in this source, same MOLIT convention)
+      "South Korea": [31499,0,44431,11090,40748,3151,130919],
+      // JADA fuel-type-by-manufacturer grid (Jan-Sep 2026 release), registered passenger cars only (excludes kei-cars + commercial); others=FCV+other. Cross-validated exactly against JADA's own announced total (236,293)
+      "Japan": [13440,4660,147496,53,62863,7781,236293]
     },
     priorYearBev: {      "Finland":2591,      "Belgium":11966,      "Netherlands":12008,      "Poland":4452,      "Brazil":8195,      "Mexico":2041,      "United Kingdom":72779},
     priorYearTotal: {      "Finland":5996,      "Belgium":31519,      "Netherlands":32199,      "Poland":49853,      "Brazil":231479,      "Mexico":119766,      "United Kingdom":312891}
@@ -557,7 +561,7 @@ const MONTHLY_DATA = {
     raw: {
       "Kazakhstan": [317,855,257,0,17675,0,19104],
       // Added 2026-09-25: Chile (ANAC real BEV/PHEV/HEV for August; ANAC's "MHEV" bucket (2,338 units) is bundled by ANAC itself into conventional combustion, so it stays in the unsplit petrol+diesel residual, divided using July 2026's own petrol/diesel ratio), Ecuador (AEADE/press real BEV + combined-hybrid total; petrol/diesel residual split via July 2026's ratio, matching this country's existing no-PHEV-split convention), Uruguay (ACAU headline total 6,781 -- other outlets report 6,477/5,933 for what may be narrower vehicle-category scopes, flagged as a data-quality caveat; the reported combined "electricos" figure of 3,471 was split into bev/phev using July 2026's bev:phev ratio since ACAU did not separate them for August), South Africa (naamsa's August release only republishes July's NEV mix -- no fresh August EV breakdown exists yet -- so bev/phev/hev were ESTIMATED by scaling July 2026's ratios onto August's real total of 57,898; replace with real figures once naamsa publishes an August-specific NEV breakdown).
-      "Chile": [696,593,1324,0,18027,7256,27896],
+      "Chile": [696,593,3662,0,16360,6585,27896],
       "Ecuador": [2034,0,3308,0,6082,3857,15281],
       "Uruguay": [3107,364,0,0,3286,24,6781],
       "South Africa": [459,1232,1416,0,54791,0,57898],
@@ -1553,7 +1557,7 @@ const MONTHLY_DATA = {
       // source: Vahan Dashboard, monthly, Jan-Aug 2026 summed
       "India": [213571,20,288005,823793,1531561,617958,3474908],
       // source: JADA — registered passenger cars only, excludes kei-cars (~35-40% of Japan's market) and commercial vehicles
-      "Japan": [69441,29132,1069108,321,510293,72780,1751075],
+      "Japan": [82881,33792,1216604,374,573156,80561,1987368],
       // source: FCAI (VFACTS) — light-vehicle market only (excludes heavy trucks/buses), Jan-Aug 2026 summed from monthly
       "Australia": [180539,85263,160068,0,269691,232714,928275],
       // source: ANFAVEA — "Carta da Anfavea"; Brazil's dominant Flex-fuel (gasoline/ethanol) vehicles mapped into petrol
@@ -1573,7 +1577,7 @@ const MONTHLY_DATA = {
       // source: world_auto_sales_annual, period_type='YTD' — FTI Automotive Industry Club, Jan-Jul 2026 summed; Total includes pickups/PPV, not passenger-cars-only; Diesel is a residual
       "Thailand": [146655,8388,102400,1217,70007,137264,465931],
       // source: TS/KOTSA new-registration API, Jan-Aug 2026 summed — PHEV folded into HEV
-      "South Korea": [266172,0,370315,99944,351406,28773,1116610],
+      "South Korea": [297671,0,414746,111034,392154,31924,1247529],
       // source: world_auto_sales_annual, period_type='YTD' — GAIKINDO, Jan-Jul 2026 summed; no diesel split published (Diesel=0)
       "Indonesia": [101250,8957,56823,0,432351,0,599381],
       // source: LTA (Land Transport Authority), Jan-Jul 2026 summed — COE quota-capped market, small volumes
@@ -1581,7 +1585,7 @@ const MONTHLY_DATA = {
       // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw), Jan-Jul 2026 summed — passenger cars only, PHEV folded into HEV
       "Taiwan": [24800,0,103566,0,111304,3162,242832],
       // source: ANAC A.G. (Registro Civil), Jan-Jul 2026 summed — see monthly comments for Petrol/Diesel residual methodology
-      "Chile": [6902,5800,24729,0,120326,48435,206192],
+      "Chile": [6902,5800,27067,0,118659,47764,206192],
       // source: Department of Customs Nepal (customs.gov.np), HS 8703 imports, Jan-Jul 2026 summed from the day-weighted monthly figures — three-wheelers excluded; imports not registrations
       "Nepal": [7522,14,14,0,2052,403,10005],
       // source: VAMA + VinFast + TC Group (merged) — VAMA member-brand sales (PC+Special→Petrol, CV→Diesel) plus VinFast (100% BEV, not a VAMA member) plus TC Group/Hyundai (independent of VAMA, folded into Petrol)
@@ -1624,7 +1628,7 @@ const MONTHLY_DATA = {
       "Colombia":"through Aug 2026",
       "Mexico":"through Sep 2026",
       "India":"through Aug 2026",
-      "Japan":"through Aug 2026",
+      "Japan":"through Sep 2026",
       "Australia":"through Sep 2026",
       "Brazil":"through Sep 2026",
       "Argentina":"through Jul 2026",
@@ -1633,7 +1637,7 @@ const MONTHLY_DATA = {
       "New Zealand":"through Aug 2026",
       "United States":"through Aug 2026",
       "China":"through Aug 2026",
-      "South Korea":"through Aug 2026",
+      "South Korea":"through Sep 2026",
       "Singapore":"through Aug 2026",
       "Malaysia":"through Aug 2026",
       "Thailand":"through Aug 2026",
@@ -1709,7 +1713,7 @@ const MONTHLY_DATA = {
       "Iceland": [6958, 2778, 3171, 0, 812, 749, 14468],
       "Ireland": [49547, 27833, 46523, 1307, 36763, 22992, 184965],
       "Italy": [135951, 162459, 833573, 104733, 344817, 111545, 1693078],
-      "Japan": [110292, 44424, 1614955, 504, 765439, 109170, 2644784],
+      "Japan": [114734, 45363, 1623140, 531, 764208, 107415, 2655391],
       "Latvia": [2771, 3377, 0, 719, 15124, 2617, 24608],
       "Lithuania": [4189, 6913, 26491, 924, 8498, 4491, 51506],
       "Luxembourg": [15780, 3209, 16752, 0, 11556, 4085, 51382],
@@ -1738,7 +1742,7 @@ const MONTHLY_DATA = {
       // source: world_auto_sales_annual, period_type='PROJECTED' — plain run-rate (YTD x 12/7) from FTI Automotive Industry Club data; Total includes pickups/PPV, not passenger-cars-only
       "Thailand": [231911, 13384, 153600, 1825, 105011, 205896, 711627],
       // source: TS/KOTSA — each fuel trended from the last 3 actual months' average (or the 8-mo YTD average if higher), applied to the remaining 4 months; PHEV folded into HEV
-      "South Korea": [411865, 0, 555472, 149916, 527109, 43160, 1687522],
+      "South Korea": [396895, 0, 552995, 148045, 522872, 42565, 1663372],
       // source: world_auto_sales_annual, period_type='PROJECTED' — plain run-rate (YTD x 12/7) from GAIKINDO data; no diesel split published (Diesel=0)
       "Indonesia": [159967, 17448, 88362, 0, 654166, 0, 919943],
       // source: world_auto_sales_annual, period_type='PROJECTED' — plain run-rate (YTD x 12/7) from LTA data; COE quota-capped market
@@ -1746,7 +1750,7 @@ const MONTHLY_DATA = {
       // source: THB via Taiwan Stats (stats.tw) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; PHEV folded into HEV
       "Taiwan": [38971, 0, 161845, 0, 171289, 4743, 376848],
       // source: ANAC A.G. — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
-      "Chile": [10547, 8700, 37093, 0, 183047, 73682, 313069],
+      "Chile": [10547, 8700, 41275, 0, 179158, 72116, 311796],
       // source: VAMA + VinFast + TC Group — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
       "Vietnam": [236548,0,21923,0,251535,75965,585971],
       // source: Department of Customs Nepal (customs.gov.np) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; imports not registrations, three-wheelers excluded
