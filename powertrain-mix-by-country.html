@@ -656,7 +656,9 @@ const MONTHLY_DATA = {
       // source: ATTT via webdo.tn -- August = Jan-Aug cumulative (official market 47,002; BEV 2,391; PHEV 2,678) minus the Jan-Jul values already loaded (41,692 / 1,540 / 2,177), so Jan-Aug sums to the published cumulative; HEV (113) from the same Q1 ratio method (Jan-Aug est. 974 = 47,002 x 442/21,334); REEV (381 Jan-Aug) not separable per month, left in Petrol like Jan-Jul; Essence+Diesel combined into Petrol
       "Tunisia": [851,501,113,0,3845,0,5310],
       // source: WHOLE MARKET -- total incl. non-member estimates (34,390); CAMPI-TMA BEV/PHEV/HEV 2,449/1,617/3,000 (Philstar/Manila Times) PLUS non-member xEV 4,799 (= whole-market xEV share 34.5% x total - CAMPI xEV), split BEV/PHEV/HEV by 2025 non-member mix (39/49/12%, estimate); petrol = remainder; diesel not published
-      "Philippines": [4336,3953,3576,0,22525,0,34390]},
+      "Philippines": [4336,3953,3576,0,22525,0,34390],
+      // Nepal Customs HS 8703, day-weighted blend of Shrawan 2083 BS (16 overlapping days) + Bhadra 2083 BS delta (15 overlapping days); BEV subheading simplified to a single code this FY, verified
+      "Nepal": [1394,12,7,0,320,51,1784]},
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY %
     priorYearBev: {
       "India": 20204, "South Korea": 23315,
@@ -1597,7 +1599,7 @@ const MONTHLY_DATA = {
       // source: ANAC A.G. (Registro Civil), Jan-Jul 2026 summed — see monthly comments for Petrol/Diesel residual methodology
       "Chile": [6902,5800,27067,0,118659,47764,206192],
       // source: Department of Customs Nepal (customs.gov.np), HS 8703 imports, Jan-Jul 2026 summed from the day-weighted monthly figures — three-wheelers excluded; imports not registrations
-      "Nepal": [7522,14,14,0,2052,403,10005],
+      "Nepal": [8916,26,21,0,2372,454,11789],
       // source: VAMA + VinFast + TC Group (merged) — VAMA member-brand sales (PC+Special→Petrol, CV→Diesel) plus VinFast (100% BEV, not a VAMA member) plus TC Group/Hyundai (independent of VAMA, folded into Petrol)
       "Vietnam": [137773,0,12501,0,146729,44313,341316],
       "Israel": [32378,63990,79732,1,72074,13112,261287],
@@ -1655,7 +1657,7 @@ const MONTHLY_DATA = {
       "Chile":"through Aug 2026",
       "Vietnam":"through Jul 2026",
       "Taiwan":"through Aug 2026",
-      "Nepal":"through Jul 2026",
+      "Nepal":"through Aug 2026",
       "Israel":"through Sep 2026",
       "Kazakhstan":"through Aug 2026",
       "Peru":"through Jul 2026",
@@ -1764,7 +1766,7 @@ const MONTHLY_DATA = {
       // source: VAMA + VinFast + TC Group — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
       "Vietnam": [236548,0,21923,0,251535,75965,585971],
       // source: Department of Customs Nepal (customs.gov.np) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; imports not registrations, three-wheelers excluded
-      "Nepal": [14259,27,31,0,3518,691,18526],
+      "Nepal": [13629, 53, 41, 0, 3558, 681, 17962],
       // source: Israel Ministry of Transport (data.gov.il) — each fuel trended from the last 3 actual months' average (or the 8-mo YTD average if higher), applied to the remaining 4 months; Petrol/HEV split via I-VIA's quarterly ratio
       "Israel": [43171, 85320, 106309, 1, 96099, 17483, 348383],
       // source: KAO (kao.kz) — each fuel trended from the last 3 actual months' average (or the 6-mo YTD average if higher), applied to the remaining 6 months; HEV projection inherits the floor bias from Mar-Jun actuals
