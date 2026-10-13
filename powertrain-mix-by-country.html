@@ -545,10 +545,12 @@ const MONTHLY_DATA = {
       // INEGI RAIAVL open data CSVs (venta mensual + hibrido mensual), Mexico (monthly) -- summed directly from the raw files
       "Mexico": [2494,3267,11063,0,112451,0,129275],
       // ACARA/DNRPA, Argentina (monthly) -- BEV/HEV real (Infobae + Autoxarg, both citing ACARA/DNRPA); PHEV and Diesel always 0 (not meaningfully tracked/negligible); Petrol=residual
-      "Argentina": [865,0,8322,0,37530,0,46717]
+      "Argentina": [865,0,8322,0,37530,0,46717],
+      // SMMT, United Kingdom (monthly) -- record BEV month (36.3% YoY, 28.3% share) and record PHEV share (55.7% YoY)
+      "United Kingdom": [99201,59571,45839,0,131864,14061,350536]
     },
-    priorYearBev: {      "Finland":2591,      "Belgium":11966,      "Netherlands":12008,      "Poland":4452,      "Brazil":8195,      "Mexico":2041},
-    priorYearTotal: {      "Finland":5996,      "Belgium":31519,      "Netherlands":32199,      "Poland":49853,      "Brazil":231479,      "Mexico":119766}
+    priorYearBev: {      "Finland":2591,      "Belgium":11966,      "Netherlands":12008,      "Poland":4452,      "Brazil":8195,      "Mexico":2041,      "United Kingdom":72779},
+    priorYearTotal: {      "Finland":5996,      "Belgium":31519,      "Netherlands":32199,      "Poland":49853,      "Brazil":231479,      "Mexico":119766,      "United Kingdom":312891}
   },
   "2026-08": {
     label: "August 2026",
@@ -1543,7 +1545,7 @@ const MONTHLY_DATA = {
       "Spain": [100870,116754,427644,32580,203379,30831,912058],
       "Sweden": [90871,50655,17828,792,39074,12566,211786],
       "Switzerland": [37631,18772,55601,5,31202,8378,151589],
-      "United Kingdom": [355718,185125,461634,159,354579,31521,1388736],
+      "United Kingdom": [454919,244696,507473,159,486443,45582,1739272],
       // source: StatCan 20-10-0025-01 — only Q1 2026 published so far
       "Canada": [70393,31531,145452,0,659175,38723,945274],
       // source: INEGI RAIAVL, monthly — 7 of 12 months published so far
@@ -1617,7 +1619,7 @@ const MONTHLY_DATA = {
       "Latvia":"through Aug 2026","Lithuania":"through Aug 2026","Luxembourg":"through Aug 2026","Malta":"through Aug 2026",
       "Netherlands":"through Sep 2026","Norway":"through Sep 2026","Poland":"through Sep 2026","Portugal":"through Sep 2026",
       "Romania":"through Aug 2026","Slovakia":"through Aug 2026","Slovenia":"through Aug 2026","Spain":"through Sep 2026",
-      "Sweden":"through Sep 2026","Switzerland":"through Aug 2026","United Kingdom":"through Aug 2026 (national source, not yet ACEA)",
+      "Sweden":"through Sep 2026","Switzerland":"through Aug 2026","United Kingdom":"through Sep 2026",
       "Canada":"through Jun 2026",
       "Colombia":"through Aug 2026",
       "Mexico":"through Sep 2026",
@@ -1726,7 +1728,7 @@ const MONTHLY_DATA = {
       "Sweden": [122941, 67540, 23771, 1056, 52155, 16755, 284218],
       "Switzerland": [59490, 29020, 83968, 8, 46803, 12879, 232168],
       "Turkey": [160545, 5631, 263316, 10680, 352557, 46052, 838781],
-      "United Kingdom": [535837,277687,692451,368,545231,50958,2102532],
+      "United Kingdom": [625259, 341260, 676631, 316, 717091, 70742, 2431299],
       // source: Argonne National Laboratory — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
       "United States": [966009, 201904, 2504565, 84, 12468299, 0, 16140861],
       // source: CAAM via CnEVPost — BEV/PHEV/Petrol trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; HEV not part of China's NEV classification (always 0)
