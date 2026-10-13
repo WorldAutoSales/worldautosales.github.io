@@ -559,7 +559,9 @@ const MONTHLY_DATA = {
       // NZTA Motor Vehicle Register live-fleet-snapshot reconstruction (vstat hadn't published Sept yet); cross-validated closely against MIA's own release (BEV 2,593, PHEV 1,203 exact, total 13,243 vs 13,239)
       "New Zealand": [2592,1236,4866,0,3948,597,13239],
       // Ukravtoprom-reported ~4,900 total with fuel-type % shares (BEV 9.2%, Petrol 39.3%, Diesel 20.2%, Hybrid 31% incl. PHEV, LPG <1%) via kurs.com.ua/dengi.ua, cross-confirmed by two independent outlets citing the same Ukravtoprom figures -- approximate, same tier as August's entry; PHEV not separated from HEV by the source
-      "Ukraine": [451,0,1519,14,1926,990,4900]
+      "Ukraine": [451,0,1519,14,1926,990,4900],
+      // Israel MoT vehicle registry (data.gov.il); BEV/PHEV/Diesel exact, Petrol/HEV split using the same I-VIA quarterly ratio already confirmed in July/August (both back-derive to ~47.44% petrol)
+      "Israel": [4630,6282,6169,0,5567,908,23556]
     },
     priorYearBev: {      "Finland":2591,      "Belgium":11966,      "Netherlands":12008,      "Poland":4452,      "Brazil":8195,      "Mexico":2041,      "United Kingdom":72779},
     priorYearTotal: {      "Finland":5996,      "Belgium":31519,      "Netherlands":32199,      "Poland":49853,      "Brazil":231479,      "Mexico":119766,      "United Kingdom":312891}
@@ -1598,7 +1600,7 @@ const MONTHLY_DATA = {
       "Nepal": [7522,14,14,0,2052,403,10005],
       // source: VAMA + VinFast + TC Group (merged) — VAMA member-brand sales (PC+Special→Petrol, CV→Diesel) plus VinFast (100% BEV, not a VAMA member) plus TC Group/Hyundai (independent of VAMA, folded into Petrol)
       "Vietnam": [137773,0,12501,0,146729,44313,341316],
-      "Israel": [27748,57708,73563,1,66507,12204,237731],
+      "Israel": [32378,63990,79732,1,72074,13112,261287],
       // source: KAO (kao.kz), Jan-Jun 2026 summed from the bimonthly-derived monthly figures — HEV is a floor from March on; Diesel=0
       "Kazakhstan": [1652,4351,1339,0,139001,0,146343],
       // source: AAP (Asociacion Automotriz del Peru), Jan-Aug 2026 summed from the monthly figures — HEV includes MHEV combined; Diesel folded into Petrol
@@ -1654,7 +1656,7 @@ const MONTHLY_DATA = {
       "Vietnam":"through Jul 2026",
       "Taiwan":"through Aug 2026",
       "Nepal":"through Jul 2026",
-      "Israel":"through Aug 2026",
+      "Israel":"through Sep 2026",
       "Kazakhstan":"through Aug 2026",
       "Peru":"through Jul 2026",
       "Uruguay":"through Aug 2026",
@@ -1764,7 +1766,7 @@ const MONTHLY_DATA = {
       // source: Department of Customs Nepal (customs.gov.np) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; imports not registrations, three-wheelers excluded
       "Nepal": [14259,27,31,0,3518,691,18526],
       // source: Israel Ministry of Transport (data.gov.il) — each fuel trended from the last 3 actual months' average (or the 8-mo YTD average if higher), applied to the remaining 4 months; Petrol/HEV split via I-VIA's quarterly ratio
-      "Israel": [41871,86562,110344,2,99760,18306,356845],
+      "Israel": [43171, 85320, 106309, 1, 96099, 17483, 348383],
       // source: KAO (kao.kz) — each fuel trended from the last 3 actual months' average (or the 6-mo YTD average if higher), applied to the remaining 6 months; HEV projection inherits the floor bias from Mar-Jun actuals
       "Kazakhstan": [2761, 7394, 2367, 0, 216936, 0, 229458],
       // source: AAP (Asociacion Automotriz del Peru) — each fuel trended from the last 3 actual months' average (or the 8-mo YTD average if higher), applied to the remaining 4 months; HEV projection inherits the HEV+MHEV combined basis
