@@ -573,10 +573,16 @@ const MONTHLY_DATA = {
       // STATEC/SNCA lustat DF_D6122 (new passenger cars by fuel, monthly), Luxembourg -- PHEV = plug-in petrol+diesel hybrids, HEV = non-plug-in hybrids; Others = OTH
       "Luxembourg": [1331,237,1065,13,698,193,3537],
       // auto-schweiz MOFIS (CH+FL), Switzerland (monthly) -- fuel totals from the same sheet as brand data; PHEV = Plug-In incl. REX, HEV = Hybrid HEV+MHEV
-      "Switzerland": [7833,2529,7007,1,3673,905,21948]
+      "Switzerland": [7833,2529,7007,1,3673,905,21948],
+      // Vahan Dashboard (analytics.parivahan.gov.in, Four Wheeler), India (monthly) -- live register pulled 2026-10-14; BEV=Pure EV+Electric(BOV), HEV=Strong+Petrol/Diesel hybrids, Others=CNG/LPG/other residual
+      "India": [37693,3,41243,100251,178722,78183,436095],
+      // U-CAR / TVBS registration (掛牌) report, Taiwan (monthly) -- total 37,054 and BEV 7,026 reported; HEV/Petrol/Diesel ESTIMATED by scaling August's non-BEV mix (no official September fuel split yet)
+      "Taiwan": [7026,0,14434,0,15224,370,37054],
+      // SIMI Motorstats (stats.simi.ie, Month From/To = Sep), Ireland (monthly) -- PHEV = petrol+diesel plug-in hybrids (1,043+17), HEV = petrol+diesel hybrids (932+38); loaded ahead of ACEA
+      "Ireland": [3116,1060,970,0,634,542,6322]
     },
-    priorYearBev: {      "Finland":2591,      "Belgium":11966,      "Netherlands":12008,      "Poland":4452,      "Brazil":8195,      "Mexico":2041,      "United Kingdom":72779,      "Luxembourg":1245,      "Switzerland":5182},
-    priorYearTotal: {      "Finland":5996,      "Belgium":31519,      "Netherlands":32199,      "Poland":49853,      "Brazil":231479,      "Mexico":119766,      "United Kingdom":312891,      "Luxembourg":3779,      "Switzerland":20031}
+    priorYearBev: {      "Finland":2591,      "Belgium":11966,      "Netherlands":12008,      "Poland":4452,      "Brazil":8195,      "Mexico":2041,      "United Kingdom":72779,      "Luxembourg":1245,      "Switzerland":5182,      "India":18549,      "Taiwan":3837,      "Ireland":1734},
+    priorYearTotal: {      "Finland":5996,      "Belgium":31519,      "Netherlands":32199,      "Poland":49853,      "Brazil":231479,      "Mexico":119766,      "United Kingdom":312891,      "Luxembourg":3779,      "Switzerland":20031,      "India":322414,      "Taiwan":28257,      "Ireland":5611}
   },
   "2026-08": {
     label: "August 2026",
@@ -610,7 +616,7 @@ const MONTHLY_DATA = {
       // source: RDC/RAI Vereniging/BOVAG -- see July comment for methodology. Petrol (1,613), Diesel (180) and LPG (192, plus 206 unclassified units = Others 398) are the August release's own exact figures (corrected 2026-10-12; previously shown as an even 289/289 estimate).
       "Netherlands": [12925,5001,6338,398,1613,180,26455],
       // source: Vahan Dashboard, India (monthly)
-      "India": [26314,4,31248,86452,141993,60109,346120],
+      "India": [32571,6,37636,104972,167185,73318,415688],
       // source: TS/KOTSA new-registration API, South Korea (monthly) — PHEV folded into HEV
       "South Korea": [30121,0,36142,10951,30255,2829,110298],
       // source: Israel Ministry of Transport vehicle registry (data.gov.il) — BEV/PHEV/Diesel exact; Petrol/HEV split using I-VIA's quarterly Trends Analysis ratio (see world_auto_sales.data_quality_note for full methodology)
@@ -1557,7 +1563,7 @@ const MONTHLY_DATA = {
       "Greece": [6824,6502,59121,3045,24603,2275,102370],
       "Hungary": [9224,8414,48695,624,19761,9211,95929],
       "Iceland": [4337,1852,2114,0,540,499,9342],
-      "Ireland": [32126,18555,31015,560,24509,15328,122093],
+      "Ireland": [35242,19615,31985,560,25143,15870,128415],
       "Italy": [101963,121844,625180,78550,258613,83659,1269809],
       "Latvia": [1503,1920,0,430,10043,1745,15641],
       "Lithuania": [2582,4262,17152,587,5325,2994,32902],
@@ -1579,7 +1585,7 @@ const MONTHLY_DATA = {
       // source: INEGI RAIAVL, monthly — 7 of 12 months published so far
       "Mexico": [21794,25168,99221,0,997807,0,1143990],
       // source: Vahan Dashboard, monthly, Jan-Aug 2026 summed
-      "India": [213571,20,288005,823793,1531561,617958,3474908],
+      "India": [257521,25,335636,942564,1735475,709350,3980571],
       // source: JADA — registered passenger cars only, excludes kei-cars (~35-40% of Japan's market) and commercial vehicles
       "Japan": [82881,33792,1216604,374,573156,80561,1987368],
       // source: FCAI (VFACTS) — light-vehicle market only (excludes heavy trucks/buses), Jan-Aug 2026 summed from monthly
@@ -1607,7 +1613,7 @@ const MONTHLY_DATA = {
       // source: LTA (Land Transport Authority), Jan-Jul 2026 summed — COE quota-capped market, small volumes
       "Singapore": [23028,1051,10560,0,2004,3,36646],
       // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw), Jan-Jul 2026 summed — passenger cars only, PHEV folded into HEV
-      "Taiwan": [24800,0,103566,0,111304,3162,242832],
+      "Taiwan": [31826,0,118000,0,126528,3532,279886],
       // source: ANAC A.G. (Registro Civil), Jan-Jul 2026 summed — see monthly comments for Petrol/Diesel residual methodology
       "Chile": [6902,5800,27067,0,118659,47764,206192],
       // source: Department of Customs Nepal (customs.gov.np), HS 8703 imports, Jan-Jul 2026 summed from the day-weighted monthly figures — three-wheelers excluded; imports not registrations
@@ -1643,7 +1649,7 @@ const MONTHLY_DATA = {
       "Austria":"through Aug 2026","Belgium":"through Sep 2026","Bulgaria":"through Aug 2026","Croatia":"through Aug 2026",
       "Cyprus":"through Aug 2026","Czechia":"through Aug 2026","Denmark":"through Sep 2026","Estonia":"through Aug 2026",
       "Finland":"through Sep 2026","France":"through Sep 2026","Germany":"through Sep 2026","Greece":"through Aug 2026",
-      "Hungary":"through Aug 2026","Iceland":"through Aug 2026","Ireland":"through Aug 2026","Italy":"through Sep 2026",
+      "Hungary":"through Aug 2026","Iceland":"through Aug 2026","Ireland":"through Sep 2026","Italy":"through Sep 2026",
       "Latvia":"through Aug 2026","Lithuania":"through Aug 2026","Luxembourg":"through Sep 2026","Malta":"through Aug 2026",
       "Netherlands":"through Sep 2026","Norway":"through Sep 2026","Poland":"through Sep 2026","Portugal":"through Sep 2026",
       "Romania":"through Aug 2026","Slovakia":"through Aug 2026","Slovenia":"through Aug 2026","Spain":"through Sep 2026",
@@ -1651,7 +1657,7 @@ const MONTHLY_DATA = {
       "Canada":"through Jun 2026",
       "Colombia":"through Sep 2026",
       "Mexico":"through Sep 2026",
-      "India":"through Aug 2026",
+      "India":"through Sep 2026",
       "Japan":"through Sep 2026",
       "Australia":"through Sep 2026",
       "Brazil":"through Sep 2026",
@@ -1668,7 +1674,7 @@ const MONTHLY_DATA = {
       "Indonesia":"through Sep 2026",
       "Chile":"through Aug 2026",
       "Vietnam":"through Sep 2026",
-      "Taiwan":"through Aug 2026",
+      "Taiwan":"through Sep 2026",
       "Nepal":"through Aug 2026",
       "Israel":"through Sep 2026",
       "Kazakhstan":"through Aug 2026",
@@ -1683,10 +1689,10 @@ const MONTHLY_DATA = {
       "Ecuador":1877,
       "Austria":31534,"Belgium":108221,"Bulgaria":1076,"Croatia":396,"Cyprus":735,"Czechia":6910,"Denmark":88452,
       "Estonia":444,"Finland":19227,"France":216310,"Germany":382202,"Greece":4265,"Hungary":5219,"Iceland":2357,
-      "Ireland":13637,"Italy":61058,"Latvia":743,"Lithuania":1205,"Luxembourg":9396,"Malta":780,"Netherlands":94448,
+      "Ireland":22390,"Italy":61058,"Latvia":743,"Lithuania":1205,"Luxembourg":9396,"Malta":780,"Netherlands":94448,
       "Norway":107605,"Poland":25828,"Portugal":36707,"Romania":3201,"Slovakia":2007,"Slovenia":2700,"Spain":72101,
       "Sweden":72230,"Switzerland":35725,"United Kingdom":224841,
-      "Canada":55935,"Mexico":10889,"New Zealand":4119,"United States":736926,"India":121295,"South Korea":142319,"Taiwan":15228,
+      "Canada":55935,"Mexico":10889,"New Zealand":4119,"United States":736926,"India":139844,"South Korea":142319,"Taiwan":22006,
       "Israel":40028,
       "Peru":437,
       "Uruguay":5830,
@@ -1697,7 +1703,7 @@ const MONTHLY_DATA = {
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Ecuador":66852,
-      "Austria":143051,"Belgium":323868,"Bulgaria":22873,"Croatia":41949,"Cyprus":8223,"Czechia":122639,"Denmark":134102,"Estonia":6156,"Finland":53933,"France":1186784,"Germany":2110348,"Greece":78162,"Hungary":66094,"Iceland":8152,"Ireland":81715,"Italy":1167768,"Latvia":11237,"Lithuania":20787,"Luxembourg":36494,"Malta":2958,"Netherlands":271973,"Norway":113407,"Poland":427908,"Portugal":171564,"Romania":64820,"Slovakia":45090,"Slovenia":29827,"Spain":854660,"Sweden":204027,"Switzerland":168929,"United Kingdom":1042219,"Canada":968769,"Mexico":842840,"New Zealand":51878,"United States":9501054,"India":2891240,"South Korea":1127726,"Taiwan":204958,
+      "Austria":143051,"Belgium":323868,"Bulgaria":22873,"Croatia":41949,"Cyprus":8223,"Czechia":122639,"Denmark":134102,"Estonia":6156,"Finland":53933,"France":1186784,"Germany":2110348,"Greece":78162,"Hungary":66094,"Iceland":8152,"Ireland":121659,"Italy":1167768,"Latvia":11237,"Lithuania":20787,"Luxembourg":36494,"Malta":2958,"Netherlands":271973,"Norway":113407,"Poland":427908,"Portugal":171564,"Romania":64820,"Slovakia":45090,"Slovenia":29827,"Spain":854660,"Sweden":204027,"Switzerland":168929,"United Kingdom":1042219,"Canada":968769,"Mexico":842840,"New Zealand":51878,"United States":9501054,"India":3213654,"South Korea":1127726,"Taiwan":258424,
       "Israel":220530,
       "Peru":117029,
       "Uruguay":25094,
@@ -1735,7 +1741,7 @@ const MONTHLY_DATA = {
       "Greece": [10669, 9753, 88681, 4969, 36905, 3413, 154390],
       "Hungary": [13836, 13363, 73043, 1113, 29962, 13876, 145193],
       "Iceland": [6958, 2778, 3171, 0, 812, 749, 14468],
-      "Ireland": [49547, 27833, 46523, 1307, 36763, 22992, 184965],
+      "Ireland": [50305, 26694, 42647, 1120, 33524, 21160, 175450],
       "Italy": [135951, 162459, 833573, 104733, 344817, 111545, 1693078],
       "Japan": [114734, 45363, 1623140, 531, 764208, 107415, 2655391],
       "Latvia": [2771, 3377, 0, 719, 15124, 2617, 24608],
@@ -1762,7 +1768,7 @@ const MONTHLY_DATA = {
       // source: CAAM via CnEVPost — BEV/PHEV/Petrol trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; HEV not part of China's NEV classification (always 0)
       "China": [11457000, 5378667, 0, 0, 14734286, 0, 31569953],
       // source: Vahan Dashboard — each fuel trended from the last 3 actual months' average (or the 8-mo YTD average if higher), applied to the remaining 4 months
-      "India": [339586, 30, 432008, 1235690, 2297342, 926937, 5231593],
+      "India": [362299, 36, 448898, 1256752, 2313967, 945800, 5327752],
       // source: world_auto_sales_annual, period_type='PROJECTED' — plain run-rate (YTD x 12/7) from FTI Automotive Industry Club data; Total includes pickups/PPV, not passenger-cars-only
       "Thailand": [231911, 13384, 153600, 1825, 105011, 205896, 711627],
       // source: TS/KOTSA — each fuel trended from the last 3 actual months' average (or the 8-mo YTD average if higher), applied to the remaining 4 months; PHEV folded into HEV
@@ -1772,7 +1778,7 @@ const MONTHLY_DATA = {
       // source: world_auto_sales_annual, period_type='PROJECTED' — plain run-rate (YTD x 12/7) from LTA data; COE quota-capped market
       "Singapore": [34542, 1576, 15840, 0, 3006, 4, 54968],
       // source: THB via Taiwan Stats (stats.tw) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; PHEV folded into HEV
-      "Taiwan": [38971, 0, 161845, 0, 171289, 4743, 376848],
+      "Taiwan": [43703, 0, 160582, 0, 171441, 4709, 380435],
       // source: ANAC A.G. — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
       "Chile": [10547, 8700, 41275, 0, 179158, 72116, 311796],
       // source: VAMA + VinFast + TC Group — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
