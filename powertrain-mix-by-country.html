@@ -262,9 +262,9 @@
 
         <div class="card chart-card hidden" id="elec-bars-card">
           <h2 id="elec-bars-title">Electrification Mix — Recent</h2>
-          <p class="note" id="elec-bars-note"></p>
           <div class="chart-legend" id="elec-bars-legend"></div>
           <svg class="chart" id="elec-bars-svg" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
+          <p class="note" id="elec-bars-note"></p>
           <div class="tooltip" id="elec-bars-tooltip"></div>
         </div>
 
@@ -5186,17 +5186,17 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     return map ? (map[brand] || null) : null;
   }
 
-  // Countries with BOTH brand-level and model-level data -- the only ones offered in the
-  // "switch country" dropdowns on these two sections (a brand-only country like India would
-  // make the By Model view disappear with no explanation if it were selectable here). Listed
-  // alphabetically, not by data richness -- a dropdown is scanned by name, not skimmed top-down.
-  const mfrCountriesWithModelsSet = new Set(
-    hasModelMonthly
-      ? Object.keys(MANUFACTURER_MODEL_MONTHLY).filter(c =>
-          MANUFACTURER_MODEL_MONTHLY[c] && MANUFACTURER_MODEL_MONTHLY[c].length &&
-          hasMonthly && MANUFACTURER_MONTHLY[c] && MANUFACTURER_MONTHLY[c].length)
-      : []
-  );
+  // Every country with ANY brand- or model-level data (monthly or yearly) is offered in the
+  // "switch country" dropdowns. A country that only has some of it (Austria: yearly only;
+  // Belgium: brand only) still shows up -- the sections themselves explain what is missing
+  // for the selected period and link to the periods that do have data (see renderMfrPeriodNotes).
+  const mfrCountriesWithModelsSet = new Set();
+  [typeof MANUFACTURER_YEARLY !== 'undefined' ? MANUFACTURER_YEARLY : null,
+   hasMonthly ? MANUFACTURER_MONTHLY : null,
+   hasModelMonthly ? MANUFACTURER_MODEL_MONTHLY : null,
+   hasModelYearly ? MANUFACTURER_MODEL_YEARLY : null].forEach(src => {
+    if(src) Object.keys(src).forEach(c => { if(src[c] && src[c].length) mfrCountriesWithModelsSet.add(c); });
+  });
   const MFR_COUNTRIES_WITH_MODELS = [...mfrCountriesWithModelsSet].sort();
   function selectMfrCountry(c){
     if(!c || c === focusedCountry) return;
@@ -5536,6 +5536,98 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     updateMfrCoverageNote();
     updateMfrModelCoverageNote();
     updateMfrCountryGroupCoverageNote();
+    renderMfrPeriodNotes();
+  }
+  // --- "no data for the selected period" label + clickable list of the periods that do have data.
+  // Shown in each of the three sections (brand / model / manufacturing country) whenever the
+  // page's selected period isn't what the section ended up displaying (it fell back to the
+  // country's latest period) or the displayed period has no rows for that section.
+  let mfrRequestedOverride = null; // set when the user picks a period inside a section on purpose
+  const MFR_MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  function mfrPeriodKeyLabel(key){
+    const m = String(key).match(/^(\d{4})-annual$/);
+    if(m) return mfrYearOptionLabel(+m[1]);
+    const mm = String(key).match(/^(\d{4})-(\d{2})$/);
+    if(mm) return MFR_MONTH_NAMES[+mm[2] - 1] + ' ' + mm[1];
+    return mfrPeriodLabel(key);
+  }
+  function mfrAvailablePeriods(kind){
+    const c = mfrCountry;
+    const mon = kind === 'model' ? (hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[c]) : (hasMonthly && MANUFACTURER_MONTHLY[c]);
+    const yr = kind === 'model' ? (hasModelYearly && MANUFACTURER_MODEL_YEARLY[c]) : MANUFACTURER_YEARLY[c];
+    const months = mon ? [...new Set(mon.map(r => r.year_month))].sort().reverse() : [];
+    const years = yr ? [...new Set(yr.map(r => r.year))].sort((a, b) => b - a) : [];
+    const synth = months.length ? mfrSyntheticPeriodKeysForCountry(c) : [];
+    return [...synth, ...months, ...years.map(y => `${y}-annual`)];
+  }
+  function ensureMfrPeriodNote(card, id){
+    let el = document.getElementById(id);
+    if(!el){
+      el = document.createElement('div');
+      el.id = id;
+      el.className = 'mfr-coverage-note hidden';
+      const anchor = card.querySelector('.note');
+      if(anchor && anchor.parentNode) anchor.parentNode.insertBefore(el, anchor.nextSibling); else card.appendChild(el);
+      el.addEventListener('click', e => {
+        const link = e.target.closest('[data-mfr-goto-period]');
+        if(!link) return;
+        e.preventDefault();
+        mfrGotoPeriod(link.dataset.mfrGotoPeriod);
+      });
+    }
+    return el;
+  }
+  function mfrGotoPeriod(key){
+    const radio = monthsBox.querySelector(`input[data-month="${key}"]`);
+    if(radio){
+      selectedMonths = new Set([key]);
+      monthsBox.querySelectorAll('input[type="radio"]').forEach(rb => { rb.checked = rb === radio; });
+      mfrRequestedOverride = null;
+      recompute();
+      return;
+    }
+    const yearly = /^\d{4}-annual$/.test(key);
+    mfrForceYearly = yearly;
+    if(mfrPeriodToggleEl) mfrPeriodToggleEl.querySelectorAll('[data-mfr-period]').forEach(b => b.classList.toggle('active', b.dataset.mfrPeriod === (yearly ? 'yearly' : 'monthly')));
+    renderMfrSection();
+    if(yearly){ mfrYearSelect.value = key.slice(0, 4); mfrYearSelect.dispatchEvent(new Event('change')); }
+    else { mfrMonthSelect.value = key; mfrMonthSelect.dispatchEvent(new Event('change')); }
+  }
+  function renderMfrPeriodNotes(){
+    // model card is empty (CSS hides all but the heading + this label): say why and offer periods
+    if(mfrCountry && mfrModelSection.classList.contains('mfr-card-empty') && mfrModelComingSoon){
+      const mAvail = mfrAvailablePeriods('model');
+      const shown0 = mfrMonthly ? mfrMonthSelect.value : `${mfrYear}-annual`;
+      mfrModelComingSoon.innerHTML = mAvail.length
+        ? `ℹ No model data for ${mfrCountry} in ${mfrPeriodKeyLabel(shown0)}. Select one of the available periods: ${mAvail.map(k => `<a href="#" data-mfr-goto-period="${k}">${mfrPeriodKeyLabel(k)}</a>`).join(', ')}.`
+        : `ℹ No model-level data for ${mfrCountry} -- the source publishes brand totals only. Brand and manufacturing-country views are available above and below.`;
+      if(!mfrModelComingSoon.dataset.wired){
+        mfrModelComingSoon.dataset.wired = '1';
+        mfrModelComingSoon.addEventListener('click', e => { const l = e.target.closest('[data-mfr-goto-period]'); if(l){ e.preventDefault(); mfrGotoPeriod(l.dataset.mfrGotoPeriod); } });
+      }
+    }
+    const specs = [['brand', mfrSection, 'mfr-period-note-brand', 'brand'], ['model', mfrModelSection, 'mfr-period-note-model', 'model'], ['mfgcountry', mfrCountrySection, 'mfr-period-note-group', 'brand']];
+    const req = mfrRequestedOverride || [...selectedMonths][0];
+    const shownKey = mfrMonthly ? mfrMonthSelect.value : `${mfrYear}-annual`;
+    const yearOf = k => String(k).slice(0, 4);
+    specs.forEach(([name, card, id, dataKind]) => {
+      const el = ensureMfrPeriodNote(card, id);
+      if(!mfrCountry || card.classList.contains('mfr-card-empty')){ el.classList.add('hidden'); return; }
+      const avail = mfrAvailablePeriods(dataKind);
+      const monthlyRows = dataKind === 'model' ? ((hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[mfrCountry]) || []) : ((hasMonthly && MANUFACTURER_MONTHLY[mfrCountry]) || []);
+      const yearlyRows = dataKind === 'model' ? ((hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry]) || []) : (MANUFACTURER_YEARLY[mfrCountry] || []);
+      const hasRows = mfrMonthly
+        ? monthlyRows.some(r => mfrIsSyntheticKey(shownKey) ? r.year_month.startsWith(yearOf(shownKey)) : r.year_month === shownKey)
+        : yearlyRows.some(r => r.year === mfrYear);
+      const mismatch = !!req && req !== shownKey;
+      if(!mismatch && hasRows){ el.classList.add('hidden'); return; }
+      const noun = name === 'model' ? 'model' : name === 'mfgcountry' ? 'manufacturing-country' : 'brand';
+      const links = avail.map(k => `<a href="#" data-mfr-goto-period="${k}">${mfrPeriodKeyLabel(k)}</a>`).join(', ');
+      el.classList.remove('hidden');
+      el.innerHTML = hasRows
+        ? `ℹ No ${noun} data for ${mfrCountry} in ${mfrPeriodKeyLabel(req)} -- showing ${mfrPeriodKeyLabel(shownKey)} instead, the latest period available here. Select one of the available periods: ${links}.`
+        : `ℹ No ${noun} data for ${mfrCountry} in ${mfrPeriodKeyLabel(shownKey)}. Select one of the available periods: ${links || 'none yet'}.`;
+    });
   }
   document.querySelectorAll('[data-mfr-mode]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -5594,6 +5686,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       recompute();
       return;
     }
+    mfrRequestedOverride = val;
     mfrTitle.textContent = mfrTitleText('brand');
     mfrModelTitle.textContent = mfrTitleText('model');
     renderBoth();
@@ -5607,6 +5700,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     // touch mfrForceYearly, so a manual in-section pick survives everything else (filters,
     // country switches, etc.) that doesn't cross that boundary.
     const currentPeriodType = isYearlyPeriodKey([...selectedMonths][0]) ? 'yearly' : 'monthly';
+    if([...selectedMonths][0] !== mfrLastSyncedPeriod) mfrRequestedOverride = null;
     if(currentPeriodType !== mfrLastPeriodType){
       mfrForceYearly = currentPeriodType === 'yearly';
       if(mfrPeriodToggleEl){
@@ -5743,6 +5837,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       return;
     }
     mfrYear = +val;
+    mfrRequestedOverride = `${val}-annual`;
     const hasModelYearlyData = hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry] &&
       MANUFACTURER_MODEL_YEARLY[mfrCountry].some(r => r.year === mfrYear);
     setMfrCardEmpty(mfrModelSection, mfrModelComingSoon, !hasModelYearlyData, mfrModelRows);

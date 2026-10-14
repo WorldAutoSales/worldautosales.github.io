@@ -11,9 +11,9 @@
 // loaded, plus a card in the host page shaped like:
 //   <div class="card chart-card" id="elec-bars-card">
 //     <h2 id="elec-bars-title"></h2>
-//     <p class="note" id="elec-bars-note"></p>
 //     <div class="chart-legend" id="elec-bars-legend"></div>
 //     <svg class="chart" id="elec-bars-svg" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
+//     <p class="note" id="elec-bars-note"></p>
 //     <div class="tooltip" id="elec-bars-tooltip"></div>
 //   </div>
 // The %/# of Units mode toggle is injected into the DOM on first render (wrapping the existing
@@ -30,8 +30,8 @@ const ELEC_BARS_YEAR_COUNT = 5;
 // YTD bar in between, individual months narrowest
 const ELEC_BARS_YEAR_WIDTH_RATIO = 2.2;
 const ELEC_BARS_MONTH_WIDTH_RATIO = 0.7;
-// almost as wide as a full year -- YTD is the current year's running total, not a single month
-const ELEC_BARS_YTD_WIDTH_RATIO = ELEC_BARS_YEAR_WIDTH_RATIO * 0.9;
+// as wide as a full year -- YTD is the current year's running total, not a single month
+const ELEC_BARS_YTD_WIDTH_RATIO = ELEC_BARS_YEAR_WIDTH_RATIO;
 // Y axis is fixed 0-100% in "%" mode (not auto-scaled to the country's own data) so charts are
 // comparable across countries and never jump around when switching focus -- 100% comfortably
 // covers the highest real value seen in this dataset (Norway, ~99.2% in March 2026).
@@ -141,7 +141,7 @@ function renderElectrificationBarsChart(country){
   // one row per period, carrying both the raw units (under _raw) and whichever unit the current
   // mode displays (% of total, or the raw count itself) under each fuel key directly
   const displaySeries = series.map(d => {
-    const row = { label: d.label, total: d.total, isPartial: d.isPartial, isYear: d.isYear, _raw: d };
+    const row = { label: d.label, total: d.total, isPartial: d.isPartial, isYear: d.isYear, isYTD: !!d.isYTD, _raw: d };
     ELEC_BARS_ALL_KEYS.forEach(k => {
       const raw = d[k] || 0;
       row[k] = elecBarsMode === 'raw' ? raw : (d.total ? raw / d.total * 100 : 0);

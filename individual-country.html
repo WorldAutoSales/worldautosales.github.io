@@ -183,9 +183,9 @@
 
         <div class="card chart-card hidden" id="elec-bars-card">
           <h2 id="elec-bars-title">Electrification Mix — Recent</h2>
-          <p class="note" id="elec-bars-note"></p>
           <div class="chart-legend" id="elec-bars-legend"></div>
           <svg class="chart" id="elec-bars-svg" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
+          <p class="note" id="elec-bars-note"></p>
           <div class="tooltip" id="elec-bars-tooltip"></div>
         </div>
 
@@ -502,17 +502,55 @@ const MONTHLY_DATA = {
       // AEB 5 Oct 2026 release: PPK JSC market volume 126,542 (new passenger cars + LCV); BEV = AEB EV Jan-Sep 10,570 minus Jan-Aug; diesel at Aug share 1.7%; PHEV/HEV not published (in petrol)
       "Russian Federation": [2208,0,0,0,122183,2151,126542],
       // GAIKINDO wholesales September 2026 (79,540); BEV/PHEV/HEV from detikOto/CNN Indonesia/Moladin press tallies; diesel included in petrol
-      "Indonesia": [16043,1279,7928,0,54290,0,79540]
+      "Indonesia": [16043,1279,7928,0,54290,0,79540],
+      // ANFAVEA, Brazil (monthly) -- automoveis+comerciais leves only (excludes trucks/buses); Petrol=Gasolina+Etanol+Flex fuel
+      "Brazil": [22316,17470,22291,0,183456,23227,268760],
+      // FCAI (VFACTS) via CarExpert, Australia (monthly) -- light vehicles only, excludes heavy commercial; others=0
+      "Australia": [26287,10072,17843,0,26018,25173,105393],
+      // INEGI RAIAVL open data CSVs (venta mensual + hibrido mensual), Mexico (monthly) -- summed directly from the raw files
+      "Mexico": [2494,3267,11063,0,112451,0,129275],
+      // ACARA/DNRPA, Argentina (monthly) -- BEV/HEV real (Infobae + Autoxarg, both citing ACARA/DNRPA); PHEV and Diesel always 0 (not meaningfully tracked/negligible); Petrol=residual
+      "Argentina": [865,0,8322,0,37530,0,46717],
+      // SMMT, United Kingdom (monthly) -- record BEV month (36.3% YoY, 28.3% share) and record PHEV share (55.7% YoY)
+      "United Kingdom": [99201,59571,45839,0,131864,14061,350536],
+      // TS/KOTSA new-registration API (registYy=2026 registMt=09), national all-vehicle-type totals; PHEV folded into HEV (no PHEV split in this source, same MOLIT convention)
+      "South Korea": [31499,0,44431,11090,40748,3151,130919],
+      // JADA fuel-type-by-manufacturer grid (Jan-Sep 2026 release), registered passenger cars only (excludes kei-cars + commercial); others=FCV+other. Cross-validated exactly against JADA's own announced total (236,293)
+      "Japan": [13440,4660,147496,53,62863,7781,236293],
+      // FENALCO-ANDI joint release, directly reported standalone September figures (new monthly records for total/BEV/HEV); Petrol = residual, no PHEV/Diesel distinguished (established convention)
+      "Colombia": [5895,0,11261,0,16679,0,33835],
+      // JPJ-direct method (data.gov.my daily registrations, category=car), same convention as prior months; bev=electric, hev=hybrid_petrol+hybrid_diesel, diesel=diesel+greendiesel
+      "Malaysia": [6029,0,5452,0,59252,3671,74404],
+      // NZTA Motor Vehicle Register live-fleet-snapshot reconstruction (vstat hadn't published Sept yet); cross-validated closely against MIA's own release (BEV 2,593, PHEV 1,203 exact, total 13,243 vs 13,239)
+      "New Zealand": [2592,1236,4866,0,3948,597,13239],
+      // Ukravtoprom-reported ~4,900 total with fuel-type % shares (BEV 9.2%, Petrol 39.3%, Diesel 20.2%, Hybrid 31% incl. PHEV, LPG <1%) via kurs.com.ua/dengi.ua, cross-confirmed by two independent outlets citing the same Ukravtoprom figures -- approximate, same tier as August's entry; PHEV not separated from HEV by the source
+      "Ukraine": [451,0,1519,14,1926,990,4900],
+      // Israel MoT vehicle registry (data.gov.il); BEV/PHEV/Diesel exact, Petrol/HEV split using the same I-VIA quarterly ratio already confirmed in July/August (both back-derive to ~47.44% petrol)
+      "Israel": [4630,6282,6169,0,5567,908,23556],
+      // CAAM via CnEVPost, China (monthly) -- all-vehicle wholesale incl. exports; NEV BEV/PHEV exact, petrol = remainder; HEV/diesel not split
+      "China": [1277000,546000,0,0,1133000,0,2956000],
+      // VAMA (members: PC+Special->Petrol, CV->Diesel, hybrid->HEV) + VinFast (100% BEV, 23,624 deliveries) + TC Group/Hyundai (3,872 -> Petrol), Vietnam -- VAMA's own BEV not added (same convention as Aug)
+      "Vietnam": [23624,0,2168,0,26991,9807,62590],
+      // STATEC/SNCA lustat DF_D6122 (new passenger cars by fuel, monthly), Luxembourg -- PHEV = plug-in petrol+diesel hybrids, HEV = non-plug-in hybrids; Others = OTH
+      "Luxembourg": [1331,237,1065,13,698,193,3537],
+      // auto-schweiz MOFIS (CH+FL), Switzerland (monthly) -- fuel totals from the same sheet as brand data; PHEV = Plug-In incl. REX, HEV = Hybrid HEV+MHEV
+      "Switzerland": [7833,2529,7007,1,3673,905,21948],
+      // Vahan Dashboard (analytics.parivahan.gov.in, Four Wheeler), India (monthly) -- live register pulled 2026-10-14; BEV=Pure EV+Electric(BOV), HEV=Strong+Petrol/Diesel hybrids, Others=CNG/LPG/other residual
+      "India": [37693,3,41243,100251,178722,78183,436095],
+      // U-CAR / TVBS registration (掛牌) report, Taiwan (monthly) -- total 37,054 and BEV 7,026 reported; HEV/Petrol/Diesel ESTIMATED by scaling August's non-BEV mix (no official September fuel split yet)
+      "Taiwan": [7026,0,14434,0,15224,370,37054],
+      // SIMI Motorstats (stats.simi.ie, Month From/To = Sep), Ireland (monthly) -- PHEV = petrol+diesel plug-in hybrids (1,043+17), HEV = petrol+diesel hybrids (932+38); loaded ahead of ACEA
+      "Ireland": [3116,1060,970,0,634,542,6322]
     },
-    priorYearBev: {      "Finland":2591,      "Belgium":11966,      "Netherlands":12008,      "Poland":4452},
-    priorYearTotal: {      "Finland":5996,      "Belgium":31519,      "Netherlands":32199,      "Poland":49853}
+    priorYearBev: {      "Finland":2591,      "Belgium":11966,      "Netherlands":12008,      "Poland":4452,      "Brazil":8195,      "Mexico":2041,      "United Kingdom":72779,      "Luxembourg":1245,      "Switzerland":5182,      "India":18549,      "Taiwan":3837,      "Ireland":1734},
+    priorYearTotal: {      "Finland":5996,      "Belgium":31519,      "Netherlands":32199,      "Poland":49853,      "Brazil":231479,      "Mexico":119766,      "United Kingdom":312891,      "Luxembourg":3779,      "Switzerland":20031,      "India":322414,      "Taiwan":28257,      "Ireland":5611}
   },
   "2026-08": {
     label: "August 2026",
     raw: {
       "Russian Federation":[2216,0,0,0,112028,1976,116220],
       // source: Vahan Dashboard, India (monthly)
-      "India": [26314,4,31248,86452,141993,60109,346120],
+      "India": [32571,6,37636,104972,167185,73318,415688],
       // source: TS/KOTSA new-registration API, South Korea (monthly) — PHEV folded into HEV
       "South Korea": [30121,0,36142,10951,30255,2829,110298],
       // source: Israel Ministry of Transport vehicle registry (data.gov.il) — BEV/PHEV/Diesel exact; Petrol/HEV split using I-VIA's quarterly Trends Analysis ratio (see world_auto_sales.data_quality_note for full methodology)
@@ -560,22 +598,90 @@ const MONTHLY_DATA = {
       // backfilled 2026-10-12 from powertrain-mix-by-country.html (2026-08 figures, ACEA/national source as noted there)
       "Luxembourg": [1132,248,956,0,586,181,3103],
       // backfilled 2026-10-12 from powertrain-mix-by-country.html (2026-08 figures, ACEA/national source as noted there)
-      "Iceland": [541,46,84,0,7,14,692]},
+      "Iceland": [541,46,84,0,7,14,692],
+      "Kazakhstan": [317,855,257,0,17675,0,19104],
+      // Added 2026-09-25: Chile (ANAC real BEV/PHEV/HEV for August; ANAC's "MHEV" bucket (2,338 units) is bundled by ANAC itself into conventional combustion, so it stays in the unsplit petrol+diesel residual, divided using July 2026's own petrol/diesel ratio), Ecuador (AEADE/press real BEV + combined-hybrid total; petrol/diesel residual split via July 2026's ratio, matching this country's existing no-PHEV-split convention), Uruguay (ACAU headline total 6,781 -- other outlets report 6,477/5,933 for what may be narrower vehicle-category scopes, flagged as a data-quality caveat; the reported combined "electricos" figure of 3,471 was split into bev/phev using July 2026's bev:phev ratio since ACAU did not separate them for August), South Africa (naamsa's August release only republishes July's NEV mix -- no fresh August EV breakdown exists yet -- so bev/phev/hev were ESTIMATED by scaling July 2026's ratios onto August's real total of 57,898; replace with real figures once naamsa publishes an August-specific NEV breakdown).
+      "Chile": [696,593,3662,0,16360,6585,27896],
+      "Ecuador": [2034,0,3308,0,6082,3857,15281],
+      "Uruguay": [3107,364,0,0,3286,24,6781],
+      "South Africa": [459,1232,1416,0,54791,0,57898],
+      // Added 2026-09-25: Indonesia (GAIKINDO wholesale, no petrol/diesel split published -- residual folded into petrol), Taiwan (real BEV+total; HEV/Petrol/Diesel split ESTIMATED by scaling July 2026's proportional mix onto August's actual total, since no official August breakdown beyond BEV+total was published), Malaysia (MAA headline total, HEV/Diesel/BEV derived by applying JPJ registration-category ratios per this project's usual method -- JPJ's "EV" category does not separate BEV from PHEV so phev is left 0 here to avoid double count), United States (Argonne National Laboratory monthly EV data + Cox/Wards/NADA total, diesel folded into petrol per existing US convention), and Ukraine (Ukravtoprom-reported ~5,000 total with fuel-type % shares -- approximate, PHEV not separated from HEV by the source).
+      "Indonesia": [17413,1993,7667,0,54683,0,81756],
+      "Taiwan": [3259,0,12480,0,13163,320,29222],
+      "Malaysia": [8834,0,4964,0,60281,3327,77406],
+      "United States": [86186,20103,216324,36,1057729,0,1380378],
+      "Ukraine": [510,0,1645,15,1955,875,5000],
+      // source: SMMT monthly release -- see July comment for methodology. Absolute units derived from SMMT's stated percentages x its stated 94,236 total.
+      "United Kingdom": [28082,13664,11968,0,35999,4523,94236],
+      // source: auto-schweiz monthly press release, Switzerland -- Total (16,047) and every fuel share are auto-schweiz's own exact published August figures for the first time this year (BEV 30.2%, PHEV 12.4%, Petrol 20.6%, Diesel 5.5%); BEV unit count (4,843) independently cross-checked against press citations. HEV = residual (31.3%); temporary pending ACEA
+      "Switzerland": [4843,1903,5981,0,2566,754,16047],
+      // source: LTA (Land Transport Authority), Singapore (monthly) — COE quota-capped market, small volumes
+      "Singapore": [2880,288,1134,0,247,0,4549],
+      // MTA (Motor Trade Association) vstat dashboard sourced from NZTA -- new passenger vehicle registrations only, released 2026-09-01
+      "Japan": [8351,3218,107134,70,48948,5118,172839],
+      // ODMD Basin Bulteni 2 Eylul 2026, Ek5 Agustos 2026 monthly column -- scope=Otomobil only, excludes HTA; genuine standalone-month table this time (not YTD-subtraction derived)
+      "New Zealand": [1049,1174,3442,0,2889,583,9137],
+      // ANFAVEA Carta 484 (August 2026) -- petrol=Gasolina+Etanol+Flex fuel; verified exactly against page 6 fuel-type table and page 5 independent Veiculos leves total (263,091)
+      "Turkey": [11878,245,20885,1576,24363,2582,61529],
+      // CAAM wholesale figures via cnevpost, released 2026-09-10
+      "Brazil": [27251,19125,17823,0,176469,22423,263091],
+      // INEGI (RAIAVL) open data, venta+hibrido monthly CSVs
+      "China": [1161000,482000,0,0,1069000,0,2712000],
+      // Automundo/ACARA + Infobae, released 2026-09-05. No PHEV column (established convention for Argentina)
+      "Mexico": [2695,3205,11146,0,112316,0,129362],
+      // FENALCO-ANDI via elnorte.com.co, released 2026-09
+      "Argentina": [665,0,6991,0,36759,0,44415],
+      // source: VAMA (member brands: PC+Special->Petrol, CV->Diesel) + VinFast (100% BEV) + TC Group/Hyundai (->Petrol), Vietnam -- HEV now reported separately by VAMA as member brands add hybrid models
+      "Vietnam": [20161,0,1388,0,18677,8258,48484],
+      // source: AAP (Asociacion Automotriz del Peru) via SUNARP registry -- genuine standalone month, from the electrified-vehicle monthly chart (BEV/PHEV/HEV) plus the light+heavy total table; no Petrol/Diesel split published, so the non-electrified remainder is placed in Petrol for this chart (Diesel=0), same convention as Peru's other loaded months
+      "Peru": [67,229,1353,0,24679,0,26328],
+      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Colombia": [4542,0,9195,0,13387,0,27124],
+      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Austria": [6316,2680,6166,0,4873,1753,21788],
+      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Bulgaria": [429,252,364,0,3255,379,4679],
+      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Croatia": [158,367,1623,26,1388,402,3964],
+      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Cyprus": [33,45,450,0,175,9,712],
+      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Czechia": [1497,953,4762,496,7264,2746,17718],
+      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Estonia": [174,112,773,0,275,145,1479],
+      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Greece": [544,279,3086,211,965,68,5153],
+      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Hungary": [810,1033,4653,135,1804,920,9355],
+      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Latvia": [308,322,0,65,963,194,1852],
+      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Lithuania": [325,623,2148,66,684,244,4090],
+      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Malta": [302,73,199,0,133,38,745],
+      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Romania": [671,0,5525,1245,1595,516,9552],
+      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Slovakia": [508,359,2198,144,2488,571,6268],
+      // ACEA Press_release_car_registrations_August_2026.pdf -- August 2026 monthly figures. Note: no standalone July 2026 release exists (ACEA skipped directly from the June/H1 release to August), so July has no monthly row for ACEA countries; YTD/projection below use ACEA's own published Jan-Aug YTD figure directly rather than summing monthly rows, to avoid silently dropping July's real contribution.
+      "Slovenia": [1651,235,653,57,1908,447,4951],
+      // Nepal Customs HS 8703, day-weighted blend of Shrawan 2083 BS (16 overlapping days) + Bhadra 2083 BS delta (15 overlapping days); BEV subheading simplified to a single code this FY, verified
+      "Nepal": [1394,12,7,0,320,51,1784]},
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY %
     priorYearBev: {
       "India": 20204, "South Korea": 23315,
       "Israel":6888,
       "Albania":490,
-      "Paraguay":38
-    },
+      "Paraguay":38,
+          "Japan":2649,      "New Zealand":382,      "Brazil":7643,      "Mexico":2439},
     // Total (all powertrains) units for the same month a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     // Australia omitted — no matching August 2025 monthly figure sourced
     priorYearTotal: {
       "India": 343212, "South Korea": 127947,
       "Israel":25847,
       "Albania":7658,
-      "Paraguay":1987
-    }
+      "Paraguay":1987,
+          "Japan":159854,      "New Zealand":8049,      "Brazil":214744,      "Mexico":126545}
   },
   "2026-07": {
     label: "July 2026",
@@ -659,9 +765,39 @@ const MONTHLY_DATA = {
       // backfilled 2026-10-12 from powertrain-mix-by-country.html (2026-07 figures, ACEA/national source as noted there)
       "Poland": [2180,5278,29370,1342,14879,3154,56203],
       // backfilled 2026-10-12 from powertrain-mix-by-country.html (2026-07 figures, ACEA/national source as noted there)
-      "Luxembourg": [1407,291,1304,0,978,356,4336],
+      "Luxembourg": [1407,291,1289,29,964,357,4337],
       // backfilled 2026-10-12 from powertrain-mix-by-country.html (2026-07 figures, ACEA/national source as noted there)
-      "Iceland": [616,204,192,0,65,71,1148]},
+      "Iceland": [616,204,192,0,65,71,1148],
+      "Kazakhstan": [318,856,257,0,19940,0,21371],
+      // ACEA-derived 2026-09-24: these 17 countries were skipped by ACEA's July monthly release (ACEA takes a "summer break" in July, publishing only an H1 Jan-Jun cumulative report instead of a standalone July report). Figures below are DERIVED: ACEA's August 2026 press release Jan-Aug year-to-date column, minus that same release's August-2026-only column, minus this site's own already-loaded Jan-Jun 2026 monthly sum -- i.e. July = YTD(Jan-Aug) - August - H1(Jan-Jun). A few countries (Bulgaria, Cyprus, Malta) hit a small negative residual in one sub-category from ACEA's cross-month data revisions; that sub-category was clamped to 0 and the gap absorbed into the country's largest remaining bucket so the total stays exact -- affects only single-digit-to-low-hundreds units, not the total.
+      "Austria": [7073,3530,7192,0,5625,2403,25823],
+      "Bulgaria": [468,177,399,0,3893,0,4937],
+      "Croatia": [358,653,2428,114,2133,759,6445],
+      "Cyprus": [59,86,684,0,483,0,1312],
+      "Czechia": [1538,1068,5005,476,8376,3684,20147],
+      "Estonia": [176,146,856,0,239,196,1613],
+      "Greece": [994,1024,8478,301,2310,113,13220],
+      "Hungary": [921,1315,5609,97,2560,1167,11669],
+      "Latvia": [356,384,0,68,1440,195,2443],
+      "Lithuania": [405,725,2352,75,848,296,4701],
+      "Malta": [525,194,251,1,0,8,979],
+      "Romania": [825,0,6194,2279,1826,616,11740],
+      "Slovakia": [550,453,2428,94,2630,785,6940],
+      "Slovenia": [1520,189,822,100,2526,586,5743],
+      // source: KBA (Kraftfahrt-Bundesamt) monthly Pressemitteilung -- Germany's official federal motor authority, published within the first days of the following month, well ahead of ACEA. Hybrid total (105,284) split into PHEV (30,609, KBA-stated) and HEV=105,284-30,609=74,675; Others = residual against KBA's own 268,068 total (Sonstige/other fuels).
+      "Germany": [78609,30609,74675,1878,50665,31632,268068],
+      // source: DGT (Direccion General de Trafico) registration microdata, processed by IEA (Instituto de Estudios de Automocion) for GANVAM -- Spain's official traffic authority via industry-association bulletin, published early in the following month, ahead of ACEA. BEV=10,722 (pure BEV, E-REV's 171 units folded into the PHEV subtotal per the source's own "Hibrido Enchufable (PHEV)"=14,507 line, which already includes it); HEV=47,636 (Hibrido Gasolina+Diesel combined); Others=4,084 GLP.
+      "Spain": [10722,14507,47636,4084,22193,2807,101949],
+      // source: ACAP (Associacao Automovel de Portugal) monthly press release -- Portugal's official industry association, published within days of month-end, ahead of ACEA. Ligeiros de passageiros (light passenger vehicles) only. Others=1,482, an unitemized residual (likely GPL/other) against ACAP's own 18,157 total -- the individually-cited BEV/PHEV/HEV/Petrol/Diesel figures only summed to 16,675.
+      "Portugal": [5603,3210,4206,1482,3021,635,18157],
+      // source: SMMT (Society of Motor Manufacturers and Traders) monthly release -- the UK's official industry body, published a few days into the following month, ahead of ACEA (not an EU/ACEA market anyway post-Brexit, but grouped with this region on this site). Absolute units derived from SMMT's stated percentages x its stated 156,571 total (SMMT's press release itself leads with percentages, not a full unit-level fuel table); Others is the small residual left after that scaling.
+      "United Kingdom": [43057,23329,20667,157,62785,6576,156571],
+      // source: auto-schweiz (Vereinigung Schweizer Automobil-Importeure) monthly press release, Switzerland -- BEV (4,899) is auto-schweiz's own exact published July figure; Total (18,994) and PHEV (2,351) derived by subtracting the June YTD cumulative (already loaded) from auto-schweiz's published YTD-through-July cumulative (135,542 total; BEV 32,788 exact; PHEV ~12.4% YTD share). HEV/Petrol/Diesel/Others split from the remainder using Switzerland's own June 2026 monthly ratio among those four categories; temporary pending ACEA
+      "Switzerland": [4899,2351,6685,1,3912,1146,18994],
+      // source: UNRAE (Unione Nazionale Rappresentanti Autoveicoli Esteri) monthly bulletin, via press (Quattroruote) -- Italy's official importers' association, published in the first days of the following month, ahead of ACEA. Absolute units derived from UNRAE's stated percentages x its stated 123,184 total; Others=GPL (Italy has a genuinely large LPG passenger-car segment, ~10.6% this month).
+      "Italy": [7268,13058,58512,13057,23405,7884,123184],
+      // source: naamsa, South Africa (monthly) — Total is naamsa's "Industry Total" (all vehicle types, local sales only: 57,708, per naamsa's July 2026 Flash Report); NEV split RECONSTRUCTED, not directly published -- naamsa's July Media Release NEV section contains a copy-paste error (it narrates "during June 2026" and repeats June's exact already-loaded 419/990/1488 figures verbatim). Worked around via subtraction: naamsa's own YTD-through-July figures (16,289 total NEV: 8,078 HEV/5,851 PHEV/2,360 BEV, cited in the same erroneous document and corroborated by techfinancials.co.za) minus YTD-through-June (13,193: 6,667/4,623/1,903, also in that document) = July's isolated contribution (3,096/1,411/1,228/457), independently matching techfinancials.co.za's separately-reported July NEV total of 3,096. Diesel folded into petrol (no separate split published)
+      "South Africa": [457,1228,1411,0,54612,0,57708]},
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY % (Argentina, China,
     // Indonesia, Australia, Singapore omitted — no matching July 2025 monthly figure sourced for those five)
     priorYearBev: {
@@ -670,8 +806,8 @@ const MONTHLY_DATA = {
       "Peru":82,
       "Uruguay":1195,
       "Albania":475,
-      "Paraguay":79
-    },
+      "Paraguay":79,
+          "Luxembourg":877},
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Brazil":230266,"India":346348,"Japan":220544,"Malaysia":75663,"Mexico":126541,"New Zealand":7576,"United States":1389685,"Thailand":49102,"South Korea":151549,"Taiwan":30934,
@@ -679,8 +815,8 @@ const MONTHLY_DATA = {
       "Peru":16956,
       "Uruguay":4170,
       "Albania":8295,
-      "Paraguay":3043
-    }
+      "Paraguay":3043,
+          "Luxembourg":4514}
   },
   "2026-06": {
     label: "June 2026",
@@ -776,7 +912,11 @@ const MONTHLY_DATA = {
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
       "Paraguay": [144,90,721,1,2620,271,3847],
       // source: WHOLE MARKET, partly estimated -- CAMPI-TMA part = TopGear.com.ph quarterly figures spread evenly (Q2 2026 (H1 minus Q1) / 3); PLUS non-member brands (BYD etc., not in CAMPI): Jan-Jun non-member xEV = whole-market Jan-Aug xEV 74,600 (Philstar) - CAMPI Jan-Aug 45,403 - Jul 5,564 - Aug 4,799 = 18,834, spread evenly (3139/mo), split BEV/PHEV/HEV by 2025 non-member mix (IEA minus CAMPI: 39/49/12%); non-member sales assumed ~all electrified (Jul/Aug non-member xEV 5,564/4,799 vs non-member total 5,561/4,779); petrol = CAMPI ICE remainder; diesel not published
-      "Philippines": [3372,2955,3339,0,26445,0,36111]
+      "Philippines": [3372,2955,3339,0,26445,0,36111],
+      // source: Statistics Canada, Table 20-10-0025-01 — reports quarterly, not monthly; Q2 2026's total (released 2026-09-08) is divided evenly across Apr/May/Jun (same figure repeated each month) rather than filed entirely under April, so month-over-month comparisons involving Canada aren't artificially skewed by a whole quarter landing in one month
+      "Canada": [13528,6075,30623,0,125271,7060,182557],
+      // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team — Q2 2026 delta (H1 2026 minus Q1 2026) split evenly across Apr-Jun (no finer intra-quarter split published); PHEV not separately tracked, folded into HEV
+      "Serbia": [133,0,1830,74,1742,394,4173]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-06), for YoY %
     priorYearBev: {
@@ -790,8 +930,8 @@ const MONTHLY_DATA = {
       "Peru":104,
       "Uruguay":797,
       "Albania":602,
-      "Paraguay":54
-    },
+      "Paraguay":54,
+          "Canada":9845},
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Austria":27868,"Belgium":41527,"Bulgaria":4614,"Croatia":8945,"Cyprus":1347,"Czechia":22208,"Denmark":19045,"Estonia":1549,"Finland":7449,"France":169505,"Germany":256193,"Greece":14647,"Hungary":11511,"Iceland":2032,"Ireland":2437,"Italy":132320,"Latvia":2244,"Lithuania":3722,"Luxembourg":4168,"Malta":544,"Netherlands":34641,"Norway":18373,"Poland":49587,"Portugal":23184,"Romania":10611,"Slovakia":8800,"Slovenia":4845,"Spain":119125,"Sweden":27565,"Switzerland":21810,"United Kingdom":191316,"New Zealand":8188,"United States":1272469,"Brazil":202458,"India":316921,"Japan":217333,"Malaysia":58858,"Mexico":117780,"Thailand":50079,"South Korea":145683,"Taiwan":29838,
@@ -799,8 +939,8 @@ const MONTHLY_DATA = {
       "Peru":16725,
       "Uruguay":3214,
       "Albania":7808,
-      "Paraguay":2492
-    }
+      "Paraguay":2492,
+          "Canada":180632}
   },
   "2026-05": {
     label: "May 2026",
@@ -888,7 +1028,11 @@ const MONTHLY_DATA = {
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
       "Paraguay": [173,176,671,0,2255,223,3498],
       // source: WHOLE MARKET, partly estimated -- CAMPI-TMA part = TopGear.com.ph quarterly figures spread evenly (Q2 2026 (H1 minus Q1) / 3); PLUS non-member brands (BYD etc., not in CAMPI): Jan-Jun non-member xEV = whole-market Jan-Aug xEV 74,600 (Philstar) - CAMPI Jan-Aug 45,403 - Jul 5,564 - Aug 4,799 = 18,834, spread evenly (3139/mo), split BEV/PHEV/HEV by 2025 non-member mix (IEA minus CAMPI: 39/49/12%); non-member sales assumed ~all electrified (Jul/Aug non-member xEV 5,564/4,799 vs non-member total 5,561/4,779); petrol = CAMPI ICE remainder; diesel not published
-      "Philippines": [3372,2955,3339,0,26445,0,36111]
+      "Philippines": [3372,2955,3339,0,26445,0,36111],
+      // source: Statistics Canada, Table 20-10-0025-01 — reports quarterly, not monthly; Q2 2026's total (released 2026-09-08) is divided evenly across Apr/May/Jun (same figure repeated each month) rather than filed entirely under April, so month-over-month comparisons involving Canada aren't artificially skewed by a whole quarter landing in one month
+      "Canada": [13528,6075,30623,0,125271,7060,182557],
+      // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team — Q2 2026 delta (H1 2026 minus Q1 2026) split evenly across Apr-Jun (no finer intra-quarter split published); PHEV not separately tracked, folded into HEV
+      "Serbia": [132,0,1829,74,1742,394,4171]
     },
     // BEV units for the same month a year prior — source: ACEA (world_auto_sales, 2025-05), for YoY %
     priorYearBev: {
@@ -902,8 +1046,8 @@ const MONTHLY_DATA = {
       "Peru":50,
       "Uruguay":946,
       "Albania":277,
-      "Paraguay":27
-    },
+      "Paraguay":27,
+          "Canada":9845},
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Austria":24311,"Belgium":34338,"Bulgaria":3857,"Croatia":8791,"Cyprus":1328,"Czechia":19519,"Denmark":17952,"Estonia":1411,"Finland":6851,"France":123918,"Germany":239297,"Greece":15670,"Hungary":10899,"Iceland":2313,"Ireland":5821,"Italy":139484,"Latvia":2149,"Lithuania":4092,"Luxembourg":4058,"Malta":677,"Netherlands":30188,"Norway":14260,"Poland":46641,"Portugal":23545,"Romania":10521,"Slovakia":7651,"Slovenia":5118,"Spain":112820,"Sweden":25675,"Switzerland":19969,"United Kingdom":150070,"New Zealand":6770,"United States":1461067,"Brazil":214617,"India":323571,"Japan":177980,"Malaysia":74393,"Mexico":121110,"Argentina":56319,"Thailand":52229,"South Korea":145387,"Turkey":85123,"Taiwan":27392,
@@ -911,8 +1055,8 @@ const MONTHLY_DATA = {
       "Peru":16337,
       "Uruguay":3623,
       "Albania":6994,
-      "Paraguay":2300
-    }
+      "Paraguay":2300,
+          "Canada":180632}
   },
   "2026-04": {
     label: "April 2026",
@@ -1000,7 +1144,11 @@ const MONTHLY_DATA = {
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
       "Paraguay": [95,277,497,3,2342,196,3410],
       // source: WHOLE MARKET, partly estimated -- CAMPI-TMA part = TopGear.com.ph quarterly figures spread evenly (Q2 2026 (H1 minus Q1) / 3); PLUS non-member brands (BYD etc., not in CAMPI): Jan-Jun non-member xEV = whole-market Jan-Aug xEV 74,600 (Philstar) - CAMPI Jan-Aug 45,403 - Jul 5,564 - Aug 4,799 = 18,834, spread evenly (3139/mo), split BEV/PHEV/HEV by 2025 non-member mix (IEA minus CAMPI: 39/49/12%); non-member sales assumed ~all electrified (Jul/Aug non-member xEV 5,564/4,799 vs non-member total 5,561/4,779); petrol = CAMPI ICE remainder; diesel not published
-      "Philippines": [3372,2955,3339,0,26445,0,36111]
+      "Philippines": [3372,2955,3339,0,26445,0,36111],
+      // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team — Q2 2026 delta (H1 2026 minus Q1 2026) split evenly across Apr-Jun (no finer intra-quarter split published); PHEV not separately tracked, folded into HEV
+      "Serbia": [132,0,1829,74,1742,394,4171],
+      // source: Statistics Canada, Table 20-10-0025-01 — reports quarterly, not monthly; Q2 2026's total (released 2026-09-08) is divided evenly across Apr/May/Jun (same figure repeated each month) rather than filed entirely under April, so month-over-month comparisons involving Canada aren't artificially skewed by a whole quarter landing in one month
+      "Canada": [13528,6075,30623,0,125271,7060,182557]
     },
     priorYearBev: {
       "Austria":5690,"Belgium":12469,"Bulgaria":144,"Croatia":60,"Cyprus":90,"Czechia":1229,"Denmark":9567,
@@ -1013,8 +1161,8 @@ const MONTHLY_DATA = {
       "Peru":50,
       "Uruguay":890,
       "Albania":268,
-      "Paraguay":47
-    },
+      "Paraguay":47,
+          "Canada":9845},
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Austria":24855,"Belgium":37812,"Bulgaria":4008,"Croatia":9070,"Cyprus":1097,"Czechia":21226,"Denmark":15119,"Estonia":1075,"Finland":6251,"France":138696,"Germany":242728,"Greece":14649,"Hungary":10785,"Iceland":1546,"Ireland":8703,"Italy":139142,"Latvia":2067,"Lithuania":4040,"Luxembourg":4365,"Malta":460,"Netherlands":27157,"Norway":11286,"Poland":46978,"Portugal":18752,"Romania":9996,"Slovakia":8322,"Slovenia":5192,"Spain":98522,"Sweden":24292,"Switzerland":18664,"United Kingdom":120331,"New Zealand":6041,"United States":1463622,"Brazil":197159,"India":374978,"Japan":191066,"Malaysia":65200,"Mexico":109420,"Thailand":47193,"South Korea":153456,"Taiwan":28460,
@@ -1022,8 +1170,8 @@ const MONTHLY_DATA = {
       "Peru":16274,
       "Uruguay":3395,
       "Albania":7136,
-      "Paraguay":2375
-    }
+      "Paraguay":2375,
+          "Canada":180632}
   },
   "2026-03": {
     label: "March 2026",
@@ -1083,7 +1231,7 @@ const MONTHLY_DATA = {
       // source: Statistics Canada, Table 20-10-0025-01 — reports quarterly, not monthly; Q1 2026's total is divided evenly across Jan/Feb/Mar (same figure repeated each month)
       "Canada": [9936,4435,17861,0,94454,5848,132534],
       // source: Serbian Association of Importers of Vehicles and Parts (uvoznicivozila.rs), passenger cars only — reports half-year/quarterly cumulative totals, not monthly; Q1 2026's total divided evenly across Jan/Feb/Mar. No PHEV/HEV split published (combined hybrid filed under HEV, PHEV=0)
-      "Serbia": [46,0,1008,29,980,270,2333],
+      "Serbia": [46,0,1008,29,981,270,2334],
       // source: FTI Automotive Industry Club via mreport.co.th, Thailand (monthly) — Total includes pickups/PPV, not passenger-cars-only; Diesel is a residual
       "Thailand": [12224,704,14896,133,11007,20901,59865],
       // source: TS/KOTSA new-registration API, South Korea (monthly) — PHEV folded into HEV
@@ -1198,7 +1346,7 @@ const MONTHLY_DATA = {
       // source: Statistics Canada, Table 20-10-0025-01 — reports quarterly, not monthly; Q1 2026's total is divided evenly across Jan/Feb/Mar (same figure repeated each month)
       "Canada": [9936,4435,17861,0,94454,5848,132534],
       // source: Serbian Association of Importers of Vehicles and Parts (uvoznicivozila.rs), passenger cars only — reports half-year/quarterly cumulative totals, not monthly; Q1 2026's total divided evenly across Jan/Feb/Mar. No PHEV/HEV split published (combined hybrid filed under HEV, PHEV=0)
-      "Serbia": [46,0,1008,29,980,270,2333],
+      "Serbia": [46,0,1008,29,981,270,2334],
       // source: FTI Automotive Industry Club via mreport.co.th, Thailand (monthly) — Total includes pickups/PPV, not passenger-cars-only; Diesel is a residual
       "Thailand": [6274,352,12711,79,9330,19496,48242],
       // source: TS/KOTSA new-registration API, South Korea (monthly) — PHEV folded into HEV
@@ -1310,7 +1458,7 @@ const MONTHLY_DATA = {
       // cars only — reports half-year/quarterly cumulative totals, not monthly; Q1 2026's total is
       // divided evenly across Jan/Feb/Mar for the same reason as Canada above. No PHEV/HEV split
       // published, so the combined hybrid figure is filed entirely under HEV (PHEV=0)
-      "Serbia": [46,0,1008,29,980,270,2333],
+      "Serbia": [46,0,1007,29,980,270,2332],
       // source: NZTA Waka Kotahi (monthly, light vehicles only)
       "New Zealand": [723,616,3256,129,3519,742,8985],
       // source: Argonne National Laboratory (Wards Auto), monthly — Total = all light-duty vehicles; no Petrol/Diesel split published, Diesel=0
@@ -1358,7 +1506,7 @@ const MONTHLY_DATA = {
     },
     // BEV units for the same month/quarter a year prior — source: ACEA (world_auto_sales, 2025-01) / same StatCan table for Canada, for YoY %
     priorYearBev: {
-      "Canada":8800,
+      "Canada":26401,
       "Austria":3822,"Belgium":13712,"Bulgaria":142,"Croatia":69,"Cyprus":149,"Czechia":981,"Denmark":6961,
       "Estonia":83,"Finland":1639,"France":19923,"Germany":34498,"Greece":527,"Hungary":563,"Iceland":226,
       "Ireland":4923,"Italy":6702,"Latvia":84,"Lithuania":161,"Luxembourg":1167,"Malta":211,"Netherlands":11157,
@@ -1391,89 +1539,89 @@ const MONTHLY_DATA = {
       // source: GEOSTAT ex-trade.geostat.ge, HS 8703 import microdata -- Jan-Jul 2026 summed directly from the 7 monthly entries above (no separate YTD figure published; this project computes it as the plain sum)
       "Georgia": [9417,1134,32909,4563,92203,6232,146458],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — Jan-Jul 2026, from the July bulletin's own "Ene-Jul 26" YTD column, not summed from separately-revised months; Hibrido = MHEV+HEV+PHEV+EREV combined
-      "Ecuador": [6367,0,17230,0,44362,25038,92997],
-      "Malaysia": [38675, 0, 29776, 0, 399788, 21601, 489840],
+      "Ecuador": [8401,0,20538,0,50444,28895,108278],
+      "Malaysia": [53538,0,40192,0,519321,28599,641650],
       // source: world_auto_sales_annual, period_type='YTD' — each country summed only through its own latest available month/quarter (see asOf below), not a fixed common cutoff
-      "Austria": [40060,18023,49751,2,40509,16184,164529],
+      "Austria": [53449,24233,63109,2,51007,20340,212140],
       "Belgium": [125261,17927,42348,2894,123609,8335,320374],
-      "Bulgaria": [2042,454,1565,66,18731,3099,25957],
+      "Bulgaria": [2939,883,2328,66,25879,3478,35573],
       // source: FENALCO-ANDI, Colombia — Jan-Jul 2026 cumulative (dedicated monthly EV/Hybrid reports + ANDI monthly totals); PHEV folded into HEV; Petrol is the undifferentiated combustion remainder (Diesel=0). Total corrected 2026-09-02: 166,677 (an uncorroborated user-supplied figure) was wrong; 186,253 = confirmed H1 2026 total (157,620) + confirmed July total (28,633).
-      "Colombia": [29347,0,54015,0,102891,0,186253],
-      "Croatia": [1781,2707,17496,380,16416,5384,44164],
-      "Cyprus": [911,411,3643,0,2174,161,7300],
-      "Czechia": [8630,6517,31060,2739,57043,23819,129808],
+      "Colombia": [39783,0,74470,0,132956,0,247209],
+      "Croatia": [2297,3727,21547,520,19937,6545,54573],
+      "Cyprus": [1003,542,4777,0,2832,170,9324],
+      "Czechia": [11665,8538,40827,3711,72683,30249,167673],
       "Denmark": [124051,706,11702,2,13000,2327,151788],
-      "Estonia": [617,864,5820,0,1556,1122,9979],
+      "Estonia": [967,1122,7449,0,2070,1463,13071],
       "Finland": [28676,6853,15197,0,4387,1814,56927],
       "France": [387342,71178,532444,45532,169333,29124,1234953],
       "Germany": [604144,247489,632695,11194,455913,270363,2221798],
-      "Greece": [5286,5199,47557,2533,21328,2094,83997],
-      "Hungary": [7493,6066,38433,392,15397,7124,74905],
-      "Iceland": [3180,1602,1838,0,468,414,7502],
-      "Ireland": [32126,18555,31015,560,24509,15328,122093],
+      "Greece": [6824,6502,59121,3045,24603,2275,102370],
+      "Hungary": [9224,8414,48695,624,19761,9211,95929],
+      "Iceland": [4337,1852,2114,0,540,499,9342],
+      "Ireland": [35242,19615,31985,560,25143,15870,128415],
       "Italy": [101963,121844,625180,78550,258613,83659,1269809],
-      "Latvia": [839,1214,0,297,7640,1356,11346],
-      "Lithuania": [1852,2914,12652,446,3793,2454,24111],
-      "Luxembourg": [7745,1530,8908,0,6140,2186,26509],
-      "Malta": [1051,219,1141,0,1091,170,3671],
+      "Latvia": [1503,1920,0,430,10043,1745,15641],
+      "Lithuania": [2582,4262,17152,587,5325,2994,32902],
+      "Luxembourg": [11615,2306,12218,42,8388,2917,37486],
+      "Malta": [1878,486,1591,1,1224,216,5396],
       "Netherlands": [109024,58951,73504,1010,19493,2719,264701],
       "Norway": [112818,625,709,0,186,851,115189],
       "Poland": [24404,41526,233853,12671,130500,27543,470497],
       "Portugal": [55508,28350,49447,11236,38396,8809,191746],
-      "Romania": [5522,0,37563,5630,11998,4137,64850],
-      "Slovakia": [2678,1886,15228,903,17532,5277,43504],
-      "Slovenia": [6062,1354,6927,434,17415,4545,36737],
+      "Romania": [7018,0,49282,9154,15419,5269,86142],
+      "Slovakia": [3736,2698,19854,1141,22650,6633,56712],
+      "Slovenia": [9233,1778,8402,591,21849,5578,47431],
       "Spain": [100870,116754,427644,32580,203379,30831,912058],
       "Sweden": [90871,50655,17828,792,39074,12566,211786],
-      "Switzerland": [27889,14456,42488,5,25224,6486,116548],
-      "United Kingdom": [284579,148132,428999,2,255795,20422,1137929],
+      "Switzerland": [45464,21239,62161,7,35375,9291,173537],
+      "United Kingdom": [454919,244696,507473,159,486443,45582,1739272],
       // source: StatCan 20-10-0025-01 — only Q1 2026 published so far
-      "Canada": [29808,13305,53584,0,283361,17543,397601],
+      "Canada": [70393,31531,145452,0,659175,38723,945274],
       // source: INEGI RAIAVL, monthly — 7 of 12 months published so far
-      "Mexico": [16605,18696,77012,0,773040,0,885353],
+      "Mexico": [21794,25168,99221,0,997807,0,1143990],
       // source: Vahan Dashboard, monthly, Jan-Aug 2026 summed
-      "India": [213571,20,288005,823793,1531561,617958,3474908],
+      "India": [257521,25,335636,942564,1735475,709350,3980571],
       // source: JADA — registered passenger cars only, excludes kei-cars (~35-40% of Japan's market) and commercial vehicles
-      "Japan": [61090,25914,961974,251,461345,67662,1578236],
+      "Japan": [82881,33792,1216604,374,573156,80561,1987368],
       // source: FCAI (VFACTS) — light-vehicle market only (excludes heavy trucks/buses), Jan-Aug 2026 summed from monthly
-      "Australia": [154252,75191,142225,0,243673,207541,822882],
+      "Australia": [180539,85263,160068,0,269691,232714,928275],
       // source: ANFAVEA — "Carta da Anfavea"; Brazil's dominant Flex-fuel (gasoline/ethanol) vehicles mapped into petrol
-      "Brazil": [116517,95399,95697,0,1167337,152101,1627051],
+      "Brazil": [166084,131994,135811,0,1526608,197751,2158248],
       // source: ACARA/SIOMAA — from the report's own cumulative "Acum 2026" columns, not summed from separately-revised months
-      "Argentina": [4490,0,44643,0,290226,0,339359],
+      "Argentina": [4928,0,48291,0,267937,0,321156],
       // source: ODMD — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
       "Turkey": [120409,4223,197487,6901,264418,34539,627977],
       // source: CAMPI-TMA — petrol is the ICE remainder (no petrol/diesel split published; diesel share is negligible in PH passenger vehicles)
       "Philippines": [25151,22964,26617,0,225930,0,300662],
       // source: NZTA Waka Kotahi — light passenger vehicles (cars/vans) only, excludes commercial vehicles
-      "New Zealand": [10722,6412,20141,815,18141,3834,60065],
+      "New Zealand": [14363,8822,28449,815,24978,5014,82441],
       // source: Argonne National Laboratory (Wards Auto), monthly, Jan-Jul 2026 summed — no Petrol/Diesel split published, Diesel=0
-      "United States": [554155,106218,1428909,0,7188731,0,9278013],
+      "United States": [640341,126321,1645233,36,8246460,0,10658391],
       // source: CAAM, monthly wholesale via CnEVPost, Jan-Jul 2026 summed — Total = all vehicle wholesale sales, incl. exports; no Petrol/Diesel split published (Diesel=0); HEV not part of China's official NEV classification (folded into Petrol, HEV=0)
-      "China": [6057000,2947000,0,0,8595000,0,17599000],
+      "China": [8495000,3975000,0,0,10797000,0,23267000],
       // source: world_auto_sales_annual, period_type='YTD' — FTI Automotive Industry Club, Jan-Jul 2026 summed; Total includes pickups/PPV, not passenger-cars-only; Diesel is a residual
       "Thailand": [146655,8388,102400,1217,70007,137264,465931],
       // source: TS/KOTSA new-registration API, Jan-Aug 2026 summed — PHEV folded into HEV
-      "South Korea": [266172,0,370315,99944,351406,28773,1116610],
+      "South Korea": [297671,0,414746,111034,392154,31924,1247529],
       // source: world_auto_sales_annual, period_type='YTD' — GAIKINDO, Jan-Jul 2026 summed; no diesel split published (Diesel=0)
       "Indonesia": [117293,10236,64751,0,486641,0,678921],
       // source: LTA (Land Transport Authority), Jan-Jul 2026 summed — COE quota-capped market, small volumes
-      "Singapore": [20148,763,9426,0,1757,3,32097],
+      "Singapore": [23028,1051,10560,0,2004,3,36646],
       // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw), Jan-Jul 2026 summed — passenger cars only, PHEV folded into HEV
-      "Taiwan": [21541,0,91086,0,98141,2842,213610],
+      "Taiwan": [31826,0,118000,0,126528,3532,279886],
       // source: ANAC A.G. (Registro Civil), Jan-Jul 2026 summed — see monthly comments for Petrol/Diesel residual methodology
-      "Chile": [6206,5207,23405,0,102299,41179,178296],
+      "Chile": [6902,5800,27067,0,118659,47764,206192],
       // source: Department of Customs Nepal (customs.gov.np), HS 8703 imports, Jan-Jul 2026 summed from the day-weighted monthly figures — three-wheelers excluded; imports not registrations
-      "Nepal": [7522,14,14,0,2052,403,10005],
+      "Nepal": [8916,26,21,0,2372,454,11789],
       // source: VAMA + VinFast + TC Group (merged) — VAMA member-brand sales (PC+Special→Petrol, CV→Diesel) plus VinFast (100% BEV, not a VAMA member) plus TC Group/Hyundai (independent of VAMA, folded into Petrol)
-      "Vietnam": [137773,0,12501,0,146729,44313,341316],
-      "Israel": [27748,57708,73563,1,66507,12204,237731],
+      "Vietnam": [181558,0,16057,0,192397,62378,452390],
+      "Israel": [32378,63990,79732,1,72074,13112,261287],
       // source: KAO (kao.kz), Jan-Jun 2026 summed from the bimonthly-derived monthly figures — HEV is a floor from March on; Diesel=0
-      "Kazakhstan": [1017,2640,825,0,101386,0,105868],
+      "Kazakhstan": [1652,4351,1339,0,139001,0,146343],
       // source: AAP (Asociacion Automotriz del Peru), Jan-Jul 2026 summed from the monthly figures — HEV includes MHEV combined; Diesel folded into Petrol
-      "Peru": [594,1000,8116,0,152778,0,162488],
+      "Peru": [661,1229,9469,0,177457,0,188816],
       // source: ACAU (Uruguay), Compilado 2026 — Jan-Jul 2026 summed from the monthly figures; HEV includes MHEV combined
-      "Uruguay": [14375,1594,4276,0,11521,42,31808],
+      "Uruguay": [17482,1958,4276,0,14807,66,38589],
       // source: DPSHTRR (Albania), Jan-Aug 2026 summed from the monthly figures — HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
       "Albania": [6560,0,1375,2869,11050,31170,53024],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, Jan-Aug 2026 summed from the monthly figures — fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
@@ -1481,77 +1629,81 @@ const MONTHLY_DATA = {
       // source: ATTT via webdo.tn/kapitalis.com — the real Jan-Jul 2026 combined total itself (the 7 identical monthly figures elsewhere are that same total split evenly, not independent months, so this reproduces it exactly: 7x220=1540 etc.)
       "Tunisia": [2391,2678,974,0,40959,0,47002],
       // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles); 2026 figure is Jan-Jul YTD
-      "Mauritius": [1441,0,5735,0,11150,0,18326]
+      "Mauritius": [1441,0,5735,0,11150,0,18326],
+      // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team -- H1 2026 (Jan-Jun), real: Petrol 8,168, Diesel 1,992, Hybrid 8,511 (petrol-hybrid+diesel-hybrid combined), Electric 535, Other/LPG 309. PHEV not separately tracked, folded into HEV.
+      "Serbia": [535,0,8511,309,8168,1992,19515],
+      // source: naamsa (all-segment total, real) -- Jan-May 2026 summed from monthly
+      "South Africa": [2275,5806,6730,0,254327,0,269138]
     },
     // per-country "as of" coverage, since cutoffs differ by source — surfaced in the Country Detail table's "Data Through" column
     asOf: {
       "Russian Federation":"through Sep 2026",
-      "Ecuador":"through Jul 2026",
+      "Ecuador":"through Aug 2026",
       "Tunisia":"through Aug 2026",
       "Georgia":"through Aug 2026",
-      "Austria":"through Jun 2026","Belgium":"through Sep 2026","Bulgaria":"through Jun 2026","Croatia":"through Jun 2026",
-      "Cyprus":"through Jun 2026","Czechia":"through Jun 2026","Denmark":"through Sep 2026","Estonia":"through Jun 2026",
-      "Finland":"through Sep 2026","France":"through Sep 2026","Germany":"through Sep 2026","Greece":"through Jun 2026",
-      "Hungary":"through Jun 2026","Iceland":"through Jun 2026","Ireland":"through Aug 2026","Italy":"through Sep 2026",
-      "Latvia":"through Jun 2026","Lithuania":"through Jun 2026","Luxembourg":"through Jun 2026","Malta":"through Jun 2026",
+      "Austria":"through Aug 2026","Belgium":"through Sep 2026","Bulgaria":"through Aug 2026","Croatia":"through Aug 2026",
+      "Cyprus":"through Aug 2026","Czechia":"through Aug 2026","Denmark":"through Sep 2026","Estonia":"through Aug 2026",
+      "Finland":"through Sep 2026","France":"through Sep 2026","Germany":"through Sep 2026","Greece":"through Aug 2026",
+      "Hungary":"through Aug 2026","Iceland":"through Aug 2026","Ireland":"through Sep 2026","Italy":"through Sep 2026",
+      "Latvia":"through Aug 2026","Lithuania":"through Aug 2026","Luxembourg":"through Sep 2026","Malta":"through Aug 2026",
       "Netherlands":"through Sep 2026","Norway":"through Sep 2026","Poland":"through Sep 2026","Portugal":"through Sep 2026",
-      "Romania":"through Jun 2026","Slovakia":"through Jun 2026","Slovenia":"through Jun 2026","Spain":"through Sep 2026",
-      "Sweden":"through Sep 2026","Switzerland":"through Jun 2026","United Kingdom":"through Jun 2026",
-      "Canada":"through Mar 2026 (Q1 only)",
-      "Colombia":"through Jul 2026",
-      "Mexico":"through Jul 2026",
-      "India":"through Aug 2026",
-      "Japan":"through Jul 2026",
-      "Australia":"through Aug 2026",
-      "Brazil":"through Jul 2026",
+      "Romania":"through Aug 2026","Slovakia":"through Aug 2026","Slovenia":"through Aug 2026","Spain":"through Sep 2026",
+      "Sweden":"through Sep 2026","Switzerland":"through Sep 2026","United Kingdom":"through Sep 2026",
+      "Canada":"through Jun 2026",
+      "Colombia":"through Sep 2026",
+      "Mexico":"through Sep 2026",
+      "India":"through Sep 2026",
+      "Japan":"through Sep 2026",
+      "Australia":"through Sep 2026",
+      "Brazil":"through Sep 2026",
       "Argentina":"through Jul 2026",
       "Turkey":"through Sep 2026",
       "Philippines":"through Aug 2026",
-      "New Zealand":"through Jul 2026",
-      "United States":"through Jul 2026",
-      "China":"through Jul 2026",
-      "South Korea":"through Aug 2026",
-      "Singapore":"through Jul 2026",
-      "Malaysia":"through Jul 2026",
+      "New Zealand":"through Sep 2026",
+      "United States":"through Aug 2026",
+      "China":"through Sep 2026",
+      "South Korea":"through Sep 2026",
+      "Singapore":"through Aug 2026",
+      "Malaysia":"through Sep 2026",
       "Thailand":"through Aug 2026",
       "Indonesia":"through Sep 2026",
-      "Chile":"through Jul 2026",
-      "Vietnam":"through Jul 2026",
-      "Taiwan":"through Jul 2026",
-      "Nepal":"through Jul 2026",
-      "Israel":"through Aug 2026",
-      "Kazakhstan":"through Jun 2026",
+      "Chile":"through Aug 2026",
+      "Vietnam":"through Sep 2026",
+      "Taiwan":"through Sep 2026",
+      "Nepal":"through Aug 2026",
+      "Israel":"through Sep 2026",
+      "Kazakhstan":"through Aug 2026",
       "Peru":"through Jul 2026",
-      "Uruguay":"through Jul 2026",
+      "Uruguay":"through Aug 2026",
       "Albania":"through Aug 2026",
       "Paraguay":"through Aug 2026",
-      "Mauritius":"through Jul 2026"
-    },
+      "Mauritius":"through Jul 2026",
+          "Serbia":"through Jun 2026 (H1)",      "South Africa":"through May 2026"},
     // BEV units for the matching prior-year period (same months)
     priorYearBev: {
       "Ecuador":1877,
       "Austria":31534,"Belgium":108221,"Bulgaria":1076,"Croatia":396,"Cyprus":735,"Czechia":6910,"Denmark":88452,
       "Estonia":444,"Finland":19227,"France":216310,"Germany":382202,"Greece":4265,"Hungary":5219,"Iceland":2357,
-      "Ireland":13637,"Italy":61058,"Latvia":743,"Lithuania":1205,"Luxembourg":6559,"Malta":780,"Netherlands":94448,
+      "Ireland":22390,"Italy":61058,"Latvia":743,"Lithuania":1205,"Luxembourg":9396,"Malta":780,"Netherlands":94448,
       "Norway":107605,"Poland":25828,"Portugal":36707,"Romania":3201,"Slovakia":2007,"Slovenia":2700,"Spain":72101,
-      "Sweden":72230,"Switzerland":23203,"United Kingdom":224841,
-      "Canada":26401,"Mexico":10889,"New Zealand":4119,"United States":736926,"India":121295,"South Korea":142319,"Taiwan":15228,
+      "Sweden":72230,"Switzerland":35725,"United Kingdom":224841,
+      "Canada":55935,"Mexico":10889,"New Zealand":4119,"United States":736926,"India":139844,"South Korea":142319,"Taiwan":22006,
       "Israel":40028,
       "Peru":437,
       "Uruguay":5830,
       "Albania":3038,
-      "Paraguay":504
-    },
+      "Paraguay":504,
+          "Serbia":161},
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Ecuador":66852,
-      "Austria":143051,"Belgium":323868,"Bulgaria":22873,"Croatia":41949,"Cyprus":8223,"Czechia":122639,"Denmark":134102,"Estonia":6156,"Finland":53933,"France":1186784,"Germany":2110348,"Greece":78162,"Hungary":66094,"Iceland":8152,"Ireland":81715,"Italy":1167768,"Latvia":11237,"Lithuania":20787,"Luxembourg":25259,"Malta":2958,"Netherlands":271973,"Norway":113407,"Poland":427908,"Portugal":171564,"Romania":64820,"Slovakia":45090,"Slovenia":29827,"Spain":854660,"Sweden":204027,"Switzerland":113133,"United Kingdom":1042219,"Canada":426873,"Mexico":842840,"New Zealand":51878,"United States":9501054,"India":2891240,"South Korea":1127726,"Taiwan":204958,
+      "Austria":143051,"Belgium":323868,"Bulgaria":22873,"Croatia":41949,"Cyprus":8223,"Czechia":122639,"Denmark":134102,"Estonia":6156,"Finland":53933,"France":1186784,"Germany":2110348,"Greece":78162,"Hungary":66094,"Iceland":8152,"Ireland":121659,"Italy":1167768,"Latvia":11237,"Lithuania":20787,"Luxembourg":36494,"Malta":2958,"Netherlands":271973,"Norway":113407,"Poland":427908,"Portugal":171564,"Romania":64820,"Slovakia":45090,"Slovenia":29827,"Spain":854660,"Sweden":204027,"Switzerland":168929,"United Kingdom":1042219,"Canada":968769,"Mexico":842840,"New Zealand":51878,"United States":9501054,"India":3213654,"South Korea":1127726,"Taiwan":258424,
       "Israel":220530,
       "Peru":117029,
       "Uruguay":25094,
       "Albania":54624,
-      "Paraguay":18964
-    }
+      "Paraguay":18964,
+          "Serbia":16473}
     // note: China omitted from priorYearBev — no matching Jan-Jul 2025 monthly data sourced (world_auto_sales has no pre-2026 China rows)
     // note: Tunisia omitted from priorYearBev/priorYearTotal for the same reason — only a full-year 2025 total was sourced (see 2025-annual), no Jan-Jul 2025 monthly breakdown to compare against
   },
@@ -1562,87 +1714,89 @@ const MONTHLY_DATA = {
       // source: derived, not published -- each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher) applied to the remaining 5 months, per this project's standard projection method (see Ecuador comment above); customs import quantity, not registrations
       "Georgia": [15589, 1701, 52618, 7128, 139246, 9560, 225842],
       // source: AEADE (Asociación de Empresas Automotrices del Ecuador) / SRI — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; Hibrido = MHEV+HEV+PHEV+EREV combined
-      "Ecuador": [11825,0,30603,0,76606,44491,163525],
-      "Malaysia": [66300, 0, 51045, 0, 685351, 37030, 839726],
-      "Argentina": [8057, 0, 76746, 0, 497535, 0, 582338],
-      "Australia": [265063, 124548, 219674, 0, 365509, 314434, 1289228],
+      "Ecuador": [14244, 0, 32661, 0, 75943, 44771, 167619],
+      "Malaysia": [75338, 0, 56233, 0, 702831, 39314, 873716],
+      "Argentina": [8496, 0, 84254, 0, 459321, 0, 552071],
+      "Australia": [257364, 116285, 215257, 0, 359588, 310285, 1258779],
       "China": [11457000, 5378667, 0, 0, 14734286, 0, 31569953],
-      "Austria": [85486, 37961, 101905, 6, 81018, 33090, 339466],
+      "Austria": [83292, 37900, 94882, 3, 76511, 30510, 323098],
       "Belgium": [167240, 23903, 56464, 3859, 164812, 11113, 427391],
-      "Brazil": [229745, 183801, 174959, 0, 2085442, 270113, 2944060],
-      "Bulgaria": [4634, 986, 3407, 182, 38965, 6767, 54941],
-      "Canada": [66001, 24729, 111729, 0, 557657, 35089, 795205],
-      "Croatia": [3783, 5933, 39910, 760, 36552, 11800, 98738],
-      "Cyprus": [1883, 851, 7286, 0, 4348, 322, 14690],
-      "Czechia": [19012, 13985, 64066, 5941, 117135, 48185, 268324],
+      "Brazil": [241438, 187727, 193300, 0, 2065562, 267210, 2955237],
+      "Bulgaria": [4772, 1626, 3805, 99, 40227, 5217, 55746],
+      "Canada": [140786, 63062, 290904, 0, 1318350, 77446, 1890548],
+      "Croatia": [3445, 5826, 32321, 780, 29905, 9817, 82094],
+      "Cyprus": [1505, 813, 7165, 0, 4248, 255, 13986],
+      "Czechia": [18580, 13294, 62266, 5902, 109025, 45373, 254440],
       "Denmark": [167395, 941, 15603, 3, 20409, 3103, 207454],
-      "Estonia": [1331, 1786, 12888, 0, 3112, 2398, 21515],
+      "Estonia": [1628, 1683, 11173, 0, 3203, 2214, 19901],
       "Finland": [39555, 9137, 20263, 0, 5849, 2419, 77223],
       "France": [533122, 94904, 709925, 61891, 225777, 38832, 1664451],
       "Germany": [840282, 331185, 843593, 15664, 607884, 360484, 2999092],
-      "Greece": [11270, 10967, 102795, 5971, 46872, 4492, 182367],
-      "Hungary": [16093, 13364, 76866, 1002, 31791, 14834, 153950],
-      "Iceland": [7296, 3204, 3676, 0, 1136, 952, 16264],
-      "Ireland": [49547, 27833, 46523, 1307, 36763, 22992, 184965],
+      "Greece": [10669, 9753, 88681, 4969, 36905, 3413, 154390],
+      "Hungary": [13836, 13363, 73043, 1113, 29962, 13876, 145193],
+      "Iceland": [6958, 2778, 3171, 0, 812, 749, 14468],
+      "Ireland": [50305, 26694, 42647, 1120, 33524, 21160, 175450],
       "Italy": [135951, 162459, 833573, 104733, 344817, 111545, 1693078],
-      "Japan": [113163, 45887, 1649477, 430, 793252, 115992, 2718201],
-      "Latvia": [1871, 2668, 0, 631, 16066, 2816, 24052],
-      "Lithuania": [4040, 6418, 28136, 1094, 8107, 5396, 53191],
-      "Luxembourg": [16473, 3176, 18288, 0, 12458, 4372, 54767],
-      "Malta": [2381, 505, 2395, 0, 2182, 378, 7841],
-      "Mexico": [29135, 34368, 135329, 0, 1327928, 0, 1526760],
+      "Japan": [114734, 45363, 1623140, 531, 764208, 107415, 2655391],
+      "Latvia": [2771, 3377, 0, 719, 15124, 2617, 24608],
+      "Lithuania": [4189, 6913, 26491, 924, 8498, 4491, 51506],
+      "Luxembourg": [15487, 3082, 16291, 84, 11184, 3889, 50017],
+      "Malta": [3295, 918, 2388, 2, 1836, 340, 8779],
+      "Mexico": [29820, 34872, 132637, 0, 1336133, 0, 1533462],
       "Netherlands": [154365, 78601, 98005, 1512, 25991, 3625, 362099],
-      "New Zealand": [20882, 11887, 34527, 1487, 31099, 6573, 106455],
+      "New Zealand": [19950, 12490, 39644, 1087, 33903, 6685, 113759],
       "Norway": [153982, 833, 945, 0, 248, 1135, 157143],
       "Philippines": [41706, 37923, 40678, 0, 338895, 0, 459202],
       "Poland": [32539, 56449, 312961, 17304, 174000, 36724, 629977],
       "Portugal": [76310, 37800, 65929, 14981, 51195, 12614, 258829],
-      "Romania": [11392, 0, 81209, 12830, 26208, 8361, 140000],
-      "Slovakia": [6006, 4234, 30582, 2199, 36334, 11073, 90428],
-      "Slovenia": [13592, 2708, 15449, 994, 35445, 9135, 77323],
+      "Romania": [11007, 0, 76578, 16230, 24355, 7903, 136073],
+      "Slovakia": [6072, 4431, 29931, 1848, 34185, 10308, 86775],
+      "Slovenia": [15714, 2667, 12603, 948, 32773, 8367, 73072],
       "Spain": [138520, 155672, 570192, 43440, 271172, 41108, 1220104],
       "Sweden": [122941, 67540, 23771, 1056, 52155, 16755, 284218],
-      "Switzerland": [60839, 30504, 86564, 13, 52310, 13450, 243680],
+      "Switzerland": [63039, 28319, 82881, 9, 47167, 12388, 233803],
       "Turkey": [160545, 5631, 263316, 10680, 352557, 46052, 838781],
-      "United Kingdom": [578509, 296264, 857998, 4, 511590, 40844, 2285209],
+      "United Kingdom": [625259, 341260, 676631, 316, 717091, 70742, 2431299],
       // source: Argonne National Laboratory — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
-      "United States": [986450, 198128, 2567796, 0, 12558346, 0, 16310720],
+      "United States": [966009, 201904, 2504565, 84, 12468299, 0, 16140861],
       // source: CAAM via CnEVPost — BEV/PHEV/Petrol trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; HEV not part of China's NEV classification (always 0)
       "China": [11457000, 5378667, 0, 0, 14734286, 0, 31569953],
       // source: Vahan Dashboard — each fuel trended from the last 3 actual months' average (or the 8-mo YTD average if higher), applied to the remaining 4 months
-      "India": [339586, 30, 432008, 1235690, 2297342, 926937, 5231593],
+      "India": [362299, 36, 448898, 1256752, 2313967, 945800, 5327752],
       // source: world_auto_sales_annual, period_type='PROJECTED' — plain run-rate (YTD x 12/7) from FTI Automotive Industry Club data; Total includes pickups/PPV, not passenger-cars-only
       "Thailand": [231911, 13384, 153600, 1825, 105011, 205896, 711627],
       // source: TS/KOTSA — each fuel trended from the last 3 actual months' average (or the 8-mo YTD average if higher), applied to the remaining 4 months; PHEV folded into HEV
-      "South Korea": [411865, 0, 555472, 149916, 527109, 43160, 1687522],
+      "South Korea": [396895, 0, 552995, 148045, 522872, 42565, 1663372],
       // source: world_auto_sales_annual, period_type='PROJECTED' — plain run-rate (YTD x 12/7) from GAIKINDO data; no diesel split published (Diesel=0)
       "Indonesia": [164721, 15481, 88115, 0, 653015, 0, 921332],
       // source: world_auto_sales_annual, period_type='PROJECTED' — plain run-rate (YTD x 12/7) from LTA data; COE quota-capped market
-      "Singapore": [34539, 1308, 16159, 0, 3012, 5, 55023],
+      "Singapore": [34542, 1576, 15840, 0, 3006, 4, 54968],
       // source: THB via Taiwan Stats (stats.tw) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; PHEV folded into HEV
-      "Taiwan": [38978, 0, 163709, 0, 173184, 4872, 380743],
+      "Taiwan": [43703, 0, 160582, 0, 171441, 4709, 380435],
       // source: ANAC A.G. — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
-      "Chile": [11053,9010,41448,0,175370,70593,307474],
+      "Chile": [10547, 8700, 41275, 0, 179158, 72116, 311796],
       // source: VAMA + VinFast + TC Group — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
-      "Vietnam": [236548,0,21923,0,251535,75965,585971],
+      "Vietnam": [247130, 0, 21409, 0, 259391, 86264, 614194],
       // source: Department of Customs Nepal (customs.gov.np) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; imports not registrations, three-wheelers excluded
-      "Nepal": [14259,27,31,0,3518,691,18526],
+      "Nepal": [13629, 53, 41, 0, 3558, 681, 17962],
       // source: Israel Ministry of Transport (data.gov.il) — each fuel trended from the last 3 actual months' average (or the 8-mo YTD average if higher), applied to the remaining 4 months; Petrol/HEV split via I-VIA's quarterly ratio
-      "Israel": [41871,86562,110344,2,99760,18306,356845],
+      "Israel": [43171, 85320, 106309, 1, 96099, 17483, 348383],
       // source: KAO (kao.kz) — each fuel trended from the last 3 actual months' average (or the 6-mo YTD average if higher), applied to the remaining 6 months; HEV projection inherits the floor bias from Mar-Jun actuals
-      "Kazakhstan": [2159,5984,2057,0,217890,0,228090],
+      "Kazakhstan": [2761, 7394, 2367, 0, 216936, 0, 229458],
       // source: AAP (Asociacion Automotriz del Peru) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; HEV projection inherits the HEV+MHEV combined basis
-      "Peru": [1018,1980,14268,0,262695,0,279961],
+      "Peru": [949,2125,14617,0,269338,0,287029],
       // source: ACAU (Uruguay) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
-      "Uruguay": [26685,2931,7330,0,19750,82,56778],
+      "Uruguay": [28091, 3249, 6414, 0, 23158, 122, 61034],
       // source: FENALCO-ANDI, Colombia — each fuel trended from the last 3 actual months' average (May-Jul, all genuine/near-genuine single months) or the 7-mo YTD average if higher, applied to the remaining 5 months; PHEV folded into HEV, Petrol is the undifferentiated combustion remainder (Diesel=0)
-      "Colombia": [54024,0,98643,0,176598,0,329265],
+      "Colombia": [55090, 0, 104336, 0, 177375, 0, 336801],
       // source: DPSHTRR (Albania) — each fuel trended from the last 3 actual months' average (Jun-Aug) or the 8-mo YTD average if higher, applied to the remaining 4 months
       "Albania": [9840,0,2062,4565,17698,49303,83468],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay — each fuel trended from the last 3 actual months' average (Jun-Aug) or the 8-mo YTD average if higher, applied to the remaining 4 months
       "Paraguay": [1805,3320,8985,765,31763,3838,50476],
       // source: ATTT via webdo.tn/kapitalis.com — plain run-rate (YTD x 12/7), same method as Philippines/Turkey: the underlying Jan-Jul figures are already a flat estimate (one combined total split evenly), so there's no real month-to-month variation to trend from
-      "Tunisia": [4112, 4175, 1461, 0, 61439, 0, 71187]
+      "Tunisia": [4112, 4175, 1461, 0, 61439, 0, 71187],
+      // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team — flat annualization (H1 2026 x2), not the standard trend method: H1 2026 has no internal monthly granularity to trend from (it's itself an even split of the H1 total), so a plain doubling is the least-fabricated option available
+      "Serbia": [1070,0,17022,618,16336,3984,39030]
     },
     // Two projection methods, depending on what data exists per country:
     // (1) Every country with a real monthly breakdown — the 31 ACEA/Europe countries, New Zealand, Argentina,
@@ -1806,12 +1960,18 @@ const MONTHLY_DATA = {
       "France - Reunion": [2350,528,12347,595,8064,2579,26463],
       "France - Mayotte": [53,9,1345,10,786,76,2279],
       // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles)
-      "Mauritius": [2449,0,14225,0,21388,0,38062]
+      "Mauritius": [2449,0,14225,0,21388,0,38062],
+      // source: MakStat (State Statistical Office of North Macedonia), "Road motor vehicles according to the type of fuel" -- Ministry of Interior data, but this table is the REGISTERED FLEET (stock) by fuel as of 31 Dec each year, not new registrations. No fuel-type breakdown exists anywhere for MakStat/UNECE's actual new-registration flow (confirmed: UNECE's "New Passenger Car Registrations by Fuel Type" table has North Macedonia's Total but every fuel-type cell is ".."). METHOD: this row is the year-over-year DELTA of the stock table (proxy for net new registrations), with Gasoline and Gasoline-gas summed together before differencing -- the raw stock shows a wave of aftermarket LPG-conversions each year (e.g. Gasoline-gas stock +48,688 / Gasoline stock -44,144 in 2023 alone) that would otherwise show up as a huge, spurious petrol-to-LPG "sales" swing; summing the two fuel columns cancels that conversion noise since it just moves cars between them. PHEV folded into HEV (source doesn't split them); Others = Mixture+Alcohol stock deltas (rounded to 0 when the raw delta was a small negative, adjusted out of Diesel to keep the total exact). CAVEAT: this remains a derived estimate of NET fleet growth, not a directly measured sales figure -- it runs ~5x higher than Focus2move's new-car-sales figure used for this country's world-rank reference (35,172 here vs 7,324 there for 2025), because it captures first-time registrations of used imports too, similar to how UNECE's own notes flag Greece/Hungary as "new + used vehicles from abroad." 2022 and earlier are NOT loaded: that year's combined Gasoline+Gasoline-gas delta itself goes negative (net fleet contraction in that category), which the fix above can't resolve. REVISIT February 2027 to see if a real new-registrations-by-fuel source turns up (e.g. behind Focus2move's paywall) before trusting this proxy further.
+      "North Macedonia": [540,0,2315,0,5923,26394,35172],
+      // source: MONSTAT "Annual statistics of transport, storage and communications - 2025" (published May 2026) -- Total is real first-time-registered passenger cars (27,108); BEV/HEV are year-over-year stock deltas (reliable, negligible attrition in these recent categories); Petrol/Diesel are a residual of the true total split by that year's stock-delta ratio (no genuine flow-based split published) -- see world_auto_sales_annual.source for full methodology
+      "Montenegro": [235,0,2653,0,4888,19332,27108],
+      // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team, Ministry of Interior first-registration data -- Jan-Sep 2025 (9 months) only, union of the H1 2025 and 9-month 2025 reports (Q4 2025 never published, gap). PHEV not separately tracked, folded into HEV. Chosen over SORS (Statistical Office of Serbia), whose official annual total is ~6x larger but only splits Petrol/Diesel and is ~83% used-vehicle imports by the Association's own count -- see population log for the full comparison.
+      "Serbia": [298,0,8778,489,11268,3135,23968]
     },
     // per-country "as of" override — every country here is a genuine full year except Philippines (11 of 12 months)
     asOf: {
-      "Nepal": "FY2081/82 (BS), ~mid-Jul 2024 to mid-Jul 2025"
-    },
+      "Nepal": "FY2081/82 (BS), ~mid-Jul 2024 to mid-Jul 2025",
+          "Serbia":"uvoznicivozila.rs, Jan-Sep 2025 (9 mo) -- Q4 2025 report never published"},
     // BEV units for full-year 2024, for YoY %
     priorYearBev: {
       "Ecuador":1416,
@@ -1844,7 +2004,7 @@ const MONTHLY_DATA = {
       "Luxembourg":12780,"Malta":2130,"Netherlands":132422,"Norway":114396,"Poland":16571,"Portugal":41914,
       "Romania":9795,"Slovakia":2270,"Slovenia":3166,"Spain":57377,"Sweden":94366,"Switzerland":46147,
       "United Kingdom":381970,"Canada":202333,"Taiwan":37629,"Singapore":14448,
-          "Philippines":2200},
+          "Philippines":2200,      "Montenegro":163},
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Ecuador":108266,
@@ -1857,7 +2017,7 @@ const MONTHLY_DATA = {
       "France - Guyane":5115,
       "France - Reunion":24740,
       "France - Mayotte":1970,
-          "Philippines":473842}
+          "Philippines":473842,      "Montenegro":28892}
   },
   "2024-annual": {
     label: "2024 (Annual)",
@@ -1944,13 +2104,18 @@ const MONTHLY_DATA = {
       // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles)
       "Mauritius": [1553,0,12087,0,22275,0,35915],
       // source: WHOLE MARKET (incl. non-CAMPI brands), partly estimated -- total 473,842 (CAMPI-TMA 467,252 + non-member brands, per CarGuide.ph); BEV 2,200 and PHEV 1,000 from IEA Global EV Data Explorer (public API, rounded, all brands); HEV 15,490 = CAMPI's reported 2024 xEV total 18,690 (CAMPI president R. Gutierrez) minus IEA's 3,200 plug-ins (an upper bound -- CAMPI only said hybrids were 'about 75%'); petrol = remainder; diesel not published
-      "Philippines": [2200,1000,15490,0,455152,0,473842]
+      "Philippines": [2200,1000,15490,0,455152,0,473842],
+      "North Macedonia": [946,0,3791,4,688,21847,27276],
+      // source: MONSTAT (Statistical Office of Montenegro) -- Total is real first-time-registered passenger cars; BEV/HEV are year-over-year stock deltas (reliable, negligible attrition in these recent categories); Petrol/Diesel are a residual of the true total split by that year's stock-delta ratio (no genuine flow-based split published) -- see world_auto_sales_annual.source for full methodology
+      "Montenegro": [163,0,1989,0,3251,23489,28892],
+      // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team, Ministry of Interior first-registration data -- Jan-Jun 2024 (H1) only, the earliest report with a fuel-type split at this source. Petrol/Hybrid derived from stated percentages (48.33%/21.50%+7.68%), Diesel/Other/Electric close to exact -- see world_auto_sales_annual.source for full reconciliation. PHEV not separately tracked, folded into HEV.
+      "Serbia": [116,0,4423,318,7341,2960,15158]
     },
     // per-country "as of" override for a source whose fiscal year doesn't match the calendar year
     asOf: {
       "Nepal": "FY2080/81 (BS), ~mid-Jul 2023 to mid-Jul 2024",
-      "Israel":"MoT registry, 96% of OICA (undercount, see comment)"
-    },
+      "Israel":"MoT registry, 96% of OICA (undercount, see comment)",
+          "Serbia":"uvoznicivozila.rs, Jan-Jun 2024 (H1) only"},
     // BEV units for full-year 2023, for YoY %
     priorYearBev: {
       "Ecuador":767,
@@ -2060,7 +2225,10 @@ const MONTHLY_DATA = {
       "France - Reunion": [3633,919,6600,120,11418,4834,27524],
       "France - Mayotte": [57,15,742,4,1042,206,2066],
       // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles)
-      "Mauritius": [1025,0,8208,0,20629,0,29862]
+      "Mauritius": [1025,0,8208,0,20629,0,29862],
+      "North Macedonia": [371,0,1287,0,4544,63255,69457],
+      // source: MONSTAT (Statistical Office of Montenegro) -- Total is real first-time-registered passenger cars; BEV/HEV are year-over-year stock deltas (reliable, negligible attrition in these recent categories); Petrol/Diesel are a residual of the true total split by that year's stock-delta ratio (no genuine flow-based split published) -- see world_auto_sales_annual.source for full methodology
+      "Montenegro": [137,0,1206,0,2658,21266,25267]
     },
     // per-country "as of" override for a source whose fiscal year doesn't match the calendar year
     asOf: {
@@ -4633,6 +4801,101 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     renderMfrCategoryFilter();
     updateMfrCoverageNote();
     updateMfrCountryGroupCoverageNote();
+    renderMfrPeriodNotes();
+  }
+  // --- "no data for the selected period" label + clickable list of the periods that do have data
+  // (same behaviour as powertrain-mix-by-country.html). Shown in the brand / model / manufacturing-
+  // country sections whenever the page's selected period isn't what the section ended up showing
+  // (it fell back to the country's latest period) or the shown period has no rows.
+  let mfrRequestedOverride = null; // set when the user picks a period inside a section on purpose
+  const MFR_MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  function mfrPeriodKeyLabel(key){
+    const m = String(key).match(/^(\d{4})-annual$/);
+    if(m) return mfrYearOptionLabel(+m[1]);
+    const mm = String(key).match(/^(\d{4})-(\d{2})$/);
+    if(mm) return MFR_MONTH_NAMES[+mm[2] - 1] + ' ' + mm[1];
+    return mfrPeriodLabel(key);
+  }
+  function mfrAvailablePeriods(kind){
+    const c = mfrCountry;
+    const mon = kind === 'model' ? (hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[c]) : (hasMonthly && MANUFACTURER_MONTHLY[c]);
+    const yr = kind === 'model' ? (hasModelYearly && MANUFACTURER_MODEL_YEARLY[c]) : MANUFACTURER_YEARLY[c];
+    const months = mon ? [...new Set(mon.map(r => r.year_month))].sort().reverse() : [];
+    const years = yr ? [...new Set(yr.map(r => r.year))].sort((a, b) => b - a) : [];
+    const synth = months.length ? mfrSyntheticPeriodKeysForCountry(c) : [];
+    return [...synth, ...months, ...years.map(y => `${y}-annual`)];
+  }
+  function ensureMfrPeriodNote(card, id){
+    let el = document.getElementById(id);
+    if(!el){
+      el = document.createElement('div');
+      el.id = id;
+      el.className = 'mfr-coverage-note hidden';
+      const anchor = card.querySelector('.note');
+      if(anchor && anchor.parentNode) anchor.parentNode.insertBefore(el, anchor.nextSibling); else card.appendChild(el);
+      el.addEventListener('click', e => {
+        const link = e.target.closest('[data-mfr-goto-period]');
+        if(!link) return;
+        e.preventDefault();
+        mfrGotoPeriod(link.dataset.mfrGotoPeriod);
+      });
+    }
+    return el;
+  }
+  function mfrGotoPeriod(key){
+    const radio = monthsBox.querySelector(`input[data-month="${key}"]`);
+    if(radio){
+      selectedMonths = new Set([key]);
+      monthsBox.querySelectorAll('input[type="radio"]').forEach(rb => { rb.checked = rb === radio; });
+      mfrRequestedOverride = null;
+      recompute();
+      return;
+    }
+    const yearly = /^\d{4}-annual$/.test(key);
+    mfrForceYearly = yearly;
+    if(mfrPeriodToggleEl) mfrPeriodToggleEl.querySelectorAll('[data-mfr-period]').forEach(b => b.classList.toggle('active', b.dataset.mfrPeriod === (yearly ? 'yearly' : 'monthly')));
+    renderMfrSection();
+    if(yearly){ mfrYearSelect.value = key.slice(0, 4); mfrYearSelect.dispatchEvent(new Event('change')); }
+    else { mfrMonthSelect.value = key; mfrMonthSelect.dispatchEvent(new Event('change')); }
+  }
+  function renderMfrPeriodNotes(){
+    const specs = [['brand', mfrSection, 'mfr-period-note-brand', 'brand'], ['model', mfrModelSection, 'mfr-period-note-model', 'model'], ['mfgcountry', mfrCountrySection, 'mfr-period-note-group', 'brand']];
+    const req = mfrRequestedOverride || [...selectedMonths][0];
+    const shownKey = mfrMonthly ? mfrMonthSelect.value : `${mfrYear}-annual`;
+    const yearOf = k => String(k).slice(0, 4);
+    specs.forEach(([name, card, id, dataKind]) => {
+      const el = ensureMfrPeriodNote(card, id);
+      if(!mfrCountry || card.classList.contains('hidden')){ el.classList.add('hidden'); return; }
+      const avail = mfrAvailablePeriods(dataKind);
+      const monthlyRows = dataKind === 'model' ? ((hasModelMonthly && MANUFACTURER_MODEL_MONTHLY[mfrCountry]) || []) : ((hasMonthly && MANUFACTURER_MONTHLY[mfrCountry]) || []);
+      const yearlyRows = dataKind === 'model' ? ((hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry]) || []) : (MANUFACTURER_YEARLY[mfrCountry] || []);
+      const hasRows = mfrMonthly
+        ? monthlyRows.some(r => mfrIsSyntheticKey(shownKey) ? r.year_month.startsWith(yearOf(shownKey)) : r.year_month === shownKey)
+        : yearlyRows.some(r => r.year === mfrYear);
+      const mismatch = !!req && req !== shownKey;
+      let extra = '';
+      if(name === 'brand'){
+        // the model card is hidden entirely when there are no model rows for this period -- say so here
+        const modelHidden = mfrModelSection.classList.contains('hidden');
+        if(modelHidden){
+          const mAvail = mfrAvailablePeriods('model');
+          extra = mAvail.length
+            ? ` No model data for ${mfrPeriodKeyLabel(shownKey)} -- model data exists for: ${mAvail.map(k => `<a href="#" data-mfr-goto-period="${k}">${mfrPeriodKeyLabel(k)}</a>`).join(', ')}.`
+            : ` No model-level data for ${mfrCountry} (the source publishes brand totals only).`;
+        }
+      }
+      if(!mismatch && hasRows && !extra){ el.classList.add('hidden'); return; }
+      const noun = name === 'model' ? 'model' : name === 'mfgcountry' ? 'manufacturing-country' : 'brand';
+      const links = avail.map(k => `<a href="#" data-mfr-goto-period="${k}">${mfrPeriodKeyLabel(k)}</a>`).join(', ');
+      el.classList.remove('hidden');
+      let msg = '';
+      if(mismatch || !hasRows){
+        msg = hasRows
+          ? `ℹ No ${noun} data for ${mfrCountry} in ${mfrPeriodKeyLabel(req)} -- showing ${mfrPeriodKeyLabel(shownKey)} instead, the latest period available here. Select one of the available periods: ${links}.`
+          : `ℹ No ${noun} data for ${mfrCountry} in ${mfrPeriodKeyLabel(shownKey)}. Select one of the available periods: ${links || 'none yet'}.`;
+      }
+      el.innerHTML = (msg + extra).trim().replace(/^(?!ℹ)/, 'ℹ ');
+    });
   }
   document.querySelectorAll('[data-mfr-mode]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -4683,6 +4946,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       recompute();
       return;
     }
+    mfrRequestedOverride = val;
     mfrTitle.textContent = mfrTitleText('brand');
     mfrModelTitle.textContent = mfrTitleText('model');
     renderBoth();
@@ -5077,6 +5341,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     // If the page's own Period filter just crossed the monthly<->yearly boundary (e.g. "June
     // 2026" -> "2025 (Annual)"), force this section's Monthly/Yearly toggle to follow.
     const currentPeriodType = isYearlyPeriodKey([...selectedMonths][0]) ? 'yearly' : 'monthly';
+    if([...selectedMonths][0] !== mfrLastSyncedPeriod) mfrRequestedOverride = null;
     if(currentPeriodType !== mfrLastPeriodType){
       mfrForceYearly = currentPeriodType === 'yearly';
       if(mfrPeriodToggleEl){
@@ -5171,6 +5436,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       return;
     }
     mfrYear = +val;
+    mfrRequestedOverride = `${val}-annual`;
     const hasModelYearlyData = hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry] &&
       MANUFACTURER_MODEL_YEARLY[mfrCountry].some(r => r.year === mfrYear);
     mfrModelSection.classList.toggle('hidden', !hasModelYearlyData);
