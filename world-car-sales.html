@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Car Sales — Global Sales, BEV vs ICE and Cars on the Road</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="index.html">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="50" r="46" fill="var(--surface)" stroke="var(--accent)" stroke-width="4"/>
+        <path d="M20 58 L26 40 C28 35 32 32 38 32 L62 32 C68 32 72 35 74 40 L80 58 L80 66 C80 69 78 71 75 71 L71 71 C68 71 66 69 66 66 L66 64 L34 64 L34 66 C34 69 32 71 29 71 L25 71 C22 71 20 69 20 66 Z" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linejoin="round"/>
+        <circle cx="32" cy="64" r="6" fill="var(--text)"/>
+        <circle cx="68" cy="64" r="6" fill="var(--text)"/>
+        <line x1="30" y1="45" x2="70" y2="45" stroke="var(--accent)" stroke-width="3" opacity="0.5"/>
+      </svg>
+      <span class="wordmark">
+        <span class="brand">World Auto</span>
+        <span class="sub">Sales Stats</span>
+      </span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <a href="index.html"><span class="dot"></span>Home</a>
+
+      <div class="nav-heading">Overview</div>
+      <a href="world-auto-sales.html"><span class="dot"></span>World Auto Sales</a>
+      <a href="world-car-sales.html" aria-current="page"><span class="dot"></span>World Car Sales</a>
+
+      <div class="nav-heading">Powertrain</div>
+      <a href="powertrain-mix-by-country.html"><span class="dot"></span>Mix by Country</a>
+      <a href="individual-country.html"><span class="dot"></span>Individual Country</a>
+
+      <div class="nav-heading">Markets</div>
+      <a href="auto-markets-by-country.html"><span class="dot"></span>Auto Markets by Country</a>
+
+      <div class="nav-heading">Rankings</div>
+      <a href="biggest-movers.html"><span class="dot"></span>Biggest Movers</a>
+
+      <div class="nav-heading">Manufacturers</div>
+      <a href="manufacturers.html"><span class="dot"></span>Sales by Brand</a>
+
+      <div class="nav-heading">Trends<span class="soon-pill">Soon</span></div>
+    </nav>
+
+    <div class="sidebar-footer">
+      Monthly worldwide car sales &amp; powertrain stats — built for video &amp; social.
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page">
+      <header class="page-header">
+        <div class="eyebrow">World Car Sales · Overview</div>
+        <h1>How many cars does the world build, sell and drive?</h1>
+        <p class="subtitle">Global motor-vehicle output since 1950, global sales since 2005, the battery-electric (BEV) versus combustion (ICE) split of new-car sales, and an estimate of how many cars are on the road since 2000. No country split on this page — world totals only.</p>
+      </header>
+
+      <div class="stat-row" id="stat-row"></div>
+
+      <div class="card chart-card" id="card-a">
+        <h2>11A · Global vehicle production and sales, per year</h2>
+        <p class="note">Worldwide motor-vehicle production (cars, vans, trucks and buses) back to 1950, with OICA's worldwide new-vehicle sales from 2005. Before 2005 no consistent worldwide sales series is published, so production — which is built to be sold within a year or two — is the best long-run proxy. Open dots are measured values; the dashed line bridges years with no published figure (straight-line between measured years, so it hides real booms and recessions).</p>
+        <div class="chart-legend" id="legend-a"></div>
+        <svg class="chart" id="svg-a" viewBox="0 0 900 340" preserveAspectRatio="none"></svg>
+        <div class="tooltip" id="tip-a"></div>
+        <div class="table-scroll" style="margin-top:14px">
+          <table id="table-a" class="data-table"></table>
+        </div>
+      </div>
+
+      <div class="card chart-card" id="card-b">
+        <div class="chart-header-row">
+          <h2>11B · New-car sales: BEV vs ICE (world)</h2>
+          <div class="chart-mode-toggle" role="group" aria-label="Units or share">
+            <button type="button" class="mode-btn active" data-mode="units">Million cars</button>
+            <button type="button" class="mode-btn" data-mode="share">% of sales</button>
+          </div>
+        </div>
+        <p class="note">Worldwide light-duty (passenger car and light commercial) sales by powertrain, 2010–2025, from the IEA Global EV Data Explorer. "ICE &amp; hybrids" is every light vehicle that cannot be plugged in — petrol, diesel, LPG/CNG and conventional (non-plug-in) hybrids. No country split.</p>
+        <div class="chart-legend" id="legend-b"></div>
+        <svg class="chart" id="svg-b" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
+        <div class="tooltip" id="tip-b"></div>
+      </div>
+
+      <div class="card chart-card" id="card-c">
+        <div class="chart-header-row">
+          <h2>11C · Estimated cars on the road (world), since 2000</h2>
+          <div class="chart-mode-toggle" role="group" aria-label="Units or share">
+            <button type="button" class="mode-btn active" data-mode="units">Million cars</button>
+            <button type="button" class="mode-btn" data-mode="share">% of fleet</button>
+          </div>
+        </div>
+        <p class="note">Modelled worldwide stock of light-duty vehicles (cars and light commercial vehicles) in use, 2000–2025: last year's fleet minus scrapped vehicles plus this year's sales, calibrated to the fleet size the IEA implies for 2010–2024. The electric part (BEV and PHEV) is built from cumulative IEA sales and reconciled to the IEA's measured electric-car stock. This is an estimate, not a census — see Notes for the method and its error.</p>
+        <div class="chart-legend" id="legend-c"></div>
+        <svg class="chart" id="svg-c" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
+        <div class="tooltip" id="tip-c"></div>
+      </div>
+
+      <div class="card notes-card is-collapsed">
+        <button type="button" class="notes-toggle" aria-expanded="false">
+          <span>📝 Notes</span>
+          <span class="notes-hint">Click to expand notes</span>
+          <span class="notes-arrow">▸</span>
+        </button>
+        <ul class="notes-body">
+          <li><strong>11A production, 1950–2004.</strong> Ward's Automotive (<em>Motor Vehicle Facts &amp; Figures</em>) five-year points for 1950, 1955, 1960, 1965, 1970, 1975, 1980, 1985 and 1990 via the US Department of Energy, Fact #637 (10 Aug 2010 edition, "World Motor Vehicle Production, 1950-2009"), plus the annual series in the US Bureau of Transportation Statistics' National Transportation Statistics, Table 1-22 (passenger cars + commercial vehicles, annual 1994–2005 and the single years 1971, 1981 and 1991). Years between the five-year points (1951–1989 except 1971 and 1981, plus 1992–1993) are straight-line interpolations and are drawn dashed. 1960 = 16.5 million vehicles, 1980 = 38.6 million.</li>
+          <li><strong>11A production, 2005–2025.</strong> OICA (International Organization of Motor Vehicle Manufacturers) "World Motor Vehicle Production by Country/Region and Type" — the latest published revision of each year (2025 = 96.4 million). OICA counts slightly more vehicles than Ward's/BTS (about 1% in 2005), so the line has a small level step at 2004→2005.</li>
+          <li><strong>11A sales, 2005–2025.</strong> OICA "Registrations or sales of new vehicles", ALL COUNTRIES/REGIONS. 2005–2018 come from the 2019 edition of the OICA sales workbooks and 2019–2025 from the 2026 edition (all vehicles) / the 2024 edition (passenger cars, to 2024), so a small revision step (about +0.8% in 2019) sits between 2018 and 2019. OICA has not yet published 2025 passenger-car sales, so that point is blank. OICA gathers national sales or registrations; for markets it does not cover it uses industry estimates, so the total is complete worldwide but of mixed accuracy.</li>
+          <li><strong>Why no worldwide sales before 2005?</strong> OICA's sales tables start in 2005 and I found no free, citable worldwide sales series for earlier years. Production is shown instead; it differs from sales by inventory and by vehicles built for local assembly, typically a few percent a year (production 2025: 96.4 million vs sales: 99.8 million).</li>
+          <li><strong>11B.</strong> IEA Global EV Data Explorer (Global EV Outlook 2026), read through Our World in Data: <em>car sales</em> (electric + non-electric), electric car sales (BEV + PHEV) and the BEV share of electric sales. The IEA's "cars" are light-duty vehicles, so its total (84.8 million in 2025) is larger than OICA's passenger-car sales (67.5 million in 2024) and smaller than OICA's all-vehicle total. 2025 values are IEA estimates. ICE &amp; hybrids is the remainder after BEV and PHEV; the IEA does not publish a global hybrid (HEV) sales series, so HEV can't be split out here.</li>
+          <li><strong>11C method.</strong> Fleet<sub>t</sub> = Fleet<sub>t−1</sub> × (1 − s<sub>t</sub>) + Sales<sub>t</sub>, with the scrappage rate s falling linearly from 4.5% (2000) to 3.3% (2025) and the 2000 starting fleet (631 million) fitted — together — by least squares to the total fleet the IEA implies for 2010–2024 (IEA electric stock ÷ IEA electric share of stock). Fit error against those 15 anchor years is within about ±3%. For 2000–2009, when no IEA sales exist, light-duty sales are estimated from OICA passenger-car sales (2005–2009) or BTS passenger-car production (2000–2004) times a light-duty/passenger ratio extrapolated from 2010–2024 (1.07 in 2000 rising to 1.23 in 2024), so the early years are the least certain. The IEA-implied totals are shown as dots; the IEA's own 2025 total is not used because its 2025 stock share is rounded to a whole percent (5%).</li>
+          <li><strong>11C electric part.</strong> BEV and PHEV stocks are cumulative IEA sales with a constant 1.5% yearly loss, the value that best reproduces the IEA's measured global electric-car stock (76 million at end-2025 per GEVO 2026; model: 77 million, within ±3% in every year 2014–2025; the very small 2011–2013 stocks differ by up to 10%). BEV/PHEV before 2010 are negligible (~30,000 vehicles at end-2009) and ICE &amp; hybrids is the rest of the fleet, so it includes conventional hybrids. Trucks, buses and two/three-wheelers are not included in 11C — OICA's wider "vehicles in use" count (cars + trucks + buses) is considerably larger.</li>
+          <li>Rounding: values are shown in millions of vehicles; hover the charts for exact figures.</li>
+        </ul>
+      </div>
+
+      <footer class="page-footer">
+        Sources: OICA — production and sales statistics (oica.net) · Ward's Automotive via US DOE Vehicle Technologies Office, Fact #637 · US Bureau of Transportation Statistics, National Transportation Statistics Table 1-22 · IEA Global EV Data Explorer / Global EV Outlook 2026 via Our World in Data · fleet model: this site's estimate
+      </footer>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="assets/world-car-sales-data.js"></script>
+<script>
+const COL = { prod:'#c1621f', sales:'#2563eb', pc:'#1e8f5f', bev:'#1e8f5f', phev:'#2563eb', ice:'#8a7f73' };
+const fmtM = v => (v/1e6).toFixed(1) + ' M';
+const fmtI = v => Math.round(v).toLocaleString('en-US');
+const latestProd = WCS.production[WCS.production.length-1];
+const latestSales = WCS.sales[WCS.sales.length-1];
+const latestPw = WCS.powertrain[WCS.powertrain.length-1];
+const latestFl = WCS.fleet[WCS.fleet.length-1];
+
+// ---- stat tiles ----
+document.getElementById('stat-row').innerHTML = [
+  ['Vehicles sold, 2025', fmtM(latestSales.all), 'OICA, all vehicle types'],
+  ['Vehicles built, 2025', fmtM(latestProd.v), 'OICA; 16.5 M in 1960'],
+  ['BEV share of new cars, 2025', (latestPw.bev/latestPw.total*100).toFixed(1) + '%', 'IEA, light-duty vehicles'],
+  ['Cars on the road, 2025', (latestFl.total/1e9).toFixed(2) + ' B', 'estimate; 0.63 B in 2000'],
+  ['Electric cars on the road', fmtM(latestFl.bev + latestFl.phev), 'BEV + PHEV, ' + ((latestFl.bev+latestFl.phev)/latestFl.total*100).toFixed(1) + '% of fleet']
+].map(([l,v,s]) => `<div class="stat"><div class="label">${l}</div><div class="value">${v}<small>${s}</small></div></div>`).join('');
+
+function setup(id, W, H, m){
+  const svg = d3.select('#svg-'+id);
+  svg.selectAll('*').remove();
+  const g = svg.append('g').attr('transform', `translate(${m.left},${m.top})`);
+  return { svg, g, iw: W-m.left-m.right, ih: H-m.top-m.bottom };
+}
+function showTip(id, e, html){
+  const tip = document.getElementById('tip-'+id);
+  const rect = document.getElementById('card-'+id).getBoundingClientRect();
+  tip.style.left = (e.clientX - rect.left) + 'px';
+  tip.style.top = (e.clientY - rect.top - 10) + 'px';
+  tip.style.opacity = 1; tip.innerHTML = html;
+}
+function hideTip(id){ document.getElementById('tip-'+id).style.opacity = 0; }
+function legend(id, items){
+  document.getElementById('legend-'+id).innerHTML = items.map(([c,l]) =>
+    `<div class="legend-chip"><span class="swatch" style="background:${c}"></span>${l}</div>`).join('');
+}
+
+// ================= 11A =================
+function drawA(){
+  const W=900,H=340,m={top:14,right:16,bottom:30,left:46};
+  const {g,iw,ih} = setup('a',W,H,m);
+  const P = WCS.production, S = WCS.sales;
+  const x = d3.scaleLinear().domain([1950,2025]).range([0,iw]);
+  const y = d3.scaleLinear().domain([0,105e6]).range([ih,0]);
+  g.append('g').attr('class','bubble-axis').attr('transform',`translate(0,${ih})`)
+    .call(d3.axisBottom(x).tickValues(d3.range(1950,2026,5)).tickFormat(d3.format('d')));
+  g.append('g').attr('class','bubble-axis').call(d3.axisLeft(y).ticks(6).tickFormat(d => (d/1e6)+' M'));
+  const line = d3.line().x(d=>x(d.y)).y(d=>y(d.v));
+  // production: dashed through interpolated stretches, solid between consecutive measured years
+  for(let i=0;i<P.length-1;i++){
+    const a=P[i], b=P[i+1];
+    const dashed = a.est || b.est;
+    g.append('path').datum([a,b]).attr('fill','none').attr('stroke',COL.prod).attr('stroke-width',2.4)
+      .attr('stroke-dasharray', dashed ? '5,4' : null).attr('d',line);
+  }
+  g.selectAll('.pd').data(P.filter(d=>!d.est)).join('circle').attr('cx',d=>x(d.y)).attr('cy',d=>y(d.v)).attr('r',3)
+    .attr('fill','var(--surface)').attr('stroke',COL.prod).attr('stroke-width',1.6);
+  const sAll = S.map(d=>({y:d.y,v:d.all})).filter(d=>d.v!=null);
+  const sPc = S.map(d=>({y:d.y,v:d.pc})).filter(d=>d.v!=null);
+  g.append('path').datum(sAll).attr('fill','none').attr('stroke',COL.sales).attr('stroke-width',2.4).attr('d',line);
+  g.append('path').datum(sPc).attr('fill','none').attr('stroke',COL.pc).attr('stroke-width',2.4).attr('d',line);
+  g.selectAll('.sa').data(sAll).join('circle').attr('cx',d=>x(d.y)).attr('cy',d=>y(d.v)).attr('r',2.6).attr('fill',COL.sales);
+  g.selectAll('.sp').data(sPc).join('circle').attr('cx',d=>x(d.y)).attr('cy',d=>y(d.v)).attr('r',2.6).attr('fill',COL.pc);
+  const guide = g.append('line').attr('class','trend-guideline').attr('y1',0).attr('y2',ih).style('opacity',0);
+  g.append('rect').attr('width',iw).attr('height',ih).attr('fill','transparent')
+    .on('pointermove', e => {
+      const yr = Math.max(1950, Math.min(2025, Math.round(x.invert(d3.pointer(e)[0]))));
+      const p = P.find(d=>d.y===yr), s = S.find(d=>d.y===yr);
+      guide.attr('x1',x(yr)).attr('x2',x(yr)).style('opacity',1);
+      let h = `<strong>${yr}</strong><br>Production: <strong>${fmtM(p.v)}</strong>${p.est?' (interpolated)':''}<br><span style="opacity:.75">${p.src}</span>`;
+      if(s){
+        h += `<br>Sales, all vehicles: <strong>${fmtM(s.all)}</strong>`;
+        if(s.pc!=null) h += `<br>Sales, passenger cars: <strong>${fmtM(s.pc)}</strong>`;
+      }
+      showTip('a',e,h);
+    })
+    .on('pointerleave', () => { guide.style('opacity',0); hideTip('a'); });
+  legend('a', [[COL.prod,'Production, all vehicles (OICA / Ward\'s)'],[COL.sales,'Sales, all vehicles (OICA)'],[COL.pc,'Sales, passenger cars (OICA)']]);
+
+  const marks = [1950,1960,1970,1980,1990,2000,2005,2010,2015,2020,2025];
+  const rows = marks.map(yr => {
+    const p = P.find(d=>d.y===yr), s = S.find(d=>d.y===yr);
+    return `<tr><td>${yr}</td><td class="num">${fmtM(p.v)}${p.est?'*':''}</td><td class="num">${s?fmtM(s.all):'—'}</td><td class="num">${s&&s.pc!=null?fmtM(s.pc):'—'}</td></tr>`;
+  }).join('');
+  document.getElementById('table-a').innerHTML =
+    `<thead><tr><th>Year</th><th class="num">Production</th><th class="num">Sales, all vehicles</th><th class="num">Sales, passenger cars</th></tr></thead><tbody>${rows}</tbody>`;
+}
+
+// ================= 11B =================
+function stacked(id, rows, keys, labels, mode, yFmt, tipExtra, xTickEvery){
+  const W=900,H=320,m={top:14,right:16,bottom:30,left:46};
+  const {g,iw,ih} = setup(id,W,H,m);
+  const share = mode==='share';
+  const data = rows.map(r => {
+    const tot = keys.reduce((s,k)=>s+r[k],0);
+    const o = { y:r.y, _raw:r, _tot:tot };
+    keys.forEach(k => o[k] = share ? r[k]/tot*100 : r[k]);
+    return o;
+  });
+  const years = data.map(d=>d.y);
+  const ymax = share ? 100 : d3.max(data, d => keys.reduce((s,k)=>s+d[k],0))*1.05;
+  const y = d3.scaleLinear().domain([0,ymax]).range([ih,0]);
+  return { g, iw, ih, data, years, y, share, ymax, W, H, m };
+}
+
+function drawB(mode){
+  const keys = ['ice','phev','bev'];
+  const rows = WCS.powertrain;
+  const c = stacked('b', rows, keys, null, mode);
+  const {g,iw,ih,data,years,y,share} = c;
+  const x = d3.scaleBand().domain(years).range([0,iw]).padding(0.18);
+  g.append('g').attr('class','bubble-axis').attr('transform',`translate(0,${ih})`).call(d3.axisBottom(x));
+  g.append('g').attr('class','bubble-axis').call(d3.axisLeft(y).ticks(6).tickFormat(d => share ? d+'%' : (d/1e6)+' M'));
+  const stack = d3.stack().keys(keys)(data);
+  stack.forEach(layer => {
+    g.selectAll('.b-'+layer.key).data(layer).join('rect')
+      .attr('x',d=>x(d.data.y)).attr('width',x.bandwidth())
+      .attr('y',d=>y(d[1])).attr('height',d=>Math.max(0,y(d[0])-y(d[1])))
+      .attr('fill',COL[layer.key]);
+  });
+  g.append('rect').attr('width',iw).attr('height',ih).attr('fill','transparent')
+    .on('pointermove', e => {
+      const i = Math.max(0, Math.min(years.length-1, Math.floor(d3.pointer(e)[0] / (iw/years.length))));
+      const r = rows[i];
+      showTip('b',e,`<strong>${r.y}</strong><br>Total: <strong>${fmtM(r.total)}</strong>` +
+        [['bev','Battery electric (BEV)'],['phev','Plug-in hybrid (PHEV)'],['ice','ICE &amp; hybrids']].map(([k,l]) =>
+          `<br>${l}: <strong>${fmtM(r[k])}</strong> (${(r[k]/r.total*100).toFixed(1)}%)`).join(''));
+    })
+    .on('pointerleave', () => hideTip('b'));
+  legend('b', [[COL.bev,'Battery electric (BEV)'],[COL.phev,'Plug-in hybrid (PHEV)'],[COL.ice,'ICE &amp; hybrids (non-plug-in)']]);
+}
+
+// ================= 11C =================
+function drawC(mode){
+  const keys = ['ice','phev','bev'];
+  const rows = WCS.fleet;
+  const c = stacked('c', rows, keys, null, mode);
+  const {g,iw,ih,data,years,y,share} = c;
+  const x = d3.scaleLinear().domain([2000,2025]).range([0,iw]);
+  g.append('g').attr('class','bubble-axis').attr('transform',`translate(0,${ih})`)
+    .call(d3.axisBottom(x).tickValues(d3.range(2000,2026,5).concat([2025]).filter((v,i,a)=>a.indexOf(v)===i)).tickFormat(d3.format('d')));
+  g.append('g').attr('class','bubble-axis').call(d3.axisLeft(y).ticks(6).tickFormat(d => share ? d+'%' : (d/1e6)+' M'));
+  const stack = d3.stack().keys(keys)(data);
+  const area = d3.area().x(d=>x(d.data.y)).y0(d=>y(d[0])).y1(d=>y(d[1]));
+  stack.forEach(layer => g.append('path').datum(layer).attr('d',area).attr('fill',COL[layer.key]).attr('opacity',0.9));
+  if(!share){
+    g.selectAll('.iea').data(rows.filter(r=>r.iea!=null)).join('circle')
+      .attr('cx',d=>x(d.y)).attr('cy',d=>y(d.iea)).attr('r',3).attr('fill','var(--surface)')
+      .attr('stroke','var(--text)').attr('stroke-width',1.4);
+  }
+  const guide = g.append('line').attr('class','trend-guideline').attr('y1',0).attr('y2',ih).style('opacity',0);
+  g.append('rect').attr('width',iw).attr('height',ih).attr('fill','transparent')
+    .on('pointermove', e => {
+      const yr = Math.max(2000, Math.min(2025, Math.round(x.invert(d3.pointer(e)[0]))));
+      const r = rows.find(d=>d.y===yr);
+      guide.attr('x1',x(yr)).attr('x2',x(yr)).style('opacity',1);
+      showTip('c',e,`<strong>${yr}</strong> (estimate)<br>Fleet: <strong>${fmtM(r.total)}</strong>` +
+        `<br>BEV: <strong>${fmtM(r.bev)}</strong> (${(r.bev/r.total*100).toFixed(2)}%)` +
+        `<br>PHEV: <strong>${fmtM(r.phev)}</strong> (${(r.phev/r.total*100).toFixed(2)}%)` +
+        `<br>ICE &amp; hybrids: <strong>${fmtM(r.ice)}</strong>` +
+        `<br>Sales that year: ${fmtM(r.sales)}${r.measuredSales?'':' (estimated)'}` +
+        (r.iea!=null ? `<br>IEA-implied fleet: ${fmtM(r.iea)}` : ''));
+    })
+    .on('pointerleave', () => { guide.style('opacity',0); hideTip('c'); });
+  legend('c', [[COL.bev,'Battery electric (BEV)'],[COL.phev,'Plug-in hybrid (PHEV)'],[COL.ice,'ICE &amp; hybrids (non-plug-in)']]);
+  if(!share){
+    document.getElementById('legend-c').insertAdjacentHTML('beforeend',
+      '<div class="legend-chip"><span class="swatch" style="background:var(--surface);border:1.5px solid var(--text)"></span>IEA-implied fleet (reference points)</div>');
+  }
+}
+
+function wireToggle(id, fn){
+  const card = document.getElementById('card-'+id);
+  card.querySelectorAll('.mode-btn').forEach(btn => btn.addEventListener('click', () => {
+    card.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b===btn));
+    fn(btn.dataset.mode);
+  }));
+}
+drawA(); drawB('units'); drawC('units');
+wireToggle('b', drawB); wireToggle('c', drawC);
+</script>
+<script src="assets/notes-toggle.js"></script>
+</body>
+</html>
