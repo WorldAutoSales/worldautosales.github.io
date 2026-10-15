@@ -543,10 +543,14 @@ const MONTHLY_DATA = {
       // SIMI Motorstats (stats.simi.ie, Month From/To = Sep), Ireland (monthly) -- PHEV = petrol+diesel plug-in hybrids (1,043+17), HEV = petrol+diesel hybrids (932+38); loaded ahead of ACEA
       "Ireland": [3116,1060,970,0,634,542,6322],
       // AEADE sales bulletin September 2026 (aeade.net), all vehicles (record 15,649) -- exact national split from SRI data: BEV 1,672; hybrid 3,008 (HEV+PHEV not split, phev=0 by convention); petrol 6,985; diesel 3,984
-      "Ecuador": [1672,0,3008,0,6985,3984,15649]
+      "Ecuador": [1672,0,3008,0,6985,3984,15649],
+      // source: DNA (Direccion Nacional de Aduanas) Paraguay, raw customs microdata filtered to NCM 8703.xx, USO=NUEVO, OPERACION=IMPORTACION — genuine standalone month; fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
+      "Paraguay": [353,455,999,134,3045,243,5229],
+      // source: ACAU (Asociacion del Comercio Automotor del Uruguay) monthly brand sales via Autoblog Uruguay, passenger cars + SUVs (autos+SUV basis); total exact, fuel split ESTIMATED from model names and the July national mix (ACAU publishes no fuel type for this month)
+      "Uruguay": [2587,298,553,0,1440,10,4888]
     },
-    priorYearBev: {      "Finland":2591,      "Belgium":11966,      "Netherlands":12008,      "Poland":4452,      "Brazil":8195,      "Mexico":2041,      "United Kingdom":72779,      "Luxembourg":1245,      "Switzerland":5182,      "India":18549,      "Taiwan":3837,      "Ireland":1734,      "Ecuador":481},
-    priorYearTotal: {      "Finland":5996,      "Belgium":31519,      "Netherlands":32199,      "Poland":49853,      "Brazil":231479,      "Mexico":119766,      "United Kingdom":312891,      "Luxembourg":3779,      "Switzerland":20031,      "India":322414,      "Taiwan":28257,      "Ireland":5611,      "Ecuador":11219}
+    priorYearBev: {      "Finland":2591,      "Belgium":11966,      "Netherlands":12008,      "Poland":4452,      "Brazil":8195,      "Mexico":2041,      "United Kingdom":72779,      "Luxembourg":1245,      "Switzerland":5182,      "India":18549,      "Taiwan":3837,      "Ireland":1734,      "Ecuador":481,      "Paraguay":38,      "Uruguay":1943},
+    priorYearTotal: {      "Finland":5996,      "Belgium":31519,      "Netherlands":32199,      "Poland":49853,      "Brazil":231479,      "Mexico":119766,      "United Kingdom":312891,      "Luxembourg":3779,      "Switzerland":20031,      "India":322414,      "Taiwan":28257,      "Ireland":5611,      "Ecuador":11219,      "Paraguay":2541,      "Uruguay":5239}
   },
   "2026-08": {
     label: "August 2026",
@@ -606,7 +610,7 @@ const MONTHLY_DATA = {
       // Added 2026-09-25: Chile (ANAC real BEV/PHEV/HEV for August; ANAC's "MHEV" bucket (2,338 units) is bundled by ANAC itself into conventional combustion, so it stays in the unsplit petrol+diesel residual, divided using July 2026's own petrol/diesel ratio), Ecuador (AEADE/press real BEV + combined-hybrid total; petrol/diesel residual split via July 2026's ratio, matching this country's existing no-PHEV-split convention), Uruguay (ACAU headline total 6,781 -- other outlets report 6,477/5,933 for what may be narrower vehicle-category scopes, flagged as a data-quality caveat; the reported combined "electricos" figure of 3,471 was split into bev/phev using July 2026's bev:phev ratio since ACAU did not separate them for August), South Africa (naamsa's August release only republishes July's NEV mix -- no fresh August EV breakdown exists yet -- so bev/phev/hev were ESTIMATED by scaling July 2026's ratios onto August's real total of 57,898; replace with real figures once naamsa publishes an August-specific NEV breakdown).
       "Chile": [696,593,3662,0,16360,6585,27896],
       "Ecuador": [2034,0,3308,0,6407,3532,15281],
-      "Uruguay": [3107,364,0,0,3286,24,6781],
+      "Uruguay": [2723,315,584,0,1513,9,5144],
       "South Africa": [459,1232,1416,0,54791,0,57898],
       // Added 2026-09-25: Indonesia (GAIKINDO wholesale, no petrol/diesel split published -- residual folded into petrol), Taiwan (real BEV+total; HEV/Petrol/Diesel split ESTIMATED by scaling July 2026's proportional mix onto August's actual total, since no official August breakdown beyond BEV+total was published), Malaysia (MAA headline total, HEV/Diesel/BEV derived by applying JPJ registration-category ratios per this project's usual method -- JPJ's "EV" category does not separate BEV from PHEV so phev is left 0 here to avoid double count), United States (Argonne National Laboratory monthly EV data + Cox/Wards/NADA total, diesel folded into petrol per existing US convention), and Ukraine (Ukravtoprom-reported ~5,000 total with fuel-type % shares -- approximate, PHEV not separated from HEV by the source).
       "Indonesia": [17413,1993,7667,0,54683,0,81756],
@@ -675,16 +679,16 @@ const MONTHLY_DATA = {
       "India": 20204, "South Korea": 23315,
       "Israel":6888,
       "Albania":490,
-      "Paraguay":38,
-          "Japan":2649,      "New Zealand":382,      "Brazil":7643,      "Mexico":2439},
+      "Paraguay":43,
+          "Japan":2649,      "New Zealand":382,      "Brazil":7643,      "Mexico":2439,      "Uruguay":1363},
     // Total (all powertrains) units for the same month a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     // Australia omitted — no matching August 2025 monthly figure sourced
     priorYearTotal: {
       "India": 343212, "South Korea": 127947,
       "Israel":25847,
       "Albania":7658,
-      "Paraguay":1987,
-          "Japan":159854,      "New Zealand":8049,      "Brazil":214744,      "Mexico":126545}
+      "Paraguay":2441,
+          "Japan":159854,      "New Zealand":8049,      "Brazil":214744,      "Mexico":126545,      "Uruguay":3886}
   },
   "2026-07": {
     label: "July 2026",
@@ -1624,11 +1628,11 @@ const MONTHLY_DATA = {
       // source: AAP (Asociacion Automotriz del Peru), Jan-Jul 2026 summed from the monthly figures — HEV includes MHEV combined; Diesel folded into Petrol
       "Peru": [661,1229,9469,0,177457,0,188816],
       // source: ACAU (Uruguay), Compilado 2026 — Jan-Jul 2026 summed from the monthly figures; HEV includes MHEV combined
-      "Uruguay": [17482,1958,4276,0,14807,66,38589],
+      "Uruguay": [19685,2207,5413,0,14474,61,41840],
       // source: DPSHTRR (Albania), Jan-Aug 2026 summed from the monthly figures — HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked
       "Albania": [6560,0,1375,2869,11050,31170,53024],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, Jan-Aug 2026 summed from the monthly figures — fuel split from the HS2022 8703 sub-heading structure itself, not a third-party aggregation
-      "Paraguay": [1138,2024,5130,485,19955,2399,31131],
+      "Paraguay": [1491,2479,6129,619,23000,2642,36360],
       // source: ATTT via webdo.tn/kapitalis.com — the real Jan-Jul 2026 combined total itself (the 7 identical monthly figures elsewhere are that same total split evenly, not independent months, so this reproduces it exactly: 7x220=1540 etc.)
       "Tunisia": [2391,2678,974,0,40959,0,47002],
       // source: NLTA (National Land Transport Authority) -- annual BEV/HEV exact from dedicated reports; Petrol=residual (Total-BEV-HEV), Diesel=0 (no split published for either conventional or hybrid vehicles); 2026 figure is Jan-Jul YTD
@@ -1677,9 +1681,9 @@ const MONTHLY_DATA = {
       "Israel":"through Sep 2026",
       "Kazakhstan":"through Aug 2026",
       "Peru":"through Jul 2026",
-      "Uruguay":"through Aug 2026",
+      "Uruguay":"through Sep 2026",
       "Albania":"through Aug 2026",
-      "Paraguay":"through Aug 2026",
+      "Paraguay":"through Sep 2026",
       "Mauritius":"through Jul 2026",
           "Serbia":"through Jun 2026 (H1)",      "South Africa":"through May 2026"},
     // BEV units for the matching prior-year period (same months)
@@ -1693,9 +1697,9 @@ const MONTHLY_DATA = {
       "Canada":55935,"Mexico":10889,"New Zealand":4119,"United States":736926,"India":139844,"South Korea":142319,"Taiwan":22006,
       "Israel":40028,
       "Peru":437,
-      "Uruguay":5830,
+      "Uruguay":9136,
       "Albania":3038,
-      "Paraguay":504,
+      "Paraguay":547,
           "Serbia":161},
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
@@ -1703,9 +1707,9 @@ const MONTHLY_DATA = {
       "Austria":143051,"Belgium":323868,"Bulgaria":22873,"Croatia":41949,"Cyprus":8223,"Czechia":122639,"Denmark":134102,"Estonia":6156,"Finland":53933,"France":1186784,"Germany":2110348,"Greece":78162,"Hungary":66094,"Iceland":8152,"Ireland":121659,"Italy":1167768,"Latvia":11237,"Lithuania":20787,"Luxembourg":36494,"Malta":2958,"Netherlands":271973,"Norway":113407,"Poland":427908,"Portugal":171564,"Romania":64820,"Slovakia":45090,"Slovenia":29827,"Spain":854660,"Sweden":204027,"Switzerland":168929,"United Kingdom":1042219,"Canada":968769,"Mexico":842840,"New Zealand":51878,"United States":9501054,"India":3213654,"South Korea":1127726,"Taiwan":258424,
       "Israel":220530,
       "Peru":117029,
-      "Uruguay":25094,
+      "Uruguay":34219,
       "Albania":54624,
-      "Paraguay":18964,
+      "Paraguay":21959,
           "Serbia":16473}
     // note: China omitted from priorYearBev — no matching Jan-Jul 2025 monthly data sourced (world_auto_sales has no pre-2026 China rows)
     // note: Tunisia omitted from priorYearBev/priorYearTotal for the same reason — only a full-year 2025 total was sourced (see 2025-annual), no Jan-Jul 2025 monthly breakdown to compare against
@@ -1789,13 +1793,13 @@ const MONTHLY_DATA = {
       // source: AAP (Asociacion Automotriz del Peru) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; HEV projection inherits the HEV+MHEV combined basis
       "Peru": [949,2125,14617,0,269338,0,287029],
       // source: ACAU (Uruguay) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
-      "Uruguay": [28091, 3249, 6414, 0, 23158, 122, 61034],
+      "Uruguay": [27641, 3130, 7217, 0, 19299, 91, 57378],
       // source: FENALCO-ANDI, Colombia — each fuel trended from the last 3 actual months' average (May-Jul, all genuine/near-genuine single months) or the 7-mo YTD average if higher, applied to the remaining 5 months; PHEV folded into HEV, Petrol is the undifferentiated combustion remainder (Diesel=0)
       "Colombia": [55090, 0, 104336, 0, 177375, 0, 336801],
       // source: DPSHTRR (Albania) — each fuel trended from the last 3 actual months' average (Jun-Aug) or the 8-mo YTD average if higher, applied to the remaining 4 months
       "Albania": [9840,0,2062,4565,17698,49303,83468],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay — each fuel trended from the last 3 actual months' average (Jun-Aug) or the 8-mo YTD average if higher, applied to the remaining 4 months
-      "Paraguay": [1805,3320,8985,765,31763,3838,50476],
+      "Paraguay": [2200, 3816, 9298, 962, 32281, 3693, 52250],
       // source: ATTT via webdo.tn/kapitalis.com — plain run-rate (YTD x 12/7), same method as Philippines/Turkey: the underlying Jan-Jul figures are already a flat estimate (one combined total split evenly), so there's no real month-to-month variation to trend from
       "Tunisia": [4112, 4175, 1461, 0, 61439, 0, 71187],
       // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team — flat annualization (H1 2026 x2), not the standard trend method: H1 2026 has no internal monthly granularity to trend from (it's itself an even split of the H1 total), so a plain doubling is the least-fabricated option available
@@ -1840,7 +1844,7 @@ const MONTHLY_DATA = {
       "Uruguay":13788,
       "Colombia":19724,
       "Albania":5666,
-      "Paraguay":851,
+      "Paraguay":856,
       "Georgia":7178,
       "Tunisia":539
     },
@@ -1853,7 +1857,7 @@ const MONTHLY_DATA = {
       "Uruguay":48588,
       "Colombia":254205,
       "Albania":80739,
-      "Paraguay":30798,
+      "Paraguay":31252,
       "Georgia":161132,
       "Tunisia":63902
     }
@@ -1949,7 +1953,7 @@ const MONTHLY_DATA = {
       // source: DPSHTRR (Albania), full-year 2025 (DPSHTRR's own separately-published figure, not summed from monthly) — HEV combines petrol-hybrid+diesel-hybrid; PHEV not separately tracked; no priorYear comparison (2024 not sourced)
       "Albania": [5666,0,2190,5307,16339,51237,80739],
       // source: DNA (Direccion Nacional de Aduanas) Paraguay, full-year 2025 summed from the 12 monthly figures — fuel split from the HS2022 8703 sub-heading structure itself; no priorYear comparison (2024 not sourced)
-      "Paraguay": [851,1128,2047,207,22712,3853,30798],
+      "Paraguay": [856,1172,2066,211,22991,3956,31252],
       // source: Ale Tech (alemonterotech.com), independent analyst blog citing Costa Rica import statistics -- NO official body (MINAE/PROCOMER/RITEVE) named in the article, and PROCOMER's own OData API (confirmed at the database-schema level) only tracks Valor/Peso, not vehicle units, so this blog figure cannot be cross-checked against a primary source this way. Only 3 categories published: Electrico (assumed pure BEV; PHEV not separately identified, may be folded in either direction), Hibrido (assumed HEV+PHEV combined), Combustion (Petrol+Diesel undifferentiated, placed entirely in petrol with diesel=0). Full-year 2025.
       "Costa Rica": [11682,0,2288,0,57465,0,71435],
       // source: ATTT (Agence Technique des Transports Terrestres), via automobile.tn's annual "Statistiques des immatriculations" report — real, published Essence/Diesel/Hybride/Électrique split (new for this report vintage). Scope = "Véhicules Légers" = VP+VU+Mixte (passenger cars + light commercial + mixed-use), not passenger-cars-only like most rows here. Figures are "Premières immatriculations" (official dealer network) only — excludes Tunisia's large "réimmatriculations"/marché parallèle of 4-5-year-old European used-vehicle reimports (29,228 units in 2025, tracked separately). PHEV not separately coded (folded into HEV).
@@ -4323,7 +4327,7 @@ const MFR_SOURCE_NOTE = {
   'New Zealand': 'source: NZTA Waka Kotahi Motor Vehicle Register (public ArcGIS FeatureServer MVR, services.arcgis.com/CXBb7LAjgIIdcsPt, the same register as the country page): every vehicle of type PASSENGER CAR/VAN with import status NEW, counted by first NZ registration month and aggregated by make, model and motive power, monthly January-September 2026 and full years 2020-2025 (2026 yearly = Jan-Sep). It is a point-in-time snapshot of the live register, so earlier months can lose a few vehicles later exported or deregistered; totals are within about 0.1-0.3% of the country page (for example June 2026 9,924 vs 9,935). Light passenger cars and vans only (utes and trucks are commercial and excluded); a few motor-tricycle and quad brands are classed as passenger vehicles by the register. Fuel is exact from the register\'s motive power with the country page\'s grouping: BEV = Electric; PHEV = Plug-in petrol hybrid; hybrid = Petrol hybrid and Petrol-electric hybrid (full and mild); petrol; diesel; Others = diesel hybrids (the country page counts them here too), range extenders, LPG, CNG, hydrogen and other.',
   Czechia: 'source: Czech Ministry of Transport vehicle register open data (Registr silničních vozidel, \'Výpis z registru vozidel\', snapshot of 1 Oct 2026, data.gov.cz / dataovozidlech.cz). New passenger cars (M1) are counted by month of first registration in Czechia, keeping only vehicles whose first registration abroad is at most 31 days before the Czech registration, so imported used cars are excluded. Annual totals are within about 0.2% of the country page (2025: 249,178 vs 248,719); 2022 is higher than the country page (192,065 vs 177,644) because the register includes some vehicles the country page does not. The extract is complete only through May 2026, so 2026 monthly data covers January-May and 2026 yearly = Jan-May. Special-purpose vehicles (mostly motorhome and camper conversions) and rare or misspelled makes are grouped as Other (unclassified). Estimate: the register\'s fuel field is exact for BEV and total volumes, but its hybrid flags are incomplete (for example only about 31,000 of the 57,000 hybrids of 2025 are flagged), so petrol, diesel, hybrid and plug-in hybrid shares by brand are estimated from the register\'s fuel matrix plus brand profiles and scaled to the country page\'s national fuel totals for each period. BEV is exact; 2021 PHEV is zero as on the country page; brand-level splits for hybrids and plug-ins are indicative.',
   Kazakhstan: 'source: Kazakhstan Automobile Union (Қазақстанның Автокөлік Одағы, ҚАО / kao.kz) monthly and annual news releases: tables of new cars sold by official dealers by brand (the 20 largest brands listed; all other brands are grouped as Other (unclassified)), January-August 2026 monthly, full years 2022-2025 (2022-2023 from the 2023 release, 2024-2025 from the 2025 release) and January-August 2026. Includes light commercial and some heavy-truck makes (Yutong, Howo, KAMAZ, GAZ, JAC Trucks), so totals are all new vehicles sold by dealers and match the country page except February 2026 (KAO 13,399 vs 13,556 on the country page) and 2024 (205,227 vs 205,111). Estimate: KAO does not publish fuel type by brand. National BEV, PHEV (including range extenders) and hybrid totals come from the country page; they were allocated to brands using KAO\'s January-August 2026 brand rankings of new-energy and conventional hybrid cars (BYD, Geely Galaxy, Li Auto, Zeekr, ROX for BEV/PHEV; Toyota, Lexus, Porsche for hybrids) and brand profiles for the remainder. All other cars are shown as petrol because the country page does not split petrol and diesel. For 2022-2023 no fuel split is available (all petrol); for 2024-2025 the country page\'s new-energy total is shown as PHEV and most of it is assigned to BYD, whose 2025 sales were all new-energy. Fuel columns are indicative only.',
-  Uruguay: 'source: ACAU (Asociación del Comercio Automotor del Uruguay) monthly sales by brand as republished by Autoblog Uruguay (autoblog.com.uy, \'Ventas: <mes>\' posts and the December-and-totals posts for 2022-2025). Brand rows are the ACAU \'Automóviles\' plus \'SUVs/CUVs\' columns (the passenger-car basis of the country page); the \'VUs/Minibuses\' (light commercial) column is excluded. Monthly January-September 2026; full years 2022-2025 (brand-level only) and 2026 yearly = January-August (to match the country page). Brand totals match the country page within 0.1% (March 2026 4,760 vs 4,752, May 4,828 vs 4,833); the country page\'s August 2026 total (6,781) is higher than ACAU\'s passenger total (5,144), so August uses ACAU\'s figure. Fiat includes Abarth. Estimate: ACAU does not publish fuel type. Fuel by brand is inferred from the model names ACAU lists (EV, PHEV/DM-i/SHS, Hybrid/HEV names; Suzuki mild-hybrid \'Hybrid\' models are scaled down so the national hybrid total is respected) and the remainder is allocated with brand profiles, scaled to the country page\'s national BEV/PHEV/hybrid/petrol/diesel totals for each month (August and September use July\'s national mix). 2022 has no national fuel split, so it is shown as petrol. Fuel columns are indicative.',
+  Uruguay: 'source: ACAU (Asociación del Comercio Automotor del Uruguay) monthly sales by brand as republished by Autoblog Uruguay (autoblog.com.uy, \'Ventas: <mes>\' posts and the December-and-totals posts for 2022-2025). Brand rows are the ACAU \'Automóviles\' plus \'SUVs/CUVs\' columns (the passenger-car basis of the country page); the \'VUs/Minibuses\' (light commercial) column is excluded. Monthly January-September 2026; full years 2022-2025 (brand-level only) and 2026 yearly = January-August (to match the country page). Brand totals match the country page within 0.1% (March 2026 4,760 vs 4,752, May 4,828 vs 4,833); the country page\'s August 2026 total was corrected from 6,781 to ACAU\'s passenger total of 5,144. Fiat includes Abarth. Estimate: ACAU does not publish fuel type. Fuel by brand is inferred from the model names ACAU lists (EV, PHEV/DM-i/SHS, Hybrid/HEV names; Suzuki mild-hybrid \'Hybrid\' models are scaled down so the national hybrid total is respected) and the remainder is allocated with brand profiles, scaled to the country page\'s national BEV/PHEV/hybrid/petrol/diesel totals for each month (August and September use July\'s national mix). 2022 has no national fuel split, so it is shown as petrol. Fuel columns are indicative.',
   Finland: 'source: Traficom (Finnish Transport and Communications Agency) open data for vehicles, register snapshot of 30 June 2026 (opendata.traficom.fi, Ajoneuvorekisteri). Passenger cars (class M1) counted by month of first registration in Finland, keeping cars whose first-use date is at most 12 months before the Finnish registration (new cars, including demo and stock cars; older used imports are excluded). Monthly January-June 2026 (the snapshot ends 30 June) and full years 2020-2025; 2026 yearly = January-June. The register only holds cars still registered, so earlier years are slightly undercounted (about 2% for 2025 and 2026, up to about 9% for 2020-2021): every period was scaled up proportionally so brand totals equal the country page totals. Fuel comes from the register (electric, plug-in hybrid = hybrid flag with external charging, other hybrid, petrol, diesel, other) and was adjusted proportionally so each period matches the country page\'s national fuel totals. Campers, motor-homes and rare makes are grouped as Other (unclassified).',
   Peru: 'source: AAP (Asociación Automotriz del Perú) monthly \'Informe del Sector Automotor\' (aap.org.pe, from SUNARP registrations): light-vehicle sales by brand. The reports give year-to-date brand totals only for the 24 largest brands, so monthly January-August 2026 brand units are differences between consecutive reports (a brand newly entering the top list is estimated from its share), yearly 2026 = January-August, and 2024-2025 come from the December 2025 report. Brands outside the top list are grouped in Other (unclassified), which also holds heavy vehicles (trucks, buses), because the country page total is light plus heavy and AAP gives heavy vehicles by brand separately. Brand totals equal the country page totals. Preliminary AAP figures are revised in later reports, so monthly brand units can be off by a few percent. Estimate: fuel by brand is not published monthly. National BEV, PHEV and hybrid (hybrid includes mild hybrids, as on the country page) totals were allocated using AAP\'s January-August 2026 technology table by brand (BYD, Volvo, Dongfeng for BEV; BYD, Changan, Geely, Volvo for PHEV; Toyota, Suzuki, Ford for hybrids); 2024-2025 use brand profiles only. Everything else is shown as petrol (diesel is not split on the country page).',
   Ecuador: 'source: AEADE (Asociación de Empresas Automotrices del Ecuador) monthly sales bulletins (aeade.net, \'Boletines de prensa: venta de vehículos\'; data from SRI): all new vehicles (cars, SUVs, pick-ups, vans, buses and trucks) as on the country page. Top-20 brands per month plus Other (unclassified) = all other brands. Monthly January-September 2026, yearly 2024, 2025 and 2026 (January-September). Totals equal the country page for January-July; AEADE\'s own August and September bulletins are used for August (petrol/diesel split differs from the country page\'s estimate) and September. Fuel: AEADE publishes exact national BEV, hybrid (HEV and PHEV together, shown as hybrid), petrol and diesel totals each month; the split by brand is estimated: BEV and hybrid units follow AEADE\'s cumulative top-20 electric and hybrid model lists by brand (January-September 2026 shares applied to every month), the rest is allocated with brand profiles and scaled to the national fuel totals. Brand fuel columns are indicative.',
