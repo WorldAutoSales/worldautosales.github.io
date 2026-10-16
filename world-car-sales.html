@@ -82,7 +82,7 @@
             <button type="button" class="mode-btn" data-mode="share">% of sales</button>
           </div>
         </div>
-        <p class="note">Worldwide light-duty (passenger car and light commercial) sales by powertrain, 2010–2025, from the IEA Global EV Data Explorer. "ICE &amp; hybrids" is every light vehicle that cannot be plugged in — petrol, diesel, LPG/CNG and conventional (non-plug-in) hybrids. No country split.</p>
+        <p class="note">Worldwide light-duty (passenger car and light commercial) sales by powertrain, 2000–2025. 2010–2025 are the IEA Global EV Data Explorer's figures; 2000–2009 (lighter bars) are estimated totals with BEV and PHEV too small to measure — about 30,000 plug-ins on the road at the end of 2009 — so they are shown as zero. "ICE &amp; hybrids" is every light vehicle that cannot be plugged in — petrol, diesel, LPG/CNG and conventional (non-plug-in) hybrids. No country split.</p>
         <div class="chart-legend" id="legend-b"></div>
         <svg class="chart" id="svg-b" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
         <div class="tooltip" id="tip-b"></div>
@@ -113,7 +113,7 @@
           <li><strong>11A sales, 2010–2025.</strong> IEA Global EV Data Explorer (Global EV Outlook 2026), read through Our World in Data: electric plus non-electric car sales. 2025 values are IEA estimates (84.8 million).</li>
           <li><strong>11A sales, 2000–2009 (estimate).</strong> No free worldwide light-vehicle sales series exists for these years. I scaled OICA passenger-car sales (2005–2009) and US Bureau of Transportation Statistics passenger-car production (2000–2004, production used as a sales proxy) by the light-vehicle/passenger-car ratio observed in 2010–2024 (IEA ÷ OICA) extrapolated backwards — 1.07 in 2000 rising to 1.23 in 2024. Treat these ten years as ±5%.</li>
           <li><strong>Why not earlier than 2000?</strong> Earlier worldwide series (Ward's, OICA) only count all motor vehicles or only passenger cars, not light vehicles, and I did not want to invent a heavy-vehicle share. The earlier all-vehicle and passenger-car charts were removed from this page for that reason.</li>
-          <li><strong>11B.</strong> IEA Global EV Data Explorer via Our World in Data: light-vehicle sales (electric + non-electric), electric sales (BEV + PHEV) and the BEV share of electric sales. "ICE &amp; hybrids" is every light vehicle that cannot be plugged in — petrol, diesel, LPG/CNG and conventional (non-plug-in) hybrids; the IEA does not publish a global hybrid (HEV) sales series, so HEV can't be split out. 2025 values are IEA estimates.</li>
+          <li><strong>11B.</strong> 2010–2025: IEA Global EV Data Explorer via Our World in Data: light-vehicle sales (electric + non-electric), electric sales (BEV + PHEV) and the BEV share of electric sales. "ICE &amp; hybrids" is every light vehicle that cannot be plugged in — petrol, diesel, LPG/CNG and conventional (non-plug-in) hybrids; the IEA does not publish a global hybrid (HEV) sales series, so HEV can't be split out. 2025 values are IEA estimates. 2000–2009: totals are the estimates described under 11A; no worldwide BEV or PHEV sales series exists before 2010 (the IEA's starts then), and the plug-in fleet at the end of 2009 was only about 30,000 vehicles, so BEV and PHEV are shown as zero, not measured.</li>
           <li><strong>11C method.</strong> Fleet<sub>t</sub> = Fleet<sub>t−1</sub> × (1 − s<sub>t</sub>) + Sales<sub>t</sub>, with the scrappage rate s falling linearly from 4.5% (2000) to 3.3% (2025) and the 2000 starting fleet (631 million) fitted — together — by least squares to the total fleet the IEA implies for 2010–2024 (IEA electric stock ÷ IEA electric share of stock). Fit error against those 15 anchor years is within about ±3%. Sales for 2000–2009 are the estimates above, so the early years are the least certain. The IEA-implied totals are shown as dots; the IEA's own 2025 total is not used because its 2025 stock share is rounded to a whole percent (5%).</li>
           <li><strong>11C electric part.</strong> BEV and PHEV stocks are cumulative IEA sales with a constant 1.5% yearly loss, the value that best reproduces the IEA's measured global electric-car stock (76 million at end-2025 per GEVO 2026; model: 77 million, within ±3% in every year 2014–2025; the very small 2011–2013 stocks differ by up to 10%). BEV/PHEV before 2010 are negligible (~30,000 vehicles at end-2009) and ICE &amp; hybrids is the rest of the fleet, so it includes conventional hybrids. Heavy trucks, buses and two/three-wheelers are not in the fleet — OICA's wider "vehicles in use" count is considerably larger.</li>
           <li>Rounding: values are shown in millions of vehicles; hover the charts for exact figures.</li>
@@ -236,15 +236,16 @@ function drawB(mode){
     g.selectAll('.b-'+layer.key).data(layer).join('rect')
       .attr('x',d=>x(d.data.y)).attr('width',x.bandwidth())
       .attr('y',d=>y(d[1])).attr('height',d=>Math.max(0,y(d[0])-y(d[1])))
-      .attr('fill',COL[layer.key]);
+      .attr('fill',COL[layer.key]).attr('opacity', d => d.data._raw.est ? 0.55 : 1);
   });
   g.append('rect').attr('width',iw).attr('height',ih).attr('fill','transparent')
     .on('pointermove', e => {
       const i = Math.max(0, Math.min(years.length-1, Math.floor(d3.pointer(e)[0] / (iw/years.length))));
       const r = rows[i];
       showTip('b',e,`<strong>${r.y}</strong><br>Total: <strong>${fmtM(r.total)}</strong>` +
+        (r.est ? `<br>ICE &amp; hybrids: <strong>${fmtM(r.ice)}</strong><br><span style="opacity:.75">estimated total; BEV/PHEV negligible, not measured</span>` :
         [['bev','Battery electric (BEV)'],['phev','Plug-in hybrid (PHEV)'],['ice','ICE &amp; hybrids']].map(([k,l]) =>
-          `<br>${l}: <strong>${fmtM(r[k])}</strong> (${(r[k]/r.total*100).toFixed(1)}%)`).join(''));
+          `<br>${l}: <strong>${fmtM(r[k])}</strong> (${(r[k]/r.total*100).toFixed(1)}%)`).join('')));
     })
     .on('pointerleave', () => hideTip('b'));
   legend('b', [[COL.bev,'Battery electric (BEV)'],[COL.phev,'Plug-in hybrid (PHEV)'],[COL.ice,'ICE &amp; hybrids (non-plug-in)']]);
