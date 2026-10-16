@@ -3819,13 +3819,14 @@ const barChartCard = chartCards[1];
 let barMode = 'pct'; // 'pct' or 'raw'
 let barSortKey = 'bevPct'; // 'bevPct' | 'icePct' | 'bev' | 'total' | 'bevYoyPct' | 'threeYrPct'
 
-function segHTML(d, key, denom, widthDenom){
+function segHTML(d, key, denom, widthDenom, mode = barMode){
   const units = d[key];
   if(units <= 0 || denom <= 0) return '';
   const pct = units / denom * 100; // always the true share, used for the tooltip
   const width = units / widthDenom * 100; // bar geometry: 100%-stacked in pct mode, scaled-to-max in raw mode
   const showLabel = width >= 7;
-  const labelText = barMode === 'raw' ? units.toLocaleString('en-US') : pct.toFixed(0) + '%';
+  // `mode` is each chart's own display mode (country bars default to barMode; the continent chart passes continentBarMode)
+  const labelText = mode === 'raw' ? units.toLocaleString('en-US') : pct.toFixed(0) + '%';
   return `<div class="bar-seg" style="width:${width}%; background:${FUEL_COLORS[key]}" data-country="${d.country}" data-key="${key}" data-units="${units}" data-pct="${pct.toFixed(1)}">${showLabel ? `<span class="seg-label">${labelText}</span>` : ''}</div>`;
 }
 
@@ -3987,7 +3988,7 @@ function renderContinentBars(){
       <div class="country-label">${d.country}</div>
       <span class="bev-outside-label" style="color:${FUEL_COLORS.bev}">${bevNarrow ? `BEV ${bevOutsideText}` : ''}</span>
       <div class="bar-track">
-        ${fuels.map(k => segHTML(d,k,denom,widthDenom)).join('')}
+        ${fuels.map(k => segHTML(d,k,denom,widthDenom,continentBarMode)).join('')}
       </div>
       <div class="pct-label ${yoyClass}" title="BEV vs. same period last year">${yoyText}</div>
       <div class="pct-label ${y3Class}" title="BEV vs. 2023 (full year)">${y3Text}</div>
