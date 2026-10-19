@@ -207,11 +207,12 @@ HEADER = """// On-road passenger-car fleet estimates (BEV vs non-BEV), by countr
 //   REAL                 = real observed passenger-car fleet: Eurostat road_eqs_carage / road_eqs_carpda
 //                          (22 European countries, 2013-2025), DfT VEH1111 (Great Britain 2005-2025), or an
 //                          official/industry fleet count (Japan MLIT/JAMA, United States S&P Global Mobility,
-//                          Mexico IDF, Brazil Sindipecas, Russia Autostat-derived) for the listed years.
+//                          Mexico IDF, Brazil Sindipecas, Canada StatCan, Australia BITRE, India MoRTH, China MPS 2018
+//                          floor, Russia Autostat-derived) for the listed years.
 //   MODEL_ANCHORED_BACK  = survival-curve model scaled to the real fleet, for years before/between real anchors.
 //   MODEL_ANCHORED       = same, after the last real anchor up to 2026 (real/model ratio trend extrapolated).
-//   MODEL_RAW            = pure survival-curve model (no real fleet count found): China, India, Korea, Canada,
-//                          Australia and the smaller markets. Includes estimated pre-2005 cohorts.
+//   MODEL_RAW            = pure survival-curve model (no real fleet count found): South Korea and the smaller
+//                          markets (China only has a 2018 floor anchor). Includes estimated pre-2005 cohorts.
 //   MODEL_STOCK_CONSTANT_WITH_FUTURE_REG = 2027-2041 projection: total fleet held at its 2026 level, new
 //                          registrations replace vehicles ageing out, BEV share follows a dampened logistic trend.
 // Survival curves (table cars_duration_rate): country-specific where real statistics exist (Germany KBA,

@@ -4,5 +4,9 @@
  "Brazil": "Sindipecas/Abipecas Relatorio da Frota Circulante: light vehicles 38.4M in 2023",
  "Japan": "MLIT via Statista: passenger cars in use 61.95M (Mar-2023), 61.87M (Mar-2022); JAMA 62.14M (2019), 58.3M (2010); includes kei cars",
  "Russian Federation": "Derived: Autostat 3.43M Chinese-made cars = 7.2% of passenger-car fleet (July 2026) -> about 47.6M",
- "Europe (22 countries)": "Eurostat road_eqs_carage / road_eqs_carpda (passenger cars, total and electricity), 2013-2025; United Kingdom 2005-2025 from DfT VEH1111 (Great Britain)"
+ "Europe (22 countries)": "Eurostat road_eqs_carage / road_eqs_carpda (passenger cars, total and electricity), 2013-2025; United Kingdom 2005-2025 from DfT VEH1111 (Great Britain)",
+ "Canada": "Statistics Canada Table 23-10-0308-01 / The Daily 2025-10-17: light-duty vehicles registered 24.6M in 2024, +4.2% (almost +1M) vs 2023 (2023 = 23.6M derived)",
+ "India": "MoRTH Road Transport Year Book via CEIC: registered cars, jeeps and taxis 46.2M (2021), 49.05M (2022); registered, not net of unreported scrapping",
+ "China": "MPS via China Daily (2019): small passenger cars first exceeded 200M at end-2018 (floor). MPS end-2025: 366M automobiles incl. trucks/buses (passenger share not published in sources found); NEV 43.97M",
+ "Australia": "BITRE Road vehicles Australia January 2026 (Table 1/4): passenger vehicles + light commercial vehicles on register at 31 Jan 2024/2025/2026 (used as end of 2023/2024/2025): 19.77M / 20.27M / 20.69M; BEV/FCEV 160k / 249k / 356k"
 }
