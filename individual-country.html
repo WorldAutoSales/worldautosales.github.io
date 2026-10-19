@@ -270,7 +270,7 @@
 
         <div class="card chart-card hidden" id="cars-on-road-card">
           <h2>Non-BEV Cars on the Road</h2>
-          <p class="note" id="cars-on-road-note">Estimated non-battery-electric fleet (petrol, diesel, hybrid combined), 2018–2041 — built by aging every year's new registrations with a survival curve and anchoring to real observed fleet-by-fuel data where it exists. Solid = observed or estimated from real fleet data. Dashed (2027 onward) = projected: the total on-road fleet (BEV + non-BEV) is held constant at its last real/projected year's level — each year's new registrations are sized to exactly replace vehicles aging out, split between BEV and non-BEV by a continuation of this country's recent BEV-share growth trend (dampened over time, and grounded in a comparable market's real trend where this country's own recent data is too thin to trust) — this is a trend continuation, not a guaranteed outcome.</p>
+          <p class="note" id="cars-on-road-note">Estimated non-battery-electric fleet (petrol, diesel, hybrid combined), 2018–2041, beside the BEV fleet. Years marked as real use official or industry fleet counts (Eurostat/DfT for Europe, plus Japan, the United States, Mexico, Brazil and Russia); other years are a model that ages every year's new registrations with a survival curve — the country's own curve where real cohort statistics exist (Germany, Norway, UK, Netherlands, Japan, China, US) and otherwise its region's average — scaled to the real counts. Countries with no real fleet count are pure model estimates (typical error ±20%). Solid = observed or modelled history through 2026. Dashed (2027 onward) = projected: the total on-road fleet (BEV + non-BEV) is held constant at its 2026 level, each year's new registrations are sized to exactly replace vehicles aging out, and they are split between BEV and non-BEV by a continuation of this country's recent BEV-share growth trend (dampened over time, and borrowed from a comparable market's trend where this country's own base is too small to trust) — a trend continuation, not a guaranteed outcome.</p>
           <div class="chart-legend" id="cars-on-road-legend"></div>
           <svg class="chart" id="cars-on-road-svg" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
           <div class="tooltip" id="cars-on-road-tooltip"></div>
@@ -2907,7 +2907,7 @@ function renderElectrificationBars(){
 }
 
 // Non-BEV on-road fleet (2018-2041): only meaningful once a single country is focused, and only
-// for countries with a real survival-curve model in CARS_ON_ROAD (currently Germany, Norway) --
+// for the 50 countries in CARS_ON_ROAD (real fleet counts where found, otherwise a survival-curve model) --
 // renderCarsOnRoadChart itself hides the card and bails out when that data doesn't exist, so the
 // wrapper only needs to handle the "no country focused at all" case.
 function renderCarsOnRoad(){
@@ -2982,7 +2982,7 @@ function renderCarsOnRoadChart(country){
 
   const line = d3.line().x(d => xScale(d.year)).y(d => yScale(d.nonBev));
   const bevLine = d3.line().x(d => xScale(d.year)).y(d => yScale(d.nonBev + d.bev));
-  const lastRealIdx = series.reduce((acc, d, idx) => d.method === 'REAL' ? idx : acc, -1);
+  const lastRealIdx = series.reduce((acc, d, idx) => d.method !== 'MODEL_STOCK_CONSTANT_WITH_FUTURE_REG' ? idx : acc, -1);
   const solidPart = series.slice(0, lastRealIdx + 1);
   const dashedPart = series.slice(Math.max(lastRealIdx, 0));
   if(solidPart.length > 1){
@@ -3018,9 +3018,11 @@ function renderCarsOnRoadChart(country){
       tooltip.style.top = (e.clientY - rect.top - 10) + 'px';
       tooltip.style.opacity = 1;
       const methodLabel = {
-        REAL: 'Observed / estimated from real fleet data',
-        MODEL_ANCHORED: 'Projected (no new registrations assumed yet)',
-        MODEL_STOCK_CONSTANT_WITH_FUTURE_REG: 'Projected (total on-road fleet held constant at its real anchor-year level)'
+        REAL: 'Real fleet count (Eurostat / DfT / official or industry source)',
+        MODEL_ANCHORED_BACK: 'Model scaled to real fleet counts (before / between real years)',
+        MODEL_ANCHORED: 'Model scaled to the latest real fleet count',
+        MODEL_RAW: 'Model estimate (no real fleet count found)',
+        MODEL_STOCK_CONSTANT_WITH_FUTURE_REG: 'Projected (total on-road fleet held constant at its 2026 level)'
       }[d.method] || d.method;
       const dTotal = d.nonBev + d.bev;
       tooltip.innerHTML = `<strong>${d.year}</strong><br>Non-BEV: <strong>${Math.round(d.nonBev).toLocaleString('en-US')}</strong> (${(d.nonBev/dTotal*100).toFixed(1)}%)` +

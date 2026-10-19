@@ -1,0 +1,8 @@
+{
+ "Mexico": "IDF (Integrate Data Facts) Vehicles in Operation, light vehicles, press release 2026-02-05: 34.0M (2024), 35.0M (2025)",
+ "United States": "S&P Global Mobility vehicles in operation, light vehicles, 289M in 2025 (+3M vs 2024), May 2025 release; scrappage rate 4.5%",
+ "Brazil": "Sindipecas/Abipecas Relatorio da Frota Circulante: light vehicles 38.4M in 2023",
+ "Japan": "MLIT via Statista: passenger cars in use 61.95M (Mar-2023), 61.87M (Mar-2022); JAMA 62.14M (2019), 58.3M (2010); includes kei cars",
+ "Russian Federation": "Derived: Autostat 3.43M Chinese-made cars = 7.2% of passenger-car fleet (July 2026) -> about 47.6M",
+ "Europe (22 countries)": "Eurostat road_eqs_carage / road_eqs_carpda (passenger cars, total and electricity), 2013-2025; United Kingdom 2005-2025 from DfT VEH1111 (Great Britain)"
+}
