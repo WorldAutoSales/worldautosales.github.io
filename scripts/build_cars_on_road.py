@@ -121,7 +121,8 @@ def own_rate(tot, bev, T):
     return (math.log(odds(s0)) - math.log(odds(s1))) / (T - 2024), s0
 
 
-def build():
+def build(first_model=FIRST):
+    fm = first_model
     prep = {}
     for c in CURVE_KEY:
         tot, bev, T, g_back, filled = registrations(c)
@@ -132,8 +133,8 @@ def build():
     for c in CURVE_KEY:
         p = prep[c]; tot, bev, T = p['tot'], p['bev'], p['T']
         key = CURVE_KEY[c]; S = survival(CURVES[key])
-        mod = model(tot, bev, S, range(FIRST, T + 1))
-        anc = {int(y): v for y, v in ANCH.get(c, {}).items() if FIRST <= int(y) <= T}
+        mod = model(tot, bev, S, range(fm, T + 1))
+        anc = {int(y): v for y, v in ANCH.get(c, {}).items() if fm <= int(y) <= T}
         res = {}
         if anc:
             fy, ly = min(anc), max(anc)
@@ -148,7 +149,7 @@ def build():
                 slope = sum((y - mx) * (v - my) for y, v in pts) / sum((y - mx) ** 2 for y, _ in pts)
             def f_at(t):
                 return min(max(f_last + slope * (t - ly), 0.94 * f_last), 1.06 * f_last) if t > ly else f_last
-            for t in range(FIRST, T + 1):
+            for t in range(fm, T + 1):
                 b, n = mod[t]
                 if t in anc:
                     a = anc[t]
@@ -166,7 +167,7 @@ def build():
                     res[t] = (bb, (b + n) * ft - bb, 'MODEL_ANCHORED')
             F, Fb = f_at(T), fb_last
         else:
-            for t in range(FIRST, T + 1): res[t] = (mod[t][0], mod[t][1], 'MODEL_RAW')
+            for t in range(fm, T + 1): res[t] = (mod[t][0], mod[t][1], 'MODEL_RAW')
             F, Fb = 1.0, 1.0
         total_T = res[T][0] + res[T][1]
         g_own, s0 = p['g_own'], p['s0']
