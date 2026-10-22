@@ -3,9 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Manufacturers — World Auto Sales</title>
+<title>Manufacturers — Who Sells What, Country by Country</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
 <link rel="stylesheet" href="assets/styles.css">
+<style>
+  .mfr-filters{ display:flex; flex-wrap:wrap; gap:18px; align-items:flex-end; margin:4px 0 14px; }
+  .mfr-filters label{ display:flex; flex-direction:column; gap:4px; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); }
+  .mfr-filters select{ margin-bottom:0; min-width:170px; font-size:13.5px; padding:7px 10px; text-transform:none; letter-spacing:0; font-weight:600; }
+  .mfr-filters .chart-mode-toggle{ align-self:flex-end; }
+  .mfr-modal{
+    position:absolute; z-index:20; pointer-events:none; opacity:0; transition:opacity .08s ease;
+    width:340px; max-width:92%; box-sizing:border-box;
+    background:var(--surface); color:var(--text); border:1px solid var(--border);
+    border-radius:12px; box-shadow:0 8px 28px rgba(0,0,0,.28); padding:12px 14px 10px;
+    font-size:12.5px; line-height:1.4;
+  }
+  .mfr-modal h3{ margin:0 0 2px; font-size:15px; }
+  .mfr-modal .sub{ color:var(--text-muted); font-size:11.5px; margin-bottom:8px; }
+  .mfr-row{ display:grid; grid-template-columns:18px 104px 1fr 54px; gap:6px; align-items:center; padding:2px 0; }
+  .mfr-row.sel{ background:color-mix(in srgb, var(--accent) 16%, transparent); border-radius:4px; font-weight:700; }
+  .mfr-row .rk{ color:var(--text-muted); font-size:11px; text-align:right; }
+  .mfr-row .nm{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mfr-row .bar{ display:flex; height:12px; background:var(--surface-alt); border-radius:3px; overflow:hidden; }
+  .mfr-row .bar i{ display:block; height:100%; }
+  .mfr-row .val{ text-align:right; font-family:ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace; font-size:11.5px; font-variant-numeric:tabular-nums; }
+  .mfr-modal .foot{ margin-top:7px; padding-top:6px; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; gap:4px 12px; color:var(--text-muted); font-size:11px; }
+  .mfr-modal .foot b{ color:var(--text); font-weight:700; }
+  .sw{ display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:4px; vertical-align:-1px; }
+  .country.mk{ stroke:var(--text); stroke-width:.6; }
+  .mfr-marker{ stroke:var(--text); stroke-width:.8; cursor:pointer; }
+</style>
 </head>
 <body>
 
@@ -14,7 +41,7 @@
     <a class="sidebar-logo" href="index.html">
       <svg viewBox="0 0 100 100" aria-hidden="true">
         <circle cx="50" cy="50" r="46" fill="var(--surface)" stroke="var(--accent)" stroke-width="4"/>
-        <path d="M20 58 L26 40 C28 35 32 32 38 32 L62 32 C68 32 72 35 74 40 L80 58 L80 66 C80 69 78 71 75 71 L71 71 C68 71 66 69 66 66 L66 64 L34 64 L34 66 C34 69 32 71 29 71 L25 71 C22 71 20 69 20 66 Z" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M20 58 L26 40 C28 35 32 32 38 32 L62 32 C68 32 72 35 74 40 L80 58 L80 66 C80 69 78 71 75 71 L71 71 C68 71 66 69 66 66 L66 64 L34 64 L34 66 C34 69 32 71 29 71 L25 71 C22 71 20 69 20 66 Z" fill="none" stroke="var(--text)" stroke-width="3" stroke-linejoin="round"/>
         <circle cx="32" cy="64" r="6" fill="var(--text)"/>
         <circle cx="68" cy="64" r="6" fill="var(--text)"/>
         <line x1="30" y1="45" x2="70" y2="45" stroke="var(--accent)" stroke-width="3" opacity="0.5"/>
@@ -34,7 +61,6 @@
 
       <div class="nav-heading">Powertrain</div>
       <a href="powertrain-mix-by-country.html"><span class="dot"></span>Mix by Country</a>
-      <a href="individual-country.html"><span class="dot"></span>Individual Country</a>
 
       <div class="nav-heading">Markets</div>
       <a href="auto-markets-by-country.html"><span class="dot"></span>Auto Markets by Country</a>
@@ -43,7 +69,7 @@
       <a href="biggest-movers.html"><span class="dot"></span>Biggest Movers</a>
 
       <div class="nav-heading">Manufacturers</div>
-      <a href="manufacturers.html" aria-current="page"><span class="dot"></span>Sales by Brand</a>
+      <a href="manufacturers.html" aria-current="page"><span class="dot"></span>Manufacturers</a>
 
       <div class="nav-heading">Trends<span class="soon-pill">Soon</span></div>
     </nav>
@@ -56,558 +82,286 @@
   <main class="main">
     <div class="page">
       <header class="page-header">
-        <div class="eyebrow">World Auto Sales · Manufacturers</div>
-        <h1>Sales by Manufacturers</h1>
-        <p class="subtitle">New car registrations by brand, and how much of each brand's volume is already battery-electric. This is a new, much smaller dimension than the country-level pages — real per-brand powertrain splits are only publicly available for a couple of markets so far, so this page starts narrow and honest rather than approximate and global.</p>
+        <div class="eyebrow">Manufacturers · Map</div>
+        <h1>Who sells what, country by country</h1>
+        <p class="subtitle">Pick a period and, optionally, one manufacturer. The map shades each country by that manufacturer's sales (or by total market size when "All manufacturers" is selected). Hover a country to see its top 10 manufacturers for the period, split into BEV, PHEV and HEV + ICE + Diesel.</p>
       </header>
 
-      <section class="card chart-card">
-        <div class="chart-header-row">
-          <h2>Germany — full Petrol/Diesel/BEV/PHEV/HEV split by brand</h2>
+      <div class="card chart-card">
+        <div class="mfr-filters">
+          <label>Period
+            <select id="f-period" class="filter-search"></select>
+          </label>
+          <label>Manufacturer
+            <select id="f-mfr" class="filter-search"></select>
+          </label>
+          <div class="chart-mode-toggle" role="group" aria-label="Group by">
+            <button type="button" class="mode-btn active" data-group="brand" title="Rank individual brands (Toyota, Lexus, Audi…).">Brand</button>
+            <button type="button" class="mode-btn" data-group="group" title="Roll brands up to their parent group as of the selected period (Volkswagen Group, Stellantis, Toyota Motor…).">Parent group</button>
+          </div>
+          <div class="chart-mode-toggle" role="group" aria-label="Map metric" id="metric-toggle">
+            <button type="button" class="mode-btn active" data-metric="units">Units</button>
+            <button type="button" class="mode-btn" data-metric="share" title="Selected manufacturer's share of each country's total market (needs a manufacturer).">Market share</button>
+          </div>
         </div>
-        <p class="note">Source: Kraftfahrt-Bundesamt (KBA), Germany's federal motor authority — "Neuzulassungen von Personenkraftwagen nach Marken und Modellreihen" (new passenger-car registrations by make and model series). This is the only market in this project with a genuine, complete powertrain split at brand level, so it's the only one where "% of a brand's sales that are BEV" is a real, directly-sourced number rather than an estimate.</p>
-        <div class="mfr-controls">
-          <label for="de-year-select">Year</label>
-          <select id="de-year-select"></select>
-          <span id="de-year-total" class="mfr-year-total"></span>
+        <p class="note" id="map-note"></p>
+        <div class="map-wrap" id="map-wrap">
+          <svg class="map-svg" id="map-svg" viewBox="0 0 940 460" role="img" aria-label="World map shaded by manufacturer sales"></svg>
+          <div class="map-zoom-controls">
+            <button type="button" class="map-zoom-btn" id="zoom-in" title="Zoom in">+</button>
+            <button type="button" class="map-zoom-btn" id="zoom-out" title="Zoom out">−</button>
+            <button type="button" class="map-zoom-btn" id="zoom-reset" title="Reset view">⟲</button>
+          </div>
+          <div class="mfr-modal" id="mfr-modal"></div>
         </div>
-        <div class="rank-rows-header">
-          <span class="rrh-spacer"></span>
-          <span class="rrh-total">BEV %</span>
-          <span class="rrh-total">Total</span>
-        </div>
-        <div class="rank-rows" id="de-rank-rows"></div>
-        <div class="tooltip" id="de-tooltip"></div>
-      </section>
+        <div class="map-legend" id="map-legend"></div>
+      </div>
 
-      <section class="card table-card">
-        <h2>Germany — full brand table</h2>
-        <p class="note">Click a column header to sort. Every brand KBA reports for the selected year, not just the top 20.</p>
-        <div class="table-scroll">
-          <table id="de-table">
-            <thead>
-              <tr>
-                <th data-key="brand" data-type="str">Brand</th>
-                <th data-key="bev" data-type="num">BEV</th>
-                <th data-key="phev" data-type="num">PHEV</th>
-                <th data-key="hev" data-type="num">HEV</th>
-                <th data-key="petrol" data-type="num">Petrol</th>
-                <th data-key="diesel" data-type="num">Diesel</th>
-                <th data-key="total" data-type="num">Total</th>
-                <th data-key="bevPct" data-type="num">BEV %</th>
-              </tr>
-            </thead>
-            <tbody id="de-table-body"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <section class="card chart-card">
-        <div class="chart-header-row">
-          <h2>Toyota Canada (TCI) — total sales &amp; electrification</h2>
-        </div>
-        <p class="note">Source: Toyota Canada Inc. (TCI) Newsroom press releases (media.toyota.ca) — a real total-market figure, unlike the iZEV chart below. TCI only ever reports Toyota+Lexus <strong>combined</strong>, never Toyota alone. Before 2023, TCI didn't disclose a Zero-Emission Vehicle (ZEV) figure at all, so "Electrified" (green+blue below) is shown as a single HEV bucket even though a small, growing BEV/PHEV share (RAV4 Prime from 2020-21, bZ4X from 2022) is folded in. 2023-2025 separate a combined ZEV (BEV+PHEV+FCEV, shown as the "BEV" segment) from HEV, but still don't split BEV from PHEV. Only 2026 (Jan-Jun, from the Q1/Q2 releases) has genuine separate BEV and PHEV figures.</p>
-        <div class="mfr-controls">
-          <label for="tci-year-select">Year</label>
-          <select id="tci-year-select"></select>
-          <span id="tci-year-note" class="mfr-year-total"></span>
-        </div>
-        <div class="rank-rows-header">
-          <span class="rrh-spacer"></span>
-          <span class="rrh-total">Electrified %</span>
-          <span class="rrh-total">Total</span>
-        </div>
-        <div class="rank-rows" id="tci-rank-rows"></div>
-        <div class="tooltip" id="tci-tooltip"></div>
-      </section>
-
-      <section class="card chart-card">
-        <div class="chart-header-row">
-          <h2>Hyundai &amp; Kia Canada — real sales &amp; BEV</h2>
-        </div>
-        <p class="note">Total = GoodCarBadCar (goodcarbadcar.net), real Canada brand sales, cross-checked against Hyundai/Kia's own newsroom press releases where available. BEV = sum of the model-specific BEV nameplates GCBC tracks for Canada (Hyundai: IONIQ 5 only; Kia: EV6+EV9) — this understates true BEV volume, since Hyundai Kona Electric (mixed nameplate with the gas Kona, can't be isolated from GCBC's combined Kona page) and Hyundai IONIQ 6/IONIQ 9 (no Canada-specific GCBC tracking found) are real BEV sales not captured here. The grey "Rest of lineup" segment is a catch-all (Total minus BEV) — it is not a real petrol-only figure, it also contains HEV, PHEV, and the uncaptured BEV models above. Replaces this project's earlier iZEV-rebate-claims-based figures for these two brands, same reasoning as the Toyota Canada (TCI) chart above.</p>
-        <div class="mfr-controls">
-          <label for="hk-year-select">Year</label>
-          <select id="hk-year-select"></select>
-          <span id="hk-year-note" class="mfr-year-total"></span>
-        </div>
-        <div class="rank-rows-header">
-          <span class="rrh-spacer"></span>
-          <span class="rrh-total">BEV %</span>
-          <span class="rrh-total">Total</span>
-        </div>
-        <div class="rank-rows" id="hk-rank-rows"></div>
-        <div class="tooltip" id="hk-tooltip"></div>
-      </section>
-
-      <section class="card chart-card">
-        <div class="chart-header-row">
-          <h2>GM Canada — real sales &amp; BEV</h2>
-        </div>
-        <p class="note">Chevrolet, Cadillac, Buick and GMC, each shown separately. Total and per-model BEV figures are from GM Authority's (gmauthority.com) quarterly GM Canada sales reports, which reconcile exactly to GM Canada's own official press-release totals (e.g. full-year 2025 = 299,813 units). BEV = sum of every current battery-electric nameplate GM Authority tracks by brand: Chevrolet Bolt EV + Blazer EV + Equinox EV + Silverado EV; Cadillac LYRIQ + OPTIQ + VISTIQ + Escalade IQ/IQL; GMC Hummer EV Pickup/SUV + Sierra EV. Buick has no BEV model on sale in Canada. The grey "Rest of lineup" segment is a catch-all (Total minus BEV) — it is not a real petrol-only figure, it also contains any HEV/PHEV volume (Chevrolet's Volt PHEV, 2019-2021, is tracked separately and folded into this brand's earlier years). Replaces this project's earlier iZEV-rebate-claims-based figures for these four brands, same reasoning as the Toyota Canada (TCI) and Hyundai &amp; Kia charts above.</p>
-        <div class="mfr-controls">
-          <label for="gm-year-select">Year</label>
-          <select id="gm-year-select"></select>
-          <span id="gm-year-note" class="mfr-year-total"></span>
-        </div>
-        <div class="rank-rows-header">
-          <span class="rrh-spacer"></span>
-          <span class="rrh-total">BEV %</span>
-          <span class="rrh-total">Total</span>
-        </div>
-        <div class="rank-rows" id="gm-rank-rows"></div>
-        <div class="tooltip" id="gm-tooltip"></div>
-      </section>
-
-      <section class="card chart-card">
-        <div class="chart-header-row">
-          <h2>Ford &amp; Lincoln Canada — real sales &amp; BEV</h2>
-        </div>
-        <p class="note">Total = GoodCarBadCar (goodcarbadcar.net), cross-checked against Ford of Canada's own newsroom combined total for 2025 (294,418 vs. GCBC's Ford+Lincoln sum of 293,897 — a 99.8% match). BEV = Ford Mustang Mach-E only — the sole cleanly-isolated BEV nameplate found for either brand. This significantly understates real BEV+PHEV volume: Ford's F-150 Lightning and E-Transit (both BEV) and Escape PHEV are only ever reported combined with their gas/hybrid siblings by every source checked, and Lincoln's Corsair Grand Touring and Aviator Grand Touring PHEV trims have the same problem — Lincoln shows 0% here despite having real PHEV sales. Ford's own newsroom reported 2025 "electrified" (BEV+PHEV+HEV) sales of 51,773, of which hybrid alone was 34,895 — implying BEV+PHEV combined of roughly 16,878 brand-wide, nearly double the 8,647 captured here. Replaces this project's earlier iZEV-rebate-claims-based figures for these two brands, same reasoning as the charts above.</p>
-        <div class="mfr-controls">
-          <label for="fl-year-select">Year</label>
-          <select id="fl-year-select"></select>
-          <span id="fl-year-note" class="mfr-year-total"></span>
-        </div>
-        <div class="rank-rows-header">
-          <span class="rrh-spacer"></span>
-          <span class="rrh-total">BEV %</span>
-          <span class="rrh-total">Total</span>
-        </div>
-        <div class="rank-rows" id="fl-rank-rows"></div>
-        <div class="tooltip" id="fl-tooltip"></div>
-      </section>
-
-      <section class="card chart-card">
-        <div class="chart-header-row">
-          <h2>Audi &amp; Porsche Canada — real sales &amp; BEV</h2>
-        </div>
-        <p class="note">Audi Total = GoodCarBadCar, cross-checked against Audi AG's own 2025 global release (Canada "over 37,000 units", matching GCBC's 37,201). Audi BEV = Q6 e-tron + A6 e-tron + e-tron GT only — the original e-tron SUV, Q4 e-tron and Q8 e-tron have no Canada-specific tracking in any source found, so Audi's real BEV volume is meaningfully understated, especially 2019-2023. Porsche Total &amp; BEV (Taycan) = Porsche Cars Canada's own official annual sales-results releases, the most reliable source in this whole series — GoodCarBadCar's Porsche Canada figure runs 4-10% below PCC's own numbers every year, a gap that widens over time, so PCC was used directly instead. Porsche's Cayenne/Panamera E-Hybrid PHEV volume is real but bundled into those models' combined totals, not isolatable. Skoda, Seat and Cupra are not sold in North America. Bentley and Lamborghini are not shown here: neither publishes a usable Canada brand total anywhere (Bentley's own financial reports give only global/Americas-region figures; Lamborghini Canada has confirmed it does not release model or regional sales data), so no defensible total-based chart could be built for either — this is a real gap in what's publicly available, not an oversight.</p>
-        <div class="mfr-controls">
-          <label for="ap-year-select">Year</label>
-          <select id="ap-year-select"></select>
-          <span id="ap-year-note" class="mfr-year-total"></span>
-        </div>
-        <div class="rank-rows-header">
-          <span class="rrh-spacer"></span>
-          <span class="rrh-total">BEV %</span>
-          <span class="rrh-total">Total</span>
-        </div>
-        <div class="rank-rows" id="ap-rank-rows"></div>
-        <div class="tooltip" id="ap-tooltip"></div>
-      </section>
-
-      <section class="card chart-card">
-        <div class="chart-header-row">
-          <h2>Canada — EV registrations by brand</h2>
-        </div>
-        <p class="note">Source: Transport Canada's iZEV incentive program (open.canada.ca) — this counts <strong>rebate claims</strong> for battery-electric and plug-in hybrid vehicles, not total registrations. Canada doesn't publish a free per-brand Petrol/Diesel/HEV breakdown, so there's no total-market denominator here and no "% of sales" figure — this chart ranks brands purely by BEV+PHEV volume, a different kind of measurement than the Germany and Toyota TCI charts above. Toyota/Lexus, Hyundai/Kia, GM's four brands, Ford/Lincoln, and Audi/Porsche are excluded here since their own real sales figures (above) replace this claims-based estimate.</p>
-        <div class="mfr-controls">
-          <label for="ca-year-select">Year</label>
-          <select id="ca-year-select"></select>
-        </div>
-        <div class="rank-rows-header">
-          <span class="rrh-spacer"></span>
-          <span class="rrh-total">BEV+PHEV</span>
-        </div>
-        <div class="rank-rows" id="ca-rank-rows"></div>
-        <div class="tooltip" id="ca-tooltip"></div>
-      </section>
-
-      <section class="card chart-card">
-        <div class="chart-header-row">
-          <h2>BEV by brand — confirmed floor, not exhaustive</h2>
-        </div>
-        <p class="note">These 4 markets (Netherlands, Italy, Ireland, Czechia) publish real per-model unit counts by national registration authority, but <strong>no fuel-type column</strong> — so BEV here is a conservative estimate: a brand's units only count as BEV when the model NAME itself is unambiguous (e.g. Tesla, VW ID.*, Skoda Enyaq/Elroq, Kia EV3/6/9, BMW/Mini i-prefix). Models sold under the <strong>same name</strong> in both a combustion/hybrid AND a battery-electric version (e.g. Hyundai Kona, Kia Niro, Volvo XC40) can't be split this way and are left in "Unclassified" rather than guessed — so the true per-brand BEV share is <strong>higher</strong> than shown here, sometimes substantially. Cross-checked against each country's real official BEV total (ACEA) as a ceiling: this method typically captures 65-82% of it in the Netherlands/Ireland/Czechia, but only 14-32% in Italy for 2023-2025 (its source groups powertrains much more coarsely) rising to 67% by 2026.</p>
-        <div class="mfr-controls">
-          <label for="floor-country-select">Country</label>
-          <select id="floor-country-select">
-            <option value="Netherlands">Netherlands</option>
-            <option value="Ireland">Ireland</option>
-            <option value="Czechia">Czechia</option>
-            <option value="Italy">Italy</option>
-          </select>
-          <label for="floor-year-select" style="margin-left:12px;">Year</label>
-          <select id="floor-year-select"></select>
-          <span id="floor-year-note" class="mfr-year-total"></span>
-        </div>
-        <div class="rank-rows-header">
-          <span class="rrh-spacer"></span>
-          <span class="rrh-total">BEV floor %</span>
-          <span class="rrh-total">Total</span>
-        </div>
-        <div class="rank-rows" id="floor-rank-rows"></div>
-        <div class="tooltip" id="floor-tooltip"></div>
-      </section>
-
-      <footer class="page-footer">
-        Data sourced from the World_auto_sales Supabase project. More markets will be added here as free, official per-brand powertrain data is found for them — see the <a href="powertrain-mix-by-country.html">Mix by Country</a> page for the full country-level picture in the meantime.
-      </footer>
+      <div class="card chart-card">
+        <h2>How to read this page</h2>
+        <p class="note" style="display:block">Coverage: about 50 countries with brand-level data (monthly from January 2025 where available, yearly back to 2008 for the longest series). Countries drawn in beige have no manufacturer breakdown on this site. Where a source publishes no powertrain split for a brand, its sales are counted as HEV + ICE + Diesel (and a few countries publish totals only). Yearly periods use each country's yearly series; a year that is still running (2026) is year-to-date through the latest month loaded for that country, so countries can end on different months. "Parent group" attributes each brand to its owner as of the selected year (e.g. Volvo and Polestar count under Geely, not Ford, from 2010 onward).</p>
+      </div>
     </div>
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script src="assets/manufacturer-monthly-data.js"></script>
 <script src="assets/manufacturer-yearly-data.js"></script>
+<script src="assets/manufacturer-holdings-data.js"></script>
 <script>
-const FUEL_COLORS = {
-  bev: "#1e8f5f", phev: "#2563eb", hev: "#f4a742",
-  petrol: "#1a1a1a", diesel: "#6b7280"
-};
-const FUEL_LABELS = { bev:"Battery Electric", phev:"Plug-in Hybrid", hev:"Hybrid", petrol:"Petrol", diesel:"Diesel" };
-const MFR_FUEL_KEYS = ['bev','phev','hev','petrol','diesel'];
+(function(){
+const COLORS = { bev:'#1e8f5f', phev:'#e0a21a', other:'#8a8f98' };
+const MAP_NAME_ALIASES = { "United States of America":"United States", "Russia":"Russian Federation", "United Arab Emirates":"UAE", "Macedonia":"North Macedonia" };
+const MARKERS = { "Singapore":[103.82,1.35], "Mauritius":[57.50,-20.16] };
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const fmt = n => Math.round(n).toLocaleString('en-US');
 
-function segHTML(row, key){
-  const units = row[key];
-  if(!(units > 0) || !(row.total > 0)) return '';
-  const pct = units / row.total * 100;
-  const showLabel = pct >= 7;
-  return `<div class="bar-seg" style="width:${pct}%; background:${FUEL_COLORS[key]}" data-brand="${row.brand}" data-key="${key}" data-units="${units}" data-pct="${pct.toFixed(1)}">${showLabel ? `<span class="seg-label">${pct.toFixed(0)}%</span>` : ''}</div>`;
+let groupMode = 'brand', metric = 'units';
+let period = null, mfr = '';
+
+// ---------- data access ----------
+const COUNTRIES = [...new Set([...Object.keys(MANUFACTURER_MONTHLY), ...Object.keys(MANUFACTURER_YEARLY)])].sort();
+const MONTHS = [...new Set(Object.values(MANUFACTURER_MONTHLY).flat().map(r => r.year_month))].sort().reverse();
+const YEARS = [...new Set(Object.values(MANUFACTURER_YEARLY).flat().map(r => r.year))].sort((a, b) => b - a);
+const CUR_YEAR = YEARS[0];
+
+function periodLabel(p){
+  if(p.type === 'year') return p.year === CUR_YEAR ? `${p.year} year-to-date` : String(p.year);
+  const [y, m] = p.ym.split('-').map(Number); return `${MONTH_NAMES[m - 1]} ${y}`;
 }
-function wireTooltip(container, tooltipEl, cardEl){
-  container.addEventListener('pointermove', e => {
-    const seg = e.target.closest('.bar-seg');
-    if(!seg){ tooltipEl.style.opacity = 0; return; }
-    const rect = cardEl.getBoundingClientRect();
-    tooltipEl.style.left = (e.clientX - rect.left) + 'px';
-    tooltipEl.style.top = (e.clientY - rect.top - 10) + 'px';
-    tooltipEl.style.opacity = 1;
-    tooltipEl.innerHTML = `${seg.dataset.brand} — ${FUEL_LABELS[seg.dataset.key]}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)`;
-  });
-  container.addEventListener('pointerleave', () => { tooltipEl.style.opacity = 0; });
+function periodYear(p){ return p.type === 'year' ? p.year : +p.ym.slice(0, 4); }
+
+// brand -> parent group as of a year (holdings: sorted [fromYear, holder] list)
+function holder(brand, year){
+  const arr = MANUFACTURER_HOLDINGS[brand];
+  if(!arr) return brand;
+  let h = null;
+  for(const [y, name] of arr){ if(y <= year) h = name; }
+  return h || arr[0][1];
+}
+function entityOf(brand, year){ return groupMode === 'group' ? holder(brand, year) : brand; }
+
+// rows of a country for the active period: [{brand,bev,phev,hev,petrol,diesel,total}]
+function rowsFor(country, p){
+  if(p.type === 'month') return (MANUFACTURER_MONTHLY[country] || []).filter(r => r.year_month === p.ym);
+  const y = (MANUFACTURER_YEARLY[country] || []).filter(r => r.year === p.year);
+  if(y.length) return y;
+  return (MANUFACTURER_MONTHLY[country] || []).filter(r => +r.year_month.slice(0, 4) === p.year); // monthly-only countries
 }
 
-// --- Germany ---
-(function(){
-  const yearSelect = document.getElementById('de-year-select');
-  const rows = document.getElementById('de-rank-rows');
-  const totalEl = document.getElementById('de-year-total');
-  const tbody = document.getElementById('de-table-body');
-  const data = MANUFACTURER_YEARLY.Germany;
-  const years = [...new Set(data.map(r => r.year))].sort((a,b) => b - a);
-  const latestYear = years[0];
-  yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}${y === latestYear ? ' (YTD)' : ''}</option>`).join('');
-  yearSelect.value = years.includes(2025) ? 2025 : latestYear;
+// aggregate to entities: Map name -> {bev,phev,other,total}
+function aggregate(country, p){
+  const yr = periodYear(p), out = new Map();
+  for(const r of rowsFor(country, p)){
+    const k = entityOf(r.brand, yr);
+    const a = out.get(k) || { name:k, bev:0, phev:0, other:0, total:0 };
+    const bev = r.bev || 0, phev = r.phev || 0;
+    a.bev += bev; a.phev += phev; a.total += r.total || 0;
+    a.other = a.total - a.bev - a.phev;
+    out.set(k, a);
+  }
+  return out;
+}
 
-  let sortKey = 'total', sortDir = -1;
+// ---------- filters ----------
+const selPeriod = document.getElementById('f-period'), selMfr = document.getElementById('f-mfr');
+function buildPeriodSelect(){
+  let h = '<optgroup label="Years">';
+  YEARS.forEach(y => { h += `<option value="y:${y}">${y === CUR_YEAR ? y + ' (year-to-date)' : y}</option>`; });
+  h += '</optgroup><optgroup label="Months">';
+  MONTHS.forEach(m => { h += `<option value="m:${m}">${periodLabel({type:'month', ym:m})}</option>`; });
+  h += '</optgroup>';
+  selPeriod.innerHTML = h;
+  selPeriod.value = `y:${YEARS.includes(2025) ? 2025 : YEARS[0]}`;
+}
+function readPeriod(){
+  const [t, v] = selPeriod.value.split(':');
+  period = t === 'y' ? { type:'year', year:+v } : { type:'month', ym:v };
+}
+function buildMfrSelect(){
+  // every entity with sales in at least one country for the period, ranked by world units in that period
+  const tot = new Map();
+  COUNTRIES.forEach(c => aggregate(c, period).forEach((a, k) => tot.set(k, (tot.get(k) || 0) + a.total)));
+  const names = [...tot.entries()].filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).map(([k]) => k);
+  if(mfr && !tot.has(mfr)) mfr = '';
+  selMfr.innerHTML = '<option value="">All manufacturers</option>' + names.map(n => `<option value="${n.replace(/"/g, '&quot;')}">${n}</option>`).join('');
+  selMfr.value = mfr;
+}
 
-  function currentYearRows(){
-    const year = +yearSelect.value;
-    return data.filter(r => r.year === year).map(r => ({ ...r, bevPct: r.bev / r.total * 100 }));
-  }
-  function renderChart(){
-    const yearRows = currentYearRows();
-    const marketTotal = yearRows.reduce((s,r) => s + r.total, 0);
-    totalEl.textContent = `${marketTotal.toLocaleString('en-US')} total registrations, ${yearRows.length} brands`;
-    const top20 = [...yearRows].sort((a,b) => b.total - a.total).slice(0,20);
-    rows.innerHTML = top20.map(row => `
-      <div class="rank-row" data-brand="${row.brand}">
-        <div class="country-label">${row.brand}</div>
-        <div class="bar-track">
-          ${MFR_FUEL_KEYS.map(k => segHTML(row, k)).join('')}
-        </div>
-        <div class="pct-label" style="color:${FUEL_COLORS.bev}">${row.bevPct.toFixed(1)}%</div>
-        <div class="total-label">${row.total.toLocaleString('en-US')}</div>
-      </div>`).join('');
-  }
-  function renderTable(){
-    const yearRows = [...currentYearRows()].sort((a,b) => {
-      const av = a[sortKey], bv = b[sortKey];
-      if(typeof av === 'string') return sortDir * av.localeCompare(bv);
-      return sortDir * ((av ?? -Infinity) - (bv ?? -Infinity));
-    });
-    tbody.innerHTML = yearRows.map(r => `
-      <tr>
-        <td>${r.brand}</td>
-        <td>${r.bev.toLocaleString('en-US')}</td>
-        <td>${r.phev.toLocaleString('en-US')}</td>
-        <td>${r.hev.toLocaleString('en-US')}</td>
-        <td>${r.petrol.toLocaleString('en-US')}</td>
-        <td>${r.diesel.toLocaleString('en-US')}</td>
-        <td>${r.total.toLocaleString('en-US')}</td>
-        <td>${r.bevPct.toFixed(1)}%</td>
-      </tr>`).join('');
-  }
-  function renderAll(){ renderChart(); renderTable(); }
-  yearSelect.addEventListener('change', renderAll);
-  document.querySelectorAll('#de-table thead th').forEach(th => {
-    th.addEventListener('click', () => {
-      const key = th.dataset.key;
-      sortDir = (sortKey === key) ? -sortDir : (key === 'brand' ? 1 : -1);
-      sortKey = key;
-      document.querySelectorAll('#de-table thead th').forEach(t => t.classList.remove('sorted'));
-      th.classList.add('sorted');
-      renderTable();
-    });
+// ---------- map ----------
+const wrap = document.getElementById('map-wrap');
+const modal = document.getElementById('mfr-modal');
+const svg = d3.select('#map-svg');
+const mapG = svg.append('g');
+const projection = d3.geoNaturalEarth1();
+const path = d3.geoPath(projection);
+let geoFeatures = null;
+const zoom = d3.zoom().scaleExtent([1, 8]).on('zoom', e => mapG.attr('transform', e.transform));
+svg.call(zoom);
+document.getElementById('zoom-in').onclick = () => svg.transition().duration(200).call(zoom.scaleBy, 1.5);
+document.getElementById('zoom-out').onclick = () => svg.transition().duration(200).call(zoom.scaleBy, 1 / 1.5);
+document.getElementById('zoom-reset').onclick = () => svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity);
+
+let byCountry = {};   // country -> {list:[entities sorted], total, sel}
+let colorFn = () => null;
+
+function compute(){
+  byCountry = {};
+  COUNTRIES.forEach(c => {
+    const m = aggregate(c, period);
+    if(!m.size) return;
+    const list = [...m.values()].sort((a, b) => b.total - a.total);
+    const total = list.reduce((s, a) => s + a.total, 0);
+    if(!total) return;
+    const sel = mfr ? m.get(mfr) || null : null;
+    byCountry[c] = { list, total, sel, rank: sel ? list.indexOf(sel) + 1 : null };
   });
-  renderAll();
-  wireTooltip(rows, document.getElementById('de-tooltip'), rows.closest('.card'));
-})();
+}
+function valueOf(c){
+  const d = byCountry[c]; if(!d) return null;
+  if(!mfr) return d.total;
+  const u = d.sel ? d.sel.total : 0;
+  return metric === 'share' ? 100 * u / d.total : u;
+}
 
-// --- Toyota Canada (TCI) ---
-(function(){
-  const yearSelect = document.getElementById('tci-year-select');
-  const rows = document.getElementById('tci-rank-rows');
-  const noteEl = document.getElementById('tci-year-note');
-  const data = MANUFACTURER_YEARLY.Canada.filter(r => r.brand === 'Toyota (TCI: Toyota+Lexus combined)');
-  const years = [...new Set(data.map(r => r.year))].sort((a,b) => b - a);
-  const latestYear = years[0];
-  yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}${y === latestYear ? ' (H1)' : ''}</option>`).join('');
-  yearSelect.value = latestYear;
+function buildScale(){
+  const vals = Object.keys(byCountry).map(valueOf).filter(v => v > 0);
+  const max = d3.max(vals) || 1;
+  const share = mfr && metric === 'share';
+  const interp = d3.interpolateRgb(share ? '#e6d8f5' : '#d4ecdd', share ? '#4b1f86' : '#0d5a3a');
+  // log scale reads better for units (markets span 3 orders of magnitude); linear for share
+  const min = d3.min(vals) || 1;
+  const t = share ? d3.scaleSqrt().domain([0, max]).range([0, 1]) : d3.scaleLog().domain([Math.max(min, 1), max]).range([0.06, 1]).clamp(true);
+  colorFn = v => (v == null ? null : v <= 0 ? 'var(--surface-alt)' : interp(t(v)));
+  return { max, min, interp, t, share };
+}
 
-  const TCI_FUEL_KEYS = ['bev','phev','hev','petrol'];
-  function render(){
-    const year = +yearSelect.value;
-    const row = data.find(r => r.year === year);
-    if(!row) return;
-    const electrifiedPct = (row.bev+row.phev+row.hev) / row.total * 100;
-    noteEl.textContent = year === latestYear ? 'Jan-Jun 2026 only (H1), not a full year' : '';
-    rows.innerHTML = `
-      <div class="rank-row" data-brand="Toyota (TCI)">
-        <div class="country-label">Toyota (TCI)</div>
-        <div class="bar-track">
-          ${TCI_FUEL_KEYS.map(k => segHTML(row, k)).join('')}
-        </div>
-        <div class="pct-label" style="color:${FUEL_COLORS.bev}">${electrifiedPct.toFixed(1)}%</div>
-        <div class="total-label">${row.total.toLocaleString('en-US')}</div>
-      </div>`;
+function fmtVal(v, share){ return share ? v.toFixed(1) + '%' : (v >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : v >= 1e3 ? Math.round(v / 1e3) + 'k' : String(Math.round(v))); }
+
+function renderLegend(sc){
+  const steps = 6, items = [];
+  for(let i = 0; i < steps; i++){
+    const f = i / (steps - 1);
+    const v = sc.share ? sc.t.invert(f) : sc.t.invert(0.06 + f * 0.94);
+    items.push(`<div class="legend-step"><span class="legend-swatch" style="background:${colorFn(Math.max(v, 0.0001))}"></span><span class="legend-num">${fmtVal(v, sc.share)}</span></div>`);
   }
-  yearSelect.addEventListener('change', render);
-  render();
-  wireTooltip(rows, document.getElementById('tci-tooltip'), rows.closest('.card'));
-})();
+  const label = mfr ? (sc.share ? `${mfr} · share of market` : `${mfr} · units sold`) : 'Total market · units';
+  document.getElementById('map-legend').innerHTML =
+    `<span class="legend-label">${label}</span><div class="legend-scale">${items.join('')}</div>` +
+    `<div class="legend-nodata"><span class="legend-swatch" style="background:var(--map-not-researched);border:1px solid var(--border)"></span>No manufacturer data</div>` +
+    (mfr ? `<div class="legend-nodata" style="margin-left:0"><span class="legend-swatch" style="background:var(--surface-alt);border:1px solid var(--border)"></span>${mfr}: no sales in period</div>` : '');
+}
 
-// --- Hyundai & Kia Canada (real sales, replaces iZEV claims for these 2 brands) ---
-(function(){
-  const yearSelect = document.getElementById('hk-year-select');
-  const rows = document.getElementById('hk-rank-rows');
-  const noteEl = document.getElementById('hk-year-note');
-  const data = MANUFACTURER_YEARLY.Canada.filter(r => r.brand === 'Hyundai' || r.brand === 'Kia');
-  const years = [...new Set(data.map(r => r.year))].sort((a,b) => b - a);
-  const latestYear = years[0];
-  yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}${y === latestYear ? ' (Jan-Aug)' : ''}</option>`).join('');
-  yearSelect.value = latestYear;
+function nameOf(d){ return MAP_NAME_ALIASES[d.properties.name] || d.properties.name; }
 
-  const HK_FUEL_KEYS = ['bev','petrol']; // petrol here = "rest of lineup" catch-all, see note above
-  function render(){
-    const year = +yearSelect.value;
-    const yearRows = data.filter(r => r.year === year).sort((a,b) => b.total - a.total);
-    noteEl.textContent = year === latestYear ? 'Jan-Aug 2026 only, not a full year' : '';
-    rows.innerHTML = yearRows.map(row => {
-      const bevPct = row.bev / row.total * 100;
-      return `
-      <div class="rank-row" data-brand="${row.brand}">
-        <div class="country-label">${row.brand}</div>
-        <div class="bar-track">
-          ${HK_FUEL_KEYS.map(k => segHTML(row, k)).join('')}
-        </div>
-        <div class="pct-label" style="color:${FUEL_COLORS.bev}">${bevPct.toFixed(1)}%</div>
-        <div class="total-label">${row.total.toLocaleString('en-US')}</div>
-      </div>`;
-    }).join('');
-  }
-  yearSelect.addEventListener('change', render);
-  render();
-  wireTooltip(rows, document.getElementById('hk-tooltip'), rows.closest('.card'));
-})();
+function renderMap(){
+  if(!geoFeatures) return;
+  compute();
+  const sc = buildScale();
+  renderLegend(sc);
+  mapG.selectAll('path.country').data(geoFeatures).join('path')
+    .attr('class', d => 'country ' + (byCountry[nameOf(d)] ? 'has-data' : 'no-data'))
+    .attr('d', path)
+    .attr('fill', d => { const c = nameOf(d); return byCountry[c] ? colorFn(valueOf(c)) : null; })
+    .on('mousemove', (e, d) => showModal(e, nameOf(d)))
+    .on('mouseleave', hideModal);
+  const mk = Object.entries(MARKERS).filter(([c]) => byCountry[c]);
+  mapG.selectAll('circle.mfr-marker').data(mk, d => d[0]).join('circle')
+    .attr('class', 'mfr-marker').attr('r', 3.2)
+    .attr('cx', d => projection(d[1])[0]).attr('cy', d => projection(d[1])[1])
+    .attr('fill', d => colorFn(valueOf(d[0])))
+    .on('mousemove', (e, d) => showModal(e, d[0])).on('mouseleave', hideModal);
+  const n = Object.keys(byCountry).length;
+  document.getElementById('map-note').textContent =
+    `${periodLabel(period)} · ${n} countries with manufacturer data · ranking by ${groupMode === 'group' ? 'parent group' : 'brand'}` +
+    (mfr ? ` · shading shows ${mfr}${metric === 'share' ? "'s share of each market" : ' units'}` : ' · shading shows total market size') +
+    '. Scroll or use the buttons to zoom, drag to pan.';
+}
 
-// --- GM Canada (real sales, replaces iZEV claims for these 4 brands) ---
-(function(){
-  const yearSelect = document.getElementById('gm-year-select');
-  const rows = document.getElementById('gm-rank-rows');
-  const noteEl = document.getElementById('gm-year-note');
-  const GM_BRANDS = ['Chevrolet', 'Cadillac', 'Buick', 'GMC'];
-  const data = MANUFACTURER_YEARLY.Canada.filter(r => GM_BRANDS.includes(r.brand));
-  const years = [...new Set(data.map(r => r.year))].sort((a,b) => b - a);
-  const latestYear = years[0];
-  yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}${y === latestYear ? ' (Jan-Jun)' : ''}</option>`).join('');
-  yearSelect.value = latestYear;
+// ---------- hover modal ----------
+function rowHTML(rk, a, max, sel){
+  const w = v => (max ? 100 * v / max : 0).toFixed(2) + '%';
+  return `<div class="mfr-row${sel ? ' sel' : ''}"><span class="rk">${rk}</span><span class="nm" title="${a.name}">${a.name}</span>` +
+    `<span class="bar"><i style="width:${w(a.bev)};background:${COLORS.bev}"></i><i style="width:${w(a.phev)};background:${COLORS.phev}"></i><i style="width:${w(a.other)};background:${COLORS.other}"></i></span>` +
+    `<span class="val">${fmt(a.total)}</span></div>`;
+}
+function showModal(e, country){
+  const d = byCountry[country];
+  if(!d){ modal.innerHTML = `<h3>${country}</h3><div class="sub">No manufacturer breakdown for this period.</div>`; place(e); return; }
+  const top = d.list.slice(0, 10), max = top[0].total;
+  let rows = top.map((a, i) => rowHTML(i + 1, a, max, a === d.sel)).join('');
+  if(d.sel && d.rank > 10) rows += `<div style="text-align:center;color:var(--text-muted);line-height:.9">⋮</div>` + rowHTML(d.rank, d.sel, max, true);
+  const sum = k => d.list.reduce((s, a) => s + a[k], 0);
+  const bev = sum('bev'), phev = sum('phev'), other = sum('other');
+  const pc = v => (100 * v / d.total).toFixed(1) + '%';
+  let sub = `${periodLabel(period)} · ${fmt(d.total)} vehicles`;
+  if(mfr) sub += d.sel ? ` · ${mfr}: #${d.rank}, ${(100 * d.sel.total / d.total).toFixed(1)}% share` : ` · ${mfr}: no sales`;
+  modal.innerHTML = `<h3>${country}</h3><div class="sub">${sub}</div>${rows}` +
+    `<div class="foot"><span><i class="sw" style="background:${COLORS.bev}"></i>BEV <b>${pc(bev)}</b></span>` +
+    `<span><i class="sw" style="background:${COLORS.phev}"></i>PHEV <b>${pc(phev)}</b></span>` +
+    `<span><i class="sw" style="background:${COLORS.other}"></i>HEV + ICE + Diesel <b>${pc(other)}</b></span></div>`;
+  place(e);
+}
+function place(e){
+  const r = wrap.getBoundingClientRect();
+  const w = modal.offsetWidth, h = modal.offsetHeight;
+  let x = e.clientX - r.left + 16, y = e.clientY - r.top + 12;
+  if(x + w > r.width) x = e.clientX - r.left - w - 16;
+  x = Math.max(4, Math.min(x, r.width - w - 4));
+  if(y + h > r.height) y = Math.max(4, r.height - h - 4);
+  modal.style.left = x + 'px'; modal.style.top = y + 'px'; modal.style.opacity = 1;
+}
+function hideModal(){ modal.style.opacity = 0; }
 
-  const GM_FUEL_KEYS = ['bev','petrol']; // petrol here = "rest of lineup" catch-all, see note above
-  function render(){
-    const year = +yearSelect.value;
-    const yearRows = data.filter(r => r.year === year).sort((a,b) => b.total - a.total);
-    noteEl.textContent = year === latestYear ? 'Jan-Jun 2026 only (H1), not a full year' : '';
-    rows.innerHTML = yearRows.map(row => {
-      const bevPct = row.bev / row.total * 100;
-      return `
-      <div class="rank-row" data-brand="${row.brand}">
-        <div class="country-label">${row.brand}</div>
-        <div class="bar-track">
-          ${GM_FUEL_KEYS.map(k => segHTML(row, k)).join('')}
-        </div>
-        <div class="pct-label" style="color:${FUEL_COLORS.bev}">${bevPct.toFixed(1)}%</div>
-        <div class="total-label">${row.total.toLocaleString('en-US')}</div>
-      </div>`;
-    }).join('');
-  }
-  yearSelect.addEventListener('change', render);
-  render();
-  wireTooltip(rows, document.getElementById('gm-tooltip'), rows.closest('.card'));
-})();
+// ---------- wiring ----------
+function refresh(rebuildMfr){
+  readPeriod();
+  if(rebuildMfr) buildMfrSelect();
+  mfr = selMfr.value;
+  const shareBtn = document.querySelector('[data-metric="share"]');
+  shareBtn.disabled = !mfr; shareBtn.style.opacity = mfr ? 1 : .45;
+  if(!mfr && metric === 'share'){ metric = 'units'; setActive('#metric-toggle', 'metric', 'units'); }
+  renderMap();
+}
+function setActive(sel, attr, val){ document.querySelectorAll(`${sel} .mode-btn`).forEach(b => b.classList.toggle('active', b.dataset[attr] === val)); }
+selPeriod.onchange = () => refresh(true);
+selMfr.onchange = () => refresh(false);
+document.querySelectorAll('[data-group]').forEach(b => b.onclick = () => { groupMode = b.dataset.group; setActive('.mfr-filters', 'group', groupMode); mfr = ''; refresh(true); });
+document.querySelectorAll('[data-metric]').forEach(b => b.onclick = () => { if(b.disabled) return; metric = b.dataset.metric; setActive('#metric-toggle', 'metric', metric); renderMap(); });
 
-// --- Ford & Lincoln Canada (real sales, replaces iZEV claims for these 2 brands) ---
-(function(){
-  const yearSelect = document.getElementById('fl-year-select');
-  const rows = document.getElementById('fl-rank-rows');
-  const noteEl = document.getElementById('fl-year-note');
-  const data = MANUFACTURER_YEARLY.Canada.filter(r => r.brand === 'Ford' || r.brand === 'Lincoln');
-  const years = [...new Set(data.map(r => r.year))].sort((a,b) => b - a);
-  const latestYear = years[0];
-  yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}${y === latestYear ? ' (Jan-Jun)' : ''}</option>`).join('');
-  yearSelect.value = latestYear;
-
-  const FL_FUEL_KEYS = ['bev','petrol']; // petrol here = "rest of lineup" catch-all, see note above
-  function render(){
-    const year = +yearSelect.value;
-    const yearRows = data.filter(r => r.year === year).sort((a,b) => b.total - a.total);
-    noteEl.textContent = year === latestYear ? 'Jan-Jun 2026 only (H1), not a full year' : '';
-    rows.innerHTML = yearRows.map(row => {
-      const bevPct = row.bev / row.total * 100;
-      return `
-      <div class="rank-row" data-brand="${row.brand}">
-        <div class="country-label">${row.brand}</div>
-        <div class="bar-track">
-          ${FL_FUEL_KEYS.map(k => segHTML(row, k)).join('')}
-        </div>
-        <div class="pct-label" style="color:${FUEL_COLORS.bev}">${bevPct.toFixed(1)}%</div>
-        <div class="total-label">${row.total.toLocaleString('en-US')}</div>
-      </div>`;
-    }).join('');
-  }
-  yearSelect.addEventListener('change', render);
-  render();
-  wireTooltip(rows, document.getElementById('fl-tooltip'), rows.closest('.card'));
-})();
-
-// --- Audi & Porsche Canada (real sales, replaces iZEV claims -- Porsche has no 2026 row yet, PCC reports annually) ---
-(function(){
-  const yearSelect = document.getElementById('ap-year-select');
-  const rows = document.getElementById('ap-rank-rows');
-  const noteEl = document.getElementById('ap-year-note');
-  const data = MANUFACTURER_YEARLY.Canada.filter(r => r.brand === 'Audi' || r.brand === 'Porsche');
-  const years = [...new Set(data.map(r => r.year))].sort((a,b) => b - a);
-  const latestYear = years[0];
-  yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}${y === latestYear ? ' (Jan-Jun, Audi only)' : ''}</option>`).join('');
-  yearSelect.value = latestYear;
-
-  const AP_FUEL_KEYS = ['bev','petrol']; // petrol here = "rest of lineup" catch-all, see note above
-  function render(){
-    const year = +yearSelect.value;
-    const yearRows = data.filter(r => r.year === year).sort((a,b) => b.total - a.total);
-    noteEl.textContent = year === latestYear ? 'Jan-Jun 2026 only (H1); Porsche not yet released for 2026' : '';
-    rows.innerHTML = yearRows.map(row => {
-      const bevPct = row.bev / row.total * 100;
-      return `
-      <div class="rank-row" data-brand="${row.brand}">
-        <div class="country-label">${row.brand}</div>
-        <div class="bar-track">
-          ${AP_FUEL_KEYS.map(k => segHTML(row, k)).join('')}
-        </div>
-        <div class="pct-label" style="color:${FUEL_COLORS.bev}">${bevPct.toFixed(1)}%</div>
-        <div class="total-label">${row.total.toLocaleString('en-US')}</div>
-      </div>`;
-    }).join('');
-  }
-  yearSelect.addEventListener('change', render);
-  render();
-  wireTooltip(rows, document.getElementById('ap-tooltip'), rows.closest('.card'));
-})();
-
-// --- Canada (iZEV, excludes Toyota/Hyundai/Kia/GM's 4 brands/Ford+Lincoln/Audi+Porsche which now have real sales figures above) ---
-(function(){
-  const yearSelect = document.getElementById('ca-year-select');
-  const rows = document.getElementById('ca-rank-rows');
-  const EXCLUDED = ['Toyota (TCI: Toyota+Lexus combined)', 'Hyundai', 'Kia', 'Chevrolet', 'Cadillac', 'Buick', 'GMC', 'Ford', 'Lincoln', 'Audi', 'Porsche'];
-  const data = MANUFACTURER_YEARLY.Canada.filter(r => !EXCLUDED.includes(r.brand));
-  const years = [...new Set(data.map(r => r.year))].sort((a,b) => b - a);
-  yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
-  yearSelect.value = years[0];
-
-  function render(){
-    const year = +yearSelect.value;
-    const yearRows = data.filter(r => r.year === year).map(r => ({ ...r, ev: r.bev + r.phev }));
-    const globalMax = Math.max(1, ...yearRows.map(r => r.ev));
-    const top15 = [...yearRows].sort((a,b) => b.ev - a.ev).slice(0,15);
-    rows.innerHTML = top15.map(row => {
-      const bevWidth = row.ev > 0 ? row.bev / globalMax * 100 : 0;
-      const phevWidth = row.ev > 0 ? row.phev / globalMax * 100 : 0;
-      const segBev = row.bev > 0 ? `<div class="bar-seg" style="width:${bevWidth}%; background:${FUEL_COLORS.bev}" data-brand="${row.brand}" data-key="bev" data-units="${row.bev}" data-pct="${(row.bev/row.ev*100).toFixed(1)}">${bevWidth >= 10 ? `<span class="seg-label">${row.bev.toLocaleString('en-US')}</span>` : ''}</div>` : '';
-      const segPhev = row.phev > 0 ? `<div class="bar-seg" style="width:${phevWidth}%; background:${FUEL_COLORS.phev}" data-brand="${row.brand}" data-key="phev" data-units="${row.phev}" data-pct="${(row.phev/row.ev*100).toFixed(1)}">${phevWidth >= 10 ? `<span class="seg-label">${row.phev.toLocaleString('en-US')}</span>` : ''}</div>` : '';
-      return `
-      <div class="rank-row" data-brand="${row.brand}">
-        <div class="country-label">${row.brand}</div>
-        <div class="bar-track">${segBev}${segPhev}</div>
-        <div class="total-label">${row.ev.toLocaleString('en-US')}</div>
-      </div>`;
-    }).join('');
-  }
-  yearSelect.addEventListener('change', render);
-  render();
-  wireTooltip(rows, document.getElementById('ca-tooltip'), rows.closest('.card'));
-})();
-
-// --- BEV-by-brand confirmed floor (Netherlands / Italy / Ireland / Czechia) ---
-(function(){
-  const countrySelect = document.getElementById('floor-country-select');
-  const yearSelect = document.getElementById('floor-year-select');
-  const noteEl = document.getElementById('floor-year-note');
-  const rows = document.getElementById('floor-rank-rows');
-  const UNCLASSIFIED_COLOR = '#9ca3af';
-
-  function currentData(){
-    return MANUFACTURER_YEARLY[countrySelect.value] || [];
-  }
-  function populateYears(){
-    const years = [...new Set(currentData().map(r => r.year))].sort((a,b) => b - a);
-    yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
-    if(years.length) yearSelect.value = years[0];
-  }
-  function floorSegHTML(brand, key, units, total, color){
-    if(!(units > 0) || !(total > 0)) return '';
-    const pct = units / total * 100;
-    const showLabel = pct >= 8;
-    return `<div class="bar-seg" style="width:${pct}%; background:${color}" data-brand="${brand}" data-key="${key}" data-units="${units}" data-pct="${pct.toFixed(1)}">${showLabel ? `<span class="seg-label">${pct.toFixed(0)}%</span>` : ''}</div>`;
-  }
-  function render(){
-    const year = +yearSelect.value;
-    const yearRows = currentData().filter(r => r.year === year);
-    const top20 = [...yearRows].sort((a,b) => b.total - a.total).slice(0,20);
-    const countryTotal = yearRows.reduce((s,r) => s+r.total, 0);
-    const countryBev = yearRows.reduce((s,r) => s+r.bev, 0);
-    noteEl.textContent = `${countryBev.toLocaleString('en-US')} confirmed BEV of ${countryTotal.toLocaleString('en-US')} total (${(countryBev/countryTotal*100).toFixed(1)}% floor -- real share is higher)`;
-    rows.innerHTML = top20.map(row => {
-      const unclassified = row.total - row.bev;
-      const bevPct = row.bev / row.total * 100;
-      return `
-      <div class="rank-row" data-brand="${row.brand}">
-        <div class="country-label">${row.brand}</div>
-        <div class="bar-track">
-          ${floorSegHTML(row.brand, 'bev', row.bev, row.total, FUEL_COLORS.bev)}
-          ${floorSegHTML(row.brand, 'unclassified', unclassified, row.total, UNCLASSIFIED_COLOR)}
-        </div>
-        <div class="pct-label" style="color:${FUEL_COLORS.bev}">${bevPct.toFixed(1)}%</div>
-        <div class="total-label">${row.total.toLocaleString('en-US')}</div>
-      </div>`;
-    }).join('');
-  }
-  countrySelect.addEventListener('change', () => { populateYears(); render(); });
-  yearSelect.addEventListener('change', render);
-  populateYears();
-  render();
-
-  rows.addEventListener('pointermove', e => {
-    const seg = e.target.closest('.bar-seg');
-    const tooltipEl = document.getElementById('floor-tooltip');
-    if(!seg){ tooltipEl.style.opacity = 0; return; }
-    const rect = rows.closest('.card').getBoundingClientRect();
-    tooltipEl.style.left = (e.clientX - rect.left) + 'px';
-    tooltipEl.style.top = (e.clientY - rect.top - 10) + 'px';
-    tooltipEl.style.opacity = 1;
-    const label = seg.dataset.key === 'bev' ? 'Confirmed BEV' : 'Unclassified (mixed ICE/HEV/PHEV + unattributed BEV)';
-    tooltipEl.innerHTML = `${seg.dataset.brand} — ${label}<br><strong>${Number(seg.dataset.units).toLocaleString('en-US')}</strong> units (${seg.dataset.pct}%)`;
-  });
-  rows.addEventListener('pointerleave', () => { document.getElementById('floor-tooltip').style.opacity = 0; });
+buildPeriodSelect();
+readPeriod();
+buildMfrSelect();
+fetch('assets/countries-50m.json').then(r => r.json()).then(topo => {
+  const geo = topojson.feature(topo, topo.objects.countries);
+  geoFeatures = geo.features;
+  projection.fitExtent([[10, 10], [930, 450]], geo);
+  refresh(false);
+});
 })();
 </script>
+<script src="assets/notes-toggle.js"></script>
 </body>
 </html>
