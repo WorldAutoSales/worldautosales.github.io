@@ -161,7 +161,13 @@ function holder(brand, year){
   for(const [y, name] of arr){ if(y <= year) h = name; }
   return h || arr[0][1];
 }
-function entityOf(brand, year){ return groupMode === 'group' ? holder(brand, year) : brand; }
+// the holdings file calls the owner 'Volkswagen AG' while South Africa reports 'Volkswagen Group' -- one entity
+const GROUP_ALIASES = { 'Volkswagen AG': 'Volkswagen Group' };
+function entityOf(brand, year){
+  if(groupMode !== 'group') return brand;
+  const h = holder(brand, year);
+  return GROUP_ALIASES[h] || h;
+}
 
 // rows of a country for the active period: [{brand,bev,phev,hev,petrol,diesel,total}]
 function rowsFor(country, p){
