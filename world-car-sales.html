@@ -63,7 +63,7 @@
       <div class="stat-row" id="stat-row"></div>
 
       <div class="card chart-card" id="card-a">
-        <h2>11A · Global light-vehicle sales, per year</h2>
+        <h2>Global light-vehicle sales, per year</h2>
         <p class="note">Worldwide new light-vehicle sales (passenger cars, SUVs, pickups and light vans), 2000–2025. 2010–2025 are the IEA's measured figures (2025 is an IEA estimate); 2000–2009 are my estimate, drawn dashed with open dots (see Notes). No light-vehicle series exists for earlier years, so the page starts in 2000.</p>
         <div class="chart-legend" id="legend-a"></div>
         <svg class="chart" id="svg-a" viewBox="0 0 900 340" preserveAspectRatio="none"></svg>
@@ -75,13 +75,13 @@
 
       <div class="card chart-card" id="card-b">
         <div class="chart-header-row">
-          <h2>11B · New light-vehicle sales: BEV vs ICE (world)</h2>
+          <h2>New light-vehicle sales: BEV vs ICE (world)</h2>
           <div class="chart-mode-toggle" role="group" aria-label="Units or share">
             <button type="button" class="mode-btn active" data-mode="units">Million vehicles</button>
             <button type="button" class="mode-btn" data-mode="share">% of sales</button>
           </div>
         </div>
-        <p class="note">Worldwide light-duty (passenger car and light commercial) sales by powertrain, 2000–2025. 2010–2025 are the IEA Global EV Data Explorer's figures; 2000–2009 (lighter bars) are estimated totals with BEV and PHEV too small to measure — about 30,000 plug-ins on the road at the end of 2009 — so they are shown as zero. "ICE &amp; hybrids" is every light vehicle that cannot be plugged in — petrol, diesel, LPG/CNG and conventional (non-plug-in) hybrids. No country split.</p>
+        <p class="note">Worldwide light-duty (passenger car and light commercial) sales by powertrain, 2000–2025, plus a projected 2026 (washed-out bar). 2010–2025 are the IEA Global EV Data Explorer's figures; 2026 is this site's projection, not a measurement (see Notes). 2000–2009 (lighter bars) are estimated totals with BEV and PHEV too small to measure — about 30,000 plug-ins on the road at the end of 2009 — so they are shown as zero. "ICE &amp; hybrids" is every light vehicle that cannot be plugged in — petrol, diesel, LPG/CNG and conventional (non-plug-in) hybrids. No country split.</p>
         <div class="chart-legend" id="legend-b"></div>
         <svg class="chart" id="svg-b" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
         <div class="tooltip" id="tip-b"></div>
@@ -89,7 +89,7 @@
 
       <div class="card chart-card" id="card-c">
         <div class="chart-header-row">
-          <h2>11C · Estimated light vehicles on the road (world), since 2000</h2>
+          <h2>Estimated light vehicles on the road (world), since 2000</h2>
           <div class="chart-mode-toggle" role="group" aria-label="Units or share">
             <button type="button" class="mode-btn active" data-mode="units">Million vehicles</button>
             <button type="button" class="mode-btn" data-mode="share">% of fleet</button>
@@ -109,13 +109,14 @@
         </button>
         <ul class="notes-body">
           <li><strong>Scope.</strong> "Light vehicles" means passenger cars (including SUVs) plus light commercial vehicles (vans and pickups up to about 3.5 tonnes) — the IEA's "light-duty vehicles", and the reference basis of the Mix by Country page. Heavy trucks, buses, exports and two/three-wheelers are excluded everywhere here. OICA's narrower "passenger car" series (67.5 million in 2024) is not used because OICA files many SUVs and pickups — most of the US market — under commercial vehicles. Cross-check: the Mix by Country totals (72 countries with a 2024 figure) add up to 76.2 million, about 7 million below the IEA's world figure of 83.3 million, which is the size of the countries the site does not track (the IEA lists about 7 million for "rest of world"). The two are not exact because some country sources are passenger-car only (ACEA Europe) or exclude kei-cars (Japan), and China is retail passenger vehicles only.</li>
-          <li><strong>11A sales, 2010–2025.</strong> IEA Global EV Data Explorer (Global EV Outlook 2026), read through Our World in Data: electric plus non-electric car sales. 2025 values are IEA estimates (84.8 million).</li>
-          <li><strong>11A sales, 2000–2009 (estimate).</strong> No free worldwide light-vehicle sales series exists for these years. I scaled OICA passenger-car sales (2005–2009) and US Bureau of Transportation Statistics passenger-car production (2000–2004, production used as a sales proxy) by the light-vehicle/passenger-car ratio observed in 2010–2024 (IEA ÷ OICA) extrapolated backwards — 1.07 in 2000 rising to 1.23 in 2024. Treat these ten years as ±5%.</li>
+          <li><strong>Sales, 2010–2025.</strong> IEA Global EV Data Explorer (Global EV Outlook 2026), read through Our World in Data: electric plus non-electric car sales. 2025 values are IEA estimates (84.8 million).</li>
+          <li><strong>Sales, 2000–2009 (estimate).</strong> No free worldwide light-vehicle sales series exists for these years. I scaled OICA passenger-car sales (2005–2009) and US Bureau of Transportation Statistics passenger-car production (2000–2004, production used as a sales proxy) by the light-vehicle/passenger-car ratio observed in 2010–2024 (IEA ÷ OICA) extrapolated backwards — 1.07 in 2000 rising to 1.23 in 2024. Treat these ten years as ±5%.</li>
           <li><strong>Why not earlier than 2000?</strong> Earlier worldwide series (Ward's, OICA) only count all motor vehicles or only passenger cars, not light vehicles, and I did not want to invent a heavy-vehicle share. The earlier all-vehicle and passenger-car charts were removed from this page for that reason.</li>
-          <li><strong>11B.</strong> 2010–2025: IEA Global EV Data Explorer via Our World in Data: light-vehicle sales (electric + non-electric), electric sales (BEV + PHEV) and the BEV share of electric sales. "ICE &amp; hybrids" is every light vehicle that cannot be plugged in — petrol, diesel, LPG/CNG and conventional (non-plug-in) hybrids; the IEA does not publish a global hybrid (HEV) sales series, so HEV can't be split out. 2025 values are IEA estimates. 2000–2009: totals are the estimates described under 11A; no worldwide BEV or PHEV sales series exists before 2010 (the IEA's starts then), and the plug-in fleet at the end of 2009 was only about 30,000 vehicles, so BEV and PHEV are shown as zero, not measured.</li>
-          <li><strong>11C method (rebuilt 2026-10-19).</strong> World fleet = the 50 tracked countries + rest of world. For each country (script <code>scripts/build_cars_on_road.py</code>): registrations 2005–2026 from this site's market data, earlier cohorts back-cast, aged with a survival curve (country-specific for Germany, Norway, UK, Netherlands, Japan, China and the US; regional average for the others; table <code>cars_duration_rate</code>), then replaced or scaled by real fleet counts — Eurostat (21 European countries 2013–2025), DfT (UK 2005–2025), Japan (MLIT/JAMA), the US (S&amp;P Global Mobility, 289 M), Mexico (IDF, 35 M), Brazil (Sindipeças), Canada (Statistics Canada, 24.6 M), Australia (BITRE, 20.7 M), India (MoRTH registrations), China (MPS 2018 floor of 200 M small passenger cars) and Russia (Autostat-derived). Countries with no real count (South Korea and the smaller markets) are pure model estimates, typically ±20%; China is the weakest: its only anchor is the 2018 floor, and the 2025 estimate (279 M) is probably 10% low against the Ministry of Public Security's 366 M automobiles (which include trucks and buses). Rest of world (about 60 M of the 2025 total of 1,341 M): OICA passenger-car sales of all countries minus the 50 tracked, converted to light vehicles (×1.07 in 2000 rising to ×1.23 in 2024, the IEA/OICA ratio) and aged with the Latin America curve; fleets that rely on used imports (much of Africa, the Middle East, Central Asia) are undercounted by this method. Survival: cars last about 13–18 years (UK median 12 years for 1990s cohorts, 15.5 for 2008; Netherlands about 18; Germany 16; US 17; China 13). Cross-check: the total sits within about 3% of the fleet the IEA implies for 2015–2024 (1,317 M vs 1,333 M in 2024), but is 11% above it in 2010, where the model has no used-export losses; it replaces the earlier flat-scrappage model (1.39 B in 2025), which was too high.</li>
-          <li><strong>11C 2026 (projection).</strong> The 2026 point uses each tracked country's 2026 projected registrations (year-to-date plus the site's standard trend, with China at its retail level), rest-of-world sales held at the 2025 level, and BEV/PHEV 2026 sales = IEA 2025 sales × the growth of the site's own 2026 projection (BEV +10%, PHEV −16%; the IEA's own outlook of about 23 million electric cars in 2026 is higher than this). Result: fleet +12 M to about 1,353 M, BEV 66 M, PHEV 31 M (estimated), ICE &amp; hybrids about 1,256 M, i.e. <strong>about −8 M against 2025</strong> — the first decline in this series. It is a projection, not a measurement: a rebound in China's retail market in Q4 would turn it into a flat year, and Japan and Russia fall partly through the model's ageing mechanics on low registration years.</li>
-          <li><strong>11C electric part.</strong> BEV and PHEV stocks are unchanged from the IEA-based series: cumulative IEA sales with a constant 1.5% yearly loss, the value that best reproduces the IEA's measured global electric-car stock (76 million at end-2025 per GEVO 2026; model: 77 million, within ±3% in every year 2014–2025). BEV/PHEV before 2010 are negligible (~30,000 vehicles at end-2009). ICE &amp; hybrids is the total fleet minus BEV and PHEV, so it includes conventional hybrids. Heavy trucks, buses and two/three-wheelers are not in the fleet.</li>
+          <li><strong>BEV vs ICE.</strong> 2010–2025: IEA Global EV Data Explorer via Our World in Data: light-vehicle sales (electric + non-electric), electric sales (BEV + PHEV) and the BEV share of electric sales. "ICE &amp; hybrids" is every light vehicle that cannot be plugged in — petrol, diesel, LPG/CNG and conventional (non-plug-in) hybrids; the IEA does not publish a global hybrid (HEV) sales series, so HEV can't be split out. 2025 values are IEA estimates. 2000–2009: totals are the estimates described under “Sales, 2000–2009 (estimate)”; no worldwide BEV or PHEV sales series exists before 2010 (the IEA's starts then), and the plug-in fleet at the end of 2009 was only about 30,000 vehicles, so BEV and PHEV are shown as zero, not measured.</li>
+          <li><strong>Fleet method (rebuilt 2026-10-19).</strong> World fleet = the 50 tracked countries + rest of world. For each country (script <code>scripts/build_cars_on_road.py</code>): registrations 2005–2026 from this site's market data, earlier cohorts back-cast, aged with a survival curve (country-specific for Germany, Norway, UK, Netherlands, Japan, China and the US; regional average for the others; table <code>cars_duration_rate</code>), then replaced or scaled by real fleet counts — Eurostat (21 European countries 2013–2025), DfT (UK 2005–2025), Japan (MLIT/JAMA), the US (S&amp;P Global Mobility, 289 M), Mexico (IDF, 35 M), Brazil (Sindipeças), Canada (Statistics Canada, 24.6 M), Australia (BITRE, 20.7 M), India (MoRTH registrations), China (MPS 2018 floor of 200 M small passenger cars) and Russia (Autostat-derived). Countries with no real count (South Korea and the smaller markets) are pure model estimates, typically ±20%; China is the weakest: its only anchor is the 2018 floor, and the 2025 estimate (279 M) is probably 10% low against the Ministry of Public Security's 366 M automobiles (which include trucks and buses). Rest of world (about 60 M of the 2025 total of 1,341 M): OICA passenger-car sales of all countries minus the 50 tracked, converted to light vehicles (×1.07 in 2000 rising to ×1.23 in 2024, the IEA/OICA ratio) and aged with the Latin America curve; fleets that rely on used imports (much of Africa, the Middle East, Central Asia) are undercounted by this method. Survival: cars last about 13–18 years (UK median 12 years for 1990s cohorts, 15.5 for 2008; Netherlands about 18; Germany 16; US 17; China 13). Cross-check: the total sits within about 3% of the fleet the IEA implies for 2015–2024 (1,317 M vs 1,333 M in 2024), but is 11% above it in 2010, where the model has no used-export losses; it replaces the earlier flat-scrappage model (1.39 B in 2025), which was too high.</li>
+          <li><strong>Fleet 2026 (projection).</strong> The 2026 point uses each tracked country's 2026 projected registrations (year-to-date plus the site's standard trend, with China at its retail level), rest-of-world sales held at the 2025 level, and BEV/PHEV 2026 sales = IEA 2025 sales × the growth of the site's own 2026 projection (BEV +10%, PHEV −16%; the IEA's own outlook of about 23 million electric cars in 2026 is higher than this). Result: fleet +12 M to about 1,353 M, BEV 66 M, PHEV 31 M (estimated), ICE &amp; hybrids about 1,256 M, i.e. <strong>about −8 M against 2025</strong> — the first decline in this series. It is a projection, not a measurement: a rebound in China's retail market in Q4 would turn it into a flat year, and Japan and Russia fall partly through the model's ageing mechanics on low registration years.</li>
+          <li><strong>Fleet electric part.</strong> BEV and PHEV stocks are unchanged from the IEA-based series: cumulative IEA sales with a constant 1.5% yearly loss, the value that best reproduces the IEA's measured global electric-car stock (76 million at end-2025 per GEVO 2026; model: 77 million, within ±3% in every year 2014–2025). BEV/PHEV before 2010 are negligible (~30,000 vehicles at end-2009). ICE &amp; hybrids is the total fleet minus BEV and PHEV, so it includes conventional hybrids. Heavy trucks, buses and two/three-wheelers are not in the fleet.</li>
+          <li><strong>BEV vs ICE 2026 (projection).</strong> The 2026 bar is IEA 2025 sales (84.8 million) multiplied by the growth between 2025 and the site's own 2026 projection, measured over the 61 countries that have both a 2025 annual and a 2026 projected fuel split: total about −4%, BEV about +10%, PHEV about −16%, which gives roughly 81.6 million light vehicles, of which 15.4 million BEV, 6.1 million PHEV and 60.2 million ICE and hybrids. It uses the same growth rates as the 2026 fleet point below, so the two charts agree. It is a projection, not a measurement; the IEA's own outlook for 2026 electric-car sales (about 23 million) is higher than this site's trend.</li>
           <li>Rounding: values are shown in millions of vehicles; hover the charts for exact figures.</li>
         </ul>
       </div>
@@ -133,7 +134,9 @@
 const COL = { sales:'#c1621f', bev:'#1e8f5f', phev:'#2563eb', ice:'#8a7f73' };
 const fmtM = v => (v/1e6).toFixed(1) + ' M';
 const fmtI = v => Math.round(v).toLocaleString('en-US');
-const latestPw = WCS.powertrain[WCS.powertrain.length-1];
+const PW_HIST = WCS.powertrain.filter(d => !d.proj);
+const PW_2026 = WCS.powertrain.find(d => d.proj);
+const latestPw = PW_HIST[PW_HIST.length-1];
 const FLEET_HIST = WCS.fleet.filter(d => !d.proj);
 const FLEET_2026 = WCS.fleet.find(d => d.proj);
 const latestFl = FLEET_HIST[FLEET_HIST.length-1];
@@ -239,16 +242,25 @@ function drawB(mode){
     g.selectAll('.b-'+layer.key).data(layer).join('rect')
       .attr('x',d=>x(d.data.y)).attr('width',x.bandwidth())
       .attr('y',d=>y(d[1])).attr('height',d=>Math.max(0,y(d[0])-y(d[1])))
-      .attr('fill',COL[layer.key]).attr('opacity', d => d.data._raw.est ? 0.55 : 1);
+      .attr('fill',COL[layer.key]).attr('opacity', d => d.data._raw.proj ? 0.45 : d.data._raw.est ? 0.55 : 1);
   });
+  // 2026 = projection: dashed outline around the bar and a label
+  const pr = rows.find(r => r.proj);
+  if(pr){
+    g.append('rect').attr('x',x(pr.y)-1).attr('width',x.bandwidth()+2).attr('y',y(share ? 100 : pr.total)-1).attr('height',ih-y(share ? 100 : pr.total)+1)
+      .attr('fill','none').attr('stroke','var(--text)').attr('stroke-dasharray','4,3').attr('opacity',0.7).style('pointer-events','none');
+    g.append('text').attr('x',x(pr.y)+x.bandwidth()/2).attr('y',Math.max(11, y(share ? 100 : pr.total)-6)).attr('text-anchor','end').attr('dx',x.bandwidth()/2+2)
+      .style('font-size','11px').attr('fill','var(--text-muted)').text('2026 projected');
+  }
   g.append('rect').attr('width',iw).attr('height',ih).attr('fill','transparent')
     .on('pointermove', e => {
       const i = Math.max(0, Math.min(years.length-1, Math.floor(d3.pointer(e)[0] / (iw/years.length))));
       const r = rows[i];
-      showTip('b',e,`<strong>${r.y}</strong><br>Total: <strong>${fmtM(r.total)}</strong>` +
+      showTip('b',e,`<strong>${r.y}</strong>${r.proj ? ' (projection)' : ''}<br>Total: <strong>${fmtM(r.total)}</strong>` +
         (r.est ? `<br>ICE &amp; hybrids: <strong>${fmtM(r.ice)}</strong><br><span style="opacity:.75">estimated total; BEV/PHEV negligible, not measured</span>` :
         [['bev','Battery electric (BEV)'],['phev','Plug-in hybrid (PHEV)'],['ice','ICE &amp; hybrids']].map(([k,l]) =>
-          `<br>${l}: <strong>${fmtM(r[k])}</strong> (${(r[k]/r.total*100).toFixed(1)}%)`).join('')));
+          `<br>${l}: <strong>${fmtM(r[k])}</strong> (${(r[k]/r.total*100).toFixed(1)}%)`).join('') +
+        (r.proj ? `<br><span style="opacity:.75">IEA 2025 sales × the growth of the site's own 2026 projection: total ${(r.growth.total*100).toFixed(1)}%, BEV ${r.growth.bev>=0?'+':''}${(r.growth.bev*100).toFixed(0)}%, PHEV ${(r.growth.phev*100).toFixed(0)}%</span>` : '')));
     })
     .on('pointerleave', () => hideTip('b'));
   legend('b', [[COL.bev,'Battery electric (BEV)'],[COL.phev,'Plug-in hybrid (PHEV)'],[COL.ice,'ICE &amp; hybrids (non-plug-in)']]);

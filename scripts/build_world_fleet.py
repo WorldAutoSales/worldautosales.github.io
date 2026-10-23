@@ -83,6 +83,13 @@ def main():
                bevSales=int(round(bev_s)), phevSales=int(round(phev_s)), growth=dict((k, round(v, 3)) for k, v in g.items()))
     r26['ice'] = r26['total'] - r26['bev'] - r26['phev']
     data['fleet'].append(r26)
+    # 2026 NEW-SALES projection for the BEV-vs-ICE chart: IEA 2025 sales x the growth of the site's own 2026 projection
+    # (same 61-country basis as the BEV/PHEV growth above); ICE & hybrids is the remainder
+    data['powertrain'] = [r for r in data['powertrain'] if not r.get('proj')]
+    tot26 = int(round(pw25['total'] * (1 + g['total'])))
+    bev26s, phev26s = int(round(bev_s)), int(round(phev_s))
+    data['powertrain'].append(dict(y=2026, total=tot26, bev=bev26s, phev=phev26s, ice=tot26 - bev26s - phev26s, proj=True,
+                                   growth=dict((k, round(v, 3)) for k, v in g.items())))
     print('year  tracked(50)  rest of world  world   IEA-implied')
     for r in data['fleet']:
         if r['y'] in (2000, 2005, 2010, 2015, 2020, 2024, 2025, 2026):
