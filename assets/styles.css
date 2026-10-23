@@ -17,6 +17,10 @@
   --dq-tooltip-b:#ffd60a;
   --dq-tooltip-c:#ff9d4d;
   --dq-tooltip-d:#ff6259;
+  /* MoM change line in the map tooltip: bright in light mode (dark tooltip), deeper in dark mode (light tooltip) */
+  --tip-up:#4ade80;
+  --tip-down:#ff6b61;
+  --tip-flat:#ffd60a;
   /* map fill for a country we've actively researched and graded (has a country_data_coverage
      entry) but that has no fuel-type split in any period -- light purple, a deliberate signal
      that real sales/total data exists for this country even though the fuel-type split doesn't,
@@ -43,6 +47,9 @@
     --dq-tooltip-b:#8a6a00;
     --dq-tooltip-c:#8a4300;
     --dq-tooltip-d:#8a1f16;
+    --tip-up:#15803d;
+    --tip-down:#b91c1c;
+    --tip-flat:#a16207;
     --map-no-motorisation:#5a4a7a;
     --map-not-researched:#ffffff;
   }
@@ -60,6 +67,9 @@
   --dq-tooltip-b:#8a6a00;
   --dq-tooltip-c:#8a4300;
   --dq-tooltip-d:#8a1f16;
+  --tip-up:#15803d;
+  --tip-down:#b91c1c;
+  --tip-flat:#a16207;
   --map-not-researched:#ffffff;
   --map-no-motorisation:#5a4a7a;
 }
@@ -534,6 +544,9 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
 .tooltip .dq-tooltip-line.dq-B{ color:var(--dq-tooltip-b); }
 .tooltip .dq-tooltip-line.dq-C{ color:var(--dq-tooltip-c); }
 .tooltip .dq-tooltip-line.dq-D{ color:var(--dq-tooltip-d); }
+.tooltip .mom-up{ color:var(--tip-up); font-weight:700; }
+.tooltip .mom-down{ color:var(--tip-down); font-weight:700; }
+.tooltip .mom-flat{ color:var(--tip-flat); font-weight:700; }
 .dq-AA, .dq-A{ color:#1a7a3c; border:1px solid #1a7a3c; background:rgba(26,122,60,.08); }
 .dq-B{ color:#9a7a00; border:1px solid #9a7a00; background:rgba(154,122,0,.1); }
 .dq-C{ color:#b85c00; border:1px solid #b85c00; background:rgba(184,92,0,.1); }

@@ -3473,10 +3473,41 @@ function isResearchedNoMotorisation(name){
   return !!COUNTRY_DATA_QUALITY[name] && !COUNTRIES_WITH_TREND.has(name);
 }
 
+// ---- month-over-month change of the BEV share, shown under the BEV share line of the map tooltip ----
+// green + up arrow when positive; red + down arrow when it falls by 0.5 points or more; yellow (down arrow, or a dash at 0) for a fall of less than 0.5 points.
+// Only for single-month periods; skipped for countries whose months are an even split of a quarter (Canada, Serbia), where "MoM" would be an artefact.
+const MOM_EXCLUDE = new Set(['Canada','Serbia']);
+const MOM_MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function momPrevKey(k){
+  const m = /^(\d{4})-(\d{2})$/.exec(k || ''); if(!m) return null;
+  let y = +m[1], mo = +m[2] - 1; if(mo < 1){ y--; mo = 12; }
+  return `${y}-${String(mo).padStart(2, '0')}`;
+}
+function bevShareOfMonth(country, key){
+  const blk = MONTHLY_DATA[key];
+  if(blk && blk.raw[country]){ const r = blk.raw[country]; return r[6] ? r[0] / r[6] * 100 : null; }   // raw row: [bev,phev,hev,others,petrol,diesel,total]
+  if(typeof COUNTRY_MONTHLY !== 'undefined' && COUNTRY_MONTHLY[country]){
+    const e = COUNTRY_MONTHLY[country].find(x => x.ym === key);
+    if(e && e.total) return e.bev / e.total * 100;
+  }
+  return null;
+}
+function momTooltipLine(country){
+  const cur = [...selectedMonths][0], prev = momPrevKey(cur);
+  if(!prev || MOM_EXCLUDE.has(country)) return '';
+  const a = bevShareOfMonth(country, cur), b = bevShareOfMonth(country, prev);
+  if(a == null || b == null) return '';
+  const d = Math.round((a - b) * 10) / 10;
+  const cls = d > 0 ? 'mom-up' : d <= -0.5 ? 'mom-down' : 'mom-flat';
+  const arrow = d > 0 ? '▲' : d === 0 ? '▬' : '▼';
+  const pm = MOM_MONTH_ABBR[+prev.slice(5) - 1];
+  return `<br><span class="${cls}">${arrow} ${d > 0 ? '+' : ''}${d.toFixed(1)} pts MoM</span> <span style="opacity:.7">(vs ${pm})</span>`;
+}
+
 function mapTooltipHTML(entry, name){
   let base;
   if(entry){
-    base = `${entry.country}<br><strong>${entry.bevPct}%</strong> BEV share · ${entry.total.toLocaleString('en-US')} registrations${entry.bevYoyPct == null ? '' : `<br>BEV YoY: <strong>${entry.bevYoyPct > 0 ? '+' : ''}${entry.bevYoyPct}%</strong>`}` +
+    base = `${entry.country}<br><strong>${entry.bevPct}%</strong> BEV share · ${entry.total.toLocaleString('en-US')} registrations${momTooltipLine(entry.country)}${entry.bevYoyPct == null ? '' : `<br>BEV YoY: <strong>${entry.bevYoyPct > 0 ? '+' : ''}${entry.bevYoyPct}%</strong>`}` +
       (entry.country === 'Canada' ? `<br><span style="opacity:.7">quarterly StatCan data spread evenly across months</span>` : '') +
       (COUNTRIES_WITH_TREND.has(name) ? `<br><span style="opacity:.75">Click to focus trend →</span>` : '');
   } else if(LAST_AVAILABLE_PERIOD[name]){
