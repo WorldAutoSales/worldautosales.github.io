@@ -40,6 +40,14 @@
   .mfr-modal .history-yr .hyear{ font-size:9.5px; color:var(--text-muted); margin-top:3px; white-space:nowrap; }
   .mfr-modal .history-yr .hval{ font-size:8px; color:var(--text-muted); font-variant-numeric:tabular-nums; white-space:nowrap; }
   .country.mk{ stroke:var(--text); stroke-width:.6; }
+  /* legend lives inside the map, bottom-left */
+  .map-legend.in-map{ position:absolute; left:10px; bottom:10px; z-index:6; margin:0; padding:8px 11px; border-top:0; max-width:min(620px, 72%);
+    background:color-mix(in srgb, var(--surface) 93%, transparent); border:1px solid var(--border); border-radius:10px; box-shadow:var(--shadow); gap:6px 12px; pointer-events:none; }
+  .map-legend.in-map .legend-label{ flex-basis:100%; font-size:10.5px; }
+  .map-legend.in-map .legend-nodata{ margin-left:0; }
+  .map-legend.in-map .legend-swatch{ width:22px; height:12px; }
+  .map-legend.in-map .legend-num{ font-size:10px; }
+  .winner-logo{ pointer-events:none; }
   .mfr-marker{ stroke:var(--text); stroke-width:.8; cursor:pointer; }
 </style>
 </head>
@@ -101,16 +109,16 @@
           <label>Period
             <select id="f-period" class="filter-search"></select>
           </label>
+          <div class="chart-mode-toggle" role="group" aria-label="Group by">
+            <button type="button" class="mode-btn active" data-group="brand" title="Rank individual brands (Toyota, Lexus, Audi…).">Brand</button>
+            <button type="button" class="mode-btn" data-group="group" title="Roll brands up to their parent group as of the selected period (Volkswagen Group, Stellantis, Toyota Motor…).">Parent group</button>
+          </div>
           <label>Manufacturer
             <select id="f-mfr" class="filter-search"></select>
           </label>
           <label id="mfr2-label">Vs. manufacturer <span class="note" style="display:inline;font-weight:400;text-transform:none;letter-spacing:0;">(head-to-head — pick manufacturer 1 first)</span>
             <select id="f-mfr2" class="filter-search" disabled></select>
           </label>
-          <div class="chart-mode-toggle" role="group" aria-label="Group by">
-            <button type="button" class="mode-btn active" data-group="brand" title="Rank individual brands (Toyota, Lexus, Audi…).">Brand</button>
-            <button type="button" class="mode-btn" data-group="group" title="Roll brands up to their parent group as of the selected period (Volkswagen Group, Stellantis, Toyota Motor…).">Parent group</button>
-          </div>
           <div class="chart-mode-toggle" role="group" aria-label="Map metric" id="metric-toggle">
             <button type="button" class="mode-btn active" data-metric="units">Units</button>
             <button type="button" class="mode-btn" data-metric="share" title="Selected manufacturer's share of each country's total market (needs a manufacturer).">Market share</button>
@@ -124,9 +132,9 @@
             <button type="button" class="map-zoom-btn" id="zoom-out" title="Zoom out">−</button>
             <button type="button" class="map-zoom-btn" id="zoom-reset" title="Reset view">⟲</button>
           </div>
+          <div class="map-legend in-map" id="map-legend"></div>
           <div class="mfr-modal" id="mfr-modal"></div>
         </div>
-        <div class="map-legend" id="map-legend"></div>
       </div>
 
       <div class="card chart-card" id="bars-card">
@@ -141,7 +149,7 @@
 
       <div class="card chart-card">
         <h2>How to read this page</h2>
-        <p class="note" style="display:block">Coverage: about 50 countries with brand-level data (monthly from January 2025 where available, yearly back to 2008 for the longest series). Countries drawn in beige have no manufacturer breakdown on this site. Where a source publishes no powertrain split for a brand, its sales are counted as HEV + ICE + Diesel (and a few countries publish totals only). Hong Kong's registry folds hybrids and plug-in hybrids into petrol, so its PHEV share shows 0% even though some plug-in hybrids are in the grey bar; its BEV share is exact. Yearly periods use each country's yearly series; a year that is still running (2026) is year-to-date through the latest month loaded for that country, so countries can end on different months. "Parent group" attributes each brand to its owner as of the selected year (e.g. Volvo and Polestar count under Geely, not Ford, from 2010 onward).</p>
+        <p class="note" style="display:block">Coverage: about 50 countries with brand-level data (monthly from January 2025 where available, yearly back to 2008 for the longest series). Countries drawn in beige have no manufacturer breakdown on this site. Where a source publishes no powertrain split for a brand, its sales are counted as HEV + ICE + Diesel (and a few countries publish totals only). Hong Kong's registry folds hybrids and plug-in hybrids into petrol, so its PHEV share shows 0% even though some plug-in hybrids are in the grey bar; its BEV share is exact. Yearly periods use each country's yearly series; a year that is still running (2026) is year-to-date through the latest month loaded for that country, so countries can end on different months. Every brand has one permanent color taken from its logo (Toyota red, Ford blue, BMW silver…) and each country carries a badge with its winner's logo; logos come from the open-source simple-icons set, so brands without one (BYD, Perodua, Stellantis, VinFast…) show their initials instead. "Parent group" attributes each brand to its owner as of the selected year (e.g. Volvo and Polestar count under Geely, not Ford, from 2010 onward).</p>
       </div>
     </div>
   </main>
@@ -172,93 +180,44 @@ function rankTierLabel(rank){
   if(rank <= 10) return 'Top 6-10';
   return 'Outside top 10';
 }
-// approximate real-world brand/logo colors for the ~90 highest-volume brands and parent groups in
-// this dataset -- any brand not listed here (the long tail of 400+ niche/regional/commercial
-// brands) falls back to a deterministic hash-based hue, so head-to-head coloring always works,
-// it just isn't a "real" brand color for less common picks
-const BRAND_COLORS = {
-  'Toyota':'#EB0A1E','Lexus':'#1A1A1A','Toyota, Lexus':'#EB0A1E','Toyota Motor':'#EB0A1E',
-  'Volkswagen':'#001E50','Volkswagen Group':'#001E50','Volkswagen AG':'#001E50','Audi':'#BB0A30','Skoda':'#4BA82E','Seat':'#E53012','Cupra':'#CB2A2E','Porsche':'#B12B28',
-  'Honda':'#E4002B','Acura':'#2D2D2D',
-  'Nissan':'#C3002F','Infiniti':'#1C2C4C','Nissan, Infiniti':'#C3002F',
-  'Hyundai':'#002C5F','Kia':'#C8102E','Genesis':'#8E8E8E','Hyundai Motor Group':'#002C5F',
-  'Ford':'#00338C','Lincoln':'#8C8C8C',
-  'Chevrolet':'#CC0000','GMC':'#AF060C','Gmc':'#AF060C','Cadillac':'#8B2942','Buick':'#CC2229','Chrysler':'#3A5FA0','Dodge':'#D0021B','RAM':'#7D1F1F','Ram':'#7D1F1F','Jeep':'#3C6E35','General Motors':'#CC0000','Stellantis':'#0C1B33',
-  'BMW':'#0066B1','BMW Group':'#0066B1','Mini':'#5A6B74',
-  'Mercedes-Benz':'#00334E','Smart':'#FFB81C','smart':'#FFB81C','Maybach':'#9B8249',
-  'Mazda':'#101823','Subaru':'#0033A0','Mitsubishi':'#E60012','Mitsubishi Fuso':'#E60012','Suzuki':'#E2001A','Maruti Suzuki':'#E2001A','Isuzu':'#C8102E',
-  'Renault':'#FFCC00','Renault Group':'#FFCC00','Dacia':'#7A7C7E','Alpine':'#0057B8',
-  'Peugeot':'#1B1C20','Citroen':'#DA291C','Citroën':'#DA291C','DS':'#8B1D41','Opel':'#F7A800','Vauxhall':'#F7A800','Fiat':'#941E34','Alfa Romeo':'#981E32','Lancia':'#7A003C','Maserati':'#00205B','Abarth':'#9E1B32',
-  'Volvo':'#003057','Polestar':'#1A1A1A',
-  'Tesla':'#E82127','Rivian':'#3B5A45','Lucid':'#5A5A5A',
-  'BYD':'#1456A3','Geely':'#0054A6','Geely Galaxy':'#0054A6','Great Wall Motors':'#8C1515','GWM':'#8C1515','Haval':'#8C1515','Tank':'#5B4636','Chery':'#CE1126','Jetour':'#C8A951','Exeed':'#4A4A4A','Omoda':'#CE1126','Jaecoo':'#2E4053','Omoda & Jaecoo':'#CE1126','Omoda Jaecoo':'#CE1126',
-  'MG':'#E4002B','SAIC':'#C8102E','Roewe':'#C8102E','NIO':'#00BEBE','XPeng':'#1F2937','Xpeng':'#1F2937','Li Auto':'#00A651','Zeekr':'#1A1A1A','Xiaomi':'#FF6900','Leapmotor':'#2BAE66','Deepal':'#2C3E50','Avatr':'#2C3E50','Changan':'#2C3E50','FAW':'#C8102E','Dongfeng':'#003DA5','GAC':'#003DA5','GAC Trumpchi':'#003DA5','BAIC':'#D22730','Baic':'#D22730','SOKON':'#2E4053','Seres':'#2E4053','Denza':'#1456A3','VinFast':'#00A651','Vinfast':'#00A651',
-  'Jaguar':'#1B4D3E','Land Rover':'#1B3A2B','Jaguar Land Rover':'#1B4D3E','Bentley':'#00543C','Rolls-Royce':'#1A1A1A','Aston Martin':'#00665E','McLaren':'#FF8000','Mclaren':'#FF8000','Lotus':'#FFD200','Ferrari':'#D40000','Lamborghini':'#D4A017',
-  'SsangYong':'#003A70','Ssangyong':'#003A70','KGM':'#003A70','Tata':'#1B4D8C','Tata Motors':'#1B4D8C','Mahindra':'#D1282E','Proton':'#002F6C','Perodua':'#9E1B32','Daihatsu':'#C8102E',
-  'Saab':'#003057','Lada':'#8C8C8C','UAZ':'#3C6E35','Uaz':'#3C6E35','GAZ':'#2E4053','Gaz':'#2E4053',
-  'Other (unclassified)':'#8a8f98','Unknown':'#8a8f98',
-};
-function brandColor(name){
-  if(BRAND_COLORS[name]) return BRAND_COLORS[name];
-  return `hsl(${hashHue(name)}, 60%, 42%)`;
+// PERMANENT brand colors, one per brand, taken from each logo's dominant color (Toyota red, Ford blue, BMW
+// silver, Volkswagen navy, Chevrolet gold, Renault yellow...) and pushed apart in CIELAB space wherever two
+// logos share a hue, so no two of the ~125 listed brands look alike. Parent groups, combined labels
+// ("Toyota, Lexus") and spelling variants resolve through BRAND_ALIASES to their flagship brand's color.
+// Brands that are not listed (the long tail of niche brands) get a stable hash-based color.
+const BRAND_PALETTE = {'Toyota':'#E30613','Ford':'#1B5FD6','BMW':'#B6BDC6','Volkswagen':'#0B2A6F','Hyundai':'#6FB1E0','Honda':'#7A1020','Nissan':'#636971','Kia':'#FF7B6B','Chevrolet':'#E8B400','Mercedes-Benz':'#141414','Renault':'#FFF429','Peugeot':'#616CA7','Tesla':'#C2185B','Suzuki':'#00B1B9','BYD':'#006F5C','Fiat':'#B56478','Skoda':'#4BA82E','Audi':'#AD6A43','Citroen':'#DE6715','Mazda':'#8E44AD','Opel':'#FFC26E','Jeep':'#287028','Subaru':'#182EC6','Dacia':'#1CB588','Volvo':'#213857','Geely':'#BA91E9','Chery':'#F5B29D','Changan':'#0F9DFF','Haval':'#5B3623','Mitsubishi':'#DD1C9C','Lexus':'#3C3C3C','Buick':'#0F360F','GMC':'#937B1A','Ram':'#6A1B4D','Wuling':'#FF82C6','Seat':'#FF3258','Cupra':'#B1BC34','Porsche':'#5E5115','MG':'#AE1B1B','Maruti Suzuki':'#AAF3E2','Tata Motors':'#1A1D87','Mahindra':'#FF9805','Mini':'#96936F','Cadillac':'#A12AD1','Perodua':'#ACD284','Lada':'#7193A4','GAC Aion':'#02FFB7','GAC Trumpchi':'#3F6C8E','Li Auto':'#93DA2E','Land Rover':'#1FDA2D','Leapmotor':'#799332','XPeng':'#00525A','Dodge':'#F2ACCB','Lynk & Co':'#4A18E2','Tank':'#966F61','Proton':'#0AFEEA','Acura':'#6C5555','Xiaomi':'#BD770A','Chrysler':'#9DB4D6','NIO':'#05D9FF','Zeekr':'#673F80','Deepal':'#0084C4','Lincoln':'#E0D3A4','Daihatsu':'#FF23E6','Genesis':'#BD9F94','Isuzu':'#823301','Alfa Romeo':'#481B29','GWM':'#BB4D49','Vauxhall':'#FDF38C','Ora':'#F275F0','DS':'#7049CE','Infiniti':'#919191','Jaguar':'#835308','Lancia':'#0B0D36','Jetour':'#FFDF54','Polestar':'#D9C4BC','Omoda':'#FD6F8F','JAC':'#1460B7','Avatr':'#571673','VinFast':'#00808D','KGM':'#3B5360','Rivian':'#82BFB9','Belgee':'#5BAD5F','Jaecoo':'#8E4844','Tenet':'#AB3E8A','Togg':'#00DB6D','Exeed':'#BCB158','Smart':'#D0FF12','Maserati':'#0164FF','Ferrari':'#FF0D84','Lamborghini':'#8AFC00','Aston Martin':'#033127','Bentley':'#3E5F2D','Rolls-Royce':'#8D0E45','McLaren':'#FF5705','Lotus':'#C3DB28','Abarth':'#C31F40','Alpine':'#A6B5FF','Maxus':'#786BC6','DFSK':'#E88484','Dongfeng':'#203E9C','GAC':'#5C867A','BAIC':'#EE8D51','Neta':'#C8F87E','Denza':'#5F0894','AITO':'#AB18A5','Foton':'#73A375','Iveco':'#0C4A83','Hino':'#F1513F','Mitsubishi Fuso':'#FFC996','UAZ':'#8EC356','GAZ':'#9D8379','Holden':'#FF9979','Solaris':'#DD458F','JMC':'#43D1BE','CMC':'#B69C11','Stellantis':'#B108F9','Other (unclassified)':'#B5ACAC','UMW Holdings':'#4F8C24','NAMI Rostec':'#410000','Vingroup':'#6CDEE6','SAIC':'#AD0A6A','Renault-Nissan':'#AE3D00','Seres':'#009C89','Hongqi':'#AE5D1B','FAW':'#0F80F1','Roewe':'#EF5561'};
+const BRAND_ALIASES = {'Volkswagen AG':'Volkswagen','Volkswagen Group':'Volkswagen','Toyota Motor Corporation':'Toyota','Hyundai Motor Group':'Hyundai','General Motors':'Chevrolet','General Motors Company':'Chevrolet','Ford Motor Company':'Ford','Honda Motor Co.':'Honda','Nissan Motor Corporation':'Nissan','Renault Group':'Renault','BYD Company Ltd.':'BYD','BMW AG':'BMW','BMW Group':'BMW','Zhejiang Geely Holding Group':'Geely','Suzuki Motor Corporation':'Suzuki','Peugeot S.A. (PSA)':'Peugeot','PSA Group / Groupe PSA':'Peugeot','PSA / Groupe PSA':'Peugeot','Tesla, Inc.':'Tesla','Daimler AG':'Mercedes-Benz','Mercedes-Benz Group AG':'Mercedes-Benz','Daimler AG / Geely Holding Group JV':'Smart','Chery Automobile Co. / Chery Holding Group':'Chery','Chery Automobile Co.':'Chery','Caoa Chery':'Chery','Mazda Motor Corporation':'Mazda','Subaru Corporation (Fuji Heavy Industries)':'Subaru','Fiat Chrysler Automobiles N.V.':'Fiat','Fiat S.p.A.':'Fiat','Stellantis N.V.':'Stellantis','SAIC Motor':'SAIC','SAIC Motor Corporation':'SAIC','Tata Group':'Tata Motors','Tata Motors (Jaguar Land Rover)':'Tata Motors','Tata':'Tata Motors','Mahindra Group':'Mahindra','China Changan Automobile Group Co.':'Changan','Changan Automobile':'Changan','China South Industries Group Corp.':'Changan','UMW Holdings':'UMW Holdings','NAMI / Rostec (Russian state)':'NAMI Rostec','Vingroup JSC':'VinFast','Isuzu Motors Ltd.':'Isuzu','Isuzu Ute':'Isuzu','KG Group':'KGM','SsangYong':'KGM','Ssangyong':'KGM','Mitsubishi Motors Corporation':'Mitsubishi','Rivian Automotive, Inc.':'Rivian','Anhui Jianghuai Automobile Group (JAC Motors)':'JAC','Zhejiang Leapmotor Technology Co.':'Leapmotor','XPeng Inc.':'XPeng','Xpeng':'XPeng','NIO Inc.':'NIO','Renault-Nissan Alliance':'Renault-Nissan','Belarusian State / Geely JV':'Belgee','Seres Group Co.':'Seres','Dongfeng Motor Corporation':'Dongfeng','Honda Motor Co':'Honda','Hyundai Motor Company':'Hyundai','Kia Corporation':'Kia','Great Wall Motors':'GWM','Haval Group':'Haval','Toyota, Lexus':'Toyota','Toyota (TCI: Toyota+Lexus combined)':'Toyota','Toyota Motor':'Toyota','BMW, Mini':'BMW','Renault, Dacia':'Renault','Nissan, Infiniti':'Nissan','Jeep, Dodge':'Jeep','Lancia, Chrysler':'Lancia','Chrysler, Jeep, Dodge':'Chrysler','Omoda & Jaecoo':'Omoda','Omoda, Jaecoo':'Omoda','Omoda Jaecoo':'Omoda','MG Roewe':'MG','Gmc':'GMC','RAM':'Ram','smart':'Smart','Mclaren':'McLaren','Geely Galaxy':'Geely','Renault Korea':'Renault','Mitsubishi Fuso':'Mitsubishi Fuso','Citroën':'Citroen','Seat':'Seat','Jaguar Land Rover':'Land Rover','Hino':'Hino','Delorean':'Lotus','Unknown':'Other (unclassified)','Uaz':'UAZ','Gaz':'GAZ','Maruti':'Maruti Suzuki','Baic':'BAIC','XPENG':'XPeng','Vinfast':'VinFast','Mercedes':'Mercedes-Benz','Mercedes Benz':'Mercedes-Benz','Dr Motor':'Chery','DR Motor':'Chery','Caoa':'Chery'};
+const BRAND_KEYS_LC = Object.fromEntries(Object.keys(BRAND_PALETTE).map(k => [k.toLowerCase(), k]));
+function brandKey(name){
+  if(BRAND_PALETTE[name]) return name;
+  if(BRAND_ALIASES[name]) return BRAND_ALIASES[name];
+  const lc = String(name).toLowerCase();
+  if(BRAND_KEYS_LC[lc]) return BRAND_KEYS_LC[lc];
+  return null;
 }
 function hashHue(name){
   let h = 0;
   for(let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
   return h % 360;
 }
-function brandHSL(name){
-  const c = brandColor(name);
-  if(c.startsWith('hsl')){
-    const m = c.match(/hsl\(([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%\)/);
-    return [+m[1], +m[2], +m[3]];
-  }
-  const hex = c.replace('#', '');
-  const r = parseInt(hex.substr(0, 2), 16) / 255, g = parseInt(hex.substr(2, 2), 16) / 255, b = parseInt(hex.substr(4, 2), 16) / 255;
-  const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  let h = 0, s = 0; const l = (max + min) / 2;
-  if(max !== min){
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    if(max === r) h = (g - b) / d + (g < b ? 6 : 0);
-    else if(max === g) h = (b - r) / d + 2;
-    else h = (r - g) / d + 4;
-    h /= 6;
-  }
-  return [h * 360, s * 100, l * 100];
+function brandColor(name){
+  const k = brandKey(name);
+  if(k) return BRAND_PALETTE[k];
+  const h = hashHue(name);
+  return `hsl(${h}, ${55 + (h % 3) * 12}%, ${38 + (h % 4) * 7}%)`;
 }
-function hueDist(a, b){ const d = Math.abs(a - b) % 360; return d > 180 ? 360 - d : d; }
-// resolved (h, s) for both sides of the current head-to-head pair, nudged apart whenever the two
-// brands' real colors would be hard to tell apart (e.g. Honda red vs. Nissan red, or two brands
-// that are both near-black like Lexus/Rolls-Royce) -- mfr (picked first) is the anchor and keeps
-// its true color; mfr2 is the one that gets rotated/boosted if needed. Recomputed once per
-// render by updateMatchPair() so every match-mode visual (map, legends, bar chart, history) reads
-// the same pair instead of each calling brandColor() independently and possibly re-colliding.
-let MATCH_PAIR = null;
-const MIN_HUE_SEP = 65, MIN_SAT = 50;
-function updateMatchPair(){
-  if(!(mfr2 && mfr2 !== mfr)){ MATCH_PAIR = null; return; }
-  let [h1, s1] = brandHSL(mfr), [h2, s2] = brandHSL(mfr2);
-  if(s1 < 12){ h1 = hashHue(mfr); s1 = MIN_SAT; }
-  if(s2 < 12){ h2 = hashHue(mfr2); s2 = MIN_SAT; }
-  if(hueDist(h1, h2) < MIN_HUE_SEP){
-    const cw = (h1 + MIN_HUE_SEP) % 360, ccw = (h1 - MIN_HUE_SEP + 360) % 360;
-    h2 = hueDist(h2, cw) <= hueDist(h2, ccw) ? cw : ccw;
-    s2 = Math.max(s2, MIN_SAT);
-  }
-  MATCH_PAIR = { 1: { h:h1, s:s1 }, 2: { h:h2, s:s2 } };
+// black or white, whichever reads better on top of a brand color (for logos / initials in badges)
+function contrastOn(color){
+  const el = contrastOn.el || (contrastOn.el = document.createElement('canvas').getContext('2d'));
+  el.fillStyle = '#000'; el.fillStyle = color;
+  const m = el.fillStyle.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+  if(!m) return '#fff';
+  const lum = (0.299 * parseInt(m[1], 16) + 0.587 * parseInt(m[2], 16) + 0.114 * parseInt(m[3], 16)) / 255;
+  return lum > 0.6 ? '#111' : '#fff';
 }
-// match-mode fill for one side of the pair (1 = mfr, 2 = mfr2): pale for a close race, bold/dark
-// for a blowout. margin is 0 (tied) to 1 (one side has ~100% of the combined sales).
-function matchColor(which, margin){
-  const c = MATCH_PAIR[which];
-  const l = 80 - Math.max(0, Math.min(1, margin)) * 44; // 80% (pale) down to 36% (bold)
-  const sat = Math.min(100, c.s * 0.55 + margin * c.s * 0.55);
-  return `hsl(${c.h}, ${sat}%, ${l}%)`;
-}
-// a single representative shade per side, for legends/bar charts/history where there's no
-// per-country margin to encode -- same resolved (disambiguated) hue as the map
-function matchFlatColor(which){ return matchColor(which, 0.55); }
+// head-to-head: each side simply wears its own permanent brand color
+function matchColor(which){ return brandColor(which === 1 ? mfr : mfr2); }
+function matchFlatColor(which){ return matchColor(which); }
 const MAP_NAME_ALIASES = { "United States of America":"United States", "Russia":"Russian Federation", "United Arab Emirates":"UAE", "Macedonia":"North Macedonia" };
 const MARKERS = { "Singapore":[103.82,1.35], "Mauritius":[57.50,-20.16], "Luxembourg":[6.13,49.82] };
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -331,17 +290,17 @@ function buildPeriodSelect(){
   MONTHS.forEach(m => { h += `<option value="m:${m}">${periodLabel({type:'month', ym:m})}</option>`; });
   h += '</optgroup>';
   selPeriod.innerHTML = h;
-  selPeriod.value = `y:${YEARS.includes(2025) ? 2025 : YEARS[0]}`;
+  selPeriod.value = `y:${YEARS[0]}`; // current year, year-to-date
 }
 function readPeriod(){
   const [t, v] = selPeriod.value.split(':');
   period = t === 'y' ? { type:'year', year:+v } : { type:'month', ym:v };
 }
 function buildMfrSelect(){
-  // every entity with sales in at least one country for the period, ranked by world units in that period
+  // every entity with sales in at least one country for the period, in alphabetical order
   const tot = new Map();
   COUNTRIES.forEach(c => aggregate(c, period).forEach((a, k) => tot.set(k, (tot.get(k) || 0) + a.total)));
-  const names = [...tot.entries()].filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).map(([k]) => k);
+  const names = [...tot.entries()].filter(([, v]) => v > 0).map(([k]) => k).sort((a, b) => a.localeCompare(b, 'en', { sensitivity:'base' }));
   if(mfr && !tot.has(mfr)) mfr = '';
   if(mfr2 && !tot.has(mfr2)) mfr2 = '';
   const opts = names.map(n => `<option value="${n.replace(/"/g, '&quot;')}">${n}</option>`).join('');
@@ -357,6 +316,7 @@ const wrap = document.getElementById('map-wrap');
 const modal = document.getElementById('mfr-modal');
 const svg = d3.select('#map-svg');
 const mapG = svg.append('g');
+const logoG = mapG.append('g').attr('class', 'logos');
 const projection = d3.geoNaturalEarth1();
 const path = d3.geoPath(projection);
 let geoFeatures = null;
@@ -371,11 +331,10 @@ let colorFn = () => null;
 // 'market' = no manufacturer picked (shade by total market size)
 // 'rank'   = one manufacturer picked (shade by its rank tier in each country)
 // 'match'  = two different manufacturers picked (shade by whichever sells more, in its own color)
-function mode(){ return (mfr2 && mfr2 !== mfr) ? 'match' : (mfr ? 'rank' : 'market'); }
+function mode(){ return (mfr && mfr2 && mfr2 !== mfr) ? 'match' : (mfr ? 'rank' : 'market'); }
 
 function compute(){
   byCountry = {};
-  updateMatchPair();
   COUNTRIES.forEach(c => {
     const m = aggregate(c, period);
     if(!m.size) return;
@@ -404,8 +363,7 @@ function countryColor(c){
   if(md === 'match'){
     const u1 = d.sel ? d.sel.total : 0, u2 = d.sel2 ? d.sel2.total : 0;
     if(!u1 && !u2) return 'var(--surface-alt)';
-    const margin = Math.abs(u1 - u2) / (u1 + u2);
-    return u1 >= u2 ? matchColor(1, margin) : matchColor(2, margin);
+    return u1 >= u2 ? matchColor(1) : matchColor(2);
   }
   if(md === 'rank') return d.sel ? rankColor(d.rank) : 'var(--surface-alt)';
   return colorFn(valueOf(c));
@@ -428,25 +386,22 @@ function fmtVal(v, share){ return share ? v.toFixed(1) + '%' : (v >= 1e6 ? (v / 
 function renderLegend(sc){
   const md = mode();
   const noDataSwatch = `<div class="legend-nodata"><span class="legend-swatch" style="background:var(--map-not-researched);border:1px solid var(--border)"></span>No manufacturer data</div>`;
+  const badgeNote = `<div class="legend-nodata"><span class="legend-swatch" style="background:none;border:0;width:auto;font-weight:700">◉</span>Badge = the winner in that country</div>`;
+  const out = document.getElementById('map-legend');
   if(md === 'match'){
-    document.getElementById('map-legend').innerHTML =
-      `<span class="legend-label">${mfr} vs. ${mfr2} · shaded by whichever sells more, pale for a close race and bold for a blowout</span>` +
-      `<div class="legend-scale">` +
-        `<div class="legend-step"><span class="legend-swatch" style="background:${matchColor(1, 0.12)}"></span><span class="legend-num">${mfr} · close</span></div>` +
-        `<div class="legend-step"><span class="legend-swatch" style="background:${matchColor(1, 0.85)}"></span><span class="legend-num">${mfr} · blowout</span></div>` +
-        `<div class="legend-step"><span class="legend-swatch" style="background:${matchColor(2, 0.12)}"></span><span class="legend-num">${mfr2} · close</span></div>` +
-        `<div class="legend-step"><span class="legend-swatch" style="background:${matchColor(2, 0.85)}"></span><span class="legend-num">${mfr2} · blowout</span></div>` +
-      `</div>` + noDataSwatch +
-      `<div class="legend-nodata" style="margin-left:0"><span class="legend-swatch" style="background:var(--surface-alt);border:1px solid var(--border)"></span>Neither sells here</div>`;
+    out.innerHTML =
+      `<span class="legend-label">${mfr} vs. ${mfr2} · each country takes the color of the one that sells more</span>` +
+      `<div class="legend-step" style="flex-direction:row;gap:6px"><span class="legend-swatch" style="background:${matchColor(1)}"></span><span class="legend-num">${mfr}</span></div>` +
+      `<div class="legend-step" style="flex-direction:row;gap:6px"><span class="legend-swatch" style="background:${matchColor(2)}"></span><span class="legend-num">${mfr2}</span></div>` +
+      `<div class="legend-nodata"><span class="legend-swatch" style="background:var(--surface-alt);border:1px solid var(--border)"></span>Neither sells here</div>` + noDataSwatch + badgeNote;
     return;
   }
   if(md === 'rank'){
     const tiers = [[1,'#1'],[2,'#2'],[5,'Top 3-5'],[10,'Top 6-10'],[Infinity,'Outside top 10']];
-    document.getElementById('map-legend').innerHTML =
+    out.innerHTML =
       `<span class="legend-label">${mfr} · rank within each country's market</span>` +
       `<div class="legend-scale">${tiers.map(([r,l]) => `<div class="legend-step"><span class="legend-swatch" style="background:${rankColor(r)}"></span><span class="legend-num">${l}</span></div>`).join('')}</div>` +
-      noDataSwatch +
-      `<div class="legend-nodata" style="margin-left:0"><span class="legend-swatch" style="background:var(--surface-alt);border:1px solid var(--border)"></span>${mfr}: no sales in period</div>`;
+      `<div class="legend-nodata"><span class="legend-swatch" style="background:var(--surface-alt);border:1px solid var(--border)"></span>${mfr}: no sales</div>` + noDataSwatch + badgeNote;
     return;
   }
   const steps = 6, items = [];
@@ -455,11 +410,96 @@ function renderLegend(sc){
     const v = sc.share ? sc.t.invert(f) : sc.t.invert(0.06 + f * 0.94);
     items.push(`<div class="legend-step"><span class="legend-swatch" style="background:${colorFn(Math.max(v, 0.0001))}"></span><span class="legend-num">${fmtVal(v, sc.share)}</span></div>`);
   }
-  document.getElementById('map-legend').innerHTML =
-    `<span class="legend-label">Total market · units</span><div class="legend-scale">${items.join('')}</div>` + noDataSwatch;
+  out.innerHTML = `<span class="legend-label">Total market · units</span><div class="legend-scale">${items.join('')}</div>` + noDataSwatch + badgeNote;
 }
 
 function nameOf(d){ return MAP_NAME_ALIASES[d.properties.name] || d.properties.name; }
+
+// ---------- winner logos (badge in each country) ----------
+// simple-icons (CC0) provides single-path SVG logos for many car brands; the paths are fetched once from the CDN.
+// Brands without one (BYD, Perodua, Stellantis, VinFast...) get a brand-colored badge with their initials instead.
+const SI_VERSION = '13.21.0';
+const LOGO_SLUGS = {
+  'Toyota':'toyota','Volkswagen':'volkswagen','Ford':'ford','BMW':'bmw','Mercedes-Benz':'mercedes','Audi':'audi','Honda':'honda','Nissan':'nissan','Hyundai':'hyundai','Chevrolet':'chevrolet',
+  'Kia':'kia','Renault':'renault','Peugeot':'peugeot','Tesla':'tesla','Suzuki':'suzuki','Maruti Suzuki':'suzuki','Fiat':'fiat','Skoda':'skoda','Citroen':'citroen','Mazda':'mazda','Jeep':'jeep',
+  'Opel':'opel','Subaru':'subaru','Dacia':'dacia','Volvo':'volvo','Mitsubishi':'mitsubishi','Mini':'mini','MG':'mg','Cadillac':'cadillac','Land Rover':'landrover','Porsche':'porsche','Seat':'seat',
+  'Lada':'lada','Mahindra':'mahindra','Tata Motors':'tata','Acura':'acura','Chrysler':'chrysler','Ram':'ram','Alfa Romeo':'alfaromeo','Infiniti':'infiniti','Jaguar':'jaguar','Polestar':'polestar',
+  'Smart':'smart','Vauxhall':'vauxhall','Xiaomi':'xiaomi','Proton':'proton','Bentley':'bentley','Ferrari':'ferrari','Lamborghini':'lamborghini','Maserati':'maserati','Aston Martin':'astonmartin',
+  'McLaren':'mclaren','Rolls-Royce':'rollsroyce','Renault-Nissan':'renault'
+};
+const LOGO_BY_NAME = { 'General Motors':'generalmotors', 'General Motors Company':'generalmotors' };
+const INITIALS = { 'BYD':'BYD','Perodua':'P','Stellantis':'STLA','VinFast':'VF','UMW Holdings':'UMW','NAMI Rostec':'NAMI','GAC Aion':'AION','Geely':'G','Chery':'CHERY','Changan':'CA','Haval':'H','Wuling':'W','Leapmotor':'LP','Li Auto':'L','XPeng':'XP','NIO':'NIO','GWM':'GWM','Isuzu':'ISZ','Lexus':'L','GMC':'GMC','Buick':'B','Dodge':'D','Cupra':'C','Genesis':'G','KGM':'KGM','Daihatsu':'D','Hino':'HINO','Iveco':'IV','Tenet':'T' };
+const LOGO_PATHS = {};   // slug -> svg path 'd' (24x24 viewBox)
+function logoSlug(name){
+  if(LOGO_BY_NAME[name]) return LOGO_BY_NAME[name];
+  const k = brandKey(name);
+  return k ? LOGO_SLUGS[k] || null : null;
+}
+function initialsOf(name){
+  const k = brandKey(name) || name;
+  if(INITIALS[k]) return INITIALS[k];
+  const w = String(k).replace(/[^A-Za-z0-9 ]/g, ' ').trim().split(/\s+/);
+  return (w.length > 1 ? w.map(x => x[0]).join('') : w[0].slice(0, 3)).toUpperCase().slice(0, 4);
+}
+function loadLogos(){
+  const slugs = [...new Set(Object.values(LOGO_SLUGS).concat(Object.values(LOGO_BY_NAME)))];
+  return Promise.all(slugs.map(s => fetch(`https://cdn.jsdelivr.net/npm/simple-icons@${SI_VERSION}/icons/${s}.svg`)
+    .then(r => r.ok ? r.text() : null).then(svg => { const m = svg && svg.match(/<path d="([^"]+)"/); if(m) LOGO_PATHS[s] = m[1]; }).catch(() => {})));
+}
+// centroid + size of each country's LARGEST polygon (so the US badge isn't dragged toward Alaska, France's toward Guyane...)
+const geoInfo = {};
+function computeGeoInfo(){
+  geoFeatures.forEach(f => {
+    const g = f.geometry; let best = f;
+    if(g.type === 'MultiPolygon'){
+      let ba = -1, bi = 0;
+      g.coordinates.forEach((c, i) => { const a = d3.geoArea({ type:'Polygon', coordinates:c }); if(a > ba){ ba = a; bi = i; } });
+      best = { type:'Feature', properties:f.properties, geometry:{ type:'Polygon', coordinates:g.coordinates[bi] } };
+    }
+    const c = path.centroid(best), a = path.area(best);
+    if(isFinite(c[0]) && isFinite(c[1])) geoInfo[nameOf(f)] = { c, a };
+  });
+}
+function isOtherName(n){ return /^(other|unknown)/i.test(n); }
+function winnerOf(country){
+  const d = byCountry[country]; if(!d) return null;
+  if(mode() === 'match'){
+    const u1 = d.sel ? d.sel.total : 0, u2 = d.sel2 ? d.sel2.total : 0;
+    return (u1 === u2) ? null : (u1 > u2 ? mfr : mfr2);
+  }
+  const top = d.list.find(a => !isOtherName(a.name));
+  return top ? top.name : null;
+}
+function renderLogos(){
+  const data = [];
+  Object.keys(byCountry).forEach(c => {
+    const gi = geoInfo[c], w = winnerOf(c);
+    if(gi && w) data.push({ country:c, win:w, x:gi.c[0], y:gi.c[1], r:Math.max(5.5, Math.min(15, Math.sqrt(gi.a) * 0.17)), a:gi.a });
+  });
+  data.sort((p, q) => q.a - p.a);   // big countries first so small ones sit on top
+  const sel = logoG.selectAll('g.winner-logo').data(data, d => d.country);
+  sel.exit().remove();
+  const ent = sel.enter().append('g').attr('class', 'winner-logo');
+  ent.append('circle'); ent.append('path'); ent.append('text');
+  const all = ent.merge(sel).attr('transform', d => `translate(${d.x},${d.y})`);
+  all.each(function(d){
+    const g = d3.select(this), col = brandColor(d.win), fg = contrastOn(col), slug = logoSlug(d.win), pathD = slug && LOGO_PATHS[slug];
+    g.select('circle').attr('r', d.r).attr('fill', col).attr('stroke', '#fff').attr('stroke-width', 1.2);
+    if(pathD){
+      const s = (d.r * 1.32) / 24;
+      g.select('path').attr('d', pathD).attr('transform', `translate(${-12 * s},${-12 * s}) scale(${s})`).attr('fill', fg).style('display', null);
+      g.select('text').style('display', 'none');
+    } else {
+      const txt = initialsOf(d.win);
+      g.select('path').style('display', 'none');
+      g.select('text').text(txt).style('display', null).attr('text-anchor', 'middle').attr('dominant-baseline', 'central').attr('fill', fg)
+        .attr('font-weight', 700).attr('font-size', Math.max(3.5, d.r * (txt.length > 2 ? 0.62 : 0.95)));
+    }
+    g.selectAll('*').style('pointer-events', 'none');
+    g.selectAll('title').remove(); g.append('title').text(`${d.country}: ${d.win}`);
+  });
+}
+
 
 function renderMap(){
   if(!geoFeatures) return;
@@ -478,6 +518,8 @@ function renderMap(){
     .attr('cx', d => projection(d[1])[0]).attr('cy', d => projection(d[1])[1])
     .attr('fill', d => countryColor(d[0]))
     .on('mousemove', (e, d) => showModal(e, d[0])).on('mouseleave', hideModal);
+  renderLogos();
+  logoG.raise();
   const n = Object.keys(byCountry).length;
   const md = mode();
   document.getElementById('map-note').textContent =
@@ -485,7 +527,7 @@ function renderMap(){
     (md === 'match' ? ` · shading shows which of ${mfr} / ${mfr2} sells more in each country` :
      md === 'rank' ? ` · shading shows ${mfr}'s rank in each country's market` :
      ' · shading shows total market size') +
-    '. Scroll or use the buttons to zoom, drag to pan.';
+    '. The badge in each country is its winner (a plain badge with initials where no logo is available). Scroll or use the buttons to zoom, drag to pan.';
   renderCountryBars();
 }
 
@@ -644,7 +686,7 @@ function refresh(rebuildMfr){
   readPeriod();
   if(rebuildMfr) buildMfrSelect();
   mfr = selMfr.value;
-  mfr2 = mfr ? selMfr2.value : '';
+  mfr2 = selMfr2.value;            // remembered even while manufacturer 1 is back on "All"
   if(mfr2 === mfr) mfr2 = '';
   syncMfr2Enabled();
   selMfr2.value = mfr2;
@@ -656,9 +698,17 @@ function refresh(rebuildMfr){
 }
 function setActive(sel, attr, val){ document.querySelectorAll(`${sel} .mode-btn`).forEach(b => b.classList.toggle('active', b.dataset[attr] === val)); }
 selPeriod.onchange = () => refresh(true);
-selMfr.onchange = () => { selMfr2.value = ''; refresh(false); };
+selMfr.onchange = () => { if(selMfr2.value === selMfr.value) selMfr2.value = ''; refresh(false); };
 selMfr2.onchange = () => refresh(false);
-document.querySelectorAll('[data-group]').forEach(b => b.onclick = () => { groupMode = b.dataset.group; setActive('.mfr-filters', 'group', groupMode); mfr = ''; mfr2 = ''; refresh(true); });
+document.querySelectorAll('[data-group]').forEach(b => b.onclick = () => {
+  const prev = groupMode; groupMode = b.dataset.group; setActive('.mfr-filters', 'group', groupMode);
+  if(prev === 'brand' && groupMode === 'group'){
+    // carry the picks over to their parent groups instead of resetting them
+    const yr = periodYear(period), toGroup = n => { if(!n) return ''; const h = holder(n, yr); return GROUP_ALIASES[h] || h; };
+    mfr = toGroup(selMfr.value); mfr2 = toGroup(selMfr2.value);
+  } else { mfr = ''; mfr2 = ''; }   // a group can't be split back into one brand
+  refresh(true);
+});
 document.querySelectorAll('[data-metric]').forEach(b => b.onclick = () => { if(b.disabled) return; metric = b.dataset.metric; setActive('#metric-toggle', 'metric', metric); renderMap(); });
 
 buildPeriodSelect();
@@ -668,7 +718,9 @@ fetch('assets/countries-50m.json').then(r => r.json()).then(topo => {
   const geo = topojson.feature(topo, topo.objects.countries);
   geoFeatures = geo.features;
   projection.fitExtent([[10, 10], [930, 450]], geo);
+  computeGeoInfo();
   refresh(false);
+  loadLogos().then(() => renderLogos());   // logos arrive after the first paint
 });
 })();
 </script>
