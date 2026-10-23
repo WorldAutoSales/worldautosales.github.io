@@ -49,6 +49,17 @@
   .map-legend.in-map .legend-num{ font-size:10px; }
   .winner-logo{ pointer-events:none; }
   .mfr-marker{ stroke:var(--text); stroke-width:.8; cursor:pointer; }
+  .mfr-combo{ position:relative; min-width:220px; }
+  .mfr-combo-input{ width:100%; box-sizing:border-box; }
+  .mfr-combo-input:disabled{ opacity:.5; cursor:not-allowed; }
+  .mfr-combo-list{ display:none; position:absolute; z-index:30; top:100%; left:0; right:0; margin-top:3px; max-height:300px; overflow-y:auto;
+    background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.22); }
+  .mfr-combo-list.open{ display:block; }
+  .mfr-combo-group{ padding:6px 10px 3px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); }
+  .mfr-combo-opt{ padding:6px 10px; font-size:13px; cursor:pointer; }
+  .mfr-combo-opt:hover, .mfr-combo-opt.hl{ background:var(--surface-alt); }
+  .mfr-combo-empty{ padding:8px 10px; font-size:12.5px; color:var(--text-muted); }
+  .rank-row .pct-of-total{ width:48px; flex-shrink:0; text-align:right; font-family:ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace; font-size:11.5px; font-variant-numeric:tabular-nums; color:var(--text-muted); }
 </style>
 </head>
 <body>
@@ -114,10 +125,18 @@
             <button type="button" class="mode-btn" data-group="group" title="Roll brands up to their parent group as of the selected period (Volkswagen Group, Stellantis, Toyota Motor…).">Parent group</button>
           </div>
           <label>Manufacturer
-            <select id="f-mfr" class="filter-search"></select>
+            <div class="mfr-combo">
+              <input type="text" id="f-mfr-search" class="filter-search mfr-combo-input" placeholder="Search or pick a brand…" autocomplete="off">
+              <div class="mfr-combo-list" id="f-mfr-list"></div>
+            </div>
+            <select id="f-mfr" class="hidden"></select>
           </label>
           <label id="mfr2-label">Vs. manufacturer <span class="note" style="display:inline;font-weight:400;text-transform:none;letter-spacing:0;">(head-to-head — pick manufacturer 1 first)</span>
-            <select id="f-mfr2" class="filter-search" disabled></select>
+            <div class="mfr-combo">
+              <input type="text" id="f-mfr2-search" class="filter-search mfr-combo-input" placeholder="Search or pick a brand…" autocomplete="off" disabled>
+              <div class="mfr-combo-list" id="f-mfr2-list"></div>
+            </div>
+            <select id="f-mfr2" class="hidden" disabled></select>
           </label>
           <div class="chart-mode-toggle" role="group" aria-label="Map metric" id="metric-toggle">
             <button type="button" class="mode-btn active" data-metric="units">Units</button>
@@ -180,6 +199,20 @@ function rankTierLabel(rank){
   if(rank <= 10) return 'Top 6-10';
   return 'Outside top 10';
 }
+// market-size rank badge (same look as the Mix by Country page's world-rank badge), scoped to the
+// ~50 countries this page tracks rather than the full ~150-country world reference that page uses
+function ordinal(n){ const s = ['th','st','nd','rd']; const v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
+function marketRankTier(n){ if(n <= 10) return 'gold'; if(n <= 30) return 'blue'; if(n <= 50) return 'green'; if(n <= 75) return 'darkred'; return 'black'; }
+function computeMarketRanks(){
+  const ranks = {};
+  Object.entries(byCountry).sort((a, b) => b[1].total - a[1].total).forEach(([c], i) => { ranks[c] = i + 1; });
+  return ranks;
+}
+function marketRankBadgeHTML(rank){
+  if(!rank) return '<span class="world-rank-badge"></span>';
+  const tier = marketRankTier(rank), ord = ordinal(rank);
+  return `<span class="world-rank-badge tier-${tier}" title="${ord} largest of the ${Object.keys(byCountry).length} tracked markets this period">${ord}</span>`;
+}
 // PERMANENT brand colors, one per brand, taken from each logo's dominant color (Toyota red, Ford blue, BMW
 // silver, Volkswagen navy, Chevrolet gold, Renault yellow...) and pushed apart in CIELAB space wherever two
 // logos share a hue, so no two of the ~125 listed brands look alike. Parent groups, combined labels
@@ -231,6 +264,11 @@ const COUNTRIES = [...new Set([...Object.keys(MANUFACTURER_MONTHLY), ...Object.k
 const MONTHS = [...new Set(Object.values(MANUFACTURER_MONTHLY).flat().map(r => r.year_month))].sort().reverse();
 const YEARS = [...new Set(Object.values(MANUFACTURER_YEARLY).flat().map(r => r.year))].sort((a, b) => b - a);
 const CUR_YEAR = YEARS[0];
+// how many months of CUR_YEAR are actually loaded anywhere, used to annualize a year-to-date total
+// for the "projected full year vs. last year" growth figure -- a single project-wide number (not
+// per-country) for the same reason periodLabel() marks CUR_YEAR "(year-to-date)" uniformly rather
+// than per country: this project doesn't track each country's own latest-loaded month separately.
+const CUR_YEAR_MONTHS_ELAPSED = MONTHS.filter(m => m.startsWith(CUR_YEAR + '-')).length || 12;
 
 function periodLabel(p){
   if(p.type === 'year') return p.year === CUR_YEAR ? `${p.year} year-to-date` : String(p.year);
@@ -279,8 +317,10 @@ function aggregate(country, p){
 // ---------- filters ----------
 const selPeriod = document.getElementById('f-period'), selMfr = document.getElementById('f-mfr'), selMfr2 = document.getElementById('f-mfr2'), mfr2Label = document.getElementById('mfr2-label');
 const mfr2Hint = mfr2Label.querySelector('.note');
+const mfr2SearchInput = document.getElementById('f-mfr2-search');
 function syncMfr2Enabled(){
   selMfr2.disabled = !mfr;
+  mfr2SearchInput.disabled = !mfr;
   mfr2Hint.textContent = mfr ? '(head-to-head, optional)' : '(head-to-head — pick manufacturer 1 first)';
 }
 const BRAND_ORIGIN = {"Abarth":"Italy","Acura":"Japan","AITO":"China","Aiways":"China","Alfa Romeo":"Italy","Alpine":"France","Aston Martin":"United Kingdom","Audi":"Germany","Avatr":"China","Baojun":"China","Belgee":"Belarus","Bentley":"United Kingdom","Bestune":"China","BMW":"Germany","Buick":"United States","BYD":"China","Cadillac":"United States","Changan":"China","Chery":"China","Chevrolet":"United States","Chrysler":"United States","Citroen":"France","Cupra":"Spain","Dacia":"Romania","Daewoo":"South Korea","DAF Trucks":"Netherlands","Daihatsu":"Japan","Deepal":"China","Denza":"China","Dodge":"United States","Dongfeng":"China","DS":"France","Ferrari":"Italy","Fiat":"Italy","Fisker":"United States","Ford":"United States","GAC Motor":"China","Geely":"China","General Motors":"United States","Genesis":"South Korea","GMC":"United States","Great Wall Motors":"China","Honda":"Japan","Hongqi":"China","Hyundai":"South Korea","INEOS":"United Kingdom","Infiniti":"Japan","Iran Khodro":"Iran","Isuzu":"Japan","Iveco":"Italy","JAC":"China","Jaecoo":"China","Jaguar":"United Kingdom","Jeep":"United States","Karma":"United States","KGM":"South Korea","Kia":"South Korea","Lada":"Russia","Lamborghini":"Italy","Lancia":"Italy","Land Rover":"United Kingdom","Leapmotor":"China","Lexus":"Japan","Lincoln":"United States","Lotus":"United Kingdom","Lucid":"United States","Lynk & Co":"China","Mahindra":"India","MAN":"Germany","Maruti Suzuki":"Japan","Maserati":"Italy","Maxus":"China","Maybach":"Germany","Mazda":"Japan","McLaren":"United Kingdom","Mercedes-Benz":"Germany","MG":"China","MG Roewe":"China","Mini":"United Kingdom","Mitsubishi":"Japan","Mitsubishi Fuso":"Japan","Morgan":"United Kingdom","Neta":"China","NIO":"China","Nissan":"Japan","Omoda":"China","Opel":"Germany","Perodua":"Malaysia","Peugeot":"France","Polestar":"Sweden","Porsche":"Germany","Proton":"Malaysia","Ram":"United States","Renault":"France","Rivian":"United States","Roewe":"China","Rolls-Royce":"United Kingdom","Saab":"Sweden","Saipa":"Iran","Seat":"Spain","Skoda":"Czech Republic","smart":"Germany","SsangYong":"South Korea","Subaru":"Japan","Suzuki":"Japan","Tata Motors":"India","Tesla":"United States","TOGG":"Turkey","Toyota":"Japan","VinFast":"Vietnam","Volkswagen":"Germany","Volvo":"Sweden","Voyah":"China","Wiesmann":"Germany","Wuling":"China","Xiaomi Auto":"China","XPeng":"China","Zeekr":"China","BMW, Mini":"Germany","Chrysler, Jeep, Dodge":"United States","Nissan, Infiniti":"Japan","Renault, Dacia":"France","Toyota, Lexus":"Japan","Toyota (TCI: Toyota+Lexus combined)":"Japan","Jaguar Land Rover":"United Kingdom","Bollore":"France","Bugatti":"France","Mobilize":"France","Skoda-Volkswagen India":"Germany","Ssangyong":"South Korea","Jetour":"China","Kaiyi":"China","Karry":"China","Forthing":"China","Soueast":"China","Foton":"China","JMC":"China","Hino":"Japan","212":"China","Sinotruk":"China","Higer":"China","IM":"China","Kama":"China","Rox":"China","ZX Auto":"China","BAIC":"China","Exlantix":"China","Seres":"China","Moke":"United Kingdom","Amatør Bil":"Norway","Bygg Bil":"Norway","Aion":"China","Ariel":"United Kingdom","Austin":"United Kingdom","Austin-Healey":"United Kingdom","Caterham":"United Kingdom","Coleman Milne":"United Kingdom","Corvette":"United States","DFSK":"China","Daimler":"United Kingdom","Datsun":"Japan","Gordon Murray":"United Kingdom","Hummer":"United States","Jensen":"United Kingdom","LEVC":"United Kingdom","Mercury":"United States","Morris":"United Kingdom","Oldsmobile":"United States","Plymouth":"United States","Pontiac":"United States","Renault Trucks":"France","Rover":"United Kingdom","Skywell":"China","Sunbeam":"United Kingdom","Triumph":"United Kingdom","Vauxhall":"United Kingdom","Westfield":"United Kingdom","Geely Galaxy":"China","Li Auto":"China","Xiaomi":"China","iCAR":"China","Haval":"China","Tank":"China","Ora":"China","GAC Aion":"China","GAC Trumpchi":"China","GWM":"China","GAC":"China","Isuzu Ute":"Japan","LDV":"China","Omoda Jaecoo":"China","Farizon":"China","Holden":"Australia","Skyworth":"China","Renault Korea":"South Korea","Smart":"Germany","Togg":"Turkey","Karsan":"Turkey","Exeed":"China","Solaris":"Russia","UAZ":"Russia","Tenet":"Russia","Jeland":"Russia","iCAUR":"China","Mitsuoka":"Japan","Alpina":"Germany","Bluecar":"France","Eveasy":"China","International":"United States","Italdesign":"Italy","Leyland":"United Kingdom","Nash":"United States","Pagani":"Italy","Panther":"United Kingdom","Standard":"United Kingdom","Xpeng":"China","Arcfox":"China","JMEV":"China","KYC":"China","RAM":"United States","Shineray":"China","Lifan":"China","Rely":"China","Fonix":"China","Xev":"Italy","Tata":"India","Borgward":"Germany","Brilliance":"China","Jensen Healey":"United Kingdom","Lea Francis":"United Kingdom","Austin Healey":"United Kingdom","Maextro":"China","Oltcit":"Romania","Panhard & Levassor":"France","Pierce Arrow":"United States","Simca":"France","Rauch & Lang":"United States","Abt":"Germany","Brabus":"Germany","Caterham Cars Ltd":"United Kingdom","Donkervoort":"Netherlands","Ineos":"United Kingdom","Koenigsegg":"Sweden","Levc":"United Kingdom","FAW":"China","SWM":"China","DR":"Italy","Allied Vehicles Ltd":"United Kingdom","Baic":"China","Livan":"China","Ruf":"Germany","Secma":"France","Tiger":"United Kingdom","Edward Davies":"United Kingdom","Allied Vehicles":"United Kingdom","Nevs":"Sweden","Riddara":"China","Lepas":"China","Nammi":"China","Yutong":"China","Swm":"China","Gecko":"China","JIM":"China","Landking":"China","ZXAuto":"China","Zna":"China","Omoda & Jaecoo":"China","Fuso":"Japan","Volkswagen Group":"Germany","BMW Group":"Germany","Stellantis":"France","Thaco Truck":"Vietnam","CMC":"Taiwan","Foxtron":"Taiwan","Citroën":"France","Kenworth":"United States","Forland":"China","Scania":"Sweden","Zhidou":"China","Juneyao":"China","Kymco":"Taiwan","Yamaha":"Japan","Piaggio":"Italy","Can-Am":"Canada","GAZ":"Russia","Howo":"China","JAC Trucks":"China","KAMAZ":"Russia","ROX":"China","Maple":"China","Nevo":"China","XEV":"Italy","Avantier":"China","Ashok Leyland":"India","Eicher":"India","Genlyon":"China","Man":"Germany","Rosenbauer":"Austria","Shacman":"China","UD Trucks":"Japan","Zamyad":"Iran","Firefly":"China","Gumpert":"Germany","Henrey":"China","IM Motors":"China","Lingbox":"China","SGMW":"China"};
@@ -347,6 +387,48 @@ function buildMfrSelect(){
   selMfr2.innerHTML = '<option value="">— none (single manufacturer) —</option>' + opts;
   selMfr2.value = mfr2;
   syncMfr2Enabled();
+  syncCombo(selMfr); syncCombo(selMfr2);
+}
+
+// ---------- searchable brand combobox (wraps a real <select>, which stays the source of truth) ----------
+function syncCombo(selectEl){
+  if(selectEl.__comboSync) selectEl.__comboSync();
+}
+function renderComboList(selectEl, listEl, filterText){
+  const q = filterText.trim().toLowerCase();
+  let html = '';
+  [...selectEl.children].forEach(node => {
+    if(node.tagName === 'OPTGROUP'){
+      const opts = [...node.children].filter(o => !q || o.textContent.toLowerCase().includes(q));
+      if(!opts.length) return;
+      html += `<div class="mfr-combo-group">${esc(node.label)}</div>`;
+      opts.forEach(o => { html += `<div class="mfr-combo-opt" data-value="${esc(o.value)}">${esc(o.textContent)}</div>`; });
+    } else if(node.tagName === 'OPTION' && (!q || node.textContent.toLowerCase().includes(q))){
+      html += `<div class="mfr-combo-opt" data-value="${esc(node.value)}">${esc(node.textContent)}</div>`;
+    }
+  });
+  listEl.innerHTML = html || `<div class="mfr-combo-empty">No match</div>`;
+}
+function wireCombo(selectEl, inputEl, listEl){
+  function pick(valueEl){
+    selectEl.value = valueEl.dataset.value;
+    selectEl.dispatchEvent(new Event('change'));
+    syncCombo(selectEl);
+    listEl.classList.remove('open');
+  }
+  selectEl.__comboSync = () => {
+    const opt = selectEl.options[selectEl.selectedIndex];
+    inputEl.value = opt ? opt.textContent : '';
+  };
+  selectEl.__comboSync();
+  inputEl.addEventListener('focus', () => { renderComboList(selectEl, listEl, ''); listEl.classList.add('open'); inputEl.select(); });
+  inputEl.addEventListener('input', () => { renderComboList(selectEl, listEl, inputEl.value); listEl.classList.add('open'); });
+  listEl.addEventListener('mousedown', e => { const opt = e.target.closest('.mfr-combo-opt'); if(opt){ e.preventDefault(); pick(opt); } });
+  inputEl.addEventListener('blur', () => setTimeout(() => { listEl.classList.remove('open'); syncCombo(selectEl); }, 150));
+  inputEl.addEventListener('keydown', e => {
+    if(e.key === 'Escape'){ listEl.classList.remove('open'); inputEl.blur(); }
+    else if(e.key === 'Enter'){ const first = listEl.querySelector('.mfr-combo-opt'); if(first) pick(first); inputEl.blur(); e.preventDefault(); }
+  });
 }
 
 // ---------- map ----------
@@ -583,6 +665,23 @@ function countryYearTotal(country, year){
   if(!rows.length) return null;
   return rows.reduce((s, r) => s + (r.total || 0), 0);
 }
+// "projected current year (annualized from year-to-date) vs. previous full year" growth, for one
+// entity in one country -- a fixed indicator of how this manufacturer is trending in a market this
+// year, independent of whatever period is selected in the filters above (same idea as the modal's
+// 5-year history chart being a fixed trend rather than period-scoped)
+function yoyProjected(country, name){
+  const ytd = entityYearTotal(country, CUR_YEAR, name);
+  const prevYear = entityYearTotal(country, CUR_YEAR - 1, name);
+  if(ytd == null || !prevYear) return null;
+  const projected = ytd * 12 / CUR_YEAR_MONTHS_ELAPSED;
+  return 100 * (projected / prevYear - 1);
+}
+function yoyLabelHTML(pct){
+  if(pct == null) return `<span class="pct-label" title="Projected ${CUR_YEAR} (annualized from ${CUR_YEAR_MONTHS_ELAPSED} months) vs. ${CUR_YEAR - 1}: not enough data">—</span>`;
+  const cls = pct >= 0 ? 'yoy-up' : 'yoy-down';
+  const txt = `${pct > 0 ? '+' : ''}${pct.toFixed(0)}%`;
+  return `<span class="pct-label ${cls}" title="Projected ${CUR_YEAR} (annualized from ${CUR_YEAR_MONTHS_ELAPSED} months of year-to-date data) vs. ${CUR_YEAR - 1}: ${txt}">${txt}</span>`;
+}
 function historyHTML(country){
   const years = historyYears(), md = mode();
   let series;
@@ -679,13 +778,19 @@ function renderCountryBars(){
     note.textContent = `${built.length < BAR_CAP ? built.length : `Top ${BAR_CAP}`} markets where ${mfr} and/or ${mfr2} sell, ${periodLabel(period)}, sorted by combined volume.`;
   } else if(md === 'rank'){
     title.textContent = `${mfr} — country by country`;
-    legend.innerHTML = [1, 2, 5, 10, 99].map(r => `<span class="sw" style="background:${rankColor(r)}"></span>${rankTierLabel(r)}`).join(' &nbsp; ');
+    legend.innerHTML = [1, 2, 5, 10, 99].map(r => `<span class="sw" style="background:${rankColor(r)}"></span>${rankTierLabel(r)}`).join(' &nbsp; ') +
+      ` &nbsp; <span style="color:var(--text-muted)">Badge = market size rank &middot; % = share of ${mfr}'s world total &middot; growth = projected ${CUR_YEAR} vs. ${CUR_YEAR - 1}</span>`;
+    const marketRanks = computeMarketRanks();
+    const worldTotal = Object.values(byCountry).reduce((s, d) => s + (d.sel ? d.sel.total : 0), 0);
     const all = Object.entries(byCountry)
       .filter(([, d]) => d.sel)
       .map(([c, d]) => ({ country:c, total:d.sel.total, rank:d.rank, share: 100 * d.sel.total / d.total }))
       .sort((a, b) => b.total - a.total);
     built = all.slice(0, BAR_CAP).map(x => ({
       country:x.country, displayTotal: metric === 'share' ? x.share : x.total, fmtAsShare: metric === 'share',
+      marketRank: marketRanks[x.country],
+      pctOfWorld: worldTotal ? 100 * x.total / worldTotal : null,
+      yoyHTML: yoyLabelHTML(yoyProjected(x.country, mfr)),
       parts:[{ value:x.total, color:rankColor(x.rank), label:`#${x.rank} · ${fmt(x.total)} units (${x.share.toFixed(1)}% share)` }],
     }));
     note.textContent = `${all.length < BAR_CAP ? all.length : `Top ${BAR_CAP} of ${all.length}`} markets with ${mfr} sales, ${periodLabel(period)}, sorted by units. Bar color = rank tier (matches the map).`;
@@ -711,9 +816,15 @@ function renderCountryBars(){
   const widthDenom = d3.max(built, e => e.parts.reduce((s, p) => s + p.value, 0)) || 1;
   rows.innerHTML = built.map(e => {
     const segs = e.parts.filter(p => p.value > 0).map(p => barSeg(p.color, 100 * p.value / widthDenom, p.label)).join('');
+    const rankBadge = e.marketRank !== undefined ? marketRankBadgeHTML(e.marketRank) : '';
+    const pctOfTotal = e.pctOfWorld != null ? `<span class="pct-of-total" title="${mfr}'s ${e.country} units as a share of ${mfr}'s world total this period">${e.pctOfWorld.toFixed(1)}%</span>` : '';
+    const yoy = e.yoyHTML || '';
     return `<div class="rank-row">
+      ${rankBadge}
       <span class="country-label">${e.country}</span>
+      ${pctOfTotal}
       <span class="bar-track">${segs}</span>
+      ${yoy}
       <span class="total-label">${e.fmtAsShare ? e.displayTotal.toFixed(1) + '%' : fmt(e.displayTotal)}</span>
     </div>`;
   }).join('');
@@ -728,6 +839,7 @@ function refresh(rebuildMfr){
   if(mfr2 === mfr) mfr2 = '';
   syncMfr2Enabled();
   selMfr2.value = mfr2;
+  syncCombo(selMfr); syncCombo(selMfr2);
   const shareBtn = document.querySelector('[data-metric="share"]');
   const rankMode = mode() === 'rank';
   shareBtn.disabled = !rankMode; shareBtn.style.opacity = rankMode ? 1 : .45;
@@ -751,6 +863,8 @@ document.querySelectorAll('[data-metric]').forEach(b => b.onclick = () => { if(b
 
 buildPeriodSelect();
 readPeriod();
+wireCombo(selMfr, document.getElementById('f-mfr-search'), document.getElementById('f-mfr-list'));
+wireCombo(selMfr2, mfr2SearchInput, document.getElementById('f-mfr2-list'));
 buildMfrSelect();
 fetch('assets/countries-50m.json').then(r => r.json()).then(topo => {
   const geo = topojson.feature(topo, topo.objects.countries);
