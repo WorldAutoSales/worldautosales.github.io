@@ -95,6 +95,9 @@
           <label>Manufacturer
             <select id="f-mfr" class="filter-search"></select>
           </label>
+          <label id="mfr2-label" class="hidden">Vs. manufacturer <span class="note" style="display:inline;font-weight:400;text-transform:none;letter-spacing:0;">(head-to-head)</span>
+            <select id="f-mfr2" class="filter-search"></select>
+          </label>
           <div class="chart-mode-toggle" role="group" aria-label="Group by">
             <button type="button" class="mode-btn active" data-group="brand" title="Rank individual brands (Toyota, Lexus, Audi…).">Brand</button>
             <button type="button" class="mode-btn" data-group="group" title="Roll brands up to their parent group as of the selected period (Volkswagen Group, Stellantis, Toyota Motor…).">Parent group</button>
@@ -117,6 +120,16 @@
         <div class="map-legend" id="map-legend"></div>
       </div>
 
+      <div class="card chart-card" id="bars-card">
+        <h2 id="bars-title">Sales by country</h2>
+        <p class="note" id="bars-note" style="display:block"></p>
+        <div class="rank-rows-header">
+          <span class="rrh-spacer"></span>
+          <span class="rrh-total" id="bars-legend"></span>
+        </div>
+        <div class="rank-rows" id="country-bars"></div>
+      </div>
+
       <div class="card chart-card">
         <h2>How to read this page</h2>
         <p class="note" style="display:block">Coverage: about 50 countries with brand-level data (monthly from January 2025 where available, yearly back to 2008 for the longest series). Countries drawn in beige have no manufacturer breakdown on this site. Where a source publishes no powertrain split for a brand, its sales are counted as HEV + ICE + Diesel (and a few countries publish totals only). Hong Kong's registry folds hybrids and plug-in hybrids into petrol, so its PHEV share shows 0% even though some plug-in hybrids are in the grey bar; its BEV share is exact. Yearly periods use each country's yearly series; a year that is still running (2026) is year-to-date through the latest month loaded for that country, so countries can end on different months. "Parent group" attributes each brand to its owner as of the selected year (e.g. Volvo and Polestar count under Geely, not Ford, from 2010 onward).</p>
@@ -133,13 +146,62 @@
 <script>
 (function(){
 const COLORS = { bev:'#1e8f5f', phev:'#e0a21a', other:'#8a8f98' };
+// discrete rank-tier colors for single-manufacturer mode: #1 blue, #2 green, 3-5 orange, 6-10 yellow, 11+ gray
+const RANK_COLORS = { r1:'#2563eb', r2:'#16a34a', top5:'#f97316', top10:'#eab308', rest:'#9ca3af' };
+function rankColor(rank){
+  if(rank == null) return null;
+  if(rank === 1) return RANK_COLORS.r1;
+  if(rank === 2) return RANK_COLORS.r2;
+  if(rank <= 5) return RANK_COLORS.top5;
+  if(rank <= 10) return RANK_COLORS.top10;
+  return RANK_COLORS.rest;
+}
+function rankTierLabel(rank){
+  if(rank === 1) return '#1';
+  if(rank === 2) return '#2';
+  if(rank <= 5) return 'Top 3-5';
+  if(rank <= 10) return 'Top 6-10';
+  return 'Outside top 10';
+}
+// approximate real-world brand/logo colors for the ~90 highest-volume brands and parent groups in
+// this dataset -- any brand not listed here (the long tail of 400+ niche/regional/commercial
+// brands) falls back to a deterministic hash-based hue, so head-to-head coloring always works,
+// it just isn't a "real" brand color for less common picks
+const BRAND_COLORS = {
+  'Toyota':'#EB0A1E','Lexus':'#1A1A1A','Toyota, Lexus':'#EB0A1E','Toyota Motor':'#EB0A1E',
+  'Volkswagen':'#001E50','Volkswagen Group':'#001E50','Volkswagen AG':'#001E50','Audi':'#BB0A30','Skoda':'#4BA82E','Seat':'#E53012','Cupra':'#CB2A2E','Porsche':'#B12B28',
+  'Honda':'#E4002B','Acura':'#2D2D2D',
+  'Nissan':'#C3002F','Infiniti':'#1C2C4C','Nissan, Infiniti':'#C3002F',
+  'Hyundai':'#002C5F','Kia':'#C8102E','Genesis':'#8E8E8E','Hyundai Motor Group':'#002C5F',
+  'Ford':'#00338C','Lincoln':'#8C8C8C',
+  'Chevrolet':'#CC0000','GMC':'#AF060C','Gmc':'#AF060C','Cadillac':'#8B2942','Buick':'#CC2229','Chrysler':'#3A5FA0','Dodge':'#D0021B','RAM':'#7D1F1F','Ram':'#7D1F1F','Jeep':'#3C6E35','General Motors':'#CC0000','Stellantis':'#0C1B33',
+  'BMW':'#0066B1','BMW Group':'#0066B1','Mini':'#5A6B74',
+  'Mercedes-Benz':'#00334E','Smart':'#FFB81C','smart':'#FFB81C','Maybach':'#9B8249',
+  'Mazda':'#101823','Subaru':'#0033A0','Mitsubishi':'#E60012','Mitsubishi Fuso':'#E60012','Suzuki':'#E2001A','Maruti Suzuki':'#E2001A','Isuzu':'#C8102E',
+  'Renault':'#FFCC00','Renault Group':'#FFCC00','Dacia':'#7A7C7E','Alpine':'#0057B8',
+  'Peugeot':'#1B1C20','Citroen':'#DA291C','Citroën':'#DA291C','DS':'#8B1D41','Opel':'#F7A800','Vauxhall':'#F7A800','Fiat':'#941E34','Alfa Romeo':'#981E32','Lancia':'#7A003C','Maserati':'#00205B','Abarth':'#9E1B32',
+  'Volvo':'#003057','Polestar':'#1A1A1A',
+  'Tesla':'#E82127','Rivian':'#3B5A45','Lucid':'#5A5A5A',
+  'BYD':'#1456A3','Geely':'#0054A6','Geely Galaxy':'#0054A6','Great Wall Motors':'#8C1515','GWM':'#8C1515','Haval':'#8C1515','Tank':'#5B4636','Chery':'#CE1126','Jetour':'#C8A951','Exeed':'#4A4A4A','Omoda':'#CE1126','Jaecoo':'#2E4053','Omoda & Jaecoo':'#CE1126','Omoda Jaecoo':'#CE1126',
+  'MG':'#E4002B','SAIC':'#C8102E','Roewe':'#C8102E','NIO':'#00BEBE','XPeng':'#1F2937','Xpeng':'#1F2937','Li Auto':'#00A651','Zeekr':'#1A1A1A','Xiaomi':'#FF6900','Leapmotor':'#2BAE66','Deepal':'#2C3E50','Avatr':'#2C3E50','Changan':'#2C3E50','FAW':'#C8102E','Dongfeng':'#003DA5','GAC':'#003DA5','GAC Trumpchi':'#003DA5','BAIC':'#D22730','Baic':'#D22730','SOKON':'#2E4053','Seres':'#2E4053','Denza':'#1456A3','VinFast':'#00A651','Vinfast':'#00A651',
+  'Jaguar':'#1B4D3E','Land Rover':'#1B3A2B','Jaguar Land Rover':'#1B4D3E','Bentley':'#00543C','Rolls-Royce':'#1A1A1A','Aston Martin':'#00665E','McLaren':'#FF8000','Mclaren':'#FF8000','Lotus':'#FFD200','Ferrari':'#D40000','Lamborghini':'#D4A017',
+  'SsangYong':'#003A70','Ssangyong':'#003A70','KGM':'#003A70','Tata':'#1B4D8C','Tata Motors':'#1B4D8C','Mahindra':'#D1282E','Proton':'#002F6C','Perodua':'#9E1B32','Daihatsu':'#C8102E',
+  'Saab':'#003057','Lada':'#8C8C8C','UAZ':'#3C6E35','Uaz':'#3C6E35','GAZ':'#2E4053','Gaz':'#2E4053',
+  'Other (unclassified)':'#8a8f98','Unknown':'#8a8f98',
+};
+function brandColor(name){
+  if(BRAND_COLORS[name]) return BRAND_COLORS[name];
+  let h = 0;
+  for(let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return `hsl(${h % 360}, 60%, 42%)`;
+}
 const MAP_NAME_ALIASES = { "United States of America":"United States", "Russia":"Russian Federation", "United Arab Emirates":"UAE", "Macedonia":"North Macedonia" };
 const MARKERS = { "Singapore":[103.82,1.35], "Mauritius":[57.50,-20.16] };
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const fmt = n => Math.round(n).toLocaleString('en-US');
 
 let groupMode = 'brand', metric = 'units';
-let period = null, mfr = '';
+let period = null, mfr = '', mfr2 = '';
 
 // ---------- data access ----------
 const COUNTRIES = [...new Set([...Object.keys(MANUFACTURER_MONTHLY), ...Object.keys(MANUFACTURER_YEARLY)])].sort();
@@ -192,7 +254,7 @@ function aggregate(country, p){
 }
 
 // ---------- filters ----------
-const selPeriod = document.getElementById('f-period'), selMfr = document.getElementById('f-mfr');
+const selPeriod = document.getElementById('f-period'), selMfr = document.getElementById('f-mfr'), selMfr2 = document.getElementById('f-mfr2'), mfr2Label = document.getElementById('mfr2-label');
 function buildPeriodSelect(){
   let h = '<optgroup label="Years">';
   YEARS.forEach(y => { h += `<option value="y:${y}">${y === CUR_YEAR ? y + ' (year-to-date)' : y}</option>`; });
@@ -212,8 +274,13 @@ function buildMfrSelect(){
   COUNTRIES.forEach(c => aggregate(c, period).forEach((a, k) => tot.set(k, (tot.get(k) || 0) + a.total)));
   const names = [...tot.entries()].filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).map(([k]) => k);
   if(mfr && !tot.has(mfr)) mfr = '';
-  selMfr.innerHTML = '<option value="">All manufacturers</option>' + names.map(n => `<option value="${n.replace(/"/g, '&quot;')}">${n}</option>`).join('');
+  if(mfr2 && !tot.has(mfr2)) mfr2 = '';
+  const opts = names.map(n => `<option value="${n.replace(/"/g, '&quot;')}">${n}</option>`).join('');
+  selMfr.innerHTML = '<option value="">All manufacturers</option>' + opts;
   selMfr.value = mfr;
+  selMfr2.innerHTML = '<option value="">— none (single manufacturer) —</option>' + opts;
+  selMfr2.value = mfr2;
+  mfr2Label.classList.toggle('hidden', !mfr);
 }
 
 // ---------- map ----------
@@ -230,8 +297,12 @@ document.getElementById('zoom-in').onclick = () => svg.transition().duration(200
 document.getElementById('zoom-out').onclick = () => svg.transition().duration(200).call(zoom.scaleBy, 1 / 1.5);
 document.getElementById('zoom-reset').onclick = () => svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity);
 
-let byCountry = {};   // country -> {list:[entities sorted], total, sel}
+let byCountry = {};   // country -> {list:[entities sorted], total, sel, sel2}
 let colorFn = () => null;
+// 'market' = no manufacturer picked (shade by total market size)
+// 'rank'   = one manufacturer picked (shade by its rank tier in each country)
+// 'match'  = two different manufacturers picked (shade by whichever sells more, in its own color)
+function mode(){ return (mfr2 && mfr2 !== mfr) ? 'match' : (mfr ? 'rank' : 'market'); }
 
 function compute(){
   byCountry = {};
@@ -242,7 +313,12 @@ function compute(){
     const total = list.reduce((s, a) => s + a.total, 0);
     if(!total) return;
     const sel = mfr ? m.get(mfr) || null : null;
-    byCountry[c] = { list, total, sel, rank: sel ? list.indexOf(sel) + 1 : null };
+    const sel2 = mfr2 ? m.get(mfr2) || null : null;
+    byCountry[c] = {
+      list, total, sel, sel2,
+      rank: sel ? list.indexOf(sel) + 1 : null,
+      rank2: sel2 ? list.indexOf(sel2) + 1 : null,
+    };
   });
 }
 function valueOf(c){
@@ -250,6 +326,18 @@ function valueOf(c){
   if(!mfr) return d.total;
   const u = d.sel ? d.sel.total : 0;
   return metric === 'share' ? 100 * u / d.total : u;
+}
+// per-country fill color for the map, branching on the active mode
+function countryColor(c){
+  const d = byCountry[c]; if(!d) return null;
+  const md = mode();
+  if(md === 'match'){
+    const u1 = d.sel ? d.sel.total : 0, u2 = d.sel2 ? d.sel2.total : 0;
+    if(!u1 && !u2) return 'var(--surface-alt)';
+    return u1 >= u2 ? brandColor(mfr) : brandColor(mfr2);
+  }
+  if(md === 'rank') return d.sel ? rankColor(d.rank) : 'var(--surface-alt)';
+  return colorFn(valueOf(c));
 }
 
 function buildScale(){
@@ -267,17 +355,35 @@ function buildScale(){
 function fmtVal(v, share){ return share ? v.toFixed(1) + '%' : (v >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : v >= 1e3 ? Math.round(v / 1e3) + 'k' : String(Math.round(v))); }
 
 function renderLegend(sc){
+  const md = mode();
+  const noDataSwatch = `<div class="legend-nodata"><span class="legend-swatch" style="background:var(--map-not-researched);border:1px solid var(--border)"></span>No manufacturer data</div>`;
+  if(md === 'match'){
+    document.getElementById('map-legend').innerHTML =
+      `<span class="legend-label">${mfr} vs. ${mfr2} · shaded by whichever sells more</span>` +
+      `<div class="legend-scale">` +
+        `<div class="legend-step"><span class="legend-swatch" style="background:${brandColor(mfr)}"></span><span class="legend-num">${mfr}</span></div>` +
+        `<div class="legend-step"><span class="legend-swatch" style="background:${brandColor(mfr2)}"></span><span class="legend-num">${mfr2}</span></div>` +
+      `</div>` + noDataSwatch +
+      `<div class="legend-nodata" style="margin-left:0"><span class="legend-swatch" style="background:var(--surface-alt);border:1px solid var(--border)"></span>Neither sells here</div>`;
+    return;
+  }
+  if(md === 'rank'){
+    const tiers = [[1,'#1'],[2,'#2'],[5,'Top 3-5'],[10,'Top 6-10'],[Infinity,'Outside top 10']];
+    document.getElementById('map-legend').innerHTML =
+      `<span class="legend-label">${mfr} · rank within each country's market</span>` +
+      `<div class="legend-scale">${tiers.map(([r,l]) => `<div class="legend-step"><span class="legend-swatch" style="background:${rankColor(r)}"></span><span class="legend-num">${l}</span></div>`).join('')}</div>` +
+      noDataSwatch +
+      `<div class="legend-nodata" style="margin-left:0"><span class="legend-swatch" style="background:var(--surface-alt);border:1px solid var(--border)"></span>${mfr}: no sales in period</div>`;
+    return;
+  }
   const steps = 6, items = [];
   for(let i = 0; i < steps; i++){
     const f = i / (steps - 1);
     const v = sc.share ? sc.t.invert(f) : sc.t.invert(0.06 + f * 0.94);
     items.push(`<div class="legend-step"><span class="legend-swatch" style="background:${colorFn(Math.max(v, 0.0001))}"></span><span class="legend-num">${fmtVal(v, sc.share)}</span></div>`);
   }
-  const label = mfr ? (sc.share ? `${mfr} · share of market` : `${mfr} · units sold`) : 'Total market · units';
   document.getElementById('map-legend').innerHTML =
-    `<span class="legend-label">${label}</span><div class="legend-scale">${items.join('')}</div>` +
-    `<div class="legend-nodata"><span class="legend-swatch" style="background:var(--map-not-researched);border:1px solid var(--border)"></span>No manufacturer data</div>` +
-    (mfr ? `<div class="legend-nodata" style="margin-left:0"><span class="legend-swatch" style="background:var(--surface-alt);border:1px solid var(--border)"></span>${mfr}: no sales in period</div>` : '');
+    `<span class="legend-label">Total market · units</span><div class="legend-scale">${items.join('')}</div>` + noDataSwatch;
 }
 
 function nameOf(d){ return MAP_NAME_ALIASES[d.properties.name] || d.properties.name; }
@@ -290,20 +396,24 @@ function renderMap(){
   mapG.selectAll('path.country').data(geoFeatures).join('path')
     .attr('class', d => 'country ' + (byCountry[nameOf(d)] ? 'has-data' : 'no-data'))
     .attr('d', path)
-    .attr('fill', d => { const c = nameOf(d); return byCountry[c] ? colorFn(valueOf(c)) : null; })
+    .attr('fill', d => { const c = nameOf(d); return byCountry[c] ? countryColor(c) : null; })
     .on('mousemove', (e, d) => showModal(e, nameOf(d)))
     .on('mouseleave', hideModal);
   const mk = Object.entries(MARKERS).filter(([c]) => byCountry[c]);
   mapG.selectAll('circle.mfr-marker').data(mk, d => d[0]).join('circle')
     .attr('class', 'mfr-marker').attr('r', 3.2)
     .attr('cx', d => projection(d[1])[0]).attr('cy', d => projection(d[1])[1])
-    .attr('fill', d => colorFn(valueOf(d[0])))
+    .attr('fill', d => countryColor(d[0]))
     .on('mousemove', (e, d) => showModal(e, d[0])).on('mouseleave', hideModal);
   const n = Object.keys(byCountry).length;
+  const md = mode();
   document.getElementById('map-note').textContent =
     `${periodLabel(period)} · ${n} countries with manufacturer data · ranking by ${groupMode === 'group' ? 'parent group' : 'brand'}` +
-    (mfr ? ` · shading shows ${mfr}${metric === 'share' ? "'s share of each market" : ' units'}` : ' · shading shows total market size') +
+    (md === 'match' ? ` · shading shows which of ${mfr} / ${mfr2} sells more in each country` :
+     md === 'rank' ? ` · shading shows ${mfr}'s rank in each country's market` :
+     ' · shading shows total market size') +
     '. Scroll or use the buttons to zoom, drag to pan.';
+  renderCountryBars();
 }
 
 // ---------- hover modal ----------
@@ -317,13 +427,21 @@ function showModal(e, country){
   const d = byCountry[country];
   if(!d){ modal.innerHTML = `<h3>${country}</h3><div class="sub">No manufacturer breakdown for this period.</div>`; place(e); return; }
   const top = d.list.slice(0, 10), max = top[0].total;
-  let rows = top.map((a, i) => rowHTML(i + 1, a, max, a === d.sel)).join('');
+  let rows = top.map((a, i) => rowHTML(i + 1, a, max, a === d.sel || a === d.sel2)).join('');
   if(d.sel && d.rank > 10) rows += `<div style="text-align:center;color:var(--text-muted);line-height:.9">⋮</div>` + rowHTML(d.rank, d.sel, max, true);
+  if(d.sel2 && d.rank2 > 10) rows += `<div style="text-align:center;color:var(--text-muted);line-height:.9">⋮</div>` + rowHTML(d.rank2, d.sel2, max, true);
   const sum = k => d.list.reduce((s, a) => s + a[k], 0);
   const bev = sum('bev'), phev = sum('phev'), other = sum('other');
   const pc = v => (100 * v / d.total).toFixed(1) + '%';
   let sub = `${periodLabel(period)} · ${fmt(d.total)} vehicles`;
-  if(mfr) sub += d.sel ? ` · ${mfr}: #${d.rank}, ${(100 * d.sel.total / d.total).toFixed(1)}% share` : ` · ${mfr}: no sales`;
+  if(mode() === 'match'){
+    const u1 = d.sel ? d.sel.total : 0, u2 = d.sel2 ? d.sel2.total : 0;
+    const winner = u1 === u2 ? (u1 ? 'tie' : null) : (u1 > u2 ? mfr : mfr2);
+    sub += ` · ${mfr}: ${fmt(u1)}${d.rank ? ` (#${d.rank})` : ''} vs. ${mfr2}: ${fmt(u2)}${d.rank2 ? ` (#${d.rank2})` : ''}` +
+      (winner === 'tie' ? ' · tied' : winner ? ` · ${winner} leads` : '');
+  } else if(mfr){
+    sub += d.sel ? ` · ${mfr}: #${d.rank} (${rankTierLabel(d.rank)}), ${(100 * d.sel.total / d.total).toFixed(1)}% share` : ` · ${mfr}: no sales`;
+  }
   modal.innerHTML = `<h3>${country}</h3><div class="sub">${sub}</div>${rows}` +
     `<div class="foot"><span><i class="sw" style="background:${COLORS.bev}"></i>BEV <b>${pc(bev)}</b></span>` +
     `<span><i class="sw" style="background:${COLORS.phev}"></i>PHEV <b>${pc(phev)}</b></span>` +
@@ -341,20 +459,95 @@ function place(e){
 }
 function hideModal(){ modal.style.opacity = 0; }
 
+// ---------- country bar chart ----------
+const BAR_CAP = 20;
+function barSeg(color, pct, label){
+  return `<div class="bar-seg" style="width:${pct}%;background:${color}" title="${label.replace(/"/g, '&quot;')}"></div>`;
+}
+function renderCountryBars(){
+  const md = mode();
+  const title = document.getElementById('bars-title'), note = document.getElementById('bars-note'),
+        legend = document.getElementById('bars-legend'), rows = document.getElementById('country-bars');
+
+  let built; // [{country, displayTotal, fmtAsShare, parts:[{value,color,label}]}]
+  if(md === 'match'){
+    title.textContent = `${mfr} vs. ${mfr2} — country by country`;
+    legend.innerHTML = `<span class="sw" style="background:${brandColor(mfr)}"></span>${mfr} &nbsp; <span class="sw" style="background:${brandColor(mfr2)}"></span>${mfr2}`;
+    built = Object.entries(byCountry)
+      .map(([c, d]) => ({ country:c, u1:d.sel ? d.sel.total : 0, u2:d.sel2 ? d.sel2.total : 0 }))
+      .filter(x => x.u1 > 0 || x.u2 > 0)
+      .sort((a, b) => (b.u1 + b.u2) - (a.u1 + a.u2))
+      .slice(0, BAR_CAP)
+      .map(x => ({
+        country:x.country, displayTotal:x.u1 + x.u2,
+        parts:[
+          { value:x.u1, color:brandColor(mfr), label:`${mfr}: ${fmt(x.u1)}` },
+          { value:x.u2, color:brandColor(mfr2), label:`${mfr2}: ${fmt(x.u2)}` },
+        ],
+      }));
+    note.textContent = `${built.length < BAR_CAP ? built.length : `Top ${BAR_CAP}`} markets where ${mfr} and/or ${mfr2} sell, ${periodLabel(period)}, sorted by combined volume.`;
+  } else if(md === 'rank'){
+    title.textContent = `${mfr} — country by country`;
+    legend.innerHTML = [1, 2, 5, 10, 99].map(r => `<span class="sw" style="background:${rankColor(r)}"></span>${rankTierLabel(r)}`).join(' &nbsp; ');
+    const all = Object.entries(byCountry)
+      .filter(([, d]) => d.sel)
+      .map(([c, d]) => ({ country:c, total:d.sel.total, rank:d.rank, share: 100 * d.sel.total / d.total }))
+      .sort((a, b) => b.total - a.total);
+    built = all.slice(0, BAR_CAP).map(x => ({
+      country:x.country, displayTotal: metric === 'share' ? x.share : x.total, fmtAsShare: metric === 'share',
+      parts:[{ value:x.total, color:rankColor(x.rank), label:`#${x.rank} · ${fmt(x.total)} units (${x.share.toFixed(1)}% share)` }],
+    }));
+    note.textContent = `${all.length < BAR_CAP ? all.length : `Top ${BAR_CAP} of ${all.length}`} markets with ${mfr} sales, ${periodLabel(period)}, sorted by units. Bar color = rank tier (matches the map).`;
+  } else {
+    title.textContent = 'Sales by manufacturer — top markets';
+    legend.innerHTML = `<span class="note" style="display:inline">Each country's top 5 manufacturers, by own color</span>`;
+    built = Object.entries(byCountry)
+      .sort((a, b) => b[1].total - a[1].total)
+      .slice(0, BAR_CAP)
+      .map(([c, d]) => {
+        const top5 = d.list.slice(0, 5), shown = top5.reduce((s, a) => s + a.total, 0);
+        const parts = top5.map(a => ({ value:a.total, color:brandColor(a.name), label:`${a.name}: ${fmt(a.total)}` }));
+        if(d.total > shown) parts.push({ value:d.total - shown, color:'var(--surface-alt)', label:`Others: ${fmt(d.total - shown)}` });
+        return { country:c, displayTotal:d.total, parts };
+      });
+    note.textContent = `Top ${BAR_CAP} markets by total volume, ${periodLabel(period)}. Pick a manufacturer above to focus this chart on it.`;
+  }
+
+  if(!built.length){ rows.innerHTML = `<div class="note" style="display:block">No data for this selection.</div>`; return; }
+  // bar LENGTH is scaled to the biggest row shown (widthDenom), same convention as the other
+  // rank-row charts on this site -- every segment's width divides by that same fixed denominator,
+  // so segments concatenate to the row's true proportional length rather than always filling 100%
+  const widthDenom = d3.max(built, e => e.parts.reduce((s, p) => s + p.value, 0)) || 1;
+  rows.innerHTML = built.map(e => {
+    const segs = e.parts.filter(p => p.value > 0).map(p => barSeg(p.color, 100 * p.value / widthDenom, p.label)).join('');
+    return `<div class="rank-row">
+      <span class="country-label">${e.country}</span>
+      <span class="bar-track">${segs}</span>
+      <span class="total-label">${e.fmtAsShare ? e.displayTotal.toFixed(1) + '%' : fmt(e.displayTotal)}</span>
+    </div>`;
+  }).join('');
+}
+
 // ---------- wiring ----------
 function refresh(rebuildMfr){
   readPeriod();
   if(rebuildMfr) buildMfrSelect();
   mfr = selMfr.value;
+  mfr2 = mfr ? selMfr2.value : '';
+  if(mfr2 === mfr) mfr2 = '';
+  mfr2Label.classList.toggle('hidden', !mfr);
+  selMfr2.value = mfr2;
   const shareBtn = document.querySelector('[data-metric="share"]');
-  shareBtn.disabled = !mfr; shareBtn.style.opacity = mfr ? 1 : .45;
-  if(!mfr && metric === 'share'){ metric = 'units'; setActive('#metric-toggle', 'metric', 'units'); }
+  const rankMode = mode() === 'rank';
+  shareBtn.disabled = !rankMode; shareBtn.style.opacity = rankMode ? 1 : .45;
+  if(!rankMode && metric === 'share'){ metric = 'units'; setActive('#metric-toggle', 'metric', 'units'); }
   renderMap();
 }
 function setActive(sel, attr, val){ document.querySelectorAll(`${sel} .mode-btn`).forEach(b => b.classList.toggle('active', b.dataset[attr] === val)); }
 selPeriod.onchange = () => refresh(true);
-selMfr.onchange = () => refresh(false);
-document.querySelectorAll('[data-group]').forEach(b => b.onclick = () => { groupMode = b.dataset.group; setActive('.mfr-filters', 'group', groupMode); mfr = ''; refresh(true); });
+selMfr.onchange = () => { selMfr2.value = ''; refresh(false); };
+selMfr2.onchange = () => refresh(false);
+document.querySelectorAll('[data-group]').forEach(b => b.onclick = () => { groupMode = b.dataset.group; setActive('.mfr-filters', 'group', groupMode); mfr = ''; mfr2 = ''; refresh(true); });
 document.querySelectorAll('[data-metric]').forEach(b => b.onclick = () => { if(b.disabled) return; metric = b.dataset.metric; setActive('#metric-toggle', 'metric', metric); renderMap(); });
 
 buildPeriodSelect();
