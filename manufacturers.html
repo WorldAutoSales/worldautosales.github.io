@@ -200,9 +200,12 @@ const BRAND_COLORS = {
 };
 function brandColor(name){
   if(BRAND_COLORS[name]) return BRAND_COLORS[name];
+  return `hsl(${hashHue(name)}, 60%, 42%)`;
+}
+function hashHue(name){
   let h = 0;
   for(let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
-  return `hsl(${h % 360}, 60%, 42%)`;
+  return h % 360;
 }
 function brandHSL(name){
   const c = brandColor(name);
@@ -224,14 +227,38 @@ function brandHSL(name){
   }
   return [h * 360, s * 100, l * 100];
 }
-// match-mode fill: same hue/brand, but pale for a close race and bold/dark for a blowout.
-// margin is 0 (tied) to 1 (one side has ~100% of the combined sales).
-function matchColor(name, margin){
-  const [h, s] = brandHSL(name);
-  const l = 80 - Math.max(0, Math.min(1, margin)) * 44; // 80% (pale) down to 36% (bold)
-  const sat = Math.min(100, s * 0.55 + margin * s * 0.55);
-  return `hsl(${h}, ${sat}%, ${l}%)`;
+function hueDist(a, b){ const d = Math.abs(a - b) % 360; return d > 180 ? 360 - d : d; }
+// resolved (h, s) for both sides of the current head-to-head pair, nudged apart whenever the two
+// brands' real colors would be hard to tell apart (e.g. Honda red vs. Nissan red, or two brands
+// that are both near-black like Lexus/Rolls-Royce) -- mfr (picked first) is the anchor and keeps
+// its true color; mfr2 is the one that gets rotated/boosted if needed. Recomputed once per
+// render by updateMatchPair() so every match-mode visual (map, legends, bar chart, history) reads
+// the same pair instead of each calling brandColor() independently and possibly re-colliding.
+let MATCH_PAIR = null;
+const MIN_HUE_SEP = 65, MIN_SAT = 50;
+function updateMatchPair(){
+  if(!(mfr2 && mfr2 !== mfr)){ MATCH_PAIR = null; return; }
+  let [h1, s1] = brandHSL(mfr), [h2, s2] = brandHSL(mfr2);
+  if(s1 < 12){ h1 = hashHue(mfr); s1 = MIN_SAT; }
+  if(s2 < 12){ h2 = hashHue(mfr2); s2 = MIN_SAT; }
+  if(hueDist(h1, h2) < MIN_HUE_SEP){
+    const cw = (h1 + MIN_HUE_SEP) % 360, ccw = (h1 - MIN_HUE_SEP + 360) % 360;
+    h2 = hueDist(h2, cw) <= hueDist(h2, ccw) ? cw : ccw;
+    s2 = Math.max(s2, MIN_SAT);
+  }
+  MATCH_PAIR = { 1: { h:h1, s:s1 }, 2: { h:h2, s:s2 } };
 }
+// match-mode fill for one side of the pair (1 = mfr, 2 = mfr2): pale for a close race, bold/dark
+// for a blowout. margin is 0 (tied) to 1 (one side has ~100% of the combined sales).
+function matchColor(which, margin){
+  const c = MATCH_PAIR[which];
+  const l = 80 - Math.max(0, Math.min(1, margin)) * 44; // 80% (pale) down to 36% (bold)
+  const sat = Math.min(100, c.s * 0.55 + margin * c.s * 0.55);
+  return `hsl(${c.h}, ${sat}%, ${l}%)`;
+}
+// a single representative shade per side, for legends/bar charts/history where there's no
+// per-country margin to encode -- same resolved (disambiguated) hue as the map
+function matchFlatColor(which){ return matchColor(which, 0.55); }
 const MAP_NAME_ALIASES = { "United States of America":"United States", "Russia":"Russian Federation", "United Arab Emirates":"UAE", "Macedonia":"North Macedonia" };
 const MARKERS = { "Singapore":[103.82,1.35], "Mauritius":[57.50,-20.16] };
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -348,6 +375,7 @@ function mode(){ return (mfr2 && mfr2 !== mfr) ? 'match' : (mfr ? 'rank' : 'mark
 
 function compute(){
   byCountry = {};
+  updateMatchPair();
   COUNTRIES.forEach(c => {
     const m = aggregate(c, period);
     if(!m.size) return;
@@ -377,7 +405,7 @@ function countryColor(c){
     const u1 = d.sel ? d.sel.total : 0, u2 = d.sel2 ? d.sel2.total : 0;
     if(!u1 && !u2) return 'var(--surface-alt)';
     const margin = Math.abs(u1 - u2) / (u1 + u2);
-    return u1 >= u2 ? matchColor(mfr, margin) : matchColor(mfr2, margin);
+    return u1 >= u2 ? matchColor(1, margin) : matchColor(2, margin);
   }
   if(md === 'rank') return d.sel ? rankColor(d.rank) : 'var(--surface-alt)';
   return colorFn(valueOf(c));
@@ -404,10 +432,10 @@ function renderLegend(sc){
     document.getElementById('map-legend').innerHTML =
       `<span class="legend-label">${mfr} vs. ${mfr2} · shaded by whichever sells more, pale for a close race and bold for a blowout</span>` +
       `<div class="legend-scale">` +
-        `<div class="legend-step"><span class="legend-swatch" style="background:${matchColor(mfr, 0.12)}"></span><span class="legend-num">${mfr} · close</span></div>` +
-        `<div class="legend-step"><span class="legend-swatch" style="background:${matchColor(mfr, 0.85)}"></span><span class="legend-num">${mfr} · blowout</span></div>` +
-        `<div class="legend-step"><span class="legend-swatch" style="background:${matchColor(mfr2, 0.12)}"></span><span class="legend-num">${mfr2} · close</span></div>` +
-        `<div class="legend-step"><span class="legend-swatch" style="background:${matchColor(mfr2, 0.85)}"></span><span class="legend-num">${mfr2} · blowout</span></div>` +
+        `<div class="legend-step"><span class="legend-swatch" style="background:${matchColor(1, 0.12)}"></span><span class="legend-num">${mfr} · close</span></div>` +
+        `<div class="legend-step"><span class="legend-swatch" style="background:${matchColor(1, 0.85)}"></span><span class="legend-num">${mfr} · blowout</span></div>` +
+        `<div class="legend-step"><span class="legend-swatch" style="background:${matchColor(2, 0.12)}"></span><span class="legend-num">${mfr2} · close</span></div>` +
+        `<div class="legend-step"><span class="legend-swatch" style="background:${matchColor(2, 0.85)}"></span><span class="legend-num">${mfr2} · blowout</span></div>` +
       `</div>` + noDataSwatch +
       `<div class="legend-nodata" style="margin-left:0"><span class="legend-swatch" style="background:var(--surface-alt);border:1px solid var(--border)"></span>Neither sells here</div>`;
     return;
@@ -478,7 +506,7 @@ function countryYearTotal(country, year){
 function historyHTML(country){
   const years = historyYears(), md = mode();
   let series;
-  if(md === 'match') series = [mfr, mfr2].map(n => ({ label:n, color:brandColor(n), values: years.map(y => ({ year:y, val: entityYearTotal(country, y, n) })) }));
+  if(md === 'match') series = [[mfr, 1], [mfr2, 2]].map(([n, slot]) => ({ label:n, color:matchFlatColor(slot), values: years.map(y => ({ year:y, val: entityYearTotal(country, y, n) })) }));
   else if(md === 'rank') series = [{ label:mfr, color:brandColor(mfr), values: years.map(y => ({ year:y, val: entityYearTotal(country, y, mfr) })) }];
   else series = [{ label:'Total market', color:'var(--accent)', values: years.map(y => ({ year:y, val: countryYearTotal(country, y) })) }];
 
@@ -555,7 +583,7 @@ function renderCountryBars(){
   let built; // [{country, displayTotal, fmtAsShare, parts:[{value,color,label}]}]
   if(md === 'match'){
     title.textContent = `${mfr} vs. ${mfr2} — country by country`;
-    legend.innerHTML = `<span class="sw" style="background:${brandColor(mfr)}"></span>${mfr} &nbsp; <span class="sw" style="background:${brandColor(mfr2)}"></span>${mfr2}`;
+    legend.innerHTML = `<span class="sw" style="background:${matchFlatColor(1)}"></span>${mfr} &nbsp; <span class="sw" style="background:${matchFlatColor(2)}"></span>${mfr2}`;
     built = Object.entries(byCountry)
       .map(([c, d]) => ({ country:c, u1:d.sel ? d.sel.total : 0, u2:d.sel2 ? d.sel2.total : 0 }))
       .filter(x => x.u1 > 0 || x.u2 > 0)
@@ -564,8 +592,8 @@ function renderCountryBars(){
       .map(x => ({
         country:x.country, displayTotal:x.u1 + x.u2,
         parts:[
-          { value:x.u1, color:brandColor(mfr), label:`${mfr}: ${fmt(x.u1)}` },
-          { value:x.u2, color:brandColor(mfr2), label:`${mfr2}: ${fmt(x.u2)}` },
+          { value:x.u1, color:matchFlatColor(1), label:`${mfr}: ${fmt(x.u1)}` },
+          { value:x.u2, color:matchFlatColor(2), label:`${mfr2}: ${fmt(x.u2)}` },
         ],
       }));
     note.textContent = `${built.length < BAR_CAP ? built.length : `Top ${BAR_CAP}`} markets where ${mfr} and/or ${mfr2} sell, ${periodLabel(period)}, sorted by combined volume.`;
