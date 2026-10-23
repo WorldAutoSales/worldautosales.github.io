@@ -95,8 +95,8 @@
           <label>Manufacturer
             <select id="f-mfr" class="filter-search"></select>
           </label>
-          <label id="mfr2-label" class="hidden">Vs. manufacturer <span class="note" style="display:inline;font-weight:400;text-transform:none;letter-spacing:0;">(head-to-head)</span>
-            <select id="f-mfr2" class="filter-search"></select>
+          <label id="mfr2-label">Vs. manufacturer <span class="note" style="display:inline;font-weight:400;text-transform:none;letter-spacing:0;">(head-to-head — pick manufacturer 1 first)</span>
+            <select id="f-mfr2" class="filter-search" disabled></select>
           </label>
           <div class="chart-mode-toggle" role="group" aria-label="Group by">
             <button type="button" class="mode-btn active" data-group="brand" title="Rank individual brands (Toyota, Lexus, Audi…).">Brand</button>
@@ -255,6 +255,11 @@ function aggregate(country, p){
 
 // ---------- filters ----------
 const selPeriod = document.getElementById('f-period'), selMfr = document.getElementById('f-mfr'), selMfr2 = document.getElementById('f-mfr2'), mfr2Label = document.getElementById('mfr2-label');
+const mfr2Hint = mfr2Label.querySelector('.note');
+function syncMfr2Enabled(){
+  selMfr2.disabled = !mfr;
+  mfr2Hint.textContent = mfr ? '(head-to-head, optional)' : '(head-to-head — pick manufacturer 1 first)';
+}
 function buildPeriodSelect(){
   let h = '<optgroup label="Years">';
   YEARS.forEach(y => { h += `<option value="y:${y}">${y === CUR_YEAR ? y + ' (year-to-date)' : y}</option>`; });
@@ -280,7 +285,7 @@ function buildMfrSelect(){
   selMfr.value = mfr;
   selMfr2.innerHTML = '<option value="">— none (single manufacturer) —</option>' + opts;
   selMfr2.value = mfr2;
-  mfr2Label.classList.toggle('hidden', !mfr);
+  syncMfr2Enabled();
 }
 
 // ---------- map ----------
@@ -535,7 +540,7 @@ function refresh(rebuildMfr){
   mfr = selMfr.value;
   mfr2 = mfr ? selMfr2.value : '';
   if(mfr2 === mfr) mfr2 = '';
-  mfr2Label.classList.toggle('hidden', !mfr);
+  syncMfr2Enabled();
   selMfr2.value = mfr2;
   const shareBtn = document.querySelector('[data-metric="share"]');
   const rankMode = mode() === 'rank';
