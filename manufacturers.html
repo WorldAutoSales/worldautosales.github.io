@@ -168,6 +168,10 @@
 
       <div class="card chart-card" id="bars-card">
         <h2 id="bars-title">Sales by country</h2>
+        <div class="chart-mode-toggle hidden" id="bars-group-toggle" role="group" aria-label="Group by" style="margin:2px 0 10px;">
+          <button type="button" class="mode-btn active" data-group="brand">Brand</button>
+          <button type="button" class="mode-btn" data-group="group">Parent group</button>
+        </div>
         <p class="note" id="bars-note" style="display:block"></p>
         <div class="rank-rows-header">
           <span class="rrh-spacer"></span>
@@ -776,7 +780,7 @@ function place(e){
 function hideModal(){ modal.style.opacity = 0; }
 
 // ---------- country bar chart ----------
-const BAR_CAP = 20;
+const WORLD_LIST_CAP = 40; // only applies to the "World sales by brand / parent group" leaderboard -- the country/continent lists show everything
 function barSeg(color, pct, label){
   return `<div class="bar-seg" style="width:${pct}%;background:${color}" title="${label.replace(/"/g, '&quot;')}"></div>`;
 }
@@ -862,19 +866,21 @@ function renderCountryBars(){
     }));
     note.textContent = `All ${all.length} markets with ${mfr} sales, ${periodLabel(period)}, sorted by units. Bar color = rank tier (matches the map).`;
   } else {
+    document.getElementById('bars-group-toggle').classList.remove('hidden');
     const byGroup = groupMode === 'group';
     title.textContent = byGroup ? 'World sales by parent group' : 'World sales by brand';
-    legend.innerHTML = `<span class="note" style="display:inline">Use the Brand / Parent group toggle above to switch this chart</span>`;
+    legend.innerHTML = '';
     const world = new Map();
     Object.values(byCountry).forEach(d => d.list.forEach(a => { if(!isOtherName(a.name)) world.set(a.name, (world.get(a.name) || 0) + a.total); }));
     const worldTotal = [...world.values()].reduce((s, v) => s + v, 0);
-    built = [...world.entries()].sort((a, b) => b[1] - a[1]).slice(0, BAR_CAP).map(([name, total]) => ({
+    built = [...world.entries()].sort((a, b) => b[1] - a[1]).slice(0, WORLD_LIST_CAP).map(([name, total]) => ({
       country:name, displayTotal:total,
       pctOfWorld: worldTotal ? 100 * total / worldTotal : null,
       parts:[{ value:total, color:brandColor(name), label:`${name}: ${fmt(total)}` }],
     }));
-    note.textContent = `Top ${BAR_CAP} ${byGroup ? 'parent groups' : 'brands'} worldwide by volume, ${periodLabel(period)}. Pick a manufacturer above to focus this chart on one market instead.`;
+    note.textContent = `Top ${WORLD_LIST_CAP} ${byGroup ? 'parent groups' : 'brands'} worldwide by volume, ${periodLabel(period)}. Pick a manufacturer above to focus this chart on one market instead.`;
   }
+  if(md !== 'market') document.getElementById('bars-group-toggle').classList.add('hidden');
 
   if(!built.length){ rows.innerHTML = `<div class="note" style="display:block">No data for this selection.</div>`; return; }
   // bar LENGTH is scaled to the biggest row shown (widthDenom), same convention as the other
@@ -918,7 +924,8 @@ selPeriod.onchange = () => refresh(true);
 selMfr.onchange = () => { if(selMfr2.value === selMfr.value) selMfr2.value = ''; refresh(false); };
 selMfr2.onchange = () => refresh(false);
 document.querySelectorAll('[data-group]').forEach(b => b.onclick = () => {
-  const prev = groupMode; groupMode = b.dataset.group; setActive('.mfr-filters', 'group', groupMode);
+  const prev = groupMode; groupMode = b.dataset.group;
+  setActive('.mfr-filters', 'group', groupMode); setActive('#bars-card', 'group', groupMode);
   if(prev === 'brand' && groupMode === 'group'){
     // carry the picks over to their parent groups instead of resetting them
     const yr = periodYear(period), toGroup = n => { if(!n) return ''; const h = holder(n, yr); return GROUP_ALIASES[h] || h; };
