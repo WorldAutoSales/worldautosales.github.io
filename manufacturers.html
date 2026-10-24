@@ -60,6 +60,8 @@
   .mfr-combo-opt:hover, .mfr-combo-opt.hl{ background:var(--surface-alt); }
   .mfr-combo-empty{ padding:8px 10px; font-size:12.5px; color:var(--text-muted); }
   .rank-row .pct-of-total{ width:48px; flex-shrink:0; text-align:right; font-family:ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace; font-size:11.5px; font-variant-numeric:tabular-nums; color:var(--text-muted); }
+  .rank-row .seg-outside{ flex-shrink:0; font-family:ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace; font-size:11px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .rank-row .seg-outside + .seg-outside{ margin-left:6px; }
   .rank-row.world-total{ font-weight:700; padding-bottom:10px; margin-bottom:4px; border-bottom:1px solid var(--border); }
   .rank-row.world-total .bar-track{ height:26px; }
 </style>
@@ -158,6 +160,10 @@
 
       <div class="card chart-card hidden" id="continent-bars-card">
         <h2 id="continent-bars-title">Continent by continent</h2>
+        <div class="chart-mode-toggle hidden" id="bars-group-toggle" role="group" aria-label="Group by" style="margin:2px 0 10px;">
+          <button type="button" class="mode-btn active" data-group="brand">Brand</button>
+          <button type="button" class="mode-btn" data-group="group">Parent group</button>
+        </div>
         <p class="note" id="continent-bars-note" style="display:block"></p>
         <div class="rank-rows-header">
           <span class="rrh-spacer"></span>
@@ -168,10 +174,6 @@
 
       <div class="card chart-card" id="bars-card">
         <h2 id="bars-title">Sales by country</h2>
-        <div class="chart-mode-toggle hidden" id="bars-group-toggle" role="group" aria-label="Group by" style="margin:2px 0 10px;">
-          <button type="button" class="mode-btn active" data-group="brand">Brand</button>
-          <button type="button" class="mode-btn" data-group="group">Parent group</button>
-        </div>
         <p class="note" id="bars-note" style="display:block"></p>
         <div class="rank-rows-header">
           <span class="rrh-spacer"></span>
@@ -781,17 +783,57 @@ function hideModal(){ modal.style.opacity = 0; }
 
 // ---------- country bar chart ----------
 const WORLD_LIST_CAP = 40; // only applies to the "World sales by brand / parent group" leaderboard -- the country/continent lists show everything
-function barSeg(color, pct, label){
-  return `<div class="bar-seg" style="width:${pct}%;background:${color}" title="${label.replace(/"/g, '&quot;')}"></div>`;
+// renders one row's bar segments, with each segment's own number shown INSIDE it when there's
+// room, or appended just after the bar (colored to match its segment) when there isn't -- used by
+// every bar-row chart on this page instead of a separate "total" column at the end of the row
+function segmentsHTML(parts, widthDenom){
+  let bar = '', outside = [];
+  parts.filter(p => p.value > 0).forEach(p => {
+    const pct = 100 * p.value / widthDenom;
+    const fits = pct >= 9;
+    const txt = p.display != null ? p.display : fmt(p.value);
+    bar += `<div class="bar-seg" style="width:${pct}%;background:${p.color}" title="${esc(p.label)}">${fits ? `<span class="seg-label">${txt}</span>` : ''}</div>`;
+    if(!fits) outside.push(`<span class="seg-outside" style="color:${p.color}">${txt}</span>`);
+  });
+  return { bar, outside: outside.join('') };
 }
 
-// ---------- match-mode only: continent-by-continent (with a world-total row on top) ----------
+// ---------- the "big picture" card: world sales leaderboard (market mode) or world total +
+// continent breakdown (match mode); hidden entirely in rank mode (single manufacturer) ----------
 function renderContinentBars(){
-  const card = document.getElementById('continent-bars-card');
-  if(mode() !== 'match'){ card.classList.add('hidden'); return; }
+  const card = document.getElementById('continent-bars-card'), toggle = document.getElementById('bars-group-toggle');
+  const md = mode();
+  if(md === 'rank'){ card.classList.add('hidden'); toggle.classList.add('hidden'); return; }
   card.classList.remove('hidden');
   const title = document.getElementById('continent-bars-title'), note = document.getElementById('continent-bars-note'),
         legend = document.getElementById('continent-bars-legend'), rows = document.getElementById('continent-bars');
+
+  if(md === 'market'){
+    toggle.classList.remove('hidden');
+    const byGroup = groupMode === 'group';
+    title.textContent = byGroup ? 'World sales by parent group' : 'World sales by brand';
+    legend.innerHTML = '';
+    const world = new Map();
+    Object.values(byCountry).forEach(d => d.list.forEach(a => { if(!isOtherName(a.name)) world.set(a.name, (world.get(a.name) || 0) + a.total); }));
+    const worldTotal = [...world.values()].reduce((s, v) => s + v, 0);
+    const built = [...world.entries()].sort((a, b) => b[1] - a[1]).slice(0, WORLD_LIST_CAP);
+    const widthDenom = built.length ? built[0][1] : 1;
+    rows.innerHTML = built.map(([name, total]) => {
+      const { bar, outside } = segmentsHTML([{ value:total, color:brandColor(name), label:`${name}: ${fmt(total)}` }], widthDenom);
+      const pct = worldTotal ? `<span class="pct-of-total">${(100 * total / worldTotal).toFixed(1)}%</span>` : '';
+      return `<div class="rank-row">
+        <span class="country-label">${esc(name)}</span>
+        ${pct}
+        <span class="bar-track">${bar}</span>
+        ${outside}
+      </div>`;
+    }).join('');
+    note.textContent = `Top ${WORLD_LIST_CAP} ${byGroup ? 'parent groups' : 'brands'} worldwide by volume, ${periodLabel(period)}. Pick a manufacturer above to focus this chart on one market instead.`;
+    return;
+  }
+
+  // match mode: world total + continent breakdown
+  toggle.classList.add('hidden');
   title.textContent = `${mfr} vs. ${mfr2} — continent by continent`;
   legend.innerHTML = `<span class="sw" style="background:${matchFlatColor(1)}"></span>${mfr} &nbsp; <span class="sw" style="background:${matchFlatColor(2)}"></span>${mfr2}`;
 
@@ -808,31 +850,38 @@ function renderContinentBars(){
   });
   const contRows = [...byContinent.entries()].sort((a, b) => (b[1].u1 + b[1].u2) - (a[1].u1 + a[1].u2));
   const contDenom = d3.max(contRows, ([, e]) => e.u1 + e.u2) || 1;
-  const twoSegHTML = (u1, u2, denom) => [
-    u1 > 0 ? barSeg(matchFlatColor(1), 100 * u1 / denom, `${mfr}: ${fmt(u1)}`) : '',
-    u2 > 0 ? barSeg(matchFlatColor(2), 100 * u2 / denom, `${mfr2}: ${fmt(u2)}`) : '',
-  ].join('');
-
+  const twoParts = (u1, u2) => [
+    { value:u1, color:matchFlatColor(1), label:`${mfr}: ${fmt(u1)}` },
+    { value:u2, color:matchFlatColor(2), label:`${mfr2}: ${fmt(u2)}` },
+  ];
+  const worldSeg = segmentsHTML(twoParts(worldU1, worldU2), worldU1 + worldU2 || 1);
   const worldRow = `<div class="rank-row world-total">
       <span class="country-label">World total</span>
-      <span class="bar-track">${twoSegHTML(worldU1, worldU2, worldU1 + worldU2 || 1)}</span>
-      <span class="total-label">${fmt(worldU1 + worldU2)}</span>
+      <span class="bar-track">${worldSeg.bar}</span>
+      ${worldSeg.outside}
     </div>`;
-  const continentRows = contRows.map(([cont, e]) => `<div class="rank-row">
+  const continentRows = contRows.map(([cont, e]) => {
+    const seg = segmentsHTML(twoParts(e.u1, e.u2), contDenom);
+    return `<div class="rank-row">
       <span class="country-label">${CONTINENT_LABELS[cont] || cont}</span>
-      <span class="bar-track">${twoSegHTML(e.u1, e.u2, contDenom)}</span>
-      <span class="total-label">${fmt(e.u1 + e.u2)}</span>
-    </div>`).join('');
+      <span class="bar-track">${seg.bar}</span>
+      ${seg.outside}
+    </div>`;
+  }).join('');
 
   rows.innerHTML = worldRow + continentRows;
   note.textContent = `${mfr} vs. ${mfr2} combined volume, ${periodLabel(period)}, by continent. Top row is the worldwide total; the continent rows below are scaled to each other, not to the world row.`;
 }
+// ---------- country-by-country card: rank mode (single manufacturer) or match mode; hidden in
+// market mode (no manufacturer picked -- there's no single country breakdown to show) ----------
 function renderCountryBars(){
-  const md = mode();
+  const md = mode(), card = document.getElementById('bars-card');
+  if(md === 'market'){ card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
   const title = document.getElementById('bars-title'), note = document.getElementById('bars-note'),
         legend = document.getElementById('bars-legend'), rows = document.getElementById('country-bars');
 
-  let built; // [{country, displayTotal, fmtAsShare, parts:[{value,color,label}]}]
+  let built; // [{country, parts:[{value,color,label,display?}], brandRank?, pctOfWorld?, yoyHTML?}]
   if(md === 'match'){
     title.textContent = `${mfr} vs. ${mfr2} — country by country`;
     legend.innerHTML = `<span class="sw" style="background:${matchFlatColor(1)}"></span>${mfr} &nbsp; <span class="sw" style="background:${matchFlatColor(2)}"></span>${mfr2}`;
@@ -841,14 +890,14 @@ function renderCountryBars(){
       .filter(x => x.u1 > 0 || x.u2 > 0)
       .sort((a, b) => (b.u1 + b.u2) - (a.u1 + a.u2))
       .map(x => ({
-        country:x.country, displayTotal:x.u1 + x.u2,
+        country:x.country,
         parts:[
           { value:x.u1, color:matchFlatColor(1), label:`${mfr}: ${fmt(x.u1)}` },
           { value:x.u2, color:matchFlatColor(2), label:`${mfr2}: ${fmt(x.u2)}` },
         ],
       }));
     note.textContent = `All ${built.length} markets where ${mfr} and/or ${mfr2} sell, ${periodLabel(period)}, sorted by combined volume.`;
-  } else if(md === 'rank'){
+  } else {
     title.textContent = `${mfr} — country by country`;
     legend.innerHTML = [1, 2, 5, 10, 99].map(r => `<span class="sw" style="background:${rankColor(r)}"></span>${rankTierLabel(r)}`).join(' &nbsp; ') +
       ` &nbsp; <span style="color:var(--text-muted)">Badge = ${mfr}'s rank in that country &middot; % = share of ${mfr}'s world total &middot; growth = projected ${CUR_YEAR} vs. ${CUR_YEAR - 1}</span>`;
@@ -858,29 +907,17 @@ function renderCountryBars(){
       .map(([c, d]) => ({ country:c, total:d.sel.total, rank:d.rank, share: 100 * d.sel.total / d.total }))
       .sort((a, b) => b.total - a.total);
     built = all.map(x => ({
-      country:x.country, displayTotal: metric === 'share' ? x.share : x.total, fmtAsShare: metric === 'share',
+      country:x.country,
       brandRank: x.rank,
       pctOfWorld: worldTotal ? 100 * x.total / worldTotal : null,
       yoyHTML: yoyLabelHTML(yoyProjected(x.country, mfr)),
-      parts:[{ value:x.total, color:rankColor(x.rank), label:`#${x.rank} · ${fmt(x.total)} units (${x.share.toFixed(1)}% share)` }],
+      parts:[{
+        value:x.total, color:rankColor(x.rank), label:`#${x.rank} · ${fmt(x.total)} units (${x.share.toFixed(1)}% share)`,
+        display: metric === 'share' ? x.share.toFixed(1) + '%' : undefined,
+      }],
     }));
     note.textContent = `All ${all.length} markets with ${mfr} sales, ${periodLabel(period)}, sorted by units. Bar color = rank tier (matches the map).`;
-  } else {
-    document.getElementById('bars-group-toggle').classList.remove('hidden');
-    const byGroup = groupMode === 'group';
-    title.textContent = byGroup ? 'World sales by parent group' : 'World sales by brand';
-    legend.innerHTML = '';
-    const world = new Map();
-    Object.values(byCountry).forEach(d => d.list.forEach(a => { if(!isOtherName(a.name)) world.set(a.name, (world.get(a.name) || 0) + a.total); }));
-    const worldTotal = [...world.values()].reduce((s, v) => s + v, 0);
-    built = [...world.entries()].sort((a, b) => b[1] - a[1]).slice(0, WORLD_LIST_CAP).map(([name, total]) => ({
-      country:name, displayTotal:total,
-      pctOfWorld: worldTotal ? 100 * total / worldTotal : null,
-      parts:[{ value:total, color:brandColor(name), label:`${name}: ${fmt(total)}` }],
-    }));
-    note.textContent = `Top ${WORLD_LIST_CAP} ${byGroup ? 'parent groups' : 'brands'} worldwide by volume, ${periodLabel(period)}. Pick a manufacturer above to focus this chart on one market instead.`;
   }
-  if(md !== 'market') document.getElementById('bars-group-toggle').classList.add('hidden');
 
   if(!built.length){ rows.innerHTML = `<div class="note" style="display:block">No data for this selection.</div>`; return; }
   // bar LENGTH is scaled to the biggest row shown (widthDenom), same convention as the other
@@ -888,7 +925,7 @@ function renderCountryBars(){
   // so segments concatenate to the row's true proportional length rather than always filling 100%
   const widthDenom = d3.max(built, e => e.parts.reduce((s, p) => s + p.value, 0)) || 1;
   rows.innerHTML = built.map(e => {
-    const segs = e.parts.filter(p => p.value > 0).map(p => barSeg(p.color, 100 * p.value / widthDenom, p.label)).join('');
+    const { bar, outside } = segmentsHTML(e.parts, widthDenom);
     const rankBadge = e.brandRank !== undefined ? brandRankBadgeHTML(e.brandRank, mfr) : '';
     const pctOfTotal = e.pctOfWorld != null ? `<span class="pct-of-total" title="Share of the world total shown in this chart">${e.pctOfWorld.toFixed(1)}%</span>` : '';
     const yoy = e.yoyHTML || '';
@@ -896,9 +933,9 @@ function renderCountryBars(){
       ${rankBadge}
       <span class="country-label">${e.country}</span>
       ${pctOfTotal}
-      <span class="bar-track">${segs}</span>
+      <span class="bar-track">${bar}</span>
+      ${outside}
       ${yoy}
-      <span class="total-label">${e.fmtAsShare ? e.displayTotal.toFixed(1) + '%' : fmt(e.displayTotal)}</span>
     </div>`;
   }).join('');
 }
