@@ -60,6 +60,8 @@
   .mfr-combo-opt:hover, .mfr-combo-opt.hl{ background:var(--surface-alt); }
   .mfr-combo-empty{ padding:8px 10px; font-size:12.5px; color:var(--text-muted); }
   .rank-row .pct-of-total{ width:48px; flex-shrink:0; text-align:right; font-family:ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace; font-size:11.5px; font-variant-numeric:tabular-nums; color:var(--text-muted); }
+  .rank-row.world-total{ font-weight:700; padding-bottom:10px; margin-bottom:4px; border-bottom:1px solid var(--border); }
+  .rank-row.world-total .bar-track{ height:26px; }
 </style>
 </head>
 <body>
@@ -156,6 +158,16 @@
         </div>
       </div>
 
+      <div class="card chart-card hidden" id="continent-bars-card">
+        <h2 id="continent-bars-title">Continent by continent</h2>
+        <p class="note" id="continent-bars-note" style="display:block"></p>
+        <div class="rank-rows-header">
+          <span class="rrh-spacer"></span>
+          <span class="rrh-total" id="continent-bars-legend"></span>
+        </div>
+        <div class="rank-rows" id="continent-bars"></div>
+      </div>
+
       <div class="card chart-card" id="bars-card">
         <h2 id="bars-title">Sales by country</h2>
         <p class="note" id="bars-note" style="display:block"></p>
@@ -199,19 +211,12 @@ function rankTierLabel(rank){
   if(rank <= 10) return 'Top 6-10';
   return 'Outside top 10';
 }
-// market-size rank badge (same look as the Mix by Country page's world-rank badge), scoped to the
-// ~50 countries this page tracks rather than the full ~150-country world reference that page uses
-function ordinal(n){ const s = ['th','st','nd','rd']; const v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
-function marketRankTier(n){ if(n <= 10) return 'gold'; if(n <= 30) return 'blue'; if(n <= 50) return 'green'; if(n <= 75) return 'darkred'; return 'black'; }
-function computeMarketRanks(){
-  const ranks = {};
-  Object.entries(byCountry).sort((a, b) => b[1].total - a[1].total).forEach(([c], i) => { ranks[c] = i + 1; });
-  return ranks;
-}
-function marketRankBadgeHTML(rank){
+// badge for the country-by-country list: the SELECTED BRAND's own rank in that country's market
+// (not the country's overall size), colored to match the bar/map's own rank-tier coloring
+function brandRankBadgeHTML(rank, name){
   if(!rank) return '<span class="world-rank-badge"></span>';
-  const tier = marketRankTier(rank), ord = ordinal(rank);
-  return `<span class="world-rank-badge tier-${tier}" title="${ord} largest of the ${Object.keys(byCountry).length} tracked markets this period">${ord}</span>`;
+  const bg = rankColor(rank);
+  return `<span class="world-rank-badge" style="background:${bg};border-color:${bg};color:#fff" title="${name}'s rank in this country's market: ${rankTierLabel(rank)}">#${rank}</span>`;
 }
 // PERMANENT brand colors, one per brand, taken from each logo's dominant color (Toyota red, Ford blue, BMW
 // silver, Volkswagen navy, Chevrolet gold, Renault yellow...) and pushed apart in CIELAB space wherever two
@@ -251,6 +256,21 @@ function contrastOn(color){
 // head-to-head: each side simply wears its own permanent brand color
 function matchColor(which){ return brandColor(which === 1 ? mfr : mfr2); }
 function matchFlatColor(which){ return matchColor(which); }
+// country -> continent code, for the match-mode "continent by continent" chart. Countries not
+// listed fall back to "OTHER" rather than breaking -- this project's brand-level country roster
+// grows over time and this list isn't guaranteed to be exhaustive for every addition.
+const COUNTRY_CONTINENT = {
+  "Austria":"EU","Belgium":"EU","Bulgaria":"EU","Croatia":"EU","Cyprus":"EU","Czechia":"EU","Denmark":"EU",
+  "Estonia":"EU","Finland":"EU","France":"EU","Germany":"EU","Greece":"EU","Hungary":"EU","Iceland":"EU",
+  "Ireland":"EU","Italy":"EU","Latvia":"EU","Lithuania":"EU","Luxembourg":"EU","Malta":"EU","Netherlands":"EU",
+  "Norway":"EU","Poland":"EU","Portugal":"EU","Romania":"EU","Slovakia":"EU","Slovenia":"EU","Spain":"EU",
+  "Sweden":"EU","Switzerland":"EU","United Kingdom":"EU",
+  "Canada":"NAC","United States":"NAC","China":"ASIA","India":"ASIA","Mexico":"NAC","South Africa":"AFRICA","Japan":"ASIA","Australia":"OCEANIA","Brazil":"SA","South Korea":"ASIA","Indonesia":"ASIA","Thailand":"ASIA","Argentina":"SA","Turkey":"EU","Philippines":"ASIA","Chile":"SA","Morocco":"AFRICA","New Zealand":"OCEANIA","Malaysia":"ASIA","Taiwan":"ASIA","Singapore":"ASIA","Hong Kong":"ASIA","Colombia":"SA","Vietnam":"ASIA","Nepal":"ASIA",
+  "Israel":"MIDEAST","Kazakhstan":"ASIA","Peru":"SA","Uzbekistan":"ASIA","Uruguay":"SA","Ecuador":"SA","Ukraine":"EU","Albania":"EU","Paraguay":"SA","Tunisia":"AFRICA","Costa Rica":"NAC","Mauritius":"AFRICA","Russian Federation":"EU","Georgia":"EU","Montenegro":"EU","North Macedonia":"EU","Serbia":"EU",
+  "Panama":"NAC","Pakistan":"ASIA","UAE":"MIDEAST","Saudi Arabia":"MIDEAST","Egypt":"AFRICA","Iraq":"MIDEAST","Kuwait":"MIDEAST","Qatar":"MIDEAST","Oman":"MIDEAST","Puerto Rico":"NAC","Dominican Republic":"NAC","Iran":"MIDEAST",
+};
+const CONTINENT_LABELS = { EU:"Europe", NAC:"North America & Central", SA:"South America", ASIA:"Asia", AFRICA:"Africa", OCEANIA:"Oceania", MIDEAST:"Middle East", OTHER:"Other" };
+function continentOf(country){ return COUNTRY_CONTINENT[country] || "OTHER"; }
 const MAP_NAME_ALIASES = { "United States of America":"United States", "Russia":"Russian Federation", "United Arab Emirates":"UAE", "Macedonia":"North Macedonia" };
 const MARKERS = { "Singapore":[103.82,1.35], "Mauritius":[57.50,-20.16], "Luxembourg":[6.13,49.82] };
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -648,6 +668,7 @@ function renderMap(){
      md === 'rank' ? ` · shading shows ${mfr}'s rank in each country's market` :
      ' · shading shows total market size') +
     '. The badge in each country is its winner (a plain badge with initials where no logo is available). Scroll or use the buttons to zoom, drag to pan.';
+  renderContinentBars();
   renderCountryBars();
 }
 
@@ -717,8 +738,15 @@ function showModal(e, country){
   if(!d){ modal.innerHTML = `<h3>${country}</h3><div class="sub">No manufacturer breakdown for this period.</div>${historyHTML(country)}`; place(e); return; }
   const top = d.list.slice(0, 10), max = top[0].total;
   let rows = top.map((a, i) => rowHTML(i + 1, a, max, a === d.sel || a === d.sel2)).join('');
-  if(d.sel && d.rank > 10) rows += `<div style="text-align:center;color:var(--text-muted);line-height:.9">⋮</div>` + rowHTML(d.rank, d.sel, max, true);
-  if(d.sel2 && d.rank2 > 10) rows += `<div style="text-align:center;color:var(--text-muted);line-height:.9">⋮</div>` + rowHTML(d.rank2, d.sel2, max, true);
+  if(d.sel && d.sel2 && d.rank > 10 && d.rank2 > 10){
+    // both outside the top 10 shown above -- still order the two appended rows by actual sales,
+    // not by which manufacturer happens to be "manufacturer 1" vs. "manufacturer 2"
+    const pair = d.sel.total >= d.sel2.total ? [[d.rank, d.sel], [d.rank2, d.sel2]] : [[d.rank2, d.sel2], [d.rank, d.sel]];
+    rows += `<div style="text-align:center;color:var(--text-muted);line-height:.9">⋮</div>` + pair.map(([rk, a]) => rowHTML(rk, a, max, true)).join('');
+  } else {
+    if(d.sel && d.rank > 10) rows += `<div style="text-align:center;color:var(--text-muted);line-height:.9">⋮</div>` + rowHTML(d.rank, d.sel, max, true);
+    if(d.sel2 && d.rank2 > 10) rows += `<div style="text-align:center;color:var(--text-muted);line-height:.9">⋮</div>` + rowHTML(d.rank2, d.sel2, max, true);
+  }
   const sum = k => d.list.reduce((s, a) => s + a[k], 0);
   const bev = sum('bev'), phev = sum('phev'), other = sum('other');
   const pc = v => (100 * v / d.total).toFixed(1) + '%';
@@ -754,6 +782,49 @@ const BAR_CAP = 20;
 function barSeg(color, pct, label){
   return `<div class="bar-seg" style="width:${pct}%;background:${color}" title="${label.replace(/"/g, '&quot;')}"></div>`;
 }
+
+// ---------- match-mode only: continent-by-continent (with a world-total row on top) ----------
+function renderContinentBars(){
+  const card = document.getElementById('continent-bars-card');
+  if(mode() !== 'match'){ card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  const title = document.getElementById('continent-bars-title'), note = document.getElementById('continent-bars-note'),
+        legend = document.getElementById('continent-bars-legend'), rows = document.getElementById('continent-bars');
+  title.textContent = `${mfr} vs. ${mfr2} — continent by continent`;
+  legend.innerHTML = `<span class="sw" style="background:${matchFlatColor(1)}"></span>${mfr} &nbsp; <span class="sw" style="background:${matchFlatColor(2)}"></span>${mfr2}`;
+
+  const byContinent = new Map();
+  let worldU1 = 0, worldU2 = 0;
+  Object.entries(byCountry).forEach(([c, d]) => {
+    const u1 = d.sel ? d.sel.total : 0, u2 = d.sel2 ? d.sel2.total : 0;
+    worldU1 += u1; worldU2 += u2;
+    if(!u1 && !u2) return;
+    const cont = continentOf(c);
+    const e = byContinent.get(cont) || { u1:0, u2:0 };
+    e.u1 += u1; e.u2 += u2;
+    byContinent.set(cont, e);
+  });
+  const contRows = [...byContinent.entries()].sort((a, b) => (b[1].u1 + b[1].u2) - (a[1].u1 + a[1].u2));
+  const contDenom = d3.max(contRows, ([, e]) => e.u1 + e.u2) || 1;
+  const twoSegHTML = (u1, u2, denom) => [
+    u1 > 0 ? barSeg(matchFlatColor(1), 100 * u1 / denom, `${mfr}: ${fmt(u1)}`) : '',
+    u2 > 0 ? barSeg(matchFlatColor(2), 100 * u2 / denom, `${mfr2}: ${fmt(u2)}`) : '',
+  ].join('');
+
+  const worldRow = `<div class="rank-row world-total">
+      <span class="country-label">World total</span>
+      <span class="bar-track">${twoSegHTML(worldU1, worldU2, worldU1 + worldU2 || 1)}</span>
+      <span class="total-label">${fmt(worldU1 + worldU2)}</span>
+    </div>`;
+  const continentRows = contRows.map(([cont, e]) => `<div class="rank-row">
+      <span class="country-label">${CONTINENT_LABELS[cont] || cont}</span>
+      <span class="bar-track">${twoSegHTML(e.u1, e.u2, contDenom)}</span>
+      <span class="total-label">${fmt(e.u1 + e.u2)}</span>
+    </div>`).join('');
+
+  rows.innerHTML = worldRow + continentRows;
+  note.textContent = `${mfr} vs. ${mfr2} combined volume, ${periodLabel(period)}, by continent. Top row is the worldwide total; the continent rows below are scaled to each other, not to the world row.`;
+}
 function renderCountryBars(){
   const md = mode();
   const title = document.getElementById('bars-title'), note = document.getElementById('bars-note'),
@@ -767,7 +838,6 @@ function renderCountryBars(){
       .map(([c, d]) => ({ country:c, u1:d.sel ? d.sel.total : 0, u2:d.sel2 ? d.sel2.total : 0 }))
       .filter(x => x.u1 > 0 || x.u2 > 0)
       .sort((a, b) => (b.u1 + b.u2) - (a.u1 + a.u2))
-      .slice(0, BAR_CAP)
       .map(x => ({
         country:x.country, displayTotal:x.u1 + x.u2,
         parts:[
@@ -775,38 +845,37 @@ function renderCountryBars(){
           { value:x.u2, color:matchFlatColor(2), label:`${mfr2}: ${fmt(x.u2)}` },
         ],
       }));
-    note.textContent = `${built.length < BAR_CAP ? built.length : `Top ${BAR_CAP}`} markets where ${mfr} and/or ${mfr2} sell, ${periodLabel(period)}, sorted by combined volume.`;
+    note.textContent = `All ${built.length} markets where ${mfr} and/or ${mfr2} sell, ${periodLabel(period)}, sorted by combined volume.`;
   } else if(md === 'rank'){
     title.textContent = `${mfr} — country by country`;
     legend.innerHTML = [1, 2, 5, 10, 99].map(r => `<span class="sw" style="background:${rankColor(r)}"></span>${rankTierLabel(r)}`).join(' &nbsp; ') +
-      ` &nbsp; <span style="color:var(--text-muted)">Badge = market size rank &middot; % = share of ${mfr}'s world total &middot; growth = projected ${CUR_YEAR} vs. ${CUR_YEAR - 1}</span>`;
-    const marketRanks = computeMarketRanks();
+      ` &nbsp; <span style="color:var(--text-muted)">Badge = ${mfr}'s rank in that country &middot; % = share of ${mfr}'s world total &middot; growth = projected ${CUR_YEAR} vs. ${CUR_YEAR - 1}</span>`;
     const worldTotal = Object.values(byCountry).reduce((s, d) => s + (d.sel ? d.sel.total : 0), 0);
     const all = Object.entries(byCountry)
       .filter(([, d]) => d.sel)
       .map(([c, d]) => ({ country:c, total:d.sel.total, rank:d.rank, share: 100 * d.sel.total / d.total }))
       .sort((a, b) => b.total - a.total);
-    built = all.slice(0, BAR_CAP).map(x => ({
+    built = all.map(x => ({
       country:x.country, displayTotal: metric === 'share' ? x.share : x.total, fmtAsShare: metric === 'share',
-      marketRank: marketRanks[x.country],
+      brandRank: x.rank,
       pctOfWorld: worldTotal ? 100 * x.total / worldTotal : null,
       yoyHTML: yoyLabelHTML(yoyProjected(x.country, mfr)),
       parts:[{ value:x.total, color:rankColor(x.rank), label:`#${x.rank} · ${fmt(x.total)} units (${x.share.toFixed(1)}% share)` }],
     }));
-    note.textContent = `${all.length < BAR_CAP ? all.length : `Top ${BAR_CAP} of ${all.length}`} markets with ${mfr} sales, ${periodLabel(period)}, sorted by units. Bar color = rank tier (matches the map).`;
+    note.textContent = `All ${all.length} markets with ${mfr} sales, ${periodLabel(period)}, sorted by units. Bar color = rank tier (matches the map).`;
   } else {
-    title.textContent = 'Sales by manufacturer — top markets';
-    legend.innerHTML = `<span class="note" style="display:inline">Each country's top 5 manufacturers, by own color</span>`;
-    built = Object.entries(byCountry)
-      .sort((a, b) => b[1].total - a[1].total)
-      .slice(0, BAR_CAP)
-      .map(([c, d]) => {
-        const top5 = d.list.slice(0, 5), shown = top5.reduce((s, a) => s + a.total, 0);
-        const parts = top5.map(a => ({ value:a.total, color:brandColor(a.name), label:`${a.name}: ${fmt(a.total)}` }));
-        if(d.total > shown) parts.push({ value:d.total - shown, color:'var(--surface-alt)', label:`Others: ${fmt(d.total - shown)}` });
-        return { country:c, displayTotal:d.total, parts };
-      });
-    note.textContent = `Top ${BAR_CAP} markets by total volume, ${periodLabel(period)}. Pick a manufacturer above to focus this chart on it.`;
+    const byGroup = groupMode === 'group';
+    title.textContent = byGroup ? 'World sales by parent group' : 'World sales by brand';
+    legend.innerHTML = `<span class="note" style="display:inline">Use the Brand / Parent group toggle above to switch this chart</span>`;
+    const world = new Map();
+    Object.values(byCountry).forEach(d => d.list.forEach(a => { if(!isOtherName(a.name)) world.set(a.name, (world.get(a.name) || 0) + a.total); }));
+    const worldTotal = [...world.values()].reduce((s, v) => s + v, 0);
+    built = [...world.entries()].sort((a, b) => b[1] - a[1]).slice(0, BAR_CAP).map(([name, total]) => ({
+      country:name, displayTotal:total,
+      pctOfWorld: worldTotal ? 100 * total / worldTotal : null,
+      parts:[{ value:total, color:brandColor(name), label:`${name}: ${fmt(total)}` }],
+    }));
+    note.textContent = `Top ${BAR_CAP} ${byGroup ? 'parent groups' : 'brands'} worldwide by volume, ${periodLabel(period)}. Pick a manufacturer above to focus this chart on one market instead.`;
   }
 
   if(!built.length){ rows.innerHTML = `<div class="note" style="display:block">No data for this selection.</div>`; return; }
@@ -816,8 +885,8 @@ function renderCountryBars(){
   const widthDenom = d3.max(built, e => e.parts.reduce((s, p) => s + p.value, 0)) || 1;
   rows.innerHTML = built.map(e => {
     const segs = e.parts.filter(p => p.value > 0).map(p => barSeg(p.color, 100 * p.value / widthDenom, p.label)).join('');
-    const rankBadge = e.marketRank !== undefined ? marketRankBadgeHTML(e.marketRank) : '';
-    const pctOfTotal = e.pctOfWorld != null ? `<span class="pct-of-total" title="${mfr}'s ${e.country} units as a share of ${mfr}'s world total this period">${e.pctOfWorld.toFixed(1)}%</span>` : '';
+    const rankBadge = e.brandRank !== undefined ? brandRankBadgeHTML(e.brandRank, mfr) : '';
+    const pctOfTotal = e.pctOfWorld != null ? `<span class="pct-of-total" title="Share of the world total shown in this chart">${e.pctOfWorld.toFixed(1)}%</span>` : '';
     const yoy = e.yoyHTML || '';
     return `<div class="rank-row">
       ${rankBadge}
