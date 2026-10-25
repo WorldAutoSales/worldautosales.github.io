@@ -4355,7 +4355,7 @@ function renderElecShareModelsChart(rows){
     .text((d,i) => `#${i + 1}`);
   g.selectAll('.model-label').data(rows).join('text').attr('class', 'model-label')
     .attr('x', -6).attr('y', (d,i) => i * rowH + rowH / 2).attr('dy', '0.32em').attr('text-anchor', 'end')
-    .style('font-size', '11.5px').style('fill', 'var(--text)').text(d => `${d.brand} ${d.model}`);
+    .style('font-size', '11.5px').style('fill', 'var(--text)').text(d => mfrModelLabel(d.brand, d.model));
   g.selectAll('.value-label').data(rows).join('text').attr('class', 'value-label')
     .attr('x', d => Math.max(1, x(d.bev)) + 5).attr('y', (d,i) => i * rowH + rowH / 2).attr('dy', '0.32em')
     .style('font-size', '11.5px').style('fill', 'var(--text)').text(d => d.bev.toLocaleString('en-US'));
@@ -5487,6 +5487,16 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     return [`${y}-projection`, `${y}-ytd`]; // Projected before YTD, matching this site's other period-ordered tables
   }
   function mfrIsSyntheticKey(key){ return /^\d{4}-(ytd|projection)$/.test(key); }
+  const MFR_MODEL_PREFIX_ALIAS = { greatwallmotors: ['gwm'], gwm: ['greatwall'] };
+  // "Brand Model", without repeating the brand when the source's model name already starts with it ("Fiat Strada")
+  function mfrModelLabel(brand, model){
+    // also skips the brand when the model starts with its first word ("Mercedes-Benz | Mercedes-AMG GT", "MG Rover | MG ZS") or a known short form (Great Wall Motors | GWM Haval H6)
+    const norm = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const m = norm(model), b = norm(brand);
+    const prefixes = [b, norm(String(brand).split(/[\s-]/)[0]), ...(MFR_MODEL_PREFIX_ALIAS[b] || [])].filter(Boolean);
+    const dup = prefixes.some(p => m.startsWith(p) && m.length > p.length);
+    return dup ? String(model) : `${brand} ${model}`;
+  }
   function mfrPeriodLabel(key){
     const m = key.match(/^(\d{4})-(ytd|projection)$/);
     if(!m) return key;
@@ -5548,11 +5558,11 @@ const MFR_MONTHLY_SOURCE_NOTE = {
         const rows = mfrIsSyntheticKey(ym)
           ? mfrAggregateSynthetic(MANUFACTURER_MODEL_MONTHLY[mfrCountry], ym, r => `${r.brand}\u0001${r.model}`)
           : MANUFACTURER_MODEL_MONTHLY[mfrCountry].filter(r => r.year_month === ym);
-        return rows.map(r => ({ ...r, label: `${r.brand} ${r.model}` }));
+        return rows.map(r => ({ ...r, label: mfrModelLabel(r.brand, r.model) }));
       }
       if(!(hasModelYearly && MANUFACTURER_MODEL_YEARLY[mfrCountry])) return [];
       return MANUFACTURER_MODEL_YEARLY[mfrCountry].filter(r => r.year === mfrYear)
-        .map(r => ({ ...r, label: `${r.brand} ${r.model}` }));
+        .map(r => ({ ...r, label: mfrModelLabel(r.brand, r.model) }));
     }
     if(mfrMonthly){
       const ym = mfrMonthSelect.value;
@@ -6287,7 +6297,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     if(!mfrModelYearPreview) return;
     const rows = buildMfrModelYearRows(brand, model);
     if(!rows.length){ mfrModelYearPreview.classList.add('hidden'); return; }
-    if(mfrModelYearPreviewTitle) mfrModelYearPreviewTitle.textContent = `${brand} ${model} — sales by year (# = overall rank, colored # = rank among same-powertrain models)`;
+    if(mfrModelYearPreviewTitle) mfrModelYearPreviewTitle.textContent = `${mfrModelLabel(brand, model)} — sales by year (# = overall rank, colored # = rank among same-powertrain models)`;
     renderMfrModelYearChart(brand, model);
     const rect = anchorEl.getBoundingClientRect();
     mfrModelYearPreview.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 920)) + 'px';
