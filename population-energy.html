@@ -65,6 +65,11 @@
         <button type="button" class="mode-btn" data-metric="oil">Oil Consumption per Capita</button>
       </div>
 
+      <div class="chart-mode-toggle basis-toggle hidden" id="basis-toggle" role="group" aria-label="Population basis" style="margin:-6px 0 16px;">
+        <button type="button" class="mode-btn" data-basis="person">Per person (all ages)</button>
+        <button type="button" class="mode-btn active" data-basis="adult">Per adult (15+)</button>
+      </div>
+
       <div class="stat-row" id="stat-row"></div>
 
       <div class="card chart-card">
@@ -72,7 +77,7 @@
           <h2 id="rank-title">People per New Car Sold</h2>
         </div>
         <p class="note" id="rank-note">Lower = more cars sold relative to population (a "hotter" market). Ranked list — bar length is inverted (shorter bar = fewer people per car = hotter market). Click a row to isolate it on the map.</p>
-        <div class="rank-rows" id="rank-rows"></div>
+        <div class="rank-rows raw-mode" id="rank-rows"></div>
         <div class="tooltip" id="bar-tooltip"></div>
       </div>
 
@@ -95,6 +100,7 @@
         <ul class="notes-body">
           <li><strong>Population:</strong> World Bank (SP.POP.TOTL), 2024, for 105 countries; Taiwan from its own Ministry of Interior (the World Bank does not track Taiwan separately); France's five overseas departments from INSEE/IEDOM. 110 countries in total.</li>
           <li><strong>Sales per capita:</strong> uses each country's latest full-year total from the "Auto Markets by Country" page — a 2026 full-year run-rate projection where available (flagged "proj." in the tooltip), otherwise the latest complete raw year. 107 of 110 countries have a sales figure; Laos, North Macedonia and Suriname don't have a tracked total anywhere on the site yet.</li>
+          <li><strong>Adult population (15+):</strong> total population minus the share aged 0-14 (World Bank SP.POP.0014.TO.ZS, 2024, from UN World Population Prospects; Taiwan 11.72% from its Ministry of the Interior, end of 2024). 105 of 110 countries; the five French overseas departments have no age split yet, so they only appear on the per-person view. 15+ is used because it is the standard age cut that is available consistently for every country; an 18+ cut would need single-year age tables per country.</li>
           <li><strong>Cars on the road per capita:</strong> uses each country's 2024 (or nearest earlier year) fleet size from this site's cars-on-road dataset, which currently covers 50 of the 110 countries — real registry counts for most major markets, modeled/anchored estimates for the rest (see the Cars on the Road page for each country's method). The other 60 countries simply aren't built yet for this dataset and show as no data here, not zero.</li>
           <li><strong>Oil consumption per capita:</strong> total refined petroleum product consumption (not just road fuel — also jet fuel, heating oil, petrochemical feedstocks, etc.), from the Energy Institute Statistical Review of World Energy / EIA via Our World in Data, 2024, converted from terawatt-hours to litres using a blended ~36 MJ/L energy density (an approximation, not a precise per-product conversion). This is <strong>not</strong> split into petrol vs. diesel — no source publishes that split per country in one consistent place; a real petrol/diesel breakdown would need slower country-by-country secondary sourcing, same as this project already does for a few individual markets.</li>
           <li>Different vintages are being compared against one population year (2024) — sales figures run up to a 2026 projection, fleet and oil figures are 2024. Treat this as a reasonable approximation, not a perfectly synchronized snapshot.</li>
@@ -136,7 +142,7 @@ const METRICS = {
   sales: {
     title: 'Sales per Capita',
     rankTitle: 'People per New Car Sold',
-    rankNote: 'Lower = more cars sold relative to population (a "hotter" market). Ranked list — bar length is inverted (shorter bar = fewer people per car). Click a row to isolate it on the map.',
+    rankNote: 'Lower = more cars sold relative to population (a "hotter" market). Bar length is proportional to cars sold per person (the inverse of the number shown), so the longest bar is the hottest market. Click a row to isolate it on the map.',
     mapTitle: 'Sales per Capita Map',
     mapNote: 'Shaded by people-per-car-sold in each country\'s latest available year — darker = more cars sold per person. Hover a country for exact figures. Grey = no sales data.',
     legendLabel: 'People per car sold',
@@ -144,20 +150,22 @@ const METRICS = {
     hasEntry: c => c.salesTotal != null,
     ratio: c => c.population / c.salesTotal, // people per car sold — lower is "hotter"
     lowerIsHotter: true,
+    perThousand: true,
     tooltipExtra: c => `${Math.round(c.salesTotal).toLocaleString('en-US')} cars sold in ${c.salesYear}${c.salesProjected ? ' (proj.)' : ''} — population ${Math.round(c.population).toLocaleString('en-US')}`,
   },
   fleet: {
     title: 'Cars on the Road per Capita',
-    rankTitle: 'People per Car on the Road',
-    rankNote: 'Lower = more cars on the road relative to population (closer to one car per person). Ranked list — bar length is inverted (shorter bar = fewer people per car). Click a row to isolate it on the map.',
+    get rankTitle(){ return fleetBasis === 'adult' ? 'Adults (15+) per Car on the Road' : 'People per Car on the Road'; },
+    get rankNote(){ return `Lower = more cars on the road relative to ${fleetBasis === 'adult' ? 'the adult population (15 and over)' : 'the total population'} (one car per ${fleetBasis === 'adult' ? 'adult' : 'person'} = 1.0). Bar length is proportional to cars per ${fleetBasis === 'adult' ? 'adult' : 'person'} (the inverse of the number shown), so the longest bar is the most motorised country. Click a row to isolate it on the map.`; },
     mapTitle: 'Cars on the Road per Capita Map',
-    mapNote: 'Shaded by people-per-car-on-the-road, 2024 (or nearest earlier year) — darker = closer to one car per person. Only 50 of 110 countries have fleet data built yet. Grey = no data.',
-    legendLabel: 'People per car on the road',
-    unitLabel: 'people/car',
-    hasEntry: c => c.fleetTotal != null,
-    ratio: c => c.population / c.fleetTotal,
+    get mapNote(){ return `Shaded by ${fleetBasis === 'adult' ? 'adults (15+)' : 'people'} per car on the road, 2024 (or nearest earlier year) — darker = more cars per ${fleetBasis === 'adult' ? 'adult' : 'person'}. Only the countries with fleet data are shaded (50 of 110 so far). Grey = no data.`; },
+    get legendLabel(){ return fleetBasis === 'adult' ? 'Adults (15+) per car on the road' : 'People per car on the road'; },
+    get unitLabel(){ return fleetBasis === 'adult' ? 'adults/car' : 'people/car'; },
+    hasEntry: c => c.fleetTotal != null && (fleetBasis === 'person' || c.adultPop != null),
+    ratio: c => (fleetBasis === 'adult' ? c.adultPop : c.population) / c.fleetTotal,
     lowerIsHotter: true,
-    tooltipExtra: c => `${Math.round(c.fleetTotal).toLocaleString('en-US')} cars on the road in ${c.fleetYear} — population ${Math.round(c.population).toLocaleString('en-US')}`,
+    perThousand: true,
+    tooltipExtra: c => `${Math.round(c.fleetTotal).toLocaleString('en-US')} cars on the road in ${c.fleetYear} — ${fleetBasis === 'adult' ? 'adult (15+) population ' + Math.round(c.adultPop).toLocaleString('en-US') + ' of ' + Math.round(c.population).toLocaleString('en-US') + ' inhabitants' : 'population ' + Math.round(c.population).toLocaleString('en-US')}`,
   },
   oil: {
     title: 'Oil Consumption per Capita',
@@ -176,6 +184,7 @@ const METRICS = {
 
 const COUNTRIES = Object.keys(POPULATION_ENERGY).sort();
 let currentMetric = 'sales';
+let fleetBasis = 'adult';
 let isolatedCountry = null;
 
 function activeData(){
@@ -300,7 +309,7 @@ function renderBars(data){
   rankRows.innerHTML = sorted.map(d => {
     let width;
     if(m.lowerIsHotter){
-      width = maxRatio === minRatio ? 100 : (1 - (d.ratio - minRatio) / (maxRatio - minRatio)) * 90 + 10;
+      width = minRatio / d.ratio * 100;   // proportional to cars per person (1 / people per car); the lowest ratio gets the full bar
     } else {
       width = maxRatio === 0 ? 10 : d.ratio / maxRatio * 100;
     }
@@ -328,7 +337,8 @@ rankRows.addEventListener('pointermove', e => {
   barTooltip.style.top = (e.clientY - cardRect.top - 10) + 'px';
   barTooltip.style.opacity = 1;
   const valueText = entry.ratio >= 1000 ? Math.round(entry.ratio).toLocaleString('en-US') : entry.ratio.toFixed(1);
-  barTooltip.innerHTML = `${entry.country} — <strong>${valueText}</strong> ${m.unitLabel}<br><span style="opacity:.7">${m.tooltipExtra(entry)}</span>`;
+  const per1000 = m.perThousand ? ` · ${(1000 / entry.ratio).toFixed(entry.ratio > 1000 ? 2 : entry.ratio > 100 ? 1 : 0)} per 1,000` : '';
+  barTooltip.innerHTML = `${entry.country} — <strong>${valueText}</strong> ${m.unitLabel}${per1000}<br><span style="opacity:.7">${m.tooltipExtra(entry)}</span>`;
 });
 rankRows.addEventListener('pointerleave', () => { barTooltip.style.opacity = 0; });
 
@@ -356,6 +366,7 @@ function switchMetric(metric){
   document.getElementById('rank-note').textContent = m.rankNote;
   document.getElementById('map-title').textContent = m.mapTitle;
   document.getElementById('map-note').textContent = m.mapNote;
+  document.getElementById('basis-toggle').classList.toggle('hidden', metric !== 'fleet');
   render();
 }
 
@@ -373,6 +384,20 @@ document.querySelectorAll('[data-metric]').forEach(btn => {
   btn.addEventListener('click', () => {
     if(btn.dataset.metric === currentMetric) return;
     switchMetric(btn.dataset.metric);
+  });
+});
+
+document.querySelectorAll('[data-basis]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if(btn.dataset.basis === fleetBasis) return;
+    fleetBasis = btn.dataset.basis;
+    document.querySelectorAll('[data-basis]').forEach(b => b.classList.toggle('active', b.dataset.basis === fleetBasis));
+    isolatedCountry = null;
+    const m = METRICS.fleet;
+    document.getElementById('rank-title').textContent = m.rankTitle;
+    document.getElementById('rank-note').textContent = m.rankNote;
+    document.getElementById('map-note').textContent = m.mapNote;
+    render();
   });
 });
 
