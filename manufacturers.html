@@ -750,7 +750,9 @@ function historyHTML(country, scope){
   else if(md === 'rank') series = [{ label:mfr, color:brandColor(mfr), values: years.map(y => ({ year:y, val: yearVal(y, mfr) })) }];
   else series = [{ label:'Total market', color:'var(--accent)', values: years.map(y => ({ year:y, val: scope ? null : countryYearTotal(country, y) })) }];
 
-  const allVals = series.flatMap(s => s.values.map(v => v.val)).filter(v => v != null);
+  // the running year is shown as a full-year projection (year-to-date x 12 / months loaded); the year-to-date part keeps the series color, the projected rest is a lighter tint
+  series.forEach(s => s.values.forEach(v => { v.top = v.val != null && v.year === CUR_YEAR ? v.val * 12 / CUR_YEAR_MONTHS_ELAPSED : v.val; }));
+  const allVals = series.flatMap(s => s.values.map(v => v.top)).filter(v => v != null);
   if(!allVals.length) return '';
   const max = Math.max(...allVals, 1);
   const title = md === 'match' ? `${mfr} vs. ${mfr2} — last ${years.length} years in ${country}` :
@@ -758,14 +760,17 @@ function historyHTML(country, scope){
   const legend = series.length > 1 ? `<div style="margin-bottom:6px;font-size:10.5px;color:var(--text-muted)">${series.map(s => `<span class="sw" style="background:${s.color}"></span>${s.label}`).join(' &nbsp; ')}</div>` : '';
   const bars = years.map((y, i) => {
     const pair = series.map(s => {
-      const v = s.values[i].val;
+      const { val: v, top } = s.values[i];
       if(v == null) return '';
-      const h = Math.max(2, 100 * v / max);
-      return `<div class="hbar" style="height:${h}%;background:${s.color}" title="${s.label} ${y}${y === CUR_YEAR ? ' (YTD)' : ''}: ${fmt(v)}"></div>`;
+      const h = Math.max(2, 100 * top / max);
+      if(y !== CUR_YEAR) return `<div class="hbar" style="height:${h}%;background:${s.color}" title="${s.label} ${y}: ${fmt(v)}"></div>`;
+      const cut = top ? (100 * v / top).toFixed(1) : 100;
+      const tint = `color-mix(in srgb, ${s.color} 32%, white)`;
+      return `<div class="hbar" style="height:${h}%;background:linear-gradient(to top, ${s.color} 0 ${cut}%, ${tint} ${cut}% 100%)" title="${s.label} ${y} projected: ${fmt(top)} (year-to-date ${fmt(v)} + projection ${fmt(top - v)})"></div>`;
     }).join('');
     return `<div class="history-yr${series.length > 1 ? ' pair' : ''}"><div class="bars-pair">${pair}</div><div class="hyear">${y}${y === CUR_YEAR ? '*' : ''}</div></div>`;
   }).join('');
-  return `<div class="history"><div class="history-title">${title}</div>${legend}<div class="history-bars">${bars}</div>${years.includes(CUR_YEAR) ? `<div style="font-size:10px;color:var(--text-muted);margin-top:4px">*${CUR_YEAR} is year-to-date</div>` : ''}</div>`;
+  return `<div class="history"><div class="history-title">${title}</div>${legend}<div class="history-bars">${bars}</div>${years.includes(CUR_YEAR) ? `<div style="font-size:10px;color:var(--text-muted);margin-top:4px">*${CUR_YEAR} projected full year (year-to-date x 12 / ${CUR_YEAR_MONTHS_ELAPSED} months): solid = year-to-date, light = projected rest of year</div>` : ''}</div>`;
 }
 function rowHTML(rk, a, max, sel){
   const w = v => (max ? 100 * v / max : 0).toFixed(2) + '%';
