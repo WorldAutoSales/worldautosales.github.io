@@ -622,10 +622,12 @@ const MONTHLY_DATA = {
       // Argonne National Laboratory monthly EV data (anl.gov, September 2026 update: BEV 90,213, PHEV 18,172, HEV 205,034; PEV 8.21% of LDV sales) + MarkLines preliminary US total of 1,321,668 new vehicles (Argonne's own 8.21% share implies ~1.32M, consistent) -- diesel folded into petrol per the existing US convention, others = 24 fuel-cell vehicles (Toyota Mirai) as in August; total is PRELIMINARY, replace with Wards' final when published
       "United States": [90213,18172,205034,24,1008225,0,1321668],
       // DesRosiers Automotive Q3 2026 estimate (493,352 new light vehicles) via BestSellingCarsBlog -- Q3 divided evenly across Jul-Sep (same figure repeated each month; Statistics Canada's Q3 table is expected ~8 Dec 2026 and will replace these numbers). BEV = sum of the all-electric nameplates in BSCB's Q3 model table (Tesla is BSCB's own estimate); PHEV / HEV / petrol / diesel = Statistics Canada's Q2 2026 shares of the non-BEV volume applied to the remainder, because the model table cannot separate hybrid variants of a nameplate
-      "Canada": [13731,5417,27306,0,111702,6295,164451]
+      "Canada": [13731,5417,27306,0,111702,6295,164451],
+      // car250.com (DLT registrations, basis-switch for this month only -- FTI not yet published as of 2026-10-24); fuel split derived by subtracting car250's Jan-Aug cumulative fuel breakdown from its Jan-Sep cumulative breakdown
+      "Thailand": [19468,2068,14695,86,8028,15765,60110]
     },
-    priorYearBev: {      "Finland":2591,      "Belgium":11966,      "Netherlands":12008,      "Poland":4452,      "Brazil":8195,      "Mexico":2041,      "United Kingdom":72779,      "Luxembourg":1245,      "Switzerland":5182,      "India":18549,      "Taiwan":3837,      "Ireland":1734,      "Ecuador":481,      "Paraguay":38,      "Uruguay":1943,      "China":826000,      "Austria":5383,      "Bulgaria":226,      "Croatia":178,      "Cyprus":151,      "Czechia":1360,      "Estonia":68,      "Greece":850,      "Hungary":905,      "Latvia":175,      "Lithuania":517,      "Malta":283,      "Romania":746,      "Slovakia":324,      "Slovenia":742,      "Iceland":625,      "United States":140579,      "Canada":9549},
-    priorYearTotal: {      "Finland":5996,      "Belgium":31519,      "Netherlands":32199,      "Poland":49853,      "Brazil":231479,      "Mexico":119766,      "United Kingdom":312891,      "Luxembourg":3779,      "Switzerland":20031,      "India":322414,      "Taiwan":28257,      "Ireland":5611,      "Ecuador":11219,      "Paraguay":2541,      "Uruguay":5239,      "China":2241000,      "Austria":25745,      "Bulgaria":3813,      "Croatia":4723,      "Cyprus":1432,      "Czechia":21370,      "Estonia":1179,      "Greece":12273,      "Hungary":10380,      "Latvia":2087,      "Lithuania":3793,      "Malta":544,      "Romania":12463,      "Slovakia":7188,      "Slovenia":4903,      "Iceland":868,      "United States":1241581,      "Canada":162094}
+    priorYearBev: {      "Finland":2591,      "Belgium":11966,      "Netherlands":12008,      "Poland":4452,      "Brazil":8195,      "Mexico":2041,      "United Kingdom":72779,      "Luxembourg":1245,      "Switzerland":5182,      "India":18549,      "Taiwan":3837,      "Ireland":1734,      "Ecuador":481,      "Paraguay":38,      "Uruguay":1943,      "China":826000,      "Austria":5383,      "Bulgaria":226,      "Croatia":178,      "Cyprus":151,      "Czechia":1360,      "Estonia":68,      "Greece":850,      "Hungary":905,      "Latvia":175,      "Lithuania":517,      "Malta":283,      "Romania":746,      "Slovakia":324,      "Slovenia":742,      "Iceland":625,      "United States":140579,      "Canada":9549,      "Thailand":9155},
+    priorYearTotal: {      "Finland":5996,      "Belgium":31519,      "Netherlands":32199,      "Poland":49853,      "Brazil":231479,      "Mexico":119766,      "United Kingdom":312891,      "Luxembourg":3779,      "Switzerland":20031,      "India":322414,      "Taiwan":28257,      "Ireland":5611,      "Ecuador":11219,      "Paraguay":2541,      "Uruguay":5239,      "China":2241000,      "Austria":25745,      "Bulgaria":3813,      "Croatia":4723,      "Cyprus":1432,      "Czechia":21370,      "Estonia":1179,      "Greece":12273,      "Hungary":10380,      "Latvia":2087,      "Lithuania":3793,      "Malta":544,      "Romania":12463,      "Slovakia":7188,      "Slovenia":4903,      "Iceland":868,      "United States":1241581,      "Canada":162094,      "Thailand":48350}
   },
   "2026-08": {
     label: "August 2026",
@@ -1698,7 +1700,7 @@ const MONTHLY_DATA = {
       // source: CPCA (China Passenger Car Association) via CnEVPost — DOMESTIC passenger-vehicle RETAIL sales (sedans, SUVs, MPVs); excludes exports, heavy/commercial vehicles and light commercial vehicles. BEV exact; PHEV = PHEV + EREV; petrol = remainder (includes non-plug-in hybrids); HEV=0, Diesel=0 (not published)
       "China": [5205000,2552000,0,0,5585000,0,13342000],
       // source: world_auto_sales_annual, period_type='YTD' — FTI Automotive Industry Club, Jan-Jul 2026 summed; Total includes pickups/PPV, not passenger-cars-only; Diesel is a residual
-      "Thailand": [146655,8388,102400,1217,70007,137264,465931],
+      "Thailand": [166123,10456,117095,1303,78035,153029,526041],
       // source: TS/KOTSA new-registration API, Jan-Aug 2026 summed — PHEV folded into HEV
       "South Korea": [297671,0,414746,111034,392154,31924,1247529],
       // source: world_auto_sales_annual, period_type='YTD' — GAIKINDO, Jan-Jul 2026 summed; no diesel split published (Diesel=0)
@@ -1765,7 +1767,7 @@ const MONTHLY_DATA = {
       "South Korea":"through Sep 2026",
       "Singapore":"through Aug 2026",
       "Malaysia":"through Sep 2026",
-      "Thailand":"through Aug 2026",
+      "Thailand":"through Sep 2026",
       "Indonesia":"through Sep 2026",
       "Chile":"through Aug 2026",
       "Vietnam":"through Sep 2026",
@@ -1797,7 +1799,8 @@ const MONTHLY_DATA = {
       "Paraguay":547,
       "China":5438000,
       "Serbia":298,
-      "Hong Kong":18058
+      "Hong Kong":18058,
+      "Thailand":82190
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
@@ -1810,7 +1813,8 @@ const MONTHLY_DATA = {
       "Paraguay":21959,
       "China":16950576,
       "Serbia":23968,
-      "Hong Kong":21528
+      "Hong Kong":21528,
+      "Thailand":447778
     }
     // note: China omitted from priorYearBev — no matching Jan-Jul 2025 monthly data sourced (world_auto_sales has no pre-2026 China rows)
     // note: Tunisia omitted from priorYearBev/priorYearTotal for the same reason — only a full-year 2025 total was sourced (see 2025-annual), no Jan-Jul 2025 monthly breakdown to compare against
@@ -1869,7 +1873,7 @@ const MONTHLY_DATA = {
       // source: Vahan Dashboard — each fuel trended from the last 3 actual months' average (or the 8-mo YTD average if higher), applied to the remaining 4 months
       "India": [362299, 36, 448898, 1256752, 2313967, 945800, 5327752],
       // source: world_auto_sales_annual, period_type='PROJECTED' — plain run-rate (YTD x 12/7) from FTI Automotive Industry Club data; Total includes pickups/PPV, not passenger-cars-only
-      "Thailand": [231911, 13384, 153600, 1825, 105011, 205896, 711627],
+      "Thailand": [226983, 14802, 159507, 1750, 104047, 204039, 711128],
       // source: TS/KOTSA — each fuel trended from the last 3 actual months' average (or the 8-mo YTD average if higher), applied to the remaining 4 months; PHEV folded into HEV
       "South Korea": [396895, 0, 552995, 148045, 522872, 42565, 1663372],
       // source: world_auto_sales_annual, period_type='PROJECTED' — plain run-rate (YTD x 12/7) from GAIKINDO data; no diesel split published (Diesel=0)
