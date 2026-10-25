@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Population &amp; Energy — World Auto Sales</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="index.html">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="50" r="46" fill="var(--surface)" stroke="var(--accent)" stroke-width="4"/>
+        <path d="M20 58 L26 40 C28 35 32 32 38 32 L62 32 C68 32 72 35 74 40 L80 58 L80 66 C80 69 78 71 75 71 L71 71 C68 71 66 69 66 66 L66 64 L34 64 L34 66 C34 69 32 71 29 71 L25 71 C22 71 20 69 20 66 Z" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linejoin="round"/>
+        <circle cx="32" cy="64" r="6" fill="var(--text)"/>
+        <circle cx="68" cy="64" r="6" fill="var(--text)"/>
+        <line x1="30" y1="45" x2="70" y2="45" stroke="var(--accent)" stroke-width="3" opacity="0.5"/>
+      </svg>
+      <span class="wordmark">
+        <span class="brand">World Auto</span>
+        <span class="sub">Sales Stats</span>
+      </span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <a href="index.html"><span class="dot"></span>Home</a>
+
+      <div class="nav-heading">Overview</div>
+      <a href="world-auto-sales.html"><span class="dot"></span>World Auto Sales</a>
+      <a href="world-car-sales.html"><span class="dot"></span>World Car Sales</a>
+
+      <div class="nav-heading">Powertrain</div>
+      <a href="powertrain-mix-by-country.html"><span class="dot"></span>Mix by Country</a>
+      <a href="manufacturers.html"><span class="dot"></span>Manufacturers</a>
+
+      <div class="nav-heading">Markets</div>
+      <a href="auto-markets-by-country.html"><span class="dot"></span>Auto Markets by Country</a>
+      <a href="population-energy.html" aria-current="page"><span class="dot"></span>Population &amp; Energy</a>
+
+      <div class="nav-heading">Rankings</div>
+      <a href="biggest-movers.html"><span class="dot"></span>Biggest Movers</a>
+
+      <div class="nav-heading">Trends<span class="soon-pill">Soon</span></div>
+    </nav>
+
+    <div class="sidebar-footer">
+      Monthly worldwide car sales &amp; powertrain stats — built for video &amp; social.
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page">
+      <header class="page-header">
+        <div class="eyebrow">World Auto Sales · Population &amp; Energy</div>
+        <h1>Population &amp; Energy</h1>
+        <p class="subtitle">Three country-level ratios, side by side: new-car sales per capita, the existing car fleet per capita, and oil consumption per capita. Each metric has its own data coverage and vintage — see the notes below before comparing across tabs.</p>
+      </header>
+
+      <div class="chart-mode-toggle metric-toggle" role="group" aria-label="Metric" style="margin-bottom:16px;">
+        <button type="button" class="mode-btn active" data-metric="sales">Sales per Capita</button>
+        <button type="button" class="mode-btn" data-metric="fleet">Cars on the Road per Capita</button>
+        <button type="button" class="mode-btn" data-metric="oil">Oil Consumption per Capita</button>
+      </div>
+
+      <div class="stat-row" id="stat-row"></div>
+
+      <div class="card chart-card">
+        <div class="chart-header-row">
+          <h2 id="rank-title">People per New Car Sold</h2>
+        </div>
+        <p class="note" id="rank-note">Lower = more cars sold relative to population (a "hotter" market). Ranked list — bar length is inverted (shorter bar = fewer people per car = hotter market). Click a row to isolate it on the map.</p>
+        <div class="rank-rows" id="rank-rows"></div>
+        <div class="tooltip" id="bar-tooltip"></div>
+      </div>
+
+      <div class="card chart-card">
+        <h2 id="map-title">Sales per Capita Map</h2>
+        <p class="note" id="map-note">Shaded by people-per-car-sold in each country's latest available year — darker = more cars sold per person. Hover a country for exact figures. Grey = no data for this metric.</p>
+        <div class="map-wrap">
+          <svg class="map-svg" id="map-svg" viewBox="0 0 940 460" role="img" aria-label="World map shaded by per-capita metric"></svg>
+          <div class="tooltip" id="map-tooltip"></div>
+        </div>
+        <div class="map-legend" id="map-legend"></div>
+      </div>
+
+      <div class="card notes-card is-collapsed">
+        <button type="button" class="notes-toggle" aria-expanded="false">
+          <span>📝 Notes</span>
+          <span class="notes-hint">Click to expand notes</span>
+          <span class="notes-arrow">▸</span>
+        </button>
+        <ul class="notes-body">
+          <li><strong>Population:</strong> World Bank (SP.POP.TOTL), 2024, for 105 countries; Taiwan from its own Ministry of Interior (the World Bank does not track Taiwan separately); France's five overseas departments from INSEE/IEDOM. 110 countries in total.</li>
+          <li><strong>Sales per capita:</strong> uses each country's latest full-year total from the "Auto Markets by Country" page — a 2026 full-year run-rate projection where available (flagged "proj." in the tooltip), otherwise the latest complete raw year. 107 of 110 countries have a sales figure; Laos, North Macedonia and Suriname don't have a tracked total anywhere on the site yet.</li>
+          <li><strong>Cars on the road per capita:</strong> uses each country's 2024 (or nearest earlier year) fleet size from this site's cars-on-road dataset, which currently covers 50 of the 110 countries — real registry counts for most major markets, modeled/anchored estimates for the rest (see the Cars on the Road page for each country's method). The other 60 countries simply aren't built yet for this dataset and show as no data here, not zero.</li>
+          <li><strong>Oil consumption per capita:</strong> total refined petroleum product consumption (not just road fuel — also jet fuel, heating oil, petrochemical feedstocks, etc.), from the Energy Institute Statistical Review of World Energy / EIA via Our World in Data, 2024, converted from terawatt-hours to litres using a blended ~36 MJ/L energy density (an approximation, not a precise per-product conversion). This is <strong>not</strong> split into petrol vs. diesel — no source publishes that split per country in one consistent place; a real petrol/diesel breakdown would need slower country-by-country secondary sourcing, same as this project already does for a few individual markets.</li>
+          <li>Different vintages are being compared against one population year (2024) — sales figures run up to a 2026 projection, fleet and oil figures are 2024. Treat this as a reasonable approximation, not a perfectly synchronized snapshot.</li>
+        </ul>
+      </div>
+
+      <footer class="page-footer">
+        Population: World Bank, Taiwan MOI, INSEE/IEDOM. Sales: this site's own Auto Markets by Country dataset. Fleet: this site's own Cars on the Road dataset. Oil consumption: Energy Institute / EIA via Our World in Data (CC BY 4.0).<br>
+        Map boundaries: Natural Earth via world-atlas (public domain)
+      </footer>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script src="assets/population-energy-data.js"></script>
+<script>
+const GREEN_STEPS = ["#EAF3DE","#C0DD97","#97C459","#639922","#3B6D11","#173404"];
+const ACCENT = "#c1621f";
+
+// this dataset's country names don't all match the map's boundary-file naming —
+// map display only, doesn't touch the canonical names used in the data/lists
+const MAP_NAME_ALIAS = {
+  "United States": "United States of America",
+  "Russian Federation": "Russia",
+  "Bosnia-Herzegovina": "Bosnia and Herz.",
+  "Syria": "Syrian Arab Republic",
+  "Laos": "Laos",
+  "UAE": "United Arab Emirates",
+  "Dominican Republic": "Dominican Rep.",
+  "North Macedonia": "North Macedonia",
+};
+const MAP_NAME_TO_COUNTRY = Object.fromEntries(
+  Object.entries(MAP_NAME_ALIAS).map(([country, mapName]) => [mapName, country])
+);
+
+const METRICS = {
+  sales: {
+    title: 'Sales per Capita',
+    rankTitle: 'People per New Car Sold',
+    rankNote: 'Lower = more cars sold relative to population (a "hotter" market). Ranked list — bar length is inverted (shorter bar = fewer people per car). Click a row to isolate it on the map.',
+    mapTitle: 'Sales per Capita Map',
+    mapNote: 'Shaded by people-per-car-sold in each country\'s latest available year — darker = more cars sold per person. Hover a country for exact figures. Grey = no sales data.',
+    legendLabel: 'People per car sold',
+    unitLabel: 'people/car',
+    hasEntry: c => c.salesTotal != null,
+    ratio: c => c.population / c.salesTotal, // people per car sold — lower is "hotter"
+    lowerIsHotter: true,
+    tooltipExtra: c => `${Math.round(c.salesTotal).toLocaleString('en-US')} cars sold in ${c.salesYear}${c.salesProjected ? ' (proj.)' : ''} — population ${Math.round(c.population).toLocaleString('en-US')}`,
+  },
+  fleet: {
+    title: 'Cars on the Road per Capita',
+    rankTitle: 'People per Car on the Road',
+    rankNote: 'Lower = more cars on the road relative to population (closer to one car per person). Ranked list — bar length is inverted (shorter bar = fewer people per car). Click a row to isolate it on the map.',
+    mapTitle: 'Cars on the Road per Capita Map',
+    mapNote: 'Shaded by people-per-car-on-the-road, 2024 (or nearest earlier year) — darker = closer to one car per person. Only 50 of 110 countries have fleet data built yet. Grey = no data.',
+    legendLabel: 'People per car on the road',
+    unitLabel: 'people/car',
+    hasEntry: c => c.fleetTotal != null,
+    ratio: c => c.population / c.fleetTotal,
+    lowerIsHotter: true,
+    tooltipExtra: c => `${Math.round(c.fleetTotal).toLocaleString('en-US')} cars on the road in ${c.fleetYear} — population ${Math.round(c.population).toLocaleString('en-US')}`,
+  },
+  oil: {
+    title: 'Oil Consumption per Capita',
+    rankTitle: 'Litres of Oil Consumed per Person',
+    rankNote: 'Higher = more oil consumed per person per year (total refined products, not just road fuel). Ranked list — bar length scales with litres per capita. Click a row to isolate it on the map.',
+    mapTitle: 'Oil Consumption per Capita Map',
+    mapNote: 'Shaded by litres of refined oil products consumed per person in 2024 — darker = more per person. Covers all 105 countries with oil data. Grey = no data.',
+    legendLabel: 'Litres per person',
+    unitLabel: 'L/person',
+    hasEntry: c => c.oilLitres != null,
+    ratio: c => c.oilLitres / c.population,
+    lowerIsHotter: false,
+    tooltipExtra: c => `${Math.round(c.oilLitres).toLocaleString('en-US')} litres total in ${c.oilYear} — population ${Math.round(c.population).toLocaleString('en-US')}`,
+  },
+};
+
+const COUNTRIES = Object.keys(POPULATION_ENERGY).sort();
+let currentMetric = 'sales';
+let isolatedCountry = null;
+
+function activeData(){
+  const m = METRICS[currentMetric];
+  return COUNTRIES
+    .map(country => ({ country, ...POPULATION_ENERGY[country] }))
+    .filter(c => m.hasEntry(c))
+    .map(c => ({ ...c, ratio: m.ratio(c) }));
+}
+
+function renderStatRow(data){
+  const m = METRICS[currentMetric];
+  if(!data.length){
+    document.getElementById('stat-row').innerHTML = '';
+    return;
+  }
+  const sorted = [...data].sort((a,b) => m.lowerIsHotter ? a.ratio - b.ratio : b.ratio - a.ratio);
+  const best = sorted[0], worst = sorted[sorted.length - 1];
+  const fmt = v => v >= 1000 ? Math.round(v).toLocaleString('en-US') : v.toFixed(1);
+  const stats = [
+    { label: 'Countries Covered', value: String(data.length), small: `of ${COUNTRIES.length} tracked` },
+    { label: m.lowerIsHotter ? 'Hottest Market' : 'Highest per Capita', value: fmt(best.ratio), small: `${best.country} (${m.unitLabel})` },
+    { label: m.lowerIsHotter ? 'Coldest Market' : 'Lowest per Capita', value: fmt(worst.ratio), small: `${worst.country} (${m.unitLabel})` },
+  ];
+  document.getElementById('stat-row').innerHTML = stats.map(s => `
+    <div class="stat">
+      <div class="label">${s.label}</div>
+      <div class="value">${s.value}<small>${s.small}</small></div>
+    </div>`).join('');
+}
+
+let colorScale = null;
+function renderMapLegend(data){
+  const m = METRICS[currentMetric];
+  const ratios = data.map(d => d.ratio);
+  if(!ratios.length){
+    colorScale = () => 'var(--surface-alt)';
+    document.getElementById('map-legend').innerHTML = `<div class="legend-nodata">No data for this metric.</div>`;
+    return;
+  }
+  const steps = m.lowerIsHotter ? [...GREEN_STEPS].reverse() : GREEN_STEPS;
+  colorScale = d3.scaleQuantile().domain(ratios).range(steps);
+  const breaks = colorScale.quantiles();
+  const edges = [d3.min(ratios), ...breaks, d3.max(ratios)];
+  const fmt = d3.format('~s');
+  document.getElementById('map-legend').innerHTML = `
+    <div class="legend-label">${m.legendLabel}</div>
+    <div class="legend-scale">
+      ${steps.map((c,i) => `
+        <div class="legend-step">
+          <div class="legend-swatch" style="background:${c}"></div>
+          <div class="legend-num">${fmt(edges[i])}–${fmt(edges[i+1])}</div>
+        </div>`).join('')}
+    </div>
+    <div class="legend-nodata"><span class="legend-swatch" style="background:var(--surface-alt);border:1px solid var(--border)"></span>No data</div>
+  `;
+}
+
+const mapTooltip = document.getElementById('map-tooltip');
+const mapWrap = document.querySelector('.map-wrap');
+const svg = d3.select('#map-svg');
+const projection = d3.geoNaturalEarth1();
+const path = d3.geoPath(projection);
+let mapPaths = null;
+let geoFeatures = null;
+let dataByName = {};
+
+function entryForMapName(mapName){
+  return dataByName[mapName] || dataByName[MAP_NAME_TO_COUNTRY[mapName]];
+}
+
+function renderMap(){
+  if(!geoFeatures) return;
+  const m = METRICS[currentMetric];
+  mapPaths = svg.selectAll('path').data(geoFeatures).join('path')
+    .attr('class', d => 'country ' + (entryForMapName(d.properties.name) ? 'has-data' : 'no-data'))
+    .attr('d', path)
+    .attr('fill', d => {
+      const entry = entryForMapName(d.properties.name);
+      return entry ? colorScale(entry.ratio) : null;
+    })
+    .on('pointermove', (e, d) => {
+      const entry = entryForMapName(d.properties.name);
+      const rect = mapWrap.getBoundingClientRect();
+      mapTooltip.style.left = (e.clientX - rect.left) + 'px';
+      mapTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
+      mapTooltip.style.opacity = 1;
+      mapTooltip.innerHTML = entry
+        ? `${entry.country}<br><strong>${entry.ratio >= 1000 ? Math.round(entry.ratio).toLocaleString('en-US') : entry.ratio.toFixed(1)}</strong> ${m.unitLabel}<br><span style="opacity:.7">${m.tooltipExtra(entry)}</span>`
+        : `${d.properties.name}<br>No data`;
+    })
+    .on('pointerleave', () => { mapTooltip.style.opacity = 0; })
+    .on('click', (e, d) => {
+      const entry = entryForMapName(d.properties.name);
+      if(!entry) return;
+      isolateCountry(entry.country);
+    });
+  mapPaths.classed('selected', d => entryForMapName(d.properties.name)?.country === isolatedCountry);
+}
+
+fetch('assets/countries-50m.json').then(r => r.json()).then(topology => {
+  const geo = topojson.feature(topology, topology.objects.countries);
+  geoFeatures = geo.features;
+  projection.fitExtent([[10,10],[930,450]], geo);
+  renderMap();
+});
+
+const rankRows = document.getElementById('rank-rows');
+const barTooltip = document.getElementById('bar-tooltip');
+
+function renderBars(data){
+  const m = METRICS[currentMetric];
+  const sorted = [...data].sort((a,b) => m.lowerIsHotter ? a.ratio - b.ratio : b.ratio - a.ratio);
+  if(!sorted.length){
+    rankRows.innerHTML = '<div class="legend-nodata">No data for this metric yet.</div>';
+    return;
+  }
+  // bar width: for "lower is hotter" metrics, invert so the hottest market gets the longest bar
+  const ratios = sorted.map(d => d.ratio);
+  const maxRatio = Math.max(...ratios);
+  const minRatio = Math.min(...ratios);
+  rankRows.innerHTML = sorted.map(d => {
+    let width;
+    if(m.lowerIsHotter){
+      width = maxRatio === minRatio ? 100 : (1 - (d.ratio - minRatio) / (maxRatio - minRatio)) * 90 + 10;
+    } else {
+      width = maxRatio === 0 ? 10 : d.ratio / maxRatio * 100;
+    }
+    const isolateClass = isolatedCountry === d.country ? ' active-isolate' : '';
+    const valueText = d.ratio >= 1000 ? Math.round(d.ratio).toLocaleString('en-US') : d.ratio.toFixed(1);
+    return `
+    <div class="rank-row isolatable${isolateClass}" data-row-country="${d.country}">
+      <div class="country-label">${d.country}</div>
+      <div class="bar-track">
+        <div class="bar-seg" style="width:${width}%; background:${ACCENT}" data-country="${d.country}"></div>
+      </div>
+      <div class="total-label">${valueText} <span style="opacity:.6;font-weight:400;">${m.unitLabel}</span></div>
+    </div>`;
+  }).join('');
+}
+
+rankRows.addEventListener('pointermove', e => {
+  const seg = e.target.closest('.bar-seg');
+  const card = rankRows.closest('.chart-card');
+  if(!seg){ barTooltip.style.opacity = 0; return; }
+  const m = METRICS[currentMetric];
+  const entry = dataByName_byCountry(seg.dataset.country);
+  const cardRect = card.getBoundingClientRect();
+  barTooltip.style.left = (e.clientX - cardRect.left) + 'px';
+  barTooltip.style.top = (e.clientY - cardRect.top - 10) + 'px';
+  barTooltip.style.opacity = 1;
+  const valueText = entry.ratio >= 1000 ? Math.round(entry.ratio).toLocaleString('en-US') : entry.ratio.toFixed(1);
+  barTooltip.innerHTML = `${entry.country} — <strong>${valueText}</strong> ${m.unitLabel}<br><span style="opacity:.7">${m.tooltipExtra(entry)}</span>`;
+});
+rankRows.addEventListener('pointerleave', () => { barTooltip.style.opacity = 0; });
+
+rankRows.addEventListener('click', e => {
+  const row = e.target.closest('.rank-row');
+  if(!row) return;
+  isolateCountry(row.dataset.rowCountry);
+});
+
+let currentDataByCountry = {};
+function dataByName_byCountry(country){ return currentDataByCountry[country]; }
+
+function isolateCountry(country){
+  isolatedCountry = isolatedCountry === country ? null : country;
+  renderMap();
+  renderBars(activeData());
+}
+
+function switchMetric(metric){
+  currentMetric = metric;
+  isolatedCountry = null;
+  document.querySelectorAll('[data-metric]').forEach(b => b.classList.toggle('active', b.dataset.metric === metric));
+  const m = METRICS[metric];
+  document.getElementById('rank-title').textContent = m.rankTitle;
+  document.getElementById('rank-note').textContent = m.rankNote;
+  document.getElementById('map-title').textContent = m.mapTitle;
+  document.getElementById('map-note').textContent = m.mapNote;
+  render();
+}
+
+function render(){
+  const data = activeData();
+  dataByName = Object.fromEntries(data.map(d => [d.country, d]));
+  currentDataByCountry = dataByName;
+  renderStatRow(data);
+  renderMapLegend(data);
+  renderMap();
+  renderBars(data);
+}
+
+document.querySelectorAll('[data-metric]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if(btn.dataset.metric === currentMetric) return;
+    switchMetric(btn.dataset.metric);
+  });
+});
+
+render();
+</script>
+<script src="assets/notes-toggle.js"></script>
+</body>
+</html>
