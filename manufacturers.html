@@ -64,6 +64,21 @@
   .rank-row .seg-outside + .seg-outside{ margin-left:6px; }
   .rank-row.world-total{ font-weight:700; padding-bottom:10px; margin-bottom:4px; border-bottom:1px solid var(--border); }
   .rank-row.world-total .bar-track{ height:26px; }
+  /* small numbers sit right after the filled bar, still inside the lighter track */
+  .rank-row .bar-track .seg-outside{ align-self:center; padding-left:6px; line-height:1; }
+  .rank-row .bar-track .seg-outside + .seg-outside{ margin-left:0; padding-left:8px; }
+  /* legends run across the whole card instead of a narrow column */
+  #bars-legend, #continent-bars-legend{ width:auto; flex:1; text-align:left; text-transform:none; letter-spacing:0; font-weight:600; font-size:11.5px;
+    display:flex; flex-wrap:wrap; align-items:center; gap:4px 16px; }
+  #bars-legend .lg-note, #continent-bars-legend .lg-note{ flex-basis:100%; color:var(--text-muted); font-weight:500; font-size:11px; }
+  #bars-card .rrh-spacer, #continent-bars-card .rrh-spacer{ display:none; }
+  .bar-hover{ position:fixed; z-index:60; pointer-events:none; opacity:0; transition:opacity .08s ease; width:400px; max-width:94vw; box-sizing:border-box;
+    background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:12px; box-shadow:0 8px 28px rgba(0,0,0,.28); padding:14px 16px 12px; font-size:12.5px; line-height:1.4; }
+  .bar-hover h3{ margin:0 0 2px; font-size:15px; }
+  .bar-hover .sub{ color:var(--text-muted); font-size:11.5px; margin-bottom:8px; }
+  .bar-hover .mdl-title{ margin-top:9px; padding-top:8px; border-top:1px solid var(--border); font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); margin-bottom:5px; }
+  .bar-hover .mfr-row{ grid-template-columns:18px 150px 1fr 64px; }
+  .rank-row[data-scope] .country-label, .rank-row[data-scope] .bar-track{ cursor:help; }
 </style>
 </head>
 <body>
@@ -190,6 +205,7 @@
   </main>
 </div>
 
+<div class="mfr-modal bar-hover" id="bar-hover"></div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
 <script src="assets/manufacturer-monthly-data.js"></script>
@@ -713,12 +729,25 @@ function yoyLabelHTML(pct){
   const txt = `${pct > 0 ? '+' : ''}${pct.toFixed(0)}%`;
   return `<span class="pct-label ${cls}" title="Projected ${CUR_YEAR} (annualized from ${CUR_YEAR_MONTHS_ELAPSED} months of year-to-date data) vs. ${CUR_YEAR - 1}: ${txt}">${txt}</span>`;
 }
-function historyHTML(country){
+function sumScopeYear(countries, year, name){
+  let sum = 0, any = false;
+  countries.forEach(c => { const v = entityYearTotal(c, year, name); if(v != null){ sum += v; any = true; } });
+  return any ? sum : null;
+}
+// yearly growth for a group of countries: only countries with both a year-to-date and a previous-year figure count
+function yoyProjectedScope(countries, name){
+  let ytd = 0, prev = 0;
+  countries.forEach(c => { const y = entityYearTotal(c, CUR_YEAR, name), pv = entityYearTotal(c, CUR_YEAR - 1, name); if(y != null && pv){ ytd += y; prev += pv; } });
+  return prev ? 100 * ((ytd * 12 / CUR_YEAR_MONTHS_ELAPSED) / prev - 1) : null;
+}
+function historyHTML(country, scope){
   const years = historyYears(), md = mode();
+  const yearVal = (y, n) => scope ? sumScopeYear(scope.countries, y, n) : entityYearTotal(country, y, n);
+  if(scope) country = scope.label;
   let series;
-  if(md === 'match') series = [[mfr, 1], [mfr2, 2]].map(([n, slot]) => ({ label:n, color:matchFlatColor(slot), values: years.map(y => ({ year:y, val: entityYearTotal(country, y, n) })) }));
-  else if(md === 'rank') series = [{ label:mfr, color:brandColor(mfr), values: years.map(y => ({ year:y, val: entityYearTotal(country, y, mfr) })) }];
-  else series = [{ label:'Total market', color:'var(--accent)', values: years.map(y => ({ year:y, val: countryYearTotal(country, y) })) }];
+  if(md === 'match') series = [[mfr, 1], [mfr2, 2]].map(([n, slot]) => ({ label:n, color:matchFlatColor(slot), values: years.map(y => ({ year:y, val: yearVal(y, n) })) }));
+  else if(md === 'rank') series = [{ label:mfr, color:brandColor(mfr), values: years.map(y => ({ year:y, val: yearVal(y, mfr) })) }];
+  else series = [{ label:'Total market', color:'var(--accent)', values: years.map(y => ({ year:y, val: scope ? null : countryYearTotal(country, y) })) }];
 
   const allVals = series.flatMap(s => s.values.map(v => v.val)).filter(v => v != null);
   if(!allVals.length) return '';
@@ -792,10 +821,11 @@ const WORLD_LIST_CAP = 40; // only applies to the "World sales by brand / parent
 // renders one row's bar segments, with each segment's own number shown INSIDE it when there's
 // room, or appended just after the bar (colored to match its segment) when there isn't -- used by
 // every bar-row chart on this page instead of a separate "total" column at the end of the row
+const BAR_HEADROOM = 0.84;   // the longest bar fills 84% of its track, leaving room for small numbers after it
 function segmentsHTML(parts, widthDenom){
   let bar = '', outside = [];
   parts.filter(p => p.value > 0).forEach(p => {
-    const pct = 100 * p.value / widthDenom;
+    const pct = 100 * p.value * BAR_HEADROOM / widthDenom;
     const fits = pct >= 9;
     const txt = p.display != null ? p.display : fmt(p.value);
     bar += `<div class="bar-seg" style="width:${pct}%;background:${p.color}" title="${esc(p.label)}">${fits ? `<span class="seg-label">${txt}</span>` : ''}</div>`;
@@ -804,15 +834,82 @@ function segmentsHTML(parts, widthDenom){
   return { bar, outside: outside.join('') };
 }
 
+// ---------- single-manufacturer rows: BEV / PHEV / HEV + ICE + Diesel segments, rank badge, share of world, growth ----------
+function fuelLegendHTML(){
+  return `<span><i class="sw" style="background:${COLORS.bev}"></i>BEV</span><span><i class="sw" style="background:${COLORS.phev}"></i>PHEV</span><span><i class="sw" style="background:${COLORS.other}"></i>HEV + ICE + Diesel</span>` +
+    `<span class="lg-note">Badge = ${esc(mfr)}'s rank in that market (colored like the map) &middot; % = share of ${esc(mfr)}'s world total &middot; growth = projected ${CUR_YEAR} vs. ${CUR_YEAR - 1} &middot; hover a row for 5-year history and top 10 models</span>`;
+}
+function fuelParts(sel, marketTotal){
+  const mk = (k, label) => {
+    const v = Math.max(sel[k], 0);
+    return { value:v, color:COLORS[k], label:`${label}: ${fmt(v)}`, display: metric === 'share' ? (100 * v / marketTotal).toFixed(1) + '%' : undefined };
+  };
+  return [mk('bev', 'BEV'), mk('phev', 'PHEV'), mk('other', 'HEV + ICE + Diesel')];
+}
+function brandRowHTML(e, widthDenom){
+  const { bar, outside } = segmentsHTML(e.parts, widthDenom);
+  const rankBadge = e.brandRank ? brandRankBadgeHTML(e.brandRank, mfr) : '<span class="world-rank-badge"></span>';
+  const pctOfTotal = e.pctOfWorld != null ? `<span class="pct-of-total" title="Share of ${esc(mfr)}'s world total shown in this chart">${e.pctOfWorld.toFixed(1)}%</span>` : '';
+  return `<div class="rank-row${e.cls ? ' ' + e.cls : ''}" data-scope="${e.scope}" data-key="${esc(e.key)}">
+      ${rankBadge}
+      <span class="country-label">${esc(e.country)}</span>
+      ${pctOfTotal}
+      <span class="bar-track">${bar.replace(/ title="[^"]*"/g, '')}${outside}</span>
+      ${e.yoyHTML || ''}
+    </div>`;
+}
+function plainRowHTML(e, widthDenom){
+  const { bar, outside } = segmentsHTML(e.parts, widthDenom);
+  return `<div class="rank-row">
+      <span class="country-label">${e.country}</span>
+      <span class="bar-track">${bar}${outside}</span>
+    </div>`;
+}
+function scopeCountries(scope, key){
+  const cs = Object.keys(byCountry);
+  if(scope === 'country') return byCountry[key] ? [key] : [];
+  if(scope === 'continent') return cs.filter(c => continentOf(c) === key);
+  return cs;
+}
+// the selected manufacturer's totals over a set of countries: {sel:{bev,phev,other,total}, marketTotal, rank}
+function aggScope(countries){
+  const ent = new Map(), sel = { bev:0, phev:0, other:0, total:0 }; let marketTotal = 0;
+  countries.forEach(c => {
+    const d = byCountry[c]; if(!d) return;
+    marketTotal += d.total;
+    d.list.forEach(a => ent.set(a.name, (ent.get(a.name) || 0) + a.total));
+    if(d.sel){ sel.bev += d.sel.bev; sel.phev += d.sel.phev; sel.other += d.sel.other; sel.total += d.sel.total; }
+  });
+  let rank = null;
+  if(sel.total > 0){ rank = 1; ent.forEach((v, k) => { if(!isOtherName(k) && k !== mfr && v > sel.total) rank++; }); }
+  return { sel, marketTotal, rank };
+}
+function renderContinentBarsForBrand(card, title, note, legend, rows){
+  title.textContent = `${mfr} — continent by continent`;
+  legend.innerHTML = fuelLegendHTML();
+  const make = (scope, key, label, cls) => {
+    const cs = scopeCountries(scope, key), a = aggScope(cs);
+    return { scope, key, country:label, cls, a, parts: fuelParts(a.sel, a.marketTotal), brandRank:a.rank, total:a.sel.total, yoyHTML: yoyLabelHTML(yoyProjectedScope(cs, mfr)) };
+  };
+  const conts = [...new Set(Object.keys(byCountry).map(continentOf))]
+    .map(k => make('continent', k, CONTINENT_LABELS[k] || k)).filter(x => x.total > 0).sort((a, b) => b.total - a.total);
+  const world = make('world', 'World', 'World', 'world-total');
+  if(!world.total){ rows.innerHTML = `<div class="note" style="display:block">No data for this selection.</div>`; note.textContent = ''; return; }
+  world.pctOfWorld = 100; conts.forEach(x => { x.pctOfWorld = 100 * x.total / world.total; });
+  const denom = conts.length ? conts[0].total : 1;
+  rows.innerHTML = brandRowHTML(world, world.total) + conts.map(x => brandRowHTML(x, denom)).join('');
+  note.textContent = `${mfr} sales by continent, ${periodLabel(period)}. Top row is the worldwide total; the continent rows below are scaled to each other, not to the world row.${metric === 'share' ? ' Numbers are points of each market.' : ''}`;
+}
+
 // ---------- the "big picture" card: world sales leaderboard (market mode) or world total +
 // continent breakdown (match mode); hidden entirely in rank mode (single manufacturer) ----------
 function renderContinentBars(){
   const card = document.getElementById('continent-bars-card'), toggle = document.getElementById('bars-group-toggle');
   const md = mode();
-  if(md === 'rank'){ card.classList.add('hidden'); toggle.classList.add('hidden'); return; }
   card.classList.remove('hidden');
   const title = document.getElementById('continent-bars-title'), note = document.getElementById('continent-bars-note'),
         legend = document.getElementById('continent-bars-legend'), rows = document.getElementById('continent-bars');
+  if(md === 'rank'){ toggle.classList.add('hidden'); renderContinentBarsForBrand(card, title, note, legend, rows); return; }
 
   if(md === 'market'){
     toggle.classList.remove('hidden');
@@ -830,8 +927,7 @@ function renderContinentBars(){
       return `<div class="rank-row">
         <span class="country-label">${esc(name)}</span>
         ${pct}
-        <span class="bar-track">${bar}</span>
-        ${outside}
+        <span class="bar-track">${bar}${outside}</span>
       </div>`;
     }).join('');
     note.textContent = `Top ${WORLD_LIST_CAP} ${byGroup ? 'parent groups' : 'brands'} worldwide by volume, ${periodLabel(period)}. Pick a manufacturer above to focus this chart on one market instead.`;
@@ -863,15 +959,13 @@ function renderContinentBars(){
   const worldSeg = segmentsHTML(twoParts(worldU1, worldU2), worldU1 + worldU2 || 1);
   const worldRow = `<div class="rank-row world-total">
       <span class="country-label">World total</span>
-      <span class="bar-track">${worldSeg.bar}</span>
-      ${worldSeg.outside}
+      <span class="bar-track">${worldSeg.bar}${worldSeg.outside}</span>
     </div>`;
   const continentRows = contRows.map(([cont, e]) => {
     const seg = segmentsHTML(twoParts(e.u1, e.u2), contDenom);
     return `<div class="rank-row">
       <span class="country-label">${CONTINENT_LABELS[cont] || cont}</span>
-      <span class="bar-track">${seg.bar}</span>
-      ${seg.outside}
+      <span class="bar-track">${seg.bar}${seg.outside}</span>
     </div>`;
   }).join('');
 
@@ -905,24 +999,20 @@ function renderCountryBars(){
     note.textContent = `All ${built.length} markets where ${mfr} and/or ${mfr2} sell, ${periodLabel(period)}, sorted by combined volume.`;
   } else {
     title.textContent = `${mfr} — country by country`;
-    legend.innerHTML = [1, 2, 5, 10, 99].map(r => `<span class="sw" style="background:${rankColor(r)}"></span>${rankTierLabel(r)}`).join(' &nbsp; ') +
-      ` &nbsp; <span style="color:var(--text-muted)">Badge = ${mfr}'s rank in that country &middot; % = share of ${mfr}'s world total &middot; growth = projected ${CUR_YEAR} vs. ${CUR_YEAR - 1}</span>`;
+    legend.innerHTML = fuelLegendHTML();
     const worldTotal = Object.values(byCountry).reduce((s, d) => s + (d.sel ? d.sel.total : 0), 0);
     const all = Object.entries(byCountry)
       .filter(([, d]) => d.sel)
-      .map(([c, d]) => ({ country:c, total:d.sel.total, rank:d.rank, share: 100 * d.sel.total / d.total }))
+      .map(([c, d]) => ({ country:c, total:d.sel.total, rank:d.rank, share: 100 * d.sel.total / d.total, sel:d.sel, marketTotal:d.total }))
       .sort((a, b) => b.total - a.total);
     built = all.map(x => ({
-      country:x.country,
+      country:x.country, scope:'country', key:x.country,
       brandRank: x.rank,
       pctOfWorld: worldTotal ? 100 * x.total / worldTotal : null,
       yoyHTML: yoyLabelHTML(yoyProjected(x.country, mfr)),
-      parts:[{
-        value:x.total, color:rankColor(x.rank), label:`#${x.rank} · ${fmt(x.total)} units (${x.share.toFixed(1)}% share)`,
-        display: metric === 'share' ? x.share.toFixed(1) + '%' : undefined,
-      }],
+      parts: fuelParts(x.sel, x.marketTotal),
     }));
-    note.textContent = `All ${all.length} markets with ${mfr} sales, ${periodLabel(period)}, sorted by units. Bar color = rank tier (matches the map).`;
+    note.textContent = `All ${all.length} markets with ${mfr} sales, ${periodLabel(period)}, sorted by units. Bars are split into BEV, PHEV and HEV + ICE + Diesel${metric === 'share' ? '; numbers are points of the country\'s market' : ''}.`;
   }
 
   if(!built.length){ rows.innerHTML = `<div class="note" style="display:block">No data for this selection.</div>`; return; }
@@ -930,21 +1020,73 @@ function renderCountryBars(){
   // rank-row charts on this site -- every segment's width divides by that same fixed denominator,
   // so segments concatenate to the row's true proportional length rather than always filling 100%
   const widthDenom = d3.max(built, e => e.parts.reduce((s, p) => s + p.value, 0)) || 1;
-  rows.innerHTML = built.map(e => {
-    const { bar, outside } = segmentsHTML(e.parts, widthDenom);
-    const rankBadge = e.brandRank !== undefined ? brandRankBadgeHTML(e.brandRank, mfr) : '';
-    const pctOfTotal = e.pctOfWorld != null ? `<span class="pct-of-total" title="Share of the world total shown in this chart">${e.pctOfWorld.toFixed(1)}%</span>` : '';
-    const yoy = e.yoyHTML || '';
-    return `<div class="rank-row">
-      ${rankBadge}
-      <span class="country-label">${e.country}</span>
-      ${pctOfTotal}
-      <span class="bar-track">${bar}</span>
-      ${outside}
-      ${yoy}
-    </div>`;
-  }).join('');
+  rows.innerHTML = built.map(e => e.scope ? brandRowHTML(e, widthDenom) : plainRowHTML(e, widthDenom)).join('');
 }
+
+// ---------- hover panel on a row's name or bar: 5-year history + top 10 models ----------
+const hoverPanel = document.getElementById('bar-hover');
+let hoverKey = null, modelDataPromise = null;
+function loadModelData(){
+  if(modelDataPromise) return modelDataPromise;
+  const load = src => new Promise((res, rej) => { const el = document.createElement('script'); el.src = src; el.onload = res; el.onerror = rej; document.head.appendChild(el); });
+  modelDataPromise = Promise.all([load('assets/manufacturer-model-monthly-data.js'), load('assets/manufacturer-model-yearly-data.js')]);
+  return modelDataPromise;
+}
+function modelRowsFor(country){
+  const MM = typeof MANUFACTURER_MODEL_MONTHLY !== 'undefined' ? MANUFACTURER_MODEL_MONTHLY : {}, MY = typeof MANUFACTURER_MODEL_YEARLY !== 'undefined' ? MANUFACTURER_MODEL_YEARLY : {};
+  if(period.type === 'month') return (MM[country] || []).filter(r => r.year_month === period.ym);
+  const y = (MY[country] || []).filter(r => r.year === period.year);
+  if(y.length) return y;
+  return (MM[country] || []).filter(r => +r.year_month.slice(0, 4) === period.year);
+}
+function topModelsFor(countries){
+  const yr = periodYear(period), agg = new Map();
+  countries.forEach(c => modelRowsFor(c).forEach(r => {
+    if(entityOf(r.brand, yr) !== mfr || /^\((other|unclassified)|^other\/discontinued|^(other|unknown)/i.test(r.model)) return;   // catch-all rows are not models
+    const name = mfrModelLabel(r.brand, r.model), a = agg.get(name) || { name, bev:0, phev:0, other:0, total:0 };
+    a.bev += r.bev || 0; a.phev += r.phev || 0; a.total += r.total || 0; a.other = a.total - a.bev - a.phev; agg.set(name, a);
+  }));
+  return [...agg.values()].sort((a, b) => b.total - a.total).slice(0, 10);
+}
+function mfrModelLabel(brand, model){
+  const norm = x => String(x).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const m = norm(model), b = norm(brand), f = norm(String(brand).split(/[\s-]/)[0]);
+  return [b, f].some(p => p && m.startsWith(p) && m.length > p.length) ? String(model) : `${brand} ${model}`;
+}
+function renderHover(scope, key){
+  const countries = scopeCountries(scope, key), a = aggScope(countries);
+  const label = scope === 'world' ? 'World' : scope === 'continent' ? (CONTINENT_LABELS[key] || key) : key;
+  let h = `<h3>${esc(mfr)} — ${esc(label)}</h3><div class="sub">${periodLabel(period)} · ${fmt(a.sel.total)} vehicles${a.rank ? ` · #${a.rank} in ${scope === 'world' ? 'the world' : 'this market'}` : ''}</div>`;
+  h += historyHTML(null, { label, countries });
+  h += `<div class="mdl-title">Top 10 models · ${periodLabel(period)}</div>`;
+  if(typeof MANUFACTURER_MODEL_MONTHLY === 'undefined' || typeof MANUFACTURER_MODEL_YEARLY === 'undefined'){
+    h += `<div class="sub">Loading model data…</div>`;
+    loadModelData().then(() => { if(hoverKey === scope + '|' + key) renderHover(scope, key); }).catch(() => {});
+  } else {
+    const top = topModelsFor(countries);
+    h += top.length ? top.map((m, i) => rowHTML(i + 1, m, top[0].total, false)).join('') : `<div class="sub">No model-level data for ${esc(label)} in this period.</div>`;
+  }
+  hoverPanel.innerHTML = h;
+}
+function placeHover(e){
+  const w = hoverPanel.offsetWidth, h = hoverPanel.offsetHeight;
+  let x = e.clientX + 16, y = e.clientY + 14;
+  if(x + w > window.innerWidth - 8) x = e.clientX - w - 16;
+  if(y + h > window.innerHeight - 8) y = window.innerHeight - h - 8;
+  hoverPanel.style.left = Math.max(8, x) + 'px'; hoverPanel.style.top = Math.max(8, y) + 'px';
+}
+function hideHover(){ hoverKey = null; hoverPanel.style.opacity = 0; }
+['country-bars', 'continent-bars'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('mousemove', e => {
+    const row = e.target.closest('.rank-row[data-scope]');
+    if(!row || !(e.target.closest('.country-label') || e.target.closest('.bar-track'))){ hideHover(); return; }
+    const k = row.dataset.scope + '|' + row.dataset.key;
+    if(k !== hoverKey){ hoverKey = k; renderHover(row.dataset.scope, row.dataset.key); }
+    hoverPanel.style.opacity = 1; placeHover(e);
+  });
+  el.addEventListener('mouseleave', hideHover);
+});
 
 // ---------- wiring ----------
 function refresh(rebuildMfr){
