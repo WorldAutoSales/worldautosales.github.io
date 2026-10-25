@@ -209,7 +209,7 @@
 
       <div class="card chart-card">
         <h2>How to read this page</h2>
-        <p class="note" style="display:block">Coverage: about 50 countries with brand-level data (monthly from January 2025 where available, yearly back to 2008 for the longest series). Countries drawn in beige have no manufacturer breakdown on this site. Where a source publishes no powertrain split for a brand, its sales are counted as HEV + ICE + Diesel (and a few countries publish totals only). Hong Kong's registry folds hybrids and plug-in hybrids into petrol, so its PHEV share shows 0% even though some plug-in hybrids are in the grey bar; its BEV share is exact. Yearly periods use each country's yearly series; a year that is still running (2026) is year-to-date through the latest month loaded for that country, so countries can end on different months. Every brand has one permanent color taken from its logo (Toyota red, Ford blue, BMW silver…) and each country carries a badge with its winner's logo; logos come from the open-source simple-icons set, so brands without one (BYD, Perodua, Stellantis, VinFast…) show their initials instead. "Parent group" attributes each brand to its owner as of the selected year (e.g. Volvo and Polestar count under Geely, not Ford, from 2010 onward).</p>
+        <p class="note" style="display:block">Coverage: about 50 countries with brand-level data (monthly from January 2025 where available, yearly back to 2008 for the longest series). Countries drawn in beige have no manufacturer breakdown on this site. Where a source publishes no powertrain split for a brand, its sales are counted as HEV + ICE + Diesel (and a few countries publish totals only). Hong Kong's registry folds hybrids and plug-in hybrids into petrol, so its PHEV share shows 0% even though some plug-in hybrids are in the grey bar; its BEV share is exact. Yearly periods use each country's yearly series; the running year (2026) is offered as "(Projected)" — each brand's year-to-date total through the latest month loaded for that country, annualized to a full-year run-rate (year-to-date &times; 12 / months loaded) — rather than a raw partial total, so it's comparable to the complete prior years in the same list. Every brand has one permanent color taken from its logo (Toyota red, Ford blue, BMW silver…) and each country carries a badge with its winner's logo; logos come from the open-source simple-icons set, so brands without one (BYD, Perodua, Stellantis, VinFast…) show their initials instead. "Parent group" attributes each brand to its owner as of the selected year (e.g. Volvo and Polestar count under Geely, not Ford, from 2010 onward).</p>
       </div>
     </div>
   </main>
@@ -321,7 +321,7 @@ const CUR_YEAR = YEARS[0];
 const CUR_YEAR_MONTHS_ELAPSED = MONTHS.filter(m => m.startsWith(CUR_YEAR + '-')).length || 12;
 
 function periodLabel(p){
-  if(p.type === 'year') return p.year === CUR_YEAR ? `${p.year} year-to-date` : String(p.year);
+  if(p.type === 'year') return p.projected ? `${p.year} (Projected)` : p.year === CUR_YEAR ? `${p.year} year-to-date` : String(p.year);
   const [y, m] = p.ym.split('-').map(Number); return `${MONTH_NAMES[m - 1]} ${y}`;
 }
 function periodYear(p){ return p.type === 'year' ? p.year : +p.ym.slice(0, 4); }
@@ -366,6 +366,13 @@ function aggregate(country, p){
     a.bev += bev; a.phev += phev; a.total += r.total || 0;
     a.other = a.total - a.bev - a.phev;
     out.set(k, a);
+  }
+  // "Projected" period: scale the year-to-date rows just loaded up to a full-year run-rate
+  // (same annualization used by the 5-year history chart's dashed/lighter projected segment),
+  // applied uniformly across bev/phev/other so each brand's fuel mix stays proportionate
+  if(p.projected){
+    const factor = 12 / CUR_YEAR_MONTHS_ELAPSED;
+    out.forEach(a => { a.bev *= factor; a.phev *= factor; a.total *= factor; a.other = a.total - a.bev - a.phev; });
   }
   return out;
 }
@@ -418,17 +425,20 @@ function groupedOptions(tot, names){
     sec('China', buckets['China'], false) + sec('Rest of the world', buckets['Rest of the world'], true);
 }
 function buildPeriodSelect(){
+  // the running year offers a "(Projected)" option (year-to-date annualized to a full-year
+  // run-rate, same method as the 5-year history chart) instead of a plain year-to-date one --
+  // a raw partial-year total isn't comparable to the complete prior years in this same list
   let h = '<optgroup label="Years">';
-  YEARS.forEach(y => { h += `<option value="y:${y}">${y === CUR_YEAR ? y + ' (year-to-date)' : y}</option>`; });
+  YEARS.forEach(y => { h += y === CUR_YEAR ? `<option value="yp:${y}">${y} (Projected)</option>` : `<option value="y:${y}">${y}</option>`; });
   h += '</optgroup><optgroup label="Months">';
   MONTHS.forEach(m => { h += `<option value="m:${m}">${periodLabel({type:'month', ym:m})}</option>`; });
   h += '</optgroup>';
   selPeriod.innerHTML = h;
-  selPeriod.value = `y:${YEARS[0]}`; // current year, year-to-date
+  selPeriod.value = `yp:${YEARS[0]}`; // current year, projected full-year run-rate
 }
 function readPeriod(){
   const [t, v] = selPeriod.value.split(':');
-  period = t === 'y' ? { type:'year', year:+v } : { type:'month', ym:v };
+  period = t === 'yp' ? { type:'year', year:+v, projected:true } : t === 'y' ? { type:'year', year:+v } : { type:'month', ym:v };
 }
 function buildMfrSelect(){
   // every entity with sales in at least one country for the period (grouped lists built by groupedOptions)
@@ -938,22 +948,32 @@ function renderContinentBars(){
     toggle.classList.remove('hidden');
     const byGroup = groupMode === 'group';
     title.textContent = byGroup ? 'World sales by parent group' : 'World sales by brand';
-    legend.innerHTML = '';
+    legend.innerHTML = `<span><i class="sw" style="background:${COLORS.bev}"></i>BEV</span><span><i class="sw" style="background:${COLORS.phev}"></i>PHEV</span><span><i class="sw" style="background:${COLORS.other}"></i>HEV + ICE + Diesel</span>`;
     const world = new Map();
-    Object.values(byCountry).forEach(d => d.list.forEach(a => { if(!isOtherName(a.name)) world.set(a.name, (world.get(a.name) || 0) + a.total); }));
-    const worldTotal = [...world.values()].reduce((s, v) => s + v, 0);
-    const built = [...world.entries()].sort((a, b) => b[1] - a[1]).slice(0, WORLD_LIST_CAP);
-    const widthDenom = built.length ? built[0][1] : 1;
-    rows.innerHTML = built.map(([name, total]) => {
-      const { bar, outside } = segmentsHTML([{ value:total, color:brandColor(name), label:`${name}: ${fmt(total)}` }], widthDenom);
-      const pct = worldTotal ? `<span class="pct-of-total">${(100 * total / worldTotal).toFixed(1)}%</span>` : '';
+    Object.values(byCountry).forEach(d => d.list.forEach(a => {
+      if(isOtherName(a.name)) return;
+      const e = world.get(a.name) || { bev:0, phev:0, other:0, total:0 };
+      e.bev += a.bev; e.phev += a.phev; e.other += a.other; e.total += a.total;
+      world.set(a.name, e);
+    }));
+    const worldTotal = [...world.values()].reduce((s, e) => s + e.total, 0);
+    const built = [...world.entries()].sort((a, b) => b[1].total - a[1].total).slice(0, WORLD_LIST_CAP);
+    const widthDenom = built.length ? built[0][1].total : 1;
+    rows.innerHTML = built.map(([name, e]) => {
+      const parts = [
+        { value:e.bev, color:COLORS.bev, label:`BEV: ${fmt(e.bev)}` },
+        { value:e.phev, color:COLORS.phev, label:`PHEV: ${fmt(e.phev)}` },
+        { value:e.other, color:COLORS.other, label:`HEV + ICE + Diesel: ${fmt(e.other)}` },
+      ];
+      const { bar, outside } = segmentsHTML(parts, widthDenom);
+      const pct = worldTotal ? `<span class="pct-of-total">${(100 * e.total / worldTotal).toFixed(1)}%</span>` : '';
       return `<div class="rank-row">
         <span class="country-label">${esc(name)}</span>
         ${pct}
         <span class="bar-track">${bar}${outside}</span>
       </div>`;
     }).join('');
-    note.textContent = `Top ${WORLD_LIST_CAP} ${byGroup ? 'parent groups' : 'brands'} worldwide by volume, ${periodLabel(period)}. Pick a manufacturer above to focus this chart on one market instead.`;
+    note.textContent = `Top ${WORLD_LIST_CAP} ${byGroup ? 'parent groups' : 'brands'} worldwide by volume, ${periodLabel(period)}. Bars are split into BEV, PHEV and HEV + ICE + Diesel. Pick a manufacturer above to focus this chart on one market instead.`;
     return;
   }
 
