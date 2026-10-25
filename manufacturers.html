@@ -7,7 +7,10 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
 <link rel="stylesheet" href="assets/styles.css">
 <style>
-  .mfr-filters{ display:flex; flex-wrap:wrap; gap:18px; align-items:flex-end; margin:4px 0 14px; }
+  .mfr-filters{ display:flex; flex-wrap:wrap; gap:18px; align-items:flex-end; margin:4px 0; }
+  /* its own card, pinned to the top of the viewport while scrolling, so the period/manufacturer
+     pickers stay reachable no matter how far down the map/bar charts the page has scrolled */
+  .mfr-filters-sticky{ position:sticky; top:0; z-index:40; }
   .mfr-filters label{ display:flex; flex-direction:column; gap:4px; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); }
   .mfr-filters select{ margin-bottom:0; min-width:170px; font-size:13.5px; padding:7px 10px; text-transform:none; letter-spacing:0; font-weight:600; }
   .mfr-filters .chart-mode-toggle{ align-self:flex-end; }
@@ -32,7 +35,10 @@
   .sw{ display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:4px; vertical-align:-1px; }
   .mfr-modal .history{ margin-top:9px; padding-top:8px; border-top:1px solid var(--border); }
   .mfr-modal .history-title{ font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); margin-bottom:6px; }
-  .mfr-modal .history-bars{ display:flex; align-items:flex-end; gap:6px; height:76px; }
+  .mfr-modal .history-bars{ display:flex; align-items:flex-end; gap:6px; height:76px; position:relative; }
+  /* dashed reference line at the height of the first year's bar, spanning across to the current
+     year's bar -- makes it easy to see at a glance whether sales improved or regressed since then */
+  .mfr-modal .history-ref-line{ position:absolute; left:1px; right:1px; border-top:1px dashed var(--text-muted); opacity:.6; pointer-events:none; }
   .mfr-modal .history-yr{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; min-width:0; }
   .mfr-modal .history-yr .bars-pair{ display:flex; align-items:flex-end; gap:2px; height:100%; width:100%; justify-content:center; }
   .mfr-modal .history-yr .hbar{ width:16px; border-radius:2px 2px 0 0; min-height:2px; }
@@ -133,7 +139,7 @@
         <p class="subtitle">Pick a period and, optionally, one manufacturer. The map shades each country by that manufacturer's sales (or by total market size when "All manufacturers" is selected). Hover a country to see its top 10 manufacturers for the period, split into BEV, PHEV and HEV + ICE + Diesel.</p>
       </header>
 
-      <div class="card chart-card">
+      <div class="card chart-card mfr-filters-sticky">
         <div class="mfr-filters">
           <label>Period
             <select id="f-period" class="filter-search"></select>
@@ -161,6 +167,9 @@
             <button type="button" class="mode-btn" data-metric="share" title="Selected manufacturer's share of each country's total market (needs a manufacturer).">Market share</button>
           </div>
         </div>
+      </div>
+
+      <div class="card chart-card">
         <p class="note" id="map-note"></p>
         <div class="map-wrap" id="map-wrap">
           <svg class="map-svg" id="map-svg" viewBox="0 0 940 460" role="img" aria-label="World map shaded by manufacturer sales"></svg>
@@ -462,6 +471,7 @@ function wireCombo(selectEl, inputEl, listEl){
     selectEl.dispatchEvent(new Event('change'));
     syncCombo(selectEl);
     listEl.classList.remove('open');
+    inputEl.blur();
   }
   selectEl.__comboSync = () => {
     const opt = selectEl.options[selectEl.selectedIndex];
@@ -770,7 +780,14 @@ function historyHTML(country, scope){
     }).join('');
     return `<div class="history-yr${series.length > 1 ? ' pair' : ''}"><div class="bars-pair">${pair}</div><div class="hyear">${y}${y === CUR_YEAR ? '*' : ''}</div></div>`;
   }).join('');
-  return `<div class="history"><div class="history-title">${title}</div>${legend}<div class="history-bars">${bars}</div>${years.includes(CUR_YEAR) ? `<div style="font-size:10px;color:var(--text-muted);margin-top:4px">*${CUR_YEAR} projected full year (year-to-date x 12 / ${CUR_YEAR_MONTHS_ELAPSED} months): solid = year-to-date, light = projected rest of year</div>` : ''}</div>`;
+  // reference line: a dashed horizontal line at the height of the FIRST year's bar (first series only,
+  // e.g. manufacturer 1 in a head-to-head), spanning across to the current year's bar -- shows at a
+  // glance whether sales improved (current year's bar rises above the line) or regressed (falls below it)
+  const firstVal = series[0] && series[0].values[0];
+  const refLine = firstVal && firstVal.top != null
+    ? `<div class="history-ref-line" style="bottom:${Math.max(2, 100 * firstVal.top / max)}%" title="${years[0]} level: ${fmt(firstVal.top)}"></div>`
+    : '';
+  return `<div class="history"><div class="history-title">${title}</div>${legend}<div class="history-bars">${refLine}${bars}</div>${years.includes(CUR_YEAR) ? `<div style="font-size:10px;color:var(--text-muted);margin-top:4px">*${CUR_YEAR} projected full year (year-to-date x 12 / ${CUR_YEAR_MONTHS_ELAPSED} months): solid = year-to-date, light = projected rest of year. Dashed line = ${years[0]} level, for comparison.</div>` : ''}</div>`;
 }
 function rowHTML(rk, a, max, sel){
   const w = v => (max ? 100 * v / max : 0).toFixed(2) + '%';
