@@ -29,7 +29,6 @@
       <a href="index.html"><span class="dot"></span>Home</a>
 
       <div class="nav-heading">Overview</div>
-      <a href="world-auto-sales.html"><span class="dot"></span>World Auto Sales</a>
       <a href="world-car-sales.html" aria-current="page"><span class="dot"></span>World Car Sales</a>
 
       <div class="nav-heading">Powertrain</div>
@@ -100,6 +99,14 @@
         <div class="tooltip" id="tip-c"></div>
       </div>
 
+      <div class="card chart-card" id="card-d">
+        <h2>Motorisation Trends</h2>
+        <p class="note" id="motor-note"></p>
+        <div class="chart-legend" id="motor-legend"></div>
+        <svg class="chart" id="motor-svg" viewBox="0 0 900 300" preserveAspectRatio="none"></svg>
+        <div class="tooltip" id="motor-tip"></div>
+      </div>
+
       <div class="card notes-card is-collapsed">
         <button type="button" class="notes-toggle" aria-expanded="false">
           <span>📝 Notes</span>
@@ -116,6 +123,7 @@
           <li><strong>Fleet 2026 (projection).</strong> The 2026 point uses each tracked country's 2026 projected registrations (year-to-date plus the site's standard trend, with China at its retail level), rest-of-world sales held at the 2025 level, and BEV/PHEV 2026 sales = IEA 2025 sales × the growth of the site's own 2026 projection (BEV +10%, PHEV −16%; the IEA's own outlook of about 23 million electric cars in 2026 is higher than this). Result: fleet +12 M to about 1,353 M, BEV 66 M, PHEV 31 M (estimated), ICE &amp; hybrids about 1,256 M, i.e. <strong>about −8 M against 2025</strong> — the first decline in this series. It is a projection, not a measurement: a rebound in China's retail market in Q4 would turn it into a flat year, and Japan and Russia fall partly through the model's ageing mechanics on low registration years.</li>
           <li><strong>Fleet electric part.</strong> BEV and PHEV stocks are unchanged from the IEA-based series: cumulative IEA sales with a constant 1.5% yearly loss, the value that best reproduces the IEA's measured global electric-car stock (76 million at end-2025 per GEVO 2026; model: 77 million, within ±3% in every year 2014–2025). BEV/PHEV before 2010 are negligible (~30,000 vehicles at end-2009). ICE &amp; hybrids is the total fleet minus BEV and PHEV, so it includes conventional hybrids. Heavy trucks, buses and two/three-wheelers are not in the fleet.</li>
           <li><strong>BEV vs ICE 2026 (projection).</strong> The 2026 bar is IEA 2025 sales (84.8 million) multiplied by the growth between 2025 and the site's own 2026 projection, measured over the 61 countries that have both a 2025 annual and a 2026 projected fuel split: total about −4%, BEV about +10%, PHEV about −16%, which gives roughly 81.6 million light vehicles, of which 15.4 million BEV, 6.1 million PHEV and 60.2 million ICE and hybrids. It uses the same growth rates as the 2026 fleet point below, so the two charts agree. It is a projection, not a measurement; the IEA's own outlook for 2026 electric-car sales (about 23 million) is higher than this site's trend.</li>
+          <li><strong>Motorisation Trends (moved here from the retired World Auto Sales page).</strong> Sums the monthly new-car registrations by powertrain of the markets with monthly data on this site (assets/market-powertrain-history-data.js, 2023-01 to 2026-07). Markets enter at different dates and some are quarterly or estimated, so a share change between years can partly come from the market mix; fuel splits follow each country's source (e.g. Hong Kong and Japan fold some hybrids into petrol). 2026 is partial.</li>
           <li>Rounding: values are shown in millions of vehicles; hover the charts for exact figures.</li>
         </ul>
       </div>
@@ -129,6 +137,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="assets/world-car-sales-data.js"></script>
+<script src="assets/market-powertrain-history-data.js"></script>
 <script>
 const COL = { sales:'#c1621f', bev:'#1e8f5f', phev:'#2563eb', ice:'#8a7f73' };
 const fmtM = v => (v/1e6).toFixed(1) + ' M';
@@ -320,6 +329,77 @@ function wireToggle(id, fn){
 }
 drawA(); drawB('units'); drawC('units');
 wireToggle('b', drawB); wireToggle('c', drawC);
+
+// ---------- Motorisation Trends: share of new-car registrations by powertrain, summed over every tracked market, year by year ----------
+(function(){
+  const FUEL_KEYS = ['bev','phev','hev','petrol','diesel','others'];
+  const FUEL_COLORS = { bev:'#1e8f5f', phev:'#2563eb', hev:'#f4a742', petrol:'#1a1a1a', diesel:'#6b7280', others:'#8b5cf6' };
+  const FUEL_LABELS = { bev:'Battery Electric', phev:'Plug-in Hybrid', hev:'Hybrid', petrol:'Petrol', diesel:'Diesel', others:'Others' };
+  const countries = Object.keys(MOTOR_HIST);
+  const years = [...new Set(MOTOR_MONTHS.map(m => m.slice(0, 4)))];
+  document.getElementById('motor-legend').innerHTML = FUEL_KEYS.map(k => `<div class="legend-chip"><span class="swatch" style="background:${FUEL_COLORS[k]}"></span>${FUEL_LABELS[k]}</div>`).join('');
+
+  function yearly(){
+    return years.map(year => {
+      const sums = { bev:0, phev:0, hev:0, petrol:0, diesel:0, others:0, total:0 };
+      let monthsWithData = 0, lastMonth = null;
+      MOTOR_MONTHS.forEach((m, i) => {
+        if(!m.startsWith(year)) return;
+        let any = false;
+        countries.forEach(c => {
+          const row = MOTOR_HIST[c][i];
+          if(!row) return;
+          any = true;
+          const [bev, phev, hev, petrol, diesel, others] = row;
+          const v = { bev, phev, hev, petrol, diesel, others };
+          FUEL_KEYS.forEach(k => { sums[k] += v[k]; sums.total += v[k]; });
+        });
+        if(any){ monthsWithData++; lastMonth = m; }
+      });
+      return { year, monthsWithData, lastMonth, ...sums };
+    }).filter(y => y.monthsWithData > 0);
+  }
+  const Y = yearly();
+  const last = Y[Y.length - 1];
+  document.getElementById('motor-note').textContent = `Share of new car registrations by powertrain, summed across the ${countries.length} markets with monthly powertrain data tracked on this site, year by year (Europe, the Americas, Asia-Pacific, South Africa and Israel; markets joined at different dates, see the notes). ${last.monthsWithData < 12 ? last.year + ' is partial (through ' + last.lastMonth + ') and shown as a dashed final segment.' : ''}`;
+
+  const W = 900, H = 300, M = { top:16, right:16, bottom:30, left:38 };
+  const innerW = W - M.left - M.right, innerH = H - M.top - M.bottom;
+  const svgSel = d3.select('#motor-svg'), tooltip = document.getElementById('motor-tip'), wrap = document.getElementById('motor-svg').closest('.chart-card');
+  const series = Y.map((y, i) => {
+    const o = { i, year:y.year, total:y.total, monthsWithData:y.monthsWithData, lastMonth:y.lastMonth };
+    FUEL_KEYS.forEach(k => { o[k] = y.total ? y[k] / y.total * 100 : 0; });
+    return o;
+  });
+  const xScale = d3.scalePoint().domain(series.map(d => d.i)).range([0, innerW]).padding(0.05);
+  const yMax = Math.max(10, d3.max(series, d => Math.max(...FUEL_KEYS.map(k => d[k]))) * 1.15);
+  const yScale = d3.scaleLinear().domain([0, yMax]).range([innerH, 0]);
+  const g = svgSel.append('g').attr('transform', `translate(${M.left},${M.top})`);
+  g.append('g').attr('class', 'bubble-axis').attr('transform', `translate(0,${innerH})`)
+    .call(d3.axisBottom(xScale).tickFormat(i => { const d = series.find(s => s.i === i); return d.monthsWithData < 12 ? `${d.year} (partial)` : d.year; }));
+  g.append('g').attr('class', 'bubble-axis').call(d3.axisLeft(yScale).ticks(5).tickFormat(d => d + '%'));
+  const line = key => d3.line().x(d => xScale(d.i)).y(d => yScale(d[key]));
+  const lastComplete = series.reduce((acc, d, idx) => d.monthsWithData >= 12 ? idx : acc, -1);
+  FUEL_KEYS.forEach(k => {
+    const solid = series.slice(0, lastComplete + 1), dashed = series.slice(Math.max(lastComplete, 0));
+    if(solid.length > 1) g.append('path').datum(solid).attr('class', 'trend-line').attr('stroke', FUEL_COLORS[k]).attr('d', line(k));
+    if(dashed.length > 1) g.append('path').datum(dashed).attr('class', 'trend-line').attr('stroke', FUEL_COLORS[k]).attr('stroke-dasharray', '5,4').attr('d', line(k));
+    g.selectAll(`.motor-dot-${k}`).data(series).join('circle').attr('class', `motor-dot-${k}`)
+      .attr('cx', d => xScale(d.i)).attr('cy', d => yScale(d[k])).attr('r', 3.5).attr('fill', FUEL_COLORS[k]);
+  });
+  const guide = g.append('line').attr('class', 'trend-guideline').attr('y1', 0).attr('y2', innerH).style('opacity', 0);
+  g.append('rect').attr('width', innerW).attr('height', innerH).attr('fill', 'transparent')
+    .on('pointermove', e => {
+      const [mx] = d3.pointer(e);
+      const d = series.reduce((best, s) => (best === null || Math.abs(xScale(s.i) - mx) < Math.abs(xScale(best.i) - mx)) ? s : best, null);
+      if(!d) return;
+      guide.attr('x1', xScale(d.i)).attr('x2', xScale(d.i)).style('opacity', 1);
+      const rect = wrap.getBoundingClientRect();
+      tooltip.style.left = (e.clientX - rect.left) + 'px'; tooltip.style.top = (e.clientY - rect.top - 10) + 'px'; tooltip.style.opacity = 1;
+      tooltip.innerHTML = `<strong>${d.year}${d.monthsWithData < 12 ? ` (through ${d.lastMonth})` : ''}</strong><br>` + FUEL_KEYS.map(k => `${FUEL_LABELS[k]}: <strong>${d[k].toFixed(1)}%</strong>`).join('<br>') + `<br>Total: ${d.total.toLocaleString('en-US')}`;
+    })
+    .on('pointerleave', () => { guide.style('opacity', 0); tooltip.style.opacity = 0; });
+})();
 </script>
 <script src="assets/notes-toggle.js"></script>
 </body>
