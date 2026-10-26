@@ -147,16 +147,16 @@
 
       <div class="card chart-card">
         <div class="chart-header-row">
-          <h2 id="rank-title">People per New Car Sold</h2>
+          <h2 id="rank-title">New Cars Sold per 100 People</h2>
         </div>
-        <p class="note" id="rank-note">Lower = more cars sold relative to population (a "hotter" market). Ranked list — bar length is inverted (shorter bar = fewer people per car = hotter market). Click a row to isolate it on the map.</p>
+        <p class="note" id="rank-note">Higher = more cars sold relative to population (a "hotter" market). Bar length is proportional to cars sold per 100 people, so the longest bar is the hottest market. Click a row to isolate it on the map.</p>
         <div class="rank-rows raw-mode" id="rank-rows"></div>
         <div class="tooltip" id="bar-tooltip"></div>
       </div>
 
       <div class="card chart-card">
-        <h2 id="map-title">Sales per Capita Map</h2>
-        <p class="note" id="map-note">Shaded by people-per-car-sold in each country's latest available year — darker = more cars sold per person. Hover a country for exact figures. Grey = no data.</p>
+        <h2 id="map-title">Sales per 100 People Map</h2>
+        <p class="note" id="map-note">Shaded by cars sold per 100 people in each country's latest available year — darker = more cars sold per person. Hover a country for exact figures, including its 2010/2020/latest trend. Grey = no data.</p>
         <div class="map-wrap">
           <svg class="map-svg" id="map-svg" viewBox="0 0 940 460" role="img" aria-label="World map shaded by per-capita metric"></svg>
           <div class="tooltip" id="map-tooltip"></div>
@@ -168,7 +168,7 @@
         <div class="chart-header-row">
           <h2>Then &amp; Now — the Motorisation Explorer</h2>
         </div>
-        <p class="note">Every country, three eras: <strong>2010</strong>, <strong>2020</strong> and the latest data on file. X-axis is population (log scale), Y-axis is the ratio for whichever metric tab is selected above (always on a per-person basis), bubble size is the total (cars sold / cars on the road / litres of oil). Press Play to watch markets move — bubbles that race downward are motorising fast; bubbles drifting right are simply growing their population. Only countries with data in all three eras can animate; everyone else is left out of this one chart only.</p>
+        <p class="note">Every country, three eras: <strong>2010</strong>, <strong>2020</strong> and the latest data on file. X-axis is population (log scale), Y-axis is cars per 100 people (or litres of oil per person) for whichever metric tab is selected above — always on a per-person basis — bubble size is the total (cars sold / cars on the road / litres of oil). Press Play to watch markets move — bubbles that race upward are climbing fastest on whichever metric is selected (more cars sold, more cars on the road, or more oil burned per person); bubbles drifting right are simply growing their population. Only countries with data in all three eras can animate; everyone else is left out of this one chart only.</p>
         <div class="pe-era-row">
           <button type="button" class="pe-play-btn" id="pe-play">▶ Play</button>
           <div class="pe-era-dots" id="pe-era-dots">
@@ -258,21 +258,72 @@ function yearLabelFor(c, which){
 }
 function yearSuffix(){ return currentYear === 'latest' ? '' : ` — ${currentYear}`; }
 
+// --- hover mini-chart: 2010 / 2020 / Latest bars for whichever metric tab is active, appended to
+// both the rank-row tooltip and the map tooltip. Always computed on a straight per-person basis
+// (no adult/15-64 split, same reasoning as the Then & Now bubble chart below) so the three bars are
+// always comparable, even on the per-adult/per-15-64 tabs. ---
+const TREND_ERAS = ['2010', '2020', 'latest'];
+const TREND_ERA_LABELS = { '2010':'2010', '2020':'2020', latest:'Latest' };
+function trendField(base, era){ return era === 'latest' ? base : base + era; }
+function trendFieldsFor(metric){
+  return {
+    sales: { pop:'population', total:'salesTotal' },
+    fleet: { pop:'population', total:'fleetTotal' },
+    oil:   { pop:'population', total:'oilLitres' },
+  }[metric];
+}
+function countryTrendChartHTML(country){
+  const c = POPULATION_ENERGY[country];
+  if(!c) return '';
+  const fld = trendFieldsFor(currentMetric);
+  const isOil = currentMetric === 'oil';
+  const pts = TREND_ERAS.map(era => {
+    const pop = c[trendField(fld.pop, era)];
+    const total = c[trendField(fld.total, era)];
+    if(pop == null || total == null || total <= 0) return null;
+    return isOil ? total / pop : total / pop * 100; // cars per 100 people, or litres per person for oil
+  });
+  if(pts.every(v => v == null)) return '';
+  const maxV = Math.max(...pts.filter(v => v != null));
+  const W = 210, H = 96, barW = 40, gap = 20, base = H - 18;
+  const unit = isOil ? 'L/person' : 'cars/100 people';
+  const bars = pts.map((v, i) => {
+    const x = 10 + i * (barW + gap);
+    const label = TREND_ERA_LABELS[TREND_ERAS[i]];
+    if(v == null){
+      return `<rect x="${x}" y="${base-4}" width="${barW}" height="4" fill="rgba(255,255,255,.2)" rx="2"></rect>
+        <text x="${x+barW/2}" y="${base+14}" text-anchor="middle" font-size="9" fill="var(--bg)" opacity="0.75">${label}</text>
+        <text x="${x+barW/2}" y="${base-10}" text-anchor="middle" font-size="8" fill="var(--bg)" opacity="0.6">n/a</text>`;
+    }
+    const h = Math.max(3, (v / maxV) * (base - 14));
+    const y = base - h;
+    const fmtV = v >= 100 ? Math.round(v).toLocaleString('en-US') : v.toFixed(1);
+    const isLast = i === pts.length - 1;
+    return `<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="${isLast ? ACCENT : ACCENT2}" opacity="${isLast ? 1 : 0.5 + i*0.2}" rx="3"></rect>
+      <text x="${x+barW/2}" y="${y-5}" text-anchor="middle" font-size="10" font-weight="700" fill="var(--bg)">${fmtV}</text>
+      <text x="${x+barW/2}" y="${base+14}" text-anchor="middle" font-size="9" fill="var(--bg)" opacity="0.75">${label}</text>`;
+  }).join('');
+  return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.18);">
+    <svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${bars}</svg>
+    <div style="font-size:10px;opacity:.6;text-align:center;">${unit} — 2010 · 2020 · latest</div>
+  </div>`;
+}
+
 const BASIS = {
   person: {
-    noun:'People', one:'person', unit:'people/car', short:'Capita', desc:'the total population',
+    noun:'People', one:'person', unit:'cars/100 people', per100:'100 People', short:'Capita', desc:'the total population',
     ok: c => yf(c,'population') != null,
     pop: c => yf(c,'population'),
     popText: c => `population ${fmtN(yf(c,'population'))}`,
   },
   adult: {
-    noun:'Adults (15+)', one:'adult', unit:'adults/car', short:'Adult (15+)', desc:'the adult population (15 and over)',
+    noun:'Adults (15+)', one:'adult', unit:'cars/100 adults', per100:'100 Adults (15+)', short:'Adult (15+)', desc:'the adult population (15 and over)',
     ok: c => currentYear === 'latest' && c.adultPop != null,
     pop: c => c.adultPop,
     popText: c => `adult (15+) population ${fmtN(c.adultPop)} of ${fmtN(c.population)} inhabitants`,
   },
   work: {
-    noun:'Working-age adults (15-64)', one:'working-age adult', unit:'15-64 yr/car', short:'15-64', desc:'the working-age population (15 to 64)',
+    noun:'Working-age adults (15-64)', one:'working-age adult', unit:'cars/100 15-64', per100:'100 Working-Age Adults', short:'15-64', desc:'the working-age population (15 to 64)',
     ok: c => currentYear === 'latest' && c.workPop != null,
     pop: c => c.workPop,
     popText: c => `15-64 population ${fmtN(c.workPop)} of ${fmtN(c.population)} inhabitants`,
@@ -283,41 +334,39 @@ const AGE_SPLIT_TABS = ['salesw','fleetadult','fleetw'];
 
 const METRICS = {
   sales: {
-    get rankTitle(){ return `${BASIS[salesBasis].noun} per New Car Sold${yearSuffix()}`; },
-    get rankNote(){ return `Lower = more cars sold relative to ${BASIS[salesBasis].desc} (a "hotter" market). Bar length is proportional to cars sold per ${BASIS[salesBasis].one} (the inverse of the number shown), so the longest bar is the hottest market. Click a row to isolate it on the map.`; },
-    get mapTitle(){ return (salesBasis === 'person' ? 'Sales per Capita Map' : `Sales per ${BASIS[salesBasis].short} Map`) + yearSuffix(); },
-    get mapNote(){ return `Shaded by ${BASIS[salesBasis].noun.toLowerCase()}-per-car-sold in each country's ${currentYear === 'latest' ? 'latest available year' : currentYear} — darker = more cars sold per ${BASIS[salesBasis].one}. Hover a country for exact figures. Grey = no sales data${salesBasis === 'person' ? '' : ' or no age split'}.`; },
-    get legendLabel(){ return `${BASIS[salesBasis].noun} per car sold`; },
+    get rankTitle(){ return `New Cars Sold per ${BASIS[salesBasis].per100}${yearSuffix()}`; },
+    get rankNote(){ return `Higher = more cars sold relative to ${BASIS[salesBasis].desc} (a "hotter" market). Bar length is proportional to cars sold per ${BASIS[salesBasis].per100.toLowerCase()}, so the longest bar is the hottest market. Click a row to isolate it on the map.`; },
+    get mapTitle(){ return `Sales per ${BASIS[salesBasis].per100} Map` + yearSuffix(); },
+    get mapNote(){ return `Shaded by cars sold per ${BASIS[salesBasis].per100.toLowerCase()} in each country's ${currentYear === 'latest' ? 'latest available year' : currentYear} — darker = more cars sold per ${BASIS[salesBasis].one}. Hover a country for exact figures, including its 2010/2020/latest trend. Grey = no sales data${salesBasis === 'person' ? '' : ' or no age split'}.`; },
+    get legendLabel(){ return `Cars sold per ${BASIS[salesBasis].per100}`; },
     get unitLabel(){ return BASIS[salesBasis].unit; },
+    hotLabel: 'Hottest Market', coldLabel: 'Coldest Market',
     hasEntry: c => yf(c,'salesTotal') != null && BASIS[salesBasis].ok(c),
-    ratio: c => BASIS[salesBasis].pop(c) / yf(c,'salesTotal'), // people per car sold — lower is "hotter"
-    lowerIsHotter: true,
-    perThousand: true,
+    ratio: c => yf(c,'salesTotal') / BASIS[salesBasis].pop(c) * 100, // cars sold per 100 people/adults/working-age — higher is "hotter"
     tooltipExtra: c => { const yl = yearLabelFor(c,'sales'); return `${Math.round(yf(c,'salesTotal')).toLocaleString('en-US')} cars sold in ${yl.year}${yl.projected ? ' (proj.)' : ''} — ${BASIS[salesBasis].popText(c)}`; },
   },
   fleet: {
-    get rankTitle(){ return `${BASIS[fleetBasis].noun} per Car on the Road${yearSuffix()}`; },
-    get rankNote(){ return `Lower = more cars on the road relative to ${BASIS[fleetBasis].desc} (one car per ${BASIS[fleetBasis].one} = 1.0). Bar length is proportional to cars per ${BASIS[fleetBasis].one} (the inverse of the number shown), so the longest bar is the most motorised country. Click a row to isolate it on the map.`; },
-    get mapTitle(){ return (fleetBasis === 'person' ? 'Cars on the Road per Capita Map' : `Cars on the Road per ${BASIS[fleetBasis].short} Map`) + yearSuffix(); },
-    get mapNote(){ return `Shaded by ${BASIS[fleetBasis].noun.toLowerCase()} per car on the road in ${currentYear === 'latest' ? '2024 (or nearest earlier year)' : currentYear} — darker = more cars per ${BASIS[fleetBasis].one}. Only the countries with fleet data for this year are shaded (50 of 110 at most). Grey = no data.`; },
-    get legendLabel(){ return `${BASIS[fleetBasis].noun} per car on the road`; },
+    get rankTitle(){ return `Cars on the Road per ${BASIS[fleetBasis].per100}${yearSuffix()}`; },
+    get rankNote(){ return `Higher = more cars on the road relative to ${BASIS[fleetBasis].desc} (a more motorised country). Bar length is proportional to cars on the road per ${BASIS[fleetBasis].per100.toLowerCase()}, so the longest bar is the most motorised country. Click a row to isolate it on the map.`; },
+    get mapTitle(){ return `Cars on the Road per ${BASIS[fleetBasis].per100} Map` + yearSuffix(); },
+    get mapNote(){ return `Shaded by cars on the road per ${BASIS[fleetBasis].per100.toLowerCase()} in ${currentYear === 'latest' ? '2024 (or nearest earlier year)' : currentYear} — darker = more cars per ${BASIS[fleetBasis].one}. Only the countries with fleet data for this year are shaded (50 of 110 at most). Grey = no data.`; },
+    get legendLabel(){ return `Cars on the road per ${BASIS[fleetBasis].per100}`; },
     get unitLabel(){ return BASIS[fleetBasis].unit; },
+    hotLabel: 'Most Motorised', coldLabel: 'Least Motorised',
     hasEntry: c => yf(c,'fleetTotal') != null && BASIS[fleetBasis].ok(c),
-    ratio: c => BASIS[fleetBasis].pop(c) / yf(c,'fleetTotal'),
-    lowerIsHotter: true,
-    perThousand: true,
+    ratio: c => yf(c,'fleetTotal') / BASIS[fleetBasis].pop(c) * 100,
     tooltipExtra: c => { const yl = yearLabelFor(c,'fleet'); return `${Math.round(yf(c,'fleetTotal')).toLocaleString('en-US')} cars on the road in ${yl.year} — ${BASIS[fleetBasis].popText(c)}`; },
   },
   oil: {
     get rankTitle(){ return `Litres of Oil Consumed per Person${yearSuffix()}`; },
     rankNote: 'Higher = more oil consumed per person per year (total refined products, not just road fuel). Ranked list — bar length scales with litres per capita. Click a row to isolate it on the map.',
     get mapTitle(){ return 'Oil Consumption per Capita Map' + yearSuffix(); },
-    get mapNote(){ return `Shaded by litres of refined oil products consumed per person in ${currentYear === 'latest' ? '2024' : currentYear} — darker = more per person. Grey = no data.`; },
+    get mapNote(){ return `Shaded by litres of refined oil products consumed per person in ${currentYear === 'latest' ? '2024' : currentYear} — darker = more per person. Hover a country for its 2010/2020/latest trend. Grey = no data.`; },
     legendLabel: 'Litres per person',
     unitLabel: 'L/person',
+    hotLabel: 'Highest per Capita', coldLabel: 'Lowest per Capita',
     hasEntry: c => yf(c,'oilLitres') != null && yf(c,'population') != null,
     ratio: c => yf(c,'oilLitres') / yf(c,'population'),
-    lowerIsHotter: false,
     tooltipExtra: c => { const yl = yearLabelFor(c,'oil'); return `${Math.round(yf(c,'oilLitres')).toLocaleString('en-US')} litres total in ${yl.year} — population ${fmtN(yf(c,'population'))}`; },
   },
 };
@@ -343,13 +392,13 @@ function renderStatRow(data){
     document.getElementById('stat-row').innerHTML = '';
     return;
   }
-  const sorted = [...data].sort((a,b) => m.lowerIsHotter ? a.ratio - b.ratio : b.ratio - a.ratio);
+  const sorted = [...data].sort((a,b) => b.ratio - a.ratio);
   const best = sorted[0], worst = sorted[sorted.length - 1];
   const fmt = v => v >= 1000 ? Math.round(v).toLocaleString('en-US') : v.toFixed(1);
   const stats = [
     { label: 'Countries Covered', value: String(data.length), small: `of ${COUNTRIES.length} tracked` },
-    { label: m.lowerIsHotter ? 'Hottest Market' : 'Highest per Capita', value: fmt(best.ratio), small: `${best.country} (${m.unitLabel})` },
-    { label: m.lowerIsHotter ? 'Coldest Market' : 'Lowest per Capita', value: fmt(worst.ratio), small: `${worst.country} (${m.unitLabel})` },
+    { label: m.hotLabel, value: fmt(best.ratio), small: `${best.country} (${m.unitLabel})` },
+    { label: m.coldLabel, value: fmt(worst.ratio), small: `${worst.country} (${m.unitLabel})` },
   ];
   document.getElementById('stat-row').innerHTML = stats.map(s => `
     <div class="stat">
@@ -367,7 +416,7 @@ function renderMapLegend(data){
     document.getElementById('map-legend').innerHTML = `<div class="legend-nodata">No data for this metric.</div>`;
     return;
   }
-  const steps = m.lowerIsHotter ? [...COLOR_STEPS].reverse() : COLOR_STEPS;
+  const steps = COLOR_STEPS; // higher ratio is always "hotter"/more now, so light-to-dark always means low-to-high
   colorScale = d3.scaleQuantile().domain(ratios).range(steps);
   const breaks = colorScale.quantiles();
   const edges = [d3.min(ratios), ...breaks, d3.max(ratios)];
@@ -415,7 +464,7 @@ function renderMap(){
       mapTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
       mapTooltip.style.opacity = 1;
       mapTooltip.innerHTML = entry
-        ? `${entry.country}<br><strong>${entry.ratio >= 1000 ? Math.round(entry.ratio).toLocaleString('en-US') : entry.ratio.toFixed(1)}</strong> ${m.unitLabel}<br><span style="opacity:.7">${m.tooltipExtra(entry)}</span>`
+        ? `${entry.country}<br><strong>${entry.ratio >= 1000 ? Math.round(entry.ratio).toLocaleString('en-US') : entry.ratio.toFixed(1)}</strong> ${m.unitLabel}<br><span style="opacity:.7">${m.tooltipExtra(entry)}</span>${countryTrendChartHTML(entry.country)}`
         : `${d.properties.name}<br>No data`;
     })
     .on('pointerleave', () => { mapTooltip.style.opacity = 0; })
@@ -439,22 +488,15 @@ const barTooltip = document.getElementById('bar-tooltip');
 
 function renderBars(data){
   const m = METRICS[currentMetric];
-  const sorted = [...data].sort((a,b) => m.lowerIsHotter ? a.ratio - b.ratio : b.ratio - a.ratio);
+  const sorted = [...data].sort((a,b) => b.ratio - a.ratio);
   if(!sorted.length){
     rankRows.innerHTML = '<div class="legend-nodata">No data for this metric yet.</div>';
     return;
   }
-  // bar width: for "lower is hotter" metrics, invert so the hottest market gets the longest bar
   const ratios = sorted.map(d => d.ratio);
   const maxRatio = Math.max(...ratios);
-  const minRatio = Math.min(...ratios);
   rankRows.innerHTML = sorted.map(d => {
-    let width;
-    if(m.lowerIsHotter){
-      width = minRatio / d.ratio * 100;   // proportional to cars per person (1 / people per car); the lowest ratio gets the full bar
-    } else {
-      width = maxRatio === 0 ? 10 : d.ratio / maxRatio * 100;
-    }
+    const width = maxRatio === 0 ? 10 : d.ratio / maxRatio * 100; // highest ratio always gets the full-length bar now
     const isolateClass = isolatedCountry === d.country ? ' active-isolate' : '';
     const valueText = d.ratio >= 1000 ? Math.round(d.ratio).toLocaleString('en-US') : d.ratio.toFixed(1);
     return `
@@ -479,8 +521,7 @@ rankRows.addEventListener('pointermove', e => {
   barTooltip.style.top = (e.clientY - cardRect.top - 10) + 'px';
   barTooltip.style.opacity = 1;
   const valueText = entry.ratio >= 1000 ? Math.round(entry.ratio).toLocaleString('en-US') : entry.ratio.toFixed(1);
-  const per1000 = m.perThousand ? ` · ${(1000 / entry.ratio).toFixed(entry.ratio > 1000 ? 2 : entry.ratio > 100 ? 1 : 0)} per 1,000` : '';
-  barTooltip.innerHTML = `${entry.country} — <strong>${valueText}</strong> ${m.unitLabel}${per1000}<br><span style="opacity:.7">${m.tooltipExtra(entry)}</span>`;
+  barTooltip.innerHTML = `${entry.country} — <strong>${valueText}</strong> ${m.unitLabel}<br><span style="opacity:.7">${m.tooltipExtra(entry)}</span>${countryTrendChartHTML(entry.country)}`;
 });
 rankRows.addEventListener('pointerleave', () => { barTooltip.style.opacity = 0; });
 
@@ -506,6 +547,17 @@ function updateYearNote(){
   document.getElementById('year-note').innerHTML = note;
 }
 
+// re-asserts the rank/map titles & notes from the current METRICS getter — these are year- and
+// basis-aware (see yearSuffix()), so both switchMetric() and switchYear() need to re-run this,
+// not just the one that changed.
+function updateMetricText(){
+  const m = METRICS[currentMetric];
+  document.getElementById('rank-title').textContent = m.rankTitle;
+  document.getElementById('rank-note').textContent = m.rankNote;
+  document.getElementById('map-title').textContent = m.mapTitle;
+  document.getElementById('map-note').textContent = m.mapNote;
+}
+
 function switchYear(year){
   if(year === currentYear) return;
   currentYear = year;
@@ -519,6 +571,7 @@ function switchYear(year){
     switchMetric(currentTab.startsWith('sales') ? 'sales' : 'fleet');
     return;
   }
+  updateMetricText();
   render();
 }
 
@@ -531,11 +584,7 @@ function switchMetric(tab){
   currentTab = tab;
   isolatedCountry = null;
   document.querySelectorAll('[data-metric]').forEach(b => b.classList.toggle('active', b.dataset.metric === tab));
-  const m = METRICS[metric];
-  document.getElementById('rank-title').textContent = m.rankTitle;
-  document.getElementById('rank-note').textContent = m.rankNote;
-  document.getElementById('map-title').textContent = m.mapTitle;
-  document.getElementById('map-note').textContent = m.mapNote;
+  updateMetricText();
   render();
   renderBubble();
 }
@@ -562,6 +611,7 @@ document.querySelectorAll('[data-year]').forEach(btn => {
 });
 
 updateYearNote();
+updateMetricText();
 render();
 
 // ---------------------------------------------------------------------------------
@@ -592,7 +642,8 @@ function bubbleFrames(metric){
       const pop = c[eraField(fld.pop, era)];
       const total = c[eraField(fld.total, era)];
       if(pop == null || total == null || total <= 0) return null;
-      return { pop, total, ratio: pop / total };
+      const ratio = metric === 'oil' ? total / pop : total / pop * 100; // litres/person, or cars per 100 people — higher is always "more" now
+      return { pop, total, ratio };
     });
     if(frames.some(f => !f)) return null; // need all 3 eras present to animate cleanly
     return { country, continent: c.continent, frames };
