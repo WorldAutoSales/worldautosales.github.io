@@ -7,14 +7,83 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
 <link rel="stylesheet" href="assets/styles.css">
 <style>
-  .mfr-filters{ display:flex; flex-wrap:wrap; gap:18px; align-items:flex-end; margin:4px 0; }
-  /* its own card, pinned to the top of the viewport while scrolling, so the period/manufacturer
-     pickers stay reachable no matter how far down the map/bar charts the page has scrolled */
-  .mfr-filters-sticky{ position:sticky; top:0; z-index:40; }
-  .mfr-filters-model{ margin-bottom:6px; padding-bottom:10px; border-bottom:1px dashed var(--border); }
-  .mfr-filters label{ display:flex; flex-direction:column; gap:4px; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); }
-  .mfr-filters select{ margin-bottom:0; min-width:170px; font-size:13.5px; padding:7px 10px; text-transform:none; letter-spacing:0; font-weight:600; }
-  .mfr-filters .chart-mode-toggle{ align-self:flex-end; }
+  /* ---------- filter panel: aurora gradient, two lanes (manufacturer / model), "VS" badges, slim sticky selection bar ---------- */
+  .fx-panel{ position:relative; margin:4px 0 0; padding:20px 22px 16px; border-radius:22px; color:#e9edff; overflow:visible;
+    background:radial-gradient(900px 260px at 8% -10%, rgba(34,211,238,.28), transparent 60%), radial-gradient(700px 300px at 98% 0%, rgba(139,92,246,.34), transparent 60%), linear-gradient(135deg,#0a0f24 0%,#141a3f 55%,#1d1450 100%);
+    box-shadow:0 18px 50px -18px rgba(20,16,80,.55), inset 0 1px 0 rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.08); }
+  .fx-head{ display:flex; flex-wrap:wrap; gap:16px 28px; align-items:flex-end; justify-content:space-between; margin-bottom:16px; }
+  .fx-brand{ display:flex; align-items:center; gap:12px; }
+  .fx-pulse{ width:12px; height:12px; border-radius:50%; background:linear-gradient(135deg,#22d3ee,#8b5cf6); box-shadow:0 0 0 0 rgba(34,211,238,.6); animation:fxPulse 2.4s infinite; }
+  @keyframes fxPulse{ 0%{ box-shadow:0 0 0 0 rgba(34,211,238,.55);} 70%{ box-shadow:0 0 0 12px rgba(34,211,238,0);} 100%{ box-shadow:0 0 0 0 rgba(34,211,238,0);} }
+  .fx-kicker{ font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:#8fa0ff; font-weight:700; }
+  .fx-title{ font-size:19px; font-weight:800; letter-spacing:-.01em; color:#fff; }
+  .fx-global{ display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; }
+  .fx-field{ display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .fx-label{ font-size:10.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#9fb0ff; }
+  .fx-label .note{ display:inline; font-weight:500; text-transform:none; letter-spacing:0; color:#7f8fcf; margin-left:4px; font-size:10.5px; }
+  .fx-panel select.fx-select, .fx-panel input.filter-search{ width:100%; box-sizing:border-box; margin:0; padding:10px 13px; border-radius:12px; font-size:13.5px; font-weight:600; text-transform:none; letter-spacing:0;
+    color:#fff; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.16); outline:none; transition:border-color .15s, box-shadow .15s, background .15s; }
+  .fx-panel select.fx-select{ min-width:190px; color-scheme:dark; }
+  .fx-panel select.fx-select option{ background:#141a3f; color:#fff; }
+  .fx-panel input.filter-search::placeholder{ color:rgba(200,210,255,.45); font-weight:500; }
+  .fx-panel select.fx-select:focus, .fx-panel input.filter-search:focus{ border-color:#22d3ee; background:rgba(255,255,255,.11); box-shadow:0 0 0 3px rgba(34,211,238,.22); }
+  .fx-panel input.filter-search:disabled{ opacity:.4; cursor:not-allowed; }
+  .fx-seg{ display:inline-flex; padding:4px; gap:2px; border-radius:14px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); }
+  .fx-seg .mode-btn{ border:0; background:transparent; color:#b7c3ff; font-weight:700; font-size:12.5px; padding:7px 13px; border-radius:10px; cursor:pointer; transition:all .15s; }
+  .fx-seg .mode-btn:hover:not(:disabled){ color:#fff; background:rgba(255,255,255,.08); }
+  .fx-seg .mode-btn.active{ color:#06122b; background:linear-gradient(135deg,#22d3ee,#a78bfa); box-shadow:0 4px 14px -4px rgba(34,211,238,.6); }
+  .fx-seg .mode-btn:disabled{ opacity:.4; cursor:not-allowed; }
+  .fx-lanes{ display:flex; flex-direction:column; gap:12px; }
+  .fx-lane{ display:grid; grid-template-columns:128px 1fr; gap:14px; align-items:center; padding:12px 14px; border-radius:16px; background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.08); }
+  .fx-lane-tag{ display:flex; align-items:center; gap:9px; font-weight:800; font-size:13px; color:#fff; }
+  .fx-lane-tag i{ width:30px; height:30px; border-radius:10px; display:grid; place-items:center; font-style:normal; font-size:15px; background:linear-gradient(135deg,rgba(34,211,238,.9),rgba(139,92,246,.9)); box-shadow:0 6px 16px -6px rgba(139,92,246,.8); }
+  .fx-lane-model .fx-lane-tag i{ background:linear-gradient(135deg,#f472b6,#fb923c); box-shadow:0 6px 16px -6px rgba(244,114,182,.8); }
+  .fx-pair{ display:grid; grid-template-columns:minmax(0,1fr) 40px minmax(0,1fr); gap:10px; align-items:end; }
+  .fx-vs{ align-self:end; justify-self:center; width:34px; height:34px; margin-bottom:2px; border-radius:50%; display:grid; place-items:center; font-size:10.5px; font-weight:900; letter-spacing:.05em; color:#06122b;
+    background:linear-gradient(135deg,#fde68a,#fb923c); box-shadow:0 6px 16px -6px rgba(251,146,60,.8); }
+  .fx-status{ grid-column:2; font-size:11px; color:#8fa0ff; margin-top:-4px; min-height:14px; }
+  .fx-quick{ display:flex; flex-wrap:wrap; gap:7px; align-items:center; margin-top:14px; padding-top:12px; border-top:1px dashed rgba(255,255,255,.14); }
+  .fx-quick > span{ font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:#8fa0ff; margin-right:4px; }
+  .fx-quick button{ border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.06); color:#e9edff; font-weight:700; font-size:12px; padding:5px 11px; border-radius:999px; cursor:pointer; transition:all .15s; }
+  .fx-quick button:hover{ background:linear-gradient(135deg,rgba(34,211,238,.35),rgba(139,92,246,.35)); border-color:rgba(255,255,255,.4); transform:translateY(-1px); }
+  .fx-panel .mfr-combo{ min-width:0; }
+  .fx-panel .mfr-combo-list{ background:#12173b; color:#eef1ff; border:1px solid rgba(255,255,255,.16); border-radius:14px; box-shadow:0 22px 50px rgba(5,8,30,.6); }
+  .fx-panel .mfr-combo-group{ color:#8fa0ff; }
+  .fx-panel .mfr-combo-opt:hover, .fx-panel .mfr-combo-opt.hl{ background:rgba(34,211,238,.16); }
+  .fx-panel .mfr-combo-empty{ color:#9fb0ff; }
+  .fx-chipbar{ position:sticky; top:8px; z-index:40; display:flex; flex-wrap:wrap; gap:8px 10px; align-items:center; margin:12px 0 16px; padding:9px 14px; border-radius:16px;
+    background:color-mix(in srgb, var(--surface) 86%, transparent); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--border); box-shadow:0 10px 30px -14px rgba(20,16,80,.35); }
+  .fx-chip{ display:inline-flex; align-items:center; gap:8px; padding:5px 6px 5px 12px; border-radius:999px; font-weight:800; font-size:12.5px; box-shadow:0 4px 12px -6px rgba(0,0,0,.45); }
+  .fx-chip.neutral{ background:var(--surface-alt); color:var(--text); box-shadow:none; padding:5px 12px; font-weight:700; }
+  .fx-chip button{ border:0; width:20px; height:20px; border-radius:50%; cursor:pointer; font-weight:900; line-height:1; background:rgba(255,255,255,.28); color:inherit; }
+  .fx-chip button:hover{ background:rgba(255,255,255,.5); }
+  .fx-chipvs{ font-size:10.5px; font-weight:900; color:var(--text-muted); letter-spacing:.08em; }
+  .fx-clear{ margin-left:auto; border:1px solid var(--border); background:transparent; color:var(--text-muted); font-weight:700; font-size:12px; padding:5px 12px; border-radius:999px; cursor:pointer; }
+  .fx-clear:hover{ color:var(--accent); border-color:var(--accent); }
+  /* ---------- spotlight card: KPIs, powertrain donut, five-year trend ---------- */
+  .fx-spot-head{ display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:6px 14px; }
+  .fx-spot-head h2{ margin:0; }
+  .fx-kpis{ display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:12px; margin:14px 0 18px; }
+  .fx-kpi{ position:relative; padding:14px 16px 12px; border-radius:16px; background:var(--surface-alt); overflow:hidden; border:1px solid var(--border); }
+  .fx-kpi::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--k, var(--accent)); }
+  .fx-kpi-label{ font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; color:var(--text-muted); }
+  .fx-kpi-value{ font-size:25px; font-weight:800; letter-spacing:-.02em; margin:4px 0 2px; font-variant-numeric:tabular-nums; }
+  .fx-kpi-sub{ font-size:11.5px; color:var(--text-muted); }
+  .fx-score{ display:flex; height:30px; border-radius:15px; overflow:hidden; margin:2px 0 6px; font-size:12px; font-weight:800; color:#fff; box-shadow:inset 0 0 0 1px rgba(0,0,0,.06); }
+  .fx-score > div{ display:flex; align-items:center; justify-content:center; min-width:0; white-space:nowrap; overflow:hidden; }
+  .fx-spot-grid{ display:grid; grid-template-columns:minmax(260px,.9fr) minmax(300px,1.5fr); gap:18px; }
+  @media (max-width:760px){ .fx-spot-grid{ grid-template-columns:1fr; } .fx-lane{ grid-template-columns:1fr; } .fx-pair{ grid-template-columns:1fr; } .fx-vs{ justify-self:start; margin:0; } }
+  .fx-spot-box{ padding:14px 16px; border-radius:16px; border:1px solid var(--border); background:color-mix(in srgb, var(--surface) 94%, var(--surface-alt)); min-width:0; }
+  .fx-spot-box h3{ margin:0 0 10px; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); }
+  .fx-donuts{ display:flex; flex-wrap:wrap; gap:14px; align-items:center; justify-content:center; }
+  .fx-donut{ text-align:center; font-size:11.5px; font-weight:700; }
+  .fx-donut-leg{ display:flex; flex-wrap:wrap; justify-content:center; gap:4px 12px; margin-top:8px; font-size:11px; color:var(--text-muted); font-weight:600; }
+  .fx-hist{ display:flex; align-items:flex-end; gap:12px; height:170px; padding-top:6px; }
+  .fx-hist-yr{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; min-width:0; }
+  .fx-hist-bars{ display:flex; align-items:flex-end; gap:4px; width:100%; justify-content:center; flex:1; }
+  .fx-hist-bar{ width:min(34px,42%); border-radius:8px 8px 3px 3px; min-height:3px; position:relative; transition:height .3s ease; }
+  .fx-hist-val{ font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:3px; white-space:nowrap; }
+  .fx-hist-lbl{ font-size:11px; font-weight:700; margin-top:6px; color:var(--text-muted); }
   .mfr-modal{
     position:absolute; z-index:20; pointer-events:none; opacity:0; transition:opacity .08s ease;
     width:460px; max-width:94%; box-sizing:border-box;
@@ -142,52 +211,69 @@
         <p class="subtitle">Pick a period and, optionally, one manufacturer or, with the Model filter on top, one model (each can be set against a second one for a head-to-head; the model data, about 24 MB, loads the first time you click the Model box). The map shades each country by that manufacturer's sales (or by total market size when "All manufacturers" is selected). Hover a country to see its top 10 manufacturers for the period, split into BEV, PHEV and HEV + ICE + Diesel.</p>
       </header>
 
-      <div class="card chart-card mfr-filters-sticky">
-        <div class="mfr-filters mfr-filters-model">
-          <label>Model
-            <div class="mfr-combo">
-              <input type="text" id="f-model-search" class="filter-search mfr-combo-input" placeholder="Click to load models, then search or pick…" autocomplete="off">
-              <div class="mfr-combo-list" id="f-model-list"></div>
+      <section class="fx-panel mfr-filters" id="fx-panel">
+        <div class="fx-head">
+          <div class="fx-brand"><span class="fx-pulse"></span><div><div class="fx-kicker">Explore</div><div class="fx-title">Pick a brand or a model, or set two head to head</div></div></div>
+          <div class="fx-global">
+            <label class="fx-field"><span class="fx-label">Period</span>
+              <select id="f-period" class="fx-select"></select>
+            </label>
+            <div class="fx-seg" role="group" aria-label="Group by">
+              <button type="button" class="mode-btn active" data-group="brand" title="Rank individual brands (Toyota, Lexus, Audi…).">Brand</button>
+              <button type="button" class="mode-btn" data-group="group" title="Roll brands up to their parent group as of the selected period (Volkswagen Group, Stellantis, Toyota Motor…).">Parent group</button>
             </div>
-            <select id="f-model" class="hidden"></select>
-          </label>
-          <label id="model2-label">Vs. model <span class="note" style="display:inline;font-weight:400;text-transform:none;letter-spacing:0;">(head-to-head — pick a model first)</span>
-            <div class="mfr-combo">
-              <input type="text" id="f-model2-search" class="filter-search mfr-combo-input" placeholder="Search or pick a model…" autocomplete="off" disabled>
-              <div class="mfr-combo-list" id="f-model2-list"></div>
+            <div class="fx-seg" role="group" aria-label="Map metric" id="metric-toggle">
+              <button type="button" class="mode-btn active" data-metric="units">Units</button>
+              <button type="button" class="mode-btn" data-metric="share" title="Selected manufacturer's or model's share of each country's total market (needs a selection).">Market share</button>
             </div>
-            <select id="f-model2" class="hidden" disabled></select>
-          </label>
-          <span class="note" id="model-status" style="display:inline;align-self:flex-end;margin-bottom:8px;"></span>
-        </div>
-        <div class="mfr-filters">
-          <label>Period
-            <select id="f-period" class="filter-search"></select>
-          </label>
-          <div class="chart-mode-toggle" role="group" aria-label="Group by">
-            <button type="button" class="mode-btn active" data-group="brand" title="Rank individual brands (Toyota, Lexus, Audi…).">Brand</button>
-            <button type="button" class="mode-btn" data-group="group" title="Roll brands up to their parent group as of the selected period (Volkswagen Group, Stellantis, Toyota Motor…).">Parent group</button>
-          </div>
-          <label>Manufacturer
-            <div class="mfr-combo">
-              <input type="text" id="f-mfr-search" class="filter-search mfr-combo-input" placeholder="Search or pick a brand…" autocomplete="off">
-              <div class="mfr-combo-list" id="f-mfr-list"></div>
-            </div>
-            <select id="f-mfr" class="hidden"></select>
-          </label>
-          <label id="mfr2-label">Vs. manufacturer <span class="note" style="display:inline;font-weight:400;text-transform:none;letter-spacing:0;">(head-to-head — pick manufacturer 1 first)</span>
-            <div class="mfr-combo">
-              <input type="text" id="f-mfr2-search" class="filter-search mfr-combo-input" placeholder="Search or pick a brand…" autocomplete="off" disabled>
-              <div class="mfr-combo-list" id="f-mfr2-list"></div>
-            </div>
-            <select id="f-mfr2" class="hidden" disabled></select>
-          </label>
-          <div class="chart-mode-toggle" role="group" aria-label="Map metric" id="metric-toggle">
-            <button type="button" class="mode-btn active" data-metric="units">Units</button>
-            <button type="button" class="mode-btn" data-metric="share" title="Selected manufacturer's share of each country's total market (needs a manufacturer).">Market share</button>
           </div>
         </div>
-      </div>
+        <div class="fx-lanes">
+          <div class="fx-lane">
+            <div class="fx-lane-tag"><i>🏭</i>Manufacturer</div>
+            <div class="fx-pair">
+              <label class="fx-field"><span class="fx-label">Manufacturer</span>
+                <div class="mfr-combo">
+                  <input type="text" id="f-mfr-search" class="filter-search mfr-combo-input" placeholder="Search or pick a brand…" autocomplete="off">
+                  <div class="mfr-combo-list" id="f-mfr-list"></div>
+                </div>
+                <select id="f-mfr" class="hidden"></select>
+              </label>
+              <span class="fx-vs">VS</span>
+              <label class="fx-field" id="mfr2-label"><span class="fx-label">Vs. manufacturer <span class="note">(pick manufacturer 1 first)</span></span>
+                <div class="mfr-combo">
+                  <input type="text" id="f-mfr2-search" class="filter-search mfr-combo-input" placeholder="Search or pick a brand…" autocomplete="off" disabled>
+                  <div class="mfr-combo-list" id="f-mfr2-list"></div>
+                </div>
+                <select id="f-mfr2" class="hidden" disabled></select>
+              </label>
+            </div>
+          </div>
+          <div class="fx-lane fx-lane-model">
+            <div class="fx-lane-tag"><i>🚗</i>Model</div>
+            <div class="fx-pair">
+              <label class="fx-field"><span class="fx-label">Model</span>
+                <div class="mfr-combo">
+                  <input type="text" id="f-model-search" class="filter-search mfr-combo-input" placeholder="Click to load models, then search or pick…" autocomplete="off">
+                  <div class="mfr-combo-list" id="f-model-list"></div>
+                </div>
+                <select id="f-model" class="hidden"></select>
+              </label>
+              <span class="fx-vs">VS</span>
+              <label class="fx-field" id="model2-label"><span class="fx-label">Vs. model <span class="note">(pick a model first)</span></span>
+                <div class="mfr-combo">
+                  <input type="text" id="f-model2-search" class="filter-search mfr-combo-input" placeholder="Search or pick a model…" autocomplete="off" disabled>
+                  <div class="mfr-combo-list" id="f-model2-list"></div>
+                </div>
+                <select id="f-model2" class="hidden" disabled></select>
+              </label>
+            </div>
+            <div class="fx-status" id="model-status"></div>
+          </div>
+        </div>
+        <div class="fx-quick" id="fx-quick"></div>
+      </section>
+      <div class="fx-chipbar" id="fx-chipbar"></div>
 
       <div class="card chart-card">
         <p class="note" id="map-note"></p>
@@ -200,6 +286,15 @@
           </div>
           <div class="map-legend in-map" id="map-legend"></div>
           <div class="mfr-modal" id="mfr-modal"></div>
+        </div>
+      </div>
+
+      <div class="card chart-card" id="spot-card">
+        <div class="fx-spot-head"><h2 id="spot-title">Spotlight</h2><span class="note" id="spot-sub" style="display:block;margin:0;"></span></div>
+        <div class="fx-kpis" id="spot-kpis"></div>
+        <div class="fx-spot-grid">
+          <div class="fx-spot-box"><h3 id="spot-mix-title">Powertrain mix</h3><div id="spot-donut"></div></div>
+          <div class="fx-spot-box"><h3 id="spot-hist-title">Five-year trend</h3><div id="spot-hist"></div></div>
         </div>
       </div>
 
@@ -469,7 +564,7 @@ function syncMfr2Enabled(){
   const on = kind === 'brand' && !!mfr;
   selMfr2.disabled = !on;
   mfr2SearchInput.disabled = !on;
-  mfr2Hint.textContent = on ? '(head-to-head, optional)' : '(head-to-head — pick manufacturer 1 first)';
+  mfr2Hint.textContent = on ? '(optional)' : '(pick manufacturer 1 first)';
 }
 const BRAND_ORIGIN = {"Abarth":"Italy","Acura":"Japan","AITO":"China","Aiways":"China","Alfa Romeo":"Italy","Alpine":"France","Aston Martin":"United Kingdom","Audi":"Germany","Avatr":"China","Baojun":"China","Belgee":"Belarus","Bentley":"United Kingdom","Bestune":"China","BMW":"Germany","Buick":"United States","BYD":"China","Cadillac":"United States","Changan":"China","Chery":"China","Chevrolet":"United States","Chrysler":"United States","Citroen":"France","Cupra":"Spain","Dacia":"Romania","Daewoo":"South Korea","DAF Trucks":"Netherlands","Daihatsu":"Japan","Deepal":"China","Denza":"China","Dodge":"United States","Dongfeng":"China","DS":"France","Ferrari":"Italy","Fiat":"Italy","Fisker":"United States","Ford":"United States","GAC Motor":"China","Geely":"China","General Motors":"United States","Genesis":"South Korea","GMC":"United States","Great Wall Motors":"China","Honda":"Japan","Hongqi":"China","Hyundai":"South Korea","INEOS":"United Kingdom","Infiniti":"Japan","Iran Khodro":"Iran","Isuzu":"Japan","Iveco":"Italy","JAC":"China","Jaecoo":"China","Jaguar":"United Kingdom","Jeep":"United States","Karma":"United States","KGM":"South Korea","Kia":"South Korea","Lada":"Russia","Lamborghini":"Italy","Lancia":"Italy","Land Rover":"United Kingdom","Leapmotor":"China","Lexus":"Japan","Lincoln":"United States","Lotus":"United Kingdom","Lucid":"United States","Lynk & Co":"China","Mahindra":"India","MAN":"Germany","Maruti Suzuki":"Japan","Maserati":"Italy","Maxus":"China","Maybach":"Germany","Mazda":"Japan","McLaren":"United Kingdom","Mercedes-Benz":"Germany","MG":"China","MG Roewe":"China","Mini":"United Kingdom","Mitsubishi":"Japan","Mitsubishi Fuso":"Japan","Morgan":"United Kingdom","Neta":"China","NIO":"China","Nissan":"Japan","Omoda":"China","Opel":"Germany","Perodua":"Malaysia","Peugeot":"France","Polestar":"Sweden","Porsche":"Germany","Proton":"Malaysia","Ram":"United States","Renault":"France","Rivian":"United States","Roewe":"China","Rolls-Royce":"United Kingdom","Saab":"Sweden","Saipa":"Iran","Seat":"Spain","Skoda":"Czech Republic","smart":"Germany","SsangYong":"South Korea","Subaru":"Japan","Suzuki":"Japan","Tata Motors":"India","Tesla":"United States","TOGG":"Turkey","Toyota":"Japan","VinFast":"Vietnam","Volkswagen":"Germany","Volvo":"Sweden","Voyah":"China","Wiesmann":"Germany","Wuling":"China","Xiaomi Auto":"China","XPeng":"China","Zeekr":"China","BMW, Mini":"Germany","Chrysler, Jeep, Dodge":"United States","Nissan, Infiniti":"Japan","Renault, Dacia":"France","Toyota, Lexus":"Japan","Toyota (TCI: Toyota+Lexus combined)":"Japan","Jaguar Land Rover":"United Kingdom","Bollore":"France","Bugatti":"France","Mobilize":"France","Skoda-Volkswagen India":"Germany","Ssangyong":"South Korea","Jetour":"China","Kaiyi":"China","Karry":"China","Forthing":"China","Soueast":"China","Foton":"China","JMC":"China","Hino":"Japan","212":"China","Sinotruk":"China","Higer":"China","IM":"China","Kama":"China","Rox":"China","ZX Auto":"China","BAIC":"China","Exlantix":"China","Seres":"China","Moke":"United Kingdom","Amatør Bil":"Norway","Bygg Bil":"Norway","Aion":"China","Ariel":"United Kingdom","Austin":"United Kingdom","Austin-Healey":"United Kingdom","Caterham":"United Kingdom","Coleman Milne":"United Kingdom","Corvette":"United States","DFSK":"China","Daimler":"United Kingdom","Datsun":"Japan","Gordon Murray":"United Kingdom","Hummer":"United States","Jensen":"United Kingdom","LEVC":"United Kingdom","Mercury":"United States","Morris":"United Kingdom","Oldsmobile":"United States","Plymouth":"United States","Pontiac":"United States","Renault Trucks":"France","Rover":"United Kingdom","Skywell":"China","Sunbeam":"United Kingdom","Triumph":"United Kingdom","Vauxhall":"United Kingdom","Westfield":"United Kingdom","Geely Galaxy":"China","Li Auto":"China","Xiaomi":"China","iCAR":"China","Haval":"China","Tank":"China","Ora":"China","GAC Aion":"China","GAC Trumpchi":"China","GWM":"China","GAC":"China","Isuzu Ute":"Japan","LDV":"China","Omoda Jaecoo":"China","Farizon":"China","Holden":"Australia","Skyworth":"China","Renault Korea":"South Korea","Smart":"Germany","Togg":"Turkey","Karsan":"Turkey","Exeed":"China","Solaris":"Russia","UAZ":"Russia","Tenet":"Russia","Jeland":"Russia","iCAUR":"China","Mitsuoka":"Japan","Alpina":"Germany","Bluecar":"France","Eveasy":"China","International":"United States","Italdesign":"Italy","Leyland":"United Kingdom","Nash":"United States","Pagani":"Italy","Panther":"United Kingdom","Standard":"United Kingdom","Xpeng":"China","Arcfox":"China","JMEV":"China","KYC":"China","RAM":"United States","Shineray":"China","Lifan":"China","Rely":"China","Fonix":"China","Xev":"Italy","Tata":"India","Borgward":"Germany","Brilliance":"China","Jensen Healey":"United Kingdom","Lea Francis":"United Kingdom","Austin Healey":"United Kingdom","Maextro":"China","Oltcit":"Romania","Panhard & Levassor":"France","Pierce Arrow":"United States","Simca":"France","Rauch & Lang":"United States","Abt":"Germany","Brabus":"Germany","Caterham Cars Ltd":"United Kingdom","Donkervoort":"Netherlands","Ineos":"United Kingdom","Koenigsegg":"Sweden","Levc":"United Kingdom","FAW":"China","SWM":"China","DR":"Italy","Allied Vehicles Ltd":"United Kingdom","Baic":"China","Livan":"China","Ruf":"Germany","Secma":"France","Tiger":"United Kingdom","Edward Davies":"United Kingdom","Allied Vehicles":"United Kingdom","Nevs":"Sweden","Riddara":"China","Lepas":"China","Nammi":"China","Yutong":"China","Swm":"China","Gecko":"China","JIM":"China","Landking":"China","ZXAuto":"China","Zna":"China","Omoda & Jaecoo":"China","Fuso":"Japan","Volkswagen Group":"Germany","BMW Group":"Germany","Stellantis":"France","Thaco Truck":"Vietnam","CMC":"Taiwan","Foxtron":"Taiwan","Citroën":"France","Kenworth":"United States","Forland":"China","Scania":"Sweden","Zhidou":"China","Juneyao":"China","Kymco":"Taiwan","Yamaha":"Japan","Piaggio":"Italy","Can-Am":"Canada","GAZ":"Russia","Howo":"China","JAC Trucks":"China","KAMAZ":"Russia","ROX":"China","Maple":"China","Nevo":"China","XEV":"Italy","Avantier":"China","Ashok Leyland":"India","Eicher":"India","Genlyon":"China","Man":"Germany","Rosenbauer":"Austria","Shacman":"China","UD Trucks":"Japan","Zamyad":"Iran","Firefly":"China","Gumpert":"Germany","Henrey":"China","IM Motors":"China","Lingbox":"China","SGMW":"China"};
 // origins for parent groups / labels that have no entry above (everything else resolves through its flagship brand via brandKey)
@@ -531,6 +626,7 @@ function buildMfrSelect(){
   COUNTRIES.forEach(c => aggregateBrands(c, period).forEach((a, k) => tot.set(k, (tot.get(k) || 0) + a.total)));
   const names = [...tot.entries()].filter(([, v]) => v > 0).map(([k]) => k).sort((a, b) => a.localeCompare(b, 'en', { sensitivity:'base' }));
   if(kind === 'brand'){ if(mfr && !tot.has(mfr)) mfr = ''; if(mfr2 && !tot.has(mfr2)) mfr2 = ''; }
+  window.__topBrands = [...tot.entries()].filter(([k, v]) => !isOtherName(k) && v > 0).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([k]) => k);
   const opts = groupedOptions(tot, names);
   selMfr.innerHTML = '<option value="">All manufacturers</option>' + opts;
   selMfr.value = kind === 'brand' ? mfr : '';
@@ -547,7 +643,7 @@ function syncModel2Enabled(){
   const on = !!selModel.value;
   selModel2.disabled = !on; model2SearchInput.disabled = !on;
   const hint = document.getElementById('model2-label').querySelector('.note');
-  hint.textContent = on ? '(head-to-head, optional)' : '(head-to-head — pick a model first)';
+  hint.textContent = on ? '(optional)' : '(pick a model first)';
 }
 function buildModelSelect(){
   const tot = new Map();
@@ -562,6 +658,7 @@ function buildModelSelect(){
   selModel2.innerHTML = '<option value="">— none (single model) —</option>' + html; selModel2.value = keep2;
   syncModel2Enabled(); syncCombo(selModel); syncCombo(selModel2);
   modelStatus.textContent = `${names.length} models with 100+ units in ${periodLabel(period)}`;
+  window.__topModels = top.slice(0, 6);
 }
 let modelsLoading = false;
 function ensureModels(){
@@ -838,6 +935,135 @@ function renderMap(){
     '. The badge in each country is its winner (a plain badge with initials where no logo is available). Scroll or use the buttons to zoom, drag to pan.';
   renderContinentBars();
   renderCountryBars();
+  renderSpotlight();
+  renderChipBar();
+}
+
+
+// ---------- chip bar (sticky selection summary), quick picks, spotlight (KPIs, donut, five-year trend) ----------
+const compactN = v => v >= 1e6 ? (v / 1e6).toFixed(v >= 1e7 ? 0 : 1) + 'M' : v >= 1e3 ? (v >= 1e5 ? Math.round(v / 1e3) : (v / 1e3).toFixed(1)) + 'k' : String(Math.round(v));
+function renderChipBar(){
+  const bar = document.getElementById('fx-chipbar');
+  const chip = (name, which) => {
+    const col = brandColor(name), fg = contrastOn(col);
+    return `<span class="fx-chip" style="background:${col};color:${fg}">${esc(name)}<button type="button" data-clear="${which}" title="Remove">×</button></span>`;
+  };
+  let h = `<span class="fx-chip neutral">${esc(periodLabel(period))}</span><span class="fx-chip neutral">${kind === 'model' ? 'Models' : groupMode === 'group' ? 'Parent groups' : 'Brands'}</span>`;
+  if(mfr) h += chip(mfr, 1);
+  if(mfr && mfr2) h += `<span class="fx-chipvs">VS</span>` + chip(mfr2, 2);
+  if(!mfr) h += `<span class="fx-chipvs" style="margin-left:6px">All manufacturers — pick a brand or a model above, or click a quick pick</span>`;
+  else h += `<button type="button" class="fx-clear" data-clear="all">Clear selection</button>`;
+  bar.innerHTML = h;
+}
+document.getElementById('fx-chipbar').addEventListener('click', e => {
+  const b = e.target.closest('[data-clear]'); if(!b) return;
+  const w = b.dataset.clear, M1 = kind === 'model' ? selModel : selMfr, M2 = kind === 'model' ? selModel2 : selMfr2;
+  if(w === '2') M2.value = ''; else { M1.value = ''; M2.value = ''; }
+  M1.dispatchEvent(new Event('change'));
+});
+function renderQuick(topBrands, topModels){
+  const q = document.getElementById('fx-quick');
+  const btn = (n, k) => `<button type="button" data-qk="${k}" data-qv="${esc(n)}">${esc(n)}</button>`;
+  let h = '<span>Quick picks</span>' + topBrands.map(n => btn(n, 'brand')).join('');
+  if(topModels && topModels.length) h += '<span style="margin-left:10px">Models</span>' + topModels.map(n => btn(n, 'model')).join('');
+  q.innerHTML = h;
+}
+document.getElementById('fx-quick').addEventListener('click', e => {
+  const b = e.target.closest('[data-qk]'); if(!b) return;
+  const el = b.dataset.qk === 'model' ? selModel : selMfr;
+  const other = b.dataset.qk === 'model' ? selModel2 : selMfr2;
+  // a second click on a different quick pick of the same kind becomes the "vs" side
+  if(el.value && el.value !== b.dataset.qv && !other.disabled){ other.value = b.dataset.qv; other.dispatchEvent(new Event('change')); }
+  else { el.value = b.dataset.qv; el.dispatchEvent(new Event('change')); }
+});
+
+function spotHistory(names, countries){
+  const years = historyYears();
+  return names.map(n => {
+    const cs = countries.filter(c => years.every(y => entityYearTotal(c, y, n) != null));
+    const vals = years.map(y => cs.reduce((t, c) => t + (entityYearTotal(c, y, n) || 0), 0));
+    return { name:n, n:cs.length, vals };
+  });
+}
+function donutSVG(parts, centerTop, centerBottom){
+  const R = 62, r = 40, W = 160, tot = parts.reduce((s, p) => s + p.v, 0) || 1;
+  const arcs = d3.pie().sort(null).value(p => p.v)(parts.filter(p => p.v > 0));
+  const arc = d3.arc().innerRadius(r).outerRadius(R).cornerRadius(3).padAngle(.02);
+  const paths = arcs.map(a => `<path d="${arc(a)}" fill="${a.data.color}"><title>${a.data.label}: ${fmt(a.data.v)} (${(100 * a.data.v / tot).toFixed(1)}%)</title></path>`).join('');
+  return `<svg viewBox="${-W / 2} ${-W / 2} ${W} ${W}" width="150" height="150" role="img"><g>${paths}</g>` +
+    `<text text-anchor="middle" y="-2" font-size="17" font-weight="800" fill="currentColor">${centerTop}</text><text text-anchor="middle" y="14" font-size="9.5" fill="currentColor" opacity=".6">${centerBottom}</text></svg>`;
+}
+function renderSpotlight(){
+  const card = document.getElementById('spot-card'), md = mode();
+  const entries = Object.entries(byCountry);
+  if(!entries.length){ card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  const kpi = (label, value, sub, color) => `<div class="fx-kpi" style="--k:${color || 'var(--accent)'}"><div class="fx-kpi-label">${label}</div><div class="fx-kpi-value">${value}</div><div class="fx-kpi-sub">${sub || ''}</div></div>`;
+  const sumOf = sel => { const t = { bev:0, phev:0, other:0, total:0 }; sel.forEach(x => { t.bev += x.bev; t.phev += x.phev; t.other += x.other; t.total += x.total; }); return t; };
+  const mixParts = t => [{ label:'BEV', v:t.bev, color:COLORS.bev }, { label:'PHEV', v:t.phev, color:COLORS.phev }, { label:'HEV + ICE + Diesel', v:Math.max(t.other, 0), color:COLORS.other }];
+  const legend = '<div class="fx-donut-leg"><span><i class="sw" style="background:' + COLORS.bev + '"></i>BEV</span><span><i class="sw" style="background:' + COLORS.phev + '"></i>PHEV</span><span><i class="sw" style="background:' + COLORS.other + '"></i>HEV + ICE + Diesel</span></div>';
+  const unit = kind === 'model' ? 'model' : groupMode === 'group' ? 'group' : 'brand';
+  let kpis = '', donuts = '', histNames = [], histTitle = '';
+  if(md === 'market'){
+    const world = new Map(), wins = new Map();
+    let all = { bev:0, phev:0, other:0, total:0 };
+    entries.forEach(([c, d]) => {
+      d.list.forEach(a => { if(isOtherName(a.name)) return; const w = world.get(a.name) || { bev:0, phev:0, other:0, total:0 }; w.bev += a.bev; w.phev += a.phev; w.other += a.other; w.total += a.total; world.set(a.name, w); });
+      const top = d.list.find(a => !isOtherName(a.name)); if(top) wins.set(top.name, (wins.get(top.name) || 0) + 1);
+      all.bev += d.list.reduce((s, a) => s + a.bev, 0); all.phev += d.list.reduce((s, a) => s + a.phev, 0); all.other += d.list.reduce((s, a) => s + a.other, 0); all.total += d.total;
+    });
+    const ranked = [...world.entries()].sort((a, b) => b[1].total - a[1].total);
+    const leader = ranked[0], mostWins = [...wins.entries()].sort((a, b) => b[1] - a[1])[0];
+    kpis = kpi('Markets covered', entries.length, `${periodLabel(period)}`) + kpi('World volume', compactN(all.total), 'units in the covered markets', '#6366f1') +
+      kpi(`Biggest ${unit}`, esc(leader[0]), `${compactN(leader[1].total)} units · ${(100 * leader[1].total / all.total).toFixed(1)}% of the covered volume`, brandColor(leader[0])) +
+      kpi('Wins the most markets', esc(mostWins[0]), `#1 in ${mostWins[1]} of ${entries.length} markets`, brandColor(mostWins[0])) +
+      kpi('BEV share', (100 * all.bev / (all.total || 1)).toFixed(1) + '%', 'of the covered volume', COLORS.bev);
+    donuts = `<div class="fx-donut">${donutSVG(mixParts(all), (100 * all.bev / (all.total || 1)).toFixed(0) + '%', 'BEV')}<div>All covered markets</div></div>`;
+    histTitle = 'Pick a ' + unit + ' to see its five-year trend';
+  } else if(md === 'rank'){
+    const ds = entries.filter(([, d]) => d.sel), t = sumOf(ds.map(([, d]) => d.sel));
+    const mk = ds.reduce((s, [, d]) => s + (d.market || d.total), 0);
+    const best = ds.slice().sort((a, b) => b[1].sel.total - a[1].sel.total)[0];
+    const wins = ds.filter(([, d]) => d.rank === 1).length, top5 = ds.filter(([, d]) => d.rank <= 5).length;
+    const col = brandColor(mfr);
+    kpis = kpi('World units', compactN(t.total), `${periodLabel(period)}`, col) + kpi('Markets', ds.length, `of ${entries.length} with data`, '#6366f1') +
+      kpi('Market share', (100 * t.total / (mk || 1)).toFixed(1) + '%', 'of the markets where it sells', '#0ea5e9') +
+      kpi('#1 in', wins + (wins === 1 ? ' market' : ' markets'), `top 5 in ${top5} markets`, '#f59e0b') +
+      (best ? kpi('Best market', esc(best[0]), `${compactN(best[1].sel.total)} units · #${best[1].rank}`, '#ec4899') : '') +
+      kpi('BEV share', (100 * t.bev / (t.total || 1)).toFixed(1) + '%', `${compactN(t.bev)} electric units`, COLORS.bev);
+    donuts = `<div class="fx-donut">${donutSVG(mixParts(t), (100 * t.bev / (t.total || 1)).toFixed(0) + '%', 'BEV')}<div>${esc(mfr)}</div></div>`;
+    histNames = [mfr]; histTitle = 'Five-year trend';
+  } else {
+    const both = entries.filter(([, d]) => d.sel || d.sel2);
+    let w1 = 0, w2 = 0, tie = 0;
+    both.forEach(([, d]) => { const u1 = d.sel ? d.sel.total : 0, u2 = d.sel2 ? d.sel2.total : 0; if(u1 > u2) w1++; else if(u2 > u1) w2++; else tie++; });
+    const t1 = sumOf(entries.filter(([, d]) => d.sel).map(([, d]) => d.sel)), t2 = sumOf(entries.filter(([, d]) => d.sel2).map(([, d]) => d.sel2));
+    const c1 = matchColor(1), c2 = matchColor(2), n = (w1 + w2) || 1;
+    kpis = `<div class="fx-kpi" style="--k:${c1};grid-column:1/-1"><div class="fx-kpi-label">Countries won · ${both.length} markets where at least one sells</div>` +
+      `<div class="fx-score"><div style="width:${100 * w1 / n}%;background:${c1};color:${contrastOn(c1)}">${w1 ? esc(mfr) + ' · ' + w1 : ''}</div><div style="width:${100 * w2 / n}%;background:${c2};color:${contrastOn(c2)}">${w2 ? esc(mfr2) + ' · ' + w2 : ''}</div></div>` +
+      `<div class="fx-kpi-sub">${tie ? tie + ' tied · ' : ''}world units: ${esc(mfr)} ${fmt(t1.total)} vs. ${esc(mfr2)} ${fmt(t2.total)}</div></div>` +
+      kpi(`${esc(mfr)} · world`, compactN(t1.total), `BEV ${(100 * t1.bev / (t1.total || 1)).toFixed(0)}% · ${entries.filter(([, d]) => d.sel).length} markets`, c1) +
+      kpi(`${esc(mfr2)} · world`, compactN(t2.total), `BEV ${(100 * t2.bev / (t2.total || 1)).toFixed(0)}% · ${entries.filter(([, d]) => d.sel2).length} markets`, c2) +
+      kpi('Lead in units', esc(t1.total >= t2.total ? mfr : mfr2), `${compactN(Math.abs(t1.total - t2.total))} units ahead (${(100 * Math.abs(t1.total - t2.total) / (Math.max(t1.total, t2.total) || 1)).toFixed(0)}%)`, t1.total >= t2.total ? c1 : c2);
+    donuts = [[t1, mfr], [t2, mfr2]].map(([t, nm]) => `<div class="fx-donut">${donutSVG(mixParts(t), (100 * t.bev / (t.total || 1)).toFixed(0) + '%', 'BEV')}<div>${esc(nm)}</div></div>`).join('');
+    histNames = [mfr, mfr2]; histTitle = 'Five-year trend, head to head';
+  }
+  document.getElementById('spot-title').textContent = md === 'market' ? 'World at a glance' : md === 'rank' ? `Spotlight — ${mfr}` : `Head to head — ${mfr} vs. ${mfr2}`;
+  document.getElementById('spot-sub').textContent = `${periodLabel(period)} · covered markets only`;
+  document.getElementById('spot-kpis').innerHTML = kpis;
+  document.getElementById('spot-donut').innerHTML = `<div class="fx-donuts">${donuts}</div>${legend}`;
+  document.getElementById('spot-hist-title').textContent = histTitle;
+  const histEl = document.getElementById('spot-hist');
+  if(!histNames.length){ histEl.innerHTML = '<div class="note" style="display:block">Select a manufacturer or a model above to see how it evolved over the last five years in the markets where data exists for every year.</div>'; return; }
+  const years = historyYears(), series = spotHistory(histNames, Object.keys(byCountry));
+  series.forEach(sr => { sr.col = histNames.length > 1 ? matchColor(histNames.indexOf(sr.name) + 1) : brandColor(sr.name); sr.top = sr.vals.map((v, i) => years[i] === CUR_YEAR ? v * 12 / CUR_YEAR_MONTHS_ELAPSED : v); });
+  const max = Math.max(1, ...series.flatMap(sr => sr.top));
+  histEl.innerHTML = `<div class="fx-hist">` + years.map((y, i) => `<div class="fx-hist-yr"><div class="fx-hist-bars">` + series.map(sr => {
+    const h = Math.max(2, 100 * sr.top[i] / max), cur = y === CUR_YEAR, cut = sr.top[i] ? 100 * sr.vals[i] / sr.top[i] : 100;
+    const bg = cur ? `linear-gradient(to top, ${sr.col} 0 ${cut}%, color-mix(in srgb, ${sr.col} 30%, white) ${cut}% 100%)` : sr.col;
+    return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;width:100%"><div class="fx-hist-val">${compactN(sr.top[i])}</div><div class="fx-hist-bar" style="height:${h * .78}%;background:${bg}" title="${esc(sr.name)} ${y}${cur ? ' projected' : ''}: ${fmt(sr.top[i])}"></div></div>`;
+  }).join('') + `</div><div class="fx-hist-lbl">${y}${y === CUR_YEAR ? '*' : ''}</div></div>`).join('') + `</div>` +
+    `<div class="note" style="display:block;margin-top:8px">${series.map(sr => `${esc(sr.name)}: ${sr.n} markets with data in all five years`).join(' · ')}. *${CUR_YEAR} projected (year-to-date x 12 / ${CUR_YEAR_MONTHS_ELAPSED}), lighter part = projection.</div>`;
 }
 
 // ---------- hover modal ----------
@@ -1301,9 +1527,10 @@ function refresh(rebuildMfr){
   const rankMode = mode() === 'rank';
   shareBtn.disabled = !rankMode; shareBtn.style.opacity = rankMode ? 1 : .45;
   if(!rankMode && metric === 'share'){ metric = 'units'; setActive('#metric-toggle', 'metric', 'units'); }
+  renderQuick(window.__topBrands || [], MODEL_LABEL ? window.__topModels : []);
   renderMap();
 }
-function setActive(sel, attr, val){ document.querySelectorAll(`${sel} .mode-btn`).forEach(b => b.classList.toggle('active', b.dataset[attr] === val)); }
+function setActive(sel, attr, val){ document.querySelectorAll(`${sel} .mode-btn`).forEach(b => { if(attr in b.dataset) b.classList.toggle('active', b.dataset[attr] === val); }); }
 selPeriod.onchange = () => refresh(true);
 selMfr.onchange = () => { if(selMfr2.value === selMfr.value) selMfr2.value = ''; if(selMfr.value){ selModel.value = ''; selModel2.value = ''; } refresh(false); };
 selMfr2.onchange = () => { if(selMfr2.value){ selModel.value = ''; selModel2.value = ''; } refresh(false); };
