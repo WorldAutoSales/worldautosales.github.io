@@ -140,7 +140,7 @@
           <li><strong>Fleet 2026 (projection).</strong> The 2026 point uses each tracked country's 2026 projected registrations (year-to-date plus the site's standard trend, with China at its retail level), rest-of-world sales held at the 2025 level, and BEV/PHEV 2026 sales = IEA 2025 sales × the growth of the site's own 2026 projection (BEV +10%, PHEV −16%; the IEA's own outlook of about 23 million electric cars in 2026 is higher than this). Result: fleet +12 M to about 1,353 M, BEV 66 M, PHEV 31 M (estimated), ICE &amp; hybrids about 1,256 M, i.e. <strong>about −8 M against 2025</strong> — the first decline in this series. It is a projection, not a measurement: a rebound in China's retail market in Q4 would turn it into a flat year, and Japan and Russia fall partly through the model's ageing mechanics on low registration years.</li>
           <li><strong>Fleet electric part.</strong> BEV and PHEV stocks are unchanged from the IEA-based series: cumulative IEA sales with a constant 1.5% yearly loss, the value that best reproduces the IEA's measured global electric-car stock (76 million at end-2025 per GEVO 2026; model: 77 million, within ±3% in every year 2014–2025). BEV/PHEV before 2010 are negligible (~30,000 vehicles at end-2009). ICE &amp; hybrids is the total fleet minus BEV and PHEV, so it includes conventional hybrids. Heavy trucks, buses and two/three-wheelers are not in the fleet.</li>
           <li><strong>BEV vs ICE 2026 (projection).</strong> The 2026 bar is IEA 2025 sales (84.8 million) multiplied by the growth between 2025 and the site's own 2026 projection, measured over the 61 countries that have both a 2025 annual and a 2026 projected fuel split: total about −4%, BEV about +10%, PHEV about −16%, which gives roughly 81.6 million light vehicles, of which 15.4 million BEV, 6.1 million PHEV and 60.2 million ICE and hybrids. It uses the same growth rates as the 2026 fleet point below, so the two charts agree. It is a projection, not a measurement; the IEA's own outlook for 2026 electric-car sales (about 23 million) is higher than this site's trend.</li>
-          <li><strong>Motorisation Trends.</strong> Built from this site's own country files (Powertrain Mix by Country): 2022-2025 use each market's annual powertrain split, and the current year uses the monthly data of the most recent months in which at least as many markets reported as in June (earlier months are added back while they are as complete as June, later months are left out until they are as complete). Shares are the sum of each fuel over the selected markets divided by the sum of their registrations. "All markets with data" uses every market that has a split in that year (the set grows from 2022 to 2025); "Same markets every year" keeps only the markets present in every year, which is the comparable view. Click a legend chip to isolate one powertrain. Hong Kong, Japan and a few others fold some hybrids into petrol, as in their sources.</li>
+          <li><strong>Motorisation Trends.</strong> Built from this site's own country files (Powertrain Mix by Country): 2022-2025 use each market's annual powertrain split, and the current year is a dedicated April-to-present point: all the monthly data available from April 2026 to the latest month, each market contributing the months it has published (the newest months are therefore thinner in markets, as in Mix by Country). Shares are the sum of each fuel over the selected markets divided by the sum of their registrations. "All markets with data" uses every market that has a split in that year (the set grows from 2022 to 2025); "Same markets every year" keeps only the markets present in every year, which is the comparable view. Click a legend chip to isolate one powertrain. Hong Kong, Japan and a few others fold some hybrids into petrol, as in their sources.</li>
           <li>Rounding: values are shown in millions of vehicles; hover the charts for exact figures.</li>
         </ul>
       </div>
@@ -382,19 +382,13 @@ wireToggle('b', drawB); wireToggle('c', drawC);
   Object.entries(COUNTRY_MONTHLY).forEach(([c, rows]) => rows.forEach(r => { if(hasSplit(r)) (monthly[r.ym] = monthly[r.ym] || new Map()).set(c, r); }));
   const CUR = Math.max(...Object.keys(monthly).map(m => +m.slice(0, 4)));
   const curMonths = Object.keys(monthly).filter(m => m.startsWith(String(CUR))).sort();
-  // the current year uses the months in which at least as many markets reported as in June: walk back from June while a month is as complete,
-  // and forward while a month is (nearly) as complete -- the newest months that are still missing markets are left out until they fill in
-  const ref = curMonths.includes(CUR + '-06') ? CUR + '-06' : curMonths[Math.floor(curMonths.length / 2)];
-  const nRef = monthly[ref].size;
-  let lo = curMonths.indexOf(ref), hi = lo;
-  while(lo > 0 && monthly[curMonths[lo - 1]].size >= nRef) lo--;
-  while(hi < curMonths.length - 1 && monthly[curMonths[hi + 1]].size >= nRef * 0.95) hi++;
-  const W = curMonths.slice(lo, hi + 1);
+  // the current-year point is a dedicated April-to-present data point: every month from April of the current year to the latest one, using whatever each market has
+  const W = curMonths.filter(m => +m.slice(5) >= 4);
   const winLabel = `${MON[+W[0].slice(5) - 1]}–${MON[+W[W.length - 1].slice(5) - 1]}`;
   const annualYears = Object.keys(annual).map(Number).filter(y => y < CUR).sort();
   const years = [...annualYears, CUR];
-  const inEveryWindowMonth = [...monthly[W[0]].keys()].filter(c => W.every(m => monthly[m].has(c)));
-  const SAME = new Set(inEveryWindowMonth.filter(c => annualYears.every(y => annual[y].has(c))));
+  const inWindow = new Set(W.flatMap(m => [...monthly[m].keys()]));
+  const SAME = new Set([...inWindow].filter(c => annualYears.every(y => annual[y].has(c))));
 
   let setMode = 'all', iso = null;
   function yearly(){
@@ -411,7 +405,7 @@ wireToggle('b', drawB); wireToggle('c', drawC);
     const Y = yearly();
     document.getElementById('motor-legend').innerHTML = FUEL_KEYS.map(k => `<div class="legend-chip${iso && iso !== k ? ' dimmed' : ''}" data-key="${k}" title="Click to isolate"><span class="swatch" style="background:${FUEL_COLORS[k]}"></span>${FUEL_LABELS[k]}</div>`).join('');
     const counts = Y.map(y => `${y.year}: ${y.n}`).join(' · ');
-    document.getElementById('motor-note').textContent = `Share of new car registrations by powertrain, summed over ${setMode === 'same' ? `the ${SAME.size} markets that have a powertrain split in every year` : `every market that has a powertrain split that year (markets per year — ${counts})`}. ${annualYears[0]}–${annualYears[annualYears.length - 1]} are annual figures; ${CUR} uses the monthly data of ${winLabel} (months in which at least as many markets reported as in June) and is the dashed final segment. Click a legend chip to isolate one powertrain.`;
+    document.getElementById('motor-note').textContent = `Share of new car registrations by powertrain, summed over ${setMode === 'same' ? `the ${SAME.size} markets that have a powertrain split in every year` : `every market that has a powertrain split that year (markets per year — ${counts})`}. ${annualYears[0]}–${annualYears[annualYears.length - 1]} are annual figures; ${CUR} is a dedicated point built from all the monthly data available from April to the latest month (${winLabel}; each market contributes the months it has published, as in Mix by Country) and is the dashed final segment. Click a legend chip to isolate one powertrain.`;
     const Wd = 900, H = 300, M = { top:16, right:16, bottom:30, left:38 }, innerW = Wd - M.left - M.right, innerH = H - M.top - M.bottom;
     svgSel.selectAll('*').remove();
     const series = Y.map((y, i) => { const o = { i, year:y.year, n:y.n, total:y.total }; FUEL_KEYS.forEach(k => { o[k] = y.total ? y[k] / y.total * 100 : 0; }); return o; });
