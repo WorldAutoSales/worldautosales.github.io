@@ -11,6 +11,7 @@
   /* its own card, pinned to the top of the viewport while scrolling, so the period/manufacturer
      pickers stay reachable no matter how far down the map/bar charts the page has scrolled */
   .mfr-filters-sticky{ position:sticky; top:0; z-index:40; }
+  .mfr-filters-model{ margin-bottom:6px; padding-bottom:10px; border-bottom:1px dashed var(--border); }
   .mfr-filters label{ display:flex; flex-direction:column; gap:4px; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); }
   .mfr-filters select{ margin-bottom:0; min-width:170px; font-size:13.5px; padding:7px 10px; text-transform:none; letter-spacing:0; font-weight:600; }
   .mfr-filters .chart-mode-toggle{ align-self:flex-end; }
@@ -138,10 +139,27 @@
       <header class="page-header">
         <div class="eyebrow">Manufacturers · Map</div>
         <h1>Who sells what, country by country</h1>
-        <p class="subtitle">Pick a period and, optionally, one manufacturer. The map shades each country by that manufacturer's sales (or by total market size when "All manufacturers" is selected). Hover a country to see its top 10 manufacturers for the period, split into BEV, PHEV and HEV + ICE + Diesel.</p>
+        <p class="subtitle">Pick a period and, optionally, one manufacturer or, with the Model filter on top, one model (each can be set against a second one for a head-to-head; the model data, about 24 MB, loads the first time you click the Model box). The map shades each country by that manufacturer's sales (or by total market size when "All manufacturers" is selected). Hover a country to see its top 10 manufacturers for the period, split into BEV, PHEV and HEV + ICE + Diesel.</p>
       </header>
 
       <div class="card chart-card mfr-filters-sticky">
+        <div class="mfr-filters mfr-filters-model">
+          <label>Model
+            <div class="mfr-combo">
+              <input type="text" id="f-model-search" class="filter-search mfr-combo-input" placeholder="Click to load models, then search or pick…" autocomplete="off">
+              <div class="mfr-combo-list" id="f-model-list"></div>
+            </div>
+            <select id="f-model" class="hidden"></select>
+          </label>
+          <label id="model2-label">Vs. model <span class="note" style="display:inline;font-weight:400;text-transform:none;letter-spacing:0;">(head-to-head — pick a model first)</span>
+            <div class="mfr-combo">
+              <input type="text" id="f-model2-search" class="filter-search mfr-combo-input" placeholder="Search or pick a model…" autocomplete="off" disabled>
+              <div class="mfr-combo-list" id="f-model2-list"></div>
+            </div>
+            <select id="f-model2" class="hidden" disabled></select>
+          </label>
+          <span class="note" id="model-status" style="display:inline;align-self:flex-end;margin-bottom:8px;"></span>
+        </div>
         <div class="mfr-filters">
           <label>Period
             <select id="f-period" class="filter-search"></select>
@@ -259,6 +277,7 @@ const BRAND_PALETTE = {'Toyota':'#E30613','Ford':'#1B5FD6','BMW':'#B6BDC6','Volk
 const BRAND_ALIASES = {'Volkswagen AG':'Volkswagen','Volkswagen Group':'Volkswagen','Toyota Motor Corporation':'Toyota','Hyundai Motor Group':'Hyundai','General Motors':'Chevrolet','General Motors Company':'Chevrolet','Ford Motor Company':'Ford','Honda Motor Co.':'Honda','Nissan Motor Corporation':'Nissan','Renault Group':'Renault','BYD Company Ltd.':'BYD','BMW AG':'BMW','BMW Group':'BMW','Zhejiang Geely Holding Group':'Geely','Suzuki Motor Corporation':'Suzuki','Peugeot S.A. (PSA)':'Peugeot','PSA Group / Groupe PSA':'Peugeot','PSA / Groupe PSA':'Peugeot','Tesla, Inc.':'Tesla','Daimler AG':'Mercedes-Benz','Mercedes-Benz Group AG':'Mercedes-Benz','Daimler AG / Geely Holding Group JV':'Smart','Chery Automobile Co. / Chery Holding Group':'Chery','Chery Automobile Co.':'Chery','Caoa Chery':'Chery','Mazda Motor Corporation':'Mazda','Subaru Corporation (Fuji Heavy Industries)':'Subaru','Fiat Chrysler Automobiles N.V.':'Fiat','Fiat S.p.A.':'Fiat','Stellantis N.V.':'Stellantis','SAIC Motor':'SAIC','SAIC Motor Corporation':'SAIC','Tata Group':'Tata Motors','Tata Motors (Jaguar Land Rover)':'Tata Motors','Tata':'Tata Motors','Mahindra Group':'Mahindra','China Changan Automobile Group Co.':'Changan','Changan Automobile':'Changan','China South Industries Group Corp.':'Changan','UMW Holdings':'UMW Holdings','NAMI / Rostec (Russian state)':'NAMI Rostec','Vingroup JSC':'VinFast','Isuzu Motors Ltd.':'Isuzu','Isuzu Ute':'Isuzu','KG Group':'KGM','SsangYong':'KGM','Ssangyong':'KGM','Mitsubishi Motors Corporation':'Mitsubishi','Rivian Automotive, Inc.':'Rivian','Anhui Jianghuai Automobile Group (JAC Motors)':'JAC','Zhejiang Leapmotor Technology Co.':'Leapmotor','XPeng Inc.':'XPeng','Xpeng':'XPeng','NIO Inc.':'NIO','Renault-Nissan Alliance':'Renault-Nissan','Belarusian State / Geely JV':'Belgee','Seres Group Co.':'Seres','Dongfeng Motor Corporation':'Dongfeng','Honda Motor Co':'Honda','Hyundai Motor Company':'Hyundai','Kia Corporation':'Kia','Great Wall Motors':'GWM','Haval Group':'Haval','Toyota, Lexus':'Toyota','Toyota (TCI: Toyota+Lexus combined)':'Toyota','Toyota Motor':'Toyota','BMW, Mini':'BMW','Renault, Dacia':'Renault','Nissan, Infiniti':'Nissan','Jeep, Dodge':'Jeep','Lancia, Chrysler':'Lancia','Chrysler, Jeep, Dodge':'Chrysler','Omoda & Jaecoo':'Omoda','Omoda, Jaecoo':'Omoda','Omoda Jaecoo':'Omoda','MG Roewe':'MG','Gmc':'GMC','RAM':'Ram','smart':'Smart','Mclaren':'McLaren','Geely Galaxy':'Geely','Renault Korea':'Renault','Mitsubishi Fuso':'Mitsubishi Fuso','Citroën':'Citroen','Seat':'Seat','Jaguar Land Rover':'Land Rover','Hino':'Hino','Delorean':'Lotus','Unknown':'Other (unclassified)','Uaz':'UAZ','Gaz':'GAZ','Maruti':'Maruti Suzuki','Baic':'BAIC','XPENG':'XPeng','Vinfast':'VinFast','Mercedes':'Mercedes-Benz','Mercedes Benz':'Mercedes-Benz','Dr Motor':'Chery','DR Motor':'Chery','Caoa':'Chery','Isuzu Ute':'Isuzu','Toyota (incl. Lexus)':'Toyota','Allied Vehicles Ltd':'Allied Vehicles','Xpeng':'XPeng','ZXAUTO':'ZX Auto','ZXAuto':'ZX Auto','Ineos':'INEOS','Man':'MAN','smart':'Smart','Ssangyong':'SsangYong','Togg':'TOGG','Vinfast':'VinFast','Gmc':'GMC','Swm':'SWM','EVO':'Evo','Baic':'BAIC','Can-am':'Can-Am','Austin Healey':'Austin-Healey','Levc':'LEVC','Uaz':'UAZ','Eveasy':'EVEasy','XEV':'Xev','Gaz':'GAZ','Rox':'ROX'};
 const BRAND_KEYS_LC = Object.fromEntries(Object.keys(BRAND_PALETTE).map(k => [k.toLowerCase(), k]));
 function brandKey(name){
+  if(kind === 'model' && MODEL_BRAND[name]) name = MODEL_BRAND[name];
   if(BRAND_PALETTE[name]) return name;
   if(BRAND_ALIASES[name]) return BRAND_ALIASES[name];
   const lc = String(name).toLowerCase();
@@ -271,6 +290,7 @@ function hashHue(name){
   return h % 360;
 }
 function brandColor(name){
+  if(kind === 'model' && MODEL_BRAND[name]) name = MODEL_BRAND[name];
   const k = brandKey(name);
   if(k) return BRAND_PALETTE[k];
   const h = hashHue(name);
@@ -286,7 +306,11 @@ function contrastOn(color){
   return lum > 0.6 ? '#111' : '#fff';
 }
 // head-to-head: each side simply wears its own permanent brand color
-function matchColor(which){ return brandColor(which === 1 ? mfr : mfr2); }
+function matchColor(which){
+  const c = brandColor(which === 1 ? mfr : mfr2);
+  if(which === 2 && brandColor(mfr) === c){ const h = d3.hcl(c); h.l = h.l > 55 ? h.l - 30 : h.l + 30; return h.formatHex(); }   // same brand on both sides: shift the second one
+  return c;
+}
 function matchFlatColor(which){ return matchColor(which); }
 // country -> continent code, for the match-mode "continent by continent" chart. Countries not
 // listed fall back to "OTHER" rather than breaking -- this project's brand-level country roster
@@ -309,6 +333,10 @@ const MONTH_NAMES = ['January','February','March','April','May','June','July','A
 const fmt = n => Math.round(n).toLocaleString('en-US');
 
 let groupMode = 'brand', metric = 'units';
+// what the Manufacturer-style filters pick: 'brand' (the Manufacturer / Vs. manufacturer pair) or 'model' (the Model / Vs. model pair).
+// In model mode `mfr` / `mfr2` hold model labels ("Toyota RAV4") and every ranking, map and chart works on models instead of brands.
+let kind = 'brand';
+const MODEL_BRAND = {};     // model label -> canonical brand (colors, logos, origin)
 let period = null, mfr = '', mfr2 = '';
 
 // ---------- data access ----------
@@ -359,7 +387,7 @@ function rowsFor(country, p){
 }
 
 // aggregate to entities: Map name -> {bev,phev,other,total}
-function aggregate(country, p){
+function aggregateBrands(country, p){
   const yr = periodYear(p), out = new Map();
   for(const r of rowsFor(country, p)){
     const k = entityOf(r.brand, yr);
@@ -379,14 +407,69 @@ function aggregate(country, p){
   return out;
 }
 
+// ---------- model data (lazy: ~24 MB, loaded the first time the Model filter is used) ----------
+const CATCHALL_MODEL = /^\((other|unclassified)|^other\/discontinued|^(other|unknown)\b/i;
+const alnum = x => String(x).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+const modelBase = m => String(m).replace(/\s+(BEV|PHEV|HEV|ICE)$/i, '');   // the site splits some nameplates into "X BEV / X ICE" rows: one model here
+function modelKey(brand, model){
+  const b = canonicalBrand(brand), bk = alnum(b);
+  let m = alnum(modelBase(model));
+  if(m.startsWith(bk) && m.length > bk.length) m = m.slice(bk.length);       // "Fiat Strada" under Fiat
+  return bk + '|' + m;
+}
+let MODEL_LABEL = null;   // key -> "Brand Model" (most common spelling)
+function buildModelLabels(){
+  const counts = new Map();
+  [MANUFACTURER_MODEL_MONTHLY, MANUFACTURER_MODEL_YEARLY].forEach(src => Object.values(src).forEach(rows => rows.forEach(r => {
+    if(CATCHALL_MODEL.test(r.model)) return;
+    const k = modelKey(r.brand, r.model);
+    let disp = modelBase(r.model).trim();
+    const b = canonicalBrand(r.brand);
+    if(disp.toLowerCase().startsWith(b.toLowerCase() + ' ')) disp = disp.slice(b.length + 1);
+    let m = counts.get(k); if(!m){ m = new Map(); counts.set(k, m); m.brand = b; }
+    m.set(disp, (m.get(disp) || 0) + 1);
+  })));
+  MODEL_LABEL = {};
+  counts.forEach((m, k) => {
+    let best = null, bn = -1;
+    m.forEach((n, d) => { if(n > bn || (n === bn && d !== d.toUpperCase() && best === best.toUpperCase())){ best = d; bn = n; } });
+    const label = `${m.brand} ${best}`;
+    MODEL_LABEL[k] = label; MODEL_BRAND[label] = m.brand;
+  });
+}
+function modelRowsForPeriod(country, p){
+  const MM = MANUFACTURER_MODEL_MONTHLY[country] || [], MY = MANUFACTURER_MODEL_YEARLY[country] || [];
+  if(p.type === 'month') return MM.filter(r => r.year_month === p.ym);
+  const y = MY.filter(r => r.year === p.year);
+  if(y.length) return y;
+  return MM.filter(r => +r.year_month.slice(0, 4) === p.year);
+}
+function aggregateModels(country, p){
+  const out = new Map();
+  for(const r of modelRowsForPeriod(country, p)){
+    if(CATCHALL_MODEL.test(r.model)) continue;
+    const name = MODEL_LABEL[modelKey(r.brand, r.model)];
+    const a = out.get(name) || { name, bev:0, phev:0, other:0, total:0 };
+    a.bev += r.bev || 0; a.phev += r.phev || 0; a.total += r.total || 0; a.other = a.total - a.bev - a.phev;
+    out.set(name, a);
+  }
+  if(p.projected){
+    const factor = 12 / CUR_YEAR_MONTHS_ELAPSED;
+    out.forEach(a => { a.bev *= factor; a.phev *= factor; a.total *= factor; a.other = a.total - a.bev - a.phev; });
+  }
+  return out;
+}
+function aggregate(country, p){ return kind === 'model' && MODEL_LABEL ? aggregateModels(country, p) : aggregateBrands(country, p); }
+
 // ---------- filters ----------
 const selPeriod = document.getElementById('f-period'), selMfr = document.getElementById('f-mfr'), selMfr2 = document.getElementById('f-mfr2'), mfr2Label = document.getElementById('mfr2-label');
 const mfr2Hint = mfr2Label.querySelector('.note');
 const mfr2SearchInput = document.getElementById('f-mfr2-search');
 function syncMfr2Enabled(){
-  selMfr2.disabled = !mfr;
-  mfr2SearchInput.disabled = !mfr;
-  mfr2Hint.textContent = mfr ? '(head-to-head, optional)' : '(head-to-head — pick manufacturer 1 first)';
+  const on = kind === 'brand' && !!mfr;
+  selMfr2.disabled = !on;
+  mfr2SearchInput.disabled = !on;
+  mfr2Hint.textContent = on ? '(head-to-head, optional)' : '(head-to-head — pick manufacturer 1 first)';
 }
 const BRAND_ORIGIN = {"Abarth":"Italy","Acura":"Japan","AITO":"China","Aiways":"China","Alfa Romeo":"Italy","Alpine":"France","Aston Martin":"United Kingdom","Audi":"Germany","Avatr":"China","Baojun":"China","Belgee":"Belarus","Bentley":"United Kingdom","Bestune":"China","BMW":"Germany","Buick":"United States","BYD":"China","Cadillac":"United States","Changan":"China","Chery":"China","Chevrolet":"United States","Chrysler":"United States","Citroen":"France","Cupra":"Spain","Dacia":"Romania","Daewoo":"South Korea","DAF Trucks":"Netherlands","Daihatsu":"Japan","Deepal":"China","Denza":"China","Dodge":"United States","Dongfeng":"China","DS":"France","Ferrari":"Italy","Fiat":"Italy","Fisker":"United States","Ford":"United States","GAC Motor":"China","Geely":"China","General Motors":"United States","Genesis":"South Korea","GMC":"United States","Great Wall Motors":"China","Honda":"Japan","Hongqi":"China","Hyundai":"South Korea","INEOS":"United Kingdom","Infiniti":"Japan","Iran Khodro":"Iran","Isuzu":"Japan","Iveco":"Italy","JAC":"China","Jaecoo":"China","Jaguar":"United Kingdom","Jeep":"United States","Karma":"United States","KGM":"South Korea","Kia":"South Korea","Lada":"Russia","Lamborghini":"Italy","Lancia":"Italy","Land Rover":"United Kingdom","Leapmotor":"China","Lexus":"Japan","Lincoln":"United States","Lotus":"United Kingdom","Lucid":"United States","Lynk & Co":"China","Mahindra":"India","MAN":"Germany","Maruti Suzuki":"Japan","Maserati":"Italy","Maxus":"China","Maybach":"Germany","Mazda":"Japan","McLaren":"United Kingdom","Mercedes-Benz":"Germany","MG":"China","MG Roewe":"China","Mini":"United Kingdom","Mitsubishi":"Japan","Mitsubishi Fuso":"Japan","Morgan":"United Kingdom","Neta":"China","NIO":"China","Nissan":"Japan","Omoda":"China","Opel":"Germany","Perodua":"Malaysia","Peugeot":"France","Polestar":"Sweden","Porsche":"Germany","Proton":"Malaysia","Ram":"United States","Renault":"France","Rivian":"United States","Roewe":"China","Rolls-Royce":"United Kingdom","Saab":"Sweden","Saipa":"Iran","Seat":"Spain","Skoda":"Czech Republic","smart":"Germany","SsangYong":"South Korea","Subaru":"Japan","Suzuki":"Japan","Tata Motors":"India","Tesla":"United States","TOGG":"Turkey","Toyota":"Japan","VinFast":"Vietnam","Volkswagen":"Germany","Volvo":"Sweden","Voyah":"China","Wiesmann":"Germany","Wuling":"China","Xiaomi Auto":"China","XPeng":"China","Zeekr":"China","BMW, Mini":"Germany","Chrysler, Jeep, Dodge":"United States","Nissan, Infiniti":"Japan","Renault, Dacia":"France","Toyota, Lexus":"Japan","Toyota (TCI: Toyota+Lexus combined)":"Japan","Jaguar Land Rover":"United Kingdom","Bollore":"France","Bugatti":"France","Mobilize":"France","Skoda-Volkswagen India":"Germany","Ssangyong":"South Korea","Jetour":"China","Kaiyi":"China","Karry":"China","Forthing":"China","Soueast":"China","Foton":"China","JMC":"China","Hino":"Japan","212":"China","Sinotruk":"China","Higer":"China","IM":"China","Kama":"China","Rox":"China","ZX Auto":"China","BAIC":"China","Exlantix":"China","Seres":"China","Moke":"United Kingdom","Amatør Bil":"Norway","Bygg Bil":"Norway","Aion":"China","Ariel":"United Kingdom","Austin":"United Kingdom","Austin-Healey":"United Kingdom","Caterham":"United Kingdom","Coleman Milne":"United Kingdom","Corvette":"United States","DFSK":"China","Daimler":"United Kingdom","Datsun":"Japan","Gordon Murray":"United Kingdom","Hummer":"United States","Jensen":"United Kingdom","LEVC":"United Kingdom","Mercury":"United States","Morris":"United Kingdom","Oldsmobile":"United States","Plymouth":"United States","Pontiac":"United States","Renault Trucks":"France","Rover":"United Kingdom","Skywell":"China","Sunbeam":"United Kingdom","Triumph":"United Kingdom","Vauxhall":"United Kingdom","Westfield":"United Kingdom","Geely Galaxy":"China","Li Auto":"China","Xiaomi":"China","iCAR":"China","Haval":"China","Tank":"China","Ora":"China","GAC Aion":"China","GAC Trumpchi":"China","GWM":"China","GAC":"China","Isuzu Ute":"Japan","LDV":"China","Omoda Jaecoo":"China","Farizon":"China","Holden":"Australia","Skyworth":"China","Renault Korea":"South Korea","Smart":"Germany","Togg":"Turkey","Karsan":"Turkey","Exeed":"China","Solaris":"Russia","UAZ":"Russia","Tenet":"Russia","Jeland":"Russia","iCAUR":"China","Mitsuoka":"Japan","Alpina":"Germany","Bluecar":"France","Eveasy":"China","International":"United States","Italdesign":"Italy","Leyland":"United Kingdom","Nash":"United States","Pagani":"Italy","Panther":"United Kingdom","Standard":"United Kingdom","Xpeng":"China","Arcfox":"China","JMEV":"China","KYC":"China","RAM":"United States","Shineray":"China","Lifan":"China","Rely":"China","Fonix":"China","Xev":"Italy","Tata":"India","Borgward":"Germany","Brilliance":"China","Jensen Healey":"United Kingdom","Lea Francis":"United Kingdom","Austin Healey":"United Kingdom","Maextro":"China","Oltcit":"Romania","Panhard & Levassor":"France","Pierce Arrow":"United States","Simca":"France","Rauch & Lang":"United States","Abt":"Germany","Brabus":"Germany","Caterham Cars Ltd":"United Kingdom","Donkervoort":"Netherlands","Ineos":"United Kingdom","Koenigsegg":"Sweden","Levc":"United Kingdom","FAW":"China","SWM":"China","DR":"Italy","Allied Vehicles Ltd":"United Kingdom","Baic":"China","Livan":"China","Ruf":"Germany","Secma":"France","Tiger":"United Kingdom","Edward Davies":"United Kingdom","Allied Vehicles":"United Kingdom","Nevs":"Sweden","Riddara":"China","Lepas":"China","Nammi":"China","Yutong":"China","Swm":"China","Gecko":"China","JIM":"China","Landking":"China","ZXAuto":"China","Zna":"China","Omoda & Jaecoo":"China","Fuso":"Japan","Volkswagen Group":"Germany","BMW Group":"Germany","Stellantis":"France","Thaco Truck":"Vietnam","CMC":"Taiwan","Foxtron":"Taiwan","Citroën":"France","Kenworth":"United States","Forland":"China","Scania":"Sweden","Zhidou":"China","Juneyao":"China","Kymco":"Taiwan","Yamaha":"Japan","Piaggio":"Italy","Can-Am":"Canada","GAZ":"Russia","Howo":"China","JAC Trucks":"China","KAMAZ":"Russia","ROX":"China","Maple":"China","Nevo":"China","XEV":"Italy","Avantier":"China","Ashok Leyland":"India","Eicher":"India","Genlyon":"China","Man":"Germany","Rosenbauer":"Austria","Shacman":"China","UD Trucks":"Japan","Zamyad":"Iran","Firefly":"China","Gumpert":"Germany","Henrey":"China","IM Motors":"China","Lingbox":"China","SGMW":"China"};
 // origins for parent groups / labels that have no entry above (everything else resolves through its flagship brand via brandKey)
@@ -445,17 +528,51 @@ function readPeriod(){
 function buildMfrSelect(){
   // every entity with sales in at least one country for the period (grouped lists built by groupedOptions)
   const tot = new Map();
-  COUNTRIES.forEach(c => aggregate(c, period).forEach((a, k) => tot.set(k, (tot.get(k) || 0) + a.total)));
+  COUNTRIES.forEach(c => aggregateBrands(c, period).forEach((a, k) => tot.set(k, (tot.get(k) || 0) + a.total)));
   const names = [...tot.entries()].filter(([, v]) => v > 0).map(([k]) => k).sort((a, b) => a.localeCompare(b, 'en', { sensitivity:'base' }));
-  if(mfr && !tot.has(mfr)) mfr = '';
-  if(mfr2 && !tot.has(mfr2)) mfr2 = '';
+  if(kind === 'brand'){ if(mfr && !tot.has(mfr)) mfr = ''; if(mfr2 && !tot.has(mfr2)) mfr2 = ''; }
   const opts = groupedOptions(tot, names);
   selMfr.innerHTML = '<option value="">All manufacturers</option>' + opts;
-  selMfr.value = mfr;
+  selMfr.value = kind === 'brand' ? mfr : '';
   selMfr2.innerHTML = '<option value="">— none (single manufacturer) —</option>' + opts;
   selMfr2.value = mfr2;
   syncMfr2Enabled();
   syncCombo(selMfr); syncCombo(selMfr2);
+}
+
+const selModel = document.getElementById('f-model'), selModel2 = document.getElementById('f-model2');
+const model2SearchInput = document.getElementById('f-model2-search'), modelSearchInput = document.getElementById('f-model-search');
+const modelStatus = document.getElementById('model-status');
+function syncModel2Enabled(){
+  const on = !!selModel.value;
+  selModel2.disabled = !on; model2SearchInput.disabled = !on;
+  const hint = document.getElementById('model2-label').querySelector('.note');
+  hint.textContent = on ? '(head-to-head, optional)' : '(head-to-head — pick a model first)';
+}
+function buildModelSelect(){
+  const tot = new Map();
+  COUNTRIES.forEach(c => aggregateModels(c, period).forEach((a, k) => tot.set(k, (tot.get(k) || 0) + a.total)));
+  const names = [...tot.entries()].filter(([, v]) => v >= 100).map(([k]) => k);
+  const top = [...names].sort((a, b) => tot.get(b) - tot.get(a)).slice(0, 100);
+  const az = [...names].sort((a, b) => a.localeCompare(b, 'en', { sensitivity:'base' }));
+  const opt = n => `<option value="${esc(n)}">${esc(n)}</option>`;
+  const html = `<optgroup label="Top 100 by volume">${top.map(opt).join('')}</optgroup><optgroup label="All models (A–Z)">${az.map(opt).join('')}</optgroup>`;
+  const keep1 = tot.has(selModel.value) ? selModel.value : '', keep2 = tot.has(selModel2.value) ? selModel2.value : '';
+  selModel.innerHTML = '<option value="">All models (pick one to rank models)</option>' + html; selModel.value = keep1;
+  selModel2.innerHTML = '<option value="">— none (single model) —</option>' + html; selModel2.value = keep2;
+  syncModel2Enabled(); syncCombo(selModel); syncCombo(selModel2);
+  modelStatus.textContent = `${names.length} models with 100+ units in ${periodLabel(period)}`;
+}
+let modelsLoading = false;
+function ensureModels(){
+  if(MODEL_LABEL || modelsLoading) return;
+  modelsLoading = true; modelStatus.textContent = 'Loading model data (about 24 MB)…'; modelSearchInput.placeholder = 'Loading models…';
+  loadModelData().then(() => {
+    buildModelLabels(); buildModelSelect();
+    modelSearchInput.placeholder = 'Search or pick a model…'; modelsLoading = false;
+    modelSearchInput.focus();
+    const l = document.getElementById('f-model-list'); renderComboList(selModel, l, ''); l.classList.add('open');
+  }).catch(() => { modelsLoading = false; modelStatus.textContent = 'Model data could not be loaded.'; });
 }
 
 // ---------- searchable brand combobox (wraps a real <select>, which stays the source of truth) ----------
@@ -532,8 +649,10 @@ function compute(){
     if(!total) return;
     const sel = mfr ? m.get(mfr) || null : null;
     const sel2 = mfr2 ? m.get(mfr2) || null : null;
+    // shares are of the whole market: in model mode the listed models do not add up to it, so use the brand-level country total
+    const market = kind === 'model' ? ([...aggregateBrands(c, period).values()].reduce((s, a) => s + a.total, 0) || total) : total;
     byCountry[c] = {
-      list, total, sel, sel2,
+      list, total, market, sel, sel2,
       rank: sel ? list.indexOf(sel) + 1 : null,
       rank2: sel2 ? list.indexOf(sel2) + 1 : null,
     };
@@ -543,7 +662,7 @@ function valueOf(c){
   const d = byCountry[c]; if(!d) return null;
   if(!mfr) return d.total;
   const u = d.sel ? d.sel.total : 0;
-  return metric === 'share' ? 100 * u / d.total : u;
+  return metric === 'share' ? 100 * u / (d.market || d.total) : u;
 }
 // per-country fill color for the map, branching on the active mode
 function countryColor(c){
@@ -712,7 +831,7 @@ function renderMap(){
   const n = Object.keys(byCountry).length;
   const md = mode();
   document.getElementById('map-note').textContent =
-    `${periodLabel(period)} · ${n} countries with manufacturer data · ranking by ${groupMode === 'group' ? 'parent group' : 'brand'}` +
+    `${periodLabel(period)} · ${n} countries with manufacturer data · ranking by ${kind === 'model' ? 'model' : groupMode === 'group' ? 'parent group' : 'brand'}` +
     (md === 'match' ? ` · shading shows which of ${mfr} / ${mfr2} sells more in each country` :
      md === 'rank' ? ` · shading shows ${mfr}'s rank in each country's market` :
      ' · shading shows total market size') +
@@ -723,7 +842,16 @@ function renderMap(){
 
 // ---------- hover modal ----------
 function historyYears(){ return YEARS.slice(0, 5).reverse(); }
+function modelYearTotal(country, year, name){
+  let rows = (MANUFACTURER_MODEL_YEARLY[country] || []).filter(r => r.year === year);
+  if(!rows.length) rows = (MANUFACTURER_MODEL_MONTHLY[country] || []).filter(r => +r.year_month.slice(0, 4) === year);
+  if(!rows.length) return null;
+  let sum = 0;
+  rows.forEach(r => { if(!CATCHALL_MODEL.test(r.model) && MODEL_LABEL[modelKey(r.brand, r.model)] === name) sum += r.total || 0; });
+  return sum;
+}
 function entityYearTotal(country, year, name){
+  if(kind === 'model' && MODEL_LABEL) return modelYearTotal(country, year, name);
   const rows = (MANUFACTURER_YEARLY[country] || []).filter(r => r.year === year);
   if(!rows.length) return null;
   let sum = 0;
@@ -831,7 +959,7 @@ function showModal(e, country){
     sub += ` · ${mfr}: ${fmt(u1)}${d.rank ? ` (#${d.rank})` : ''} vs. ${mfr2}: ${fmt(u2)}${d.rank2 ? ` (#${d.rank2})` : ''}` +
       (winner === 'tie' ? ' · tied' : winner ? ` · ${winner} leads` : '');
   } else if(mfr){
-    sub += d.sel ? ` · ${mfr}: #${d.rank} (${rankTierLabel(d.rank)}), ${(100 * d.sel.total / d.total).toFixed(1)}% share` : ` · ${mfr}: no sales`;
+    sub += d.sel ? ` · ${mfr}: #${d.rank} (${rankTierLabel(d.rank)}), ${(100 * d.sel.total / (d.market || d.total)).toFixed(1)}% share` : ` · ${mfr}: no sales`;
   }
   modal.innerHTML = `<h3>${country}</h3><div class="sub">${sub}</div>${rows}` +
     `<div class="foot"><span><i class="sw" style="background:${COLORS.bev}"></i>BEV <b>${pc(bev)}</b></span>` +
@@ -925,7 +1053,7 @@ function aggScope(countries){
   const ent = new Map(), sel = { bev:0, phev:0, other:0, total:0 }; let marketTotal = 0;
   countries.forEach(c => {
     const d = byCountry[c]; if(!d) return;
-    marketTotal += d.total;
+    marketTotal += (d.market || d.total);
     d.list.forEach(a => ent.set(a.name, (ent.get(a.name) || 0) + a.total));
     if(d.sel){ sel.bev += d.sel.bev; sel.phev += d.sel.phev; sel.other += d.sel.other; sel.total += d.sel.total; }
   });
@@ -1062,7 +1190,7 @@ function renderCountryBars(){
     const worldTotal = Object.values(byCountry).reduce((s, d) => s + (d.sel ? d.sel.total : 0), 0);
     const all = Object.entries(byCountry)
       .filter(([, d]) => d.sel)
-      .map(([c, d]) => ({ country:c, total:d.sel.total, rank:d.rank, share: 100 * d.sel.total / d.total, sel:d.sel, marketTotal:d.total }))
+      .map(([c, d]) => ({ country:c, total:d.sel.total, rank:d.rank, share: 100 * d.sel.total / (d.market || d.total), sel:d.sel, marketTotal:(d.market || d.total) }))
       .sort((a, b) => b.total - a.total);
     built = all.map(x => ({
       country:x.country, scope:'country', key:x.country,
@@ -1101,8 +1229,9 @@ function modelRowsFor(country){
 function topModelsFor(countries){
   const yr = periodYear(period), agg = new Map();
   countries.forEach(c => modelRowsFor(c).forEach(r => {
-    if(entityOf(r.brand, yr) !== mfr || /^\((other|unclassified)|^other\/discontinued|^(other|unknown)/i.test(r.model)) return;   // catch-all rows are not models
-    const name = mfrModelLabel(r.brand, r.model), a = agg.get(name) || { name, bev:0, phev:0, other:0, total:0 };
+    if(CATCHALL_MODEL.test(r.model)) return;   // catch-all rows are not models
+    if(kind !== 'model' && entityOf(r.brand, yr) !== mfr) return;
+    const name = kind === 'model' && MODEL_LABEL ? MODEL_LABEL[modelKey(r.brand, r.model)] : mfrModelLabel(r.brand, r.model), a = agg.get(name) || { name, bev:0, phev:0, other:0, total:0 };
     a.bev += r.bev || 0; a.phev += r.phev || 0; a.total += r.total || 0; a.other = a.total - a.bev - a.phev; agg.set(name, a);
   }));
   return [...agg.values()].sort((a, b) => b.total - a.total).slice(0, 10);
@@ -1117,13 +1246,13 @@ function renderHover(scope, key){
   const label = scope === 'world' ? 'World' : scope === 'continent' ? (CONTINENT_LABELS[key] || key) : key;
   let h = `<h3>${esc(mfr)} — ${esc(label)}</h3><div class="sub">${periodLabel(period)} · ${fmt(a.sel.total)} vehicles${a.rank ? ` · #${a.rank} in ${scope === 'world' ? 'the world' : 'this market'}` : ''}</div>`;
   h += historyHTML(null, { label, countries });
-  h += `<div class="mdl-title">Top 10 models · ${periodLabel(period)}</div>`;
+  h += `<div class="mdl-title">Top 10 models${kind === 'model' ? ' in this market' : ''} · ${periodLabel(period)}</div>`;
   if(typeof MANUFACTURER_MODEL_MONTHLY === 'undefined' || typeof MANUFACTURER_MODEL_YEARLY === 'undefined'){
     h += `<div class="sub">Loading model data…</div>`;
     loadModelData().then(() => { if(hoverKey === scope + '|' + key) renderHover(scope, key); }).catch(() => {});
   } else {
     const top = topModelsFor(countries);
-    h += top.length ? top.map((m, i) => rowHTML(i + 1, m, top[0].total, false)).join('') : `<div class="sub">No model-level data for ${esc(label)} in this period.</div>`;
+    h += top.length ? top.map((m, i) => rowHTML(i + 1, m, top[0].total, kind === 'model' && (m.name === mfr || m.name === mfr2))).join('') : `<div class="sub">No model-level data for ${esc(label)} in this period.</div>`;
   }
   hoverPanel.innerHTML = h;
 }
@@ -1150,13 +1279,24 @@ function hideHover(){ hoverKey = null; hoverPanel.style.opacity = 0; }
 // ---------- wiring ----------
 function refresh(rebuildMfr){
   readPeriod();
-  if(rebuildMfr) buildMfrSelect();
-  mfr = selMfr.value;
-  mfr2 = selMfr2.value;            // remembered even while manufacturer 1 is back on "All"
-  if(mfr2 === mfr) mfr2 = '';
-  syncMfr2Enabled();
-  selMfr2.value = mfr2;
-  syncCombo(selMfr); syncCombo(selMfr2);
+  if(rebuildMfr){ buildMfrSelect(); if(MODEL_LABEL) buildModelSelect(); }
+  if(selModel.value && MODEL_LABEL){
+    kind = 'model';
+    mfr = selModel.value; mfr2 = selModel2.value;
+    if(mfr2 === mfr) mfr2 = '';
+    selMfr.value = ''; selMfr2.value = '';
+  } else {
+    kind = 'brand';
+    mfr = selMfr.value;
+    mfr2 = selMfr2.value;            // remembered even while manufacturer 1 is back on "All"
+    if(mfr2 === mfr) mfr2 = '';
+    selModel.value = ''; selModel2.value = '';
+  }
+  syncMfr2Enabled(); syncModel2Enabled();
+  selMfr2.value = kind === 'brand' ? mfr2 : '';
+  selModel2.value = kind === 'model' ? mfr2 : '';
+  syncCombo(selMfr); syncCombo(selMfr2); syncCombo(selModel); syncCombo(selModel2);
+  document.querySelectorAll('[data-group]').forEach(b => { b.disabled = kind === 'model'; b.style.opacity = kind === 'model' ? .45 : 1; });
   const shareBtn = document.querySelector('[data-metric="share"]');
   const rankMode = mode() === 'rank';
   shareBtn.disabled = !rankMode; shareBtn.style.opacity = rankMode ? 1 : .45;
@@ -1165,8 +1305,10 @@ function refresh(rebuildMfr){
 }
 function setActive(sel, attr, val){ document.querySelectorAll(`${sel} .mode-btn`).forEach(b => b.classList.toggle('active', b.dataset[attr] === val)); }
 selPeriod.onchange = () => refresh(true);
-selMfr.onchange = () => { if(selMfr2.value === selMfr.value) selMfr2.value = ''; refresh(false); };
-selMfr2.onchange = () => refresh(false);
+selMfr.onchange = () => { if(selMfr2.value === selMfr.value) selMfr2.value = ''; if(selMfr.value){ selModel.value = ''; selModel2.value = ''; } refresh(false); };
+selMfr2.onchange = () => { if(selMfr2.value){ selModel.value = ''; selModel2.value = ''; } refresh(false); };
+selModel.onchange = () => { if(selModel2.value === selModel.value) selModel2.value = ''; if(selModel.value){ selMfr.value = ''; selMfr2.value = ''; } refresh(false); };
+selModel2.onchange = () => refresh(false);
 document.querySelectorAll('[data-group]').forEach(b => b.onclick = () => {
   const prev = groupMode; groupMode = b.dataset.group;
   setActive('.mfr-filters', 'group', groupMode); setActive('#bars-card', 'group', groupMode);
@@ -1183,6 +1325,10 @@ buildPeriodSelect();
 readPeriod();
 wireCombo(selMfr, document.getElementById('f-mfr-search'), document.getElementById('f-mfr-list'));
 wireCombo(selMfr2, mfr2SearchInput, document.getElementById('f-mfr2-list'));
+wireCombo(selModel, modelSearchInput, document.getElementById('f-model-list'));
+wireCombo(selModel2, model2SearchInput, document.getElementById('f-model2-list'));
+modelSearchInput.addEventListener('focus', ensureModels);
+selModel.innerHTML = '<option value=""></option>'; syncCombo(selModel);
 buildMfrSelect();
 fetch('assets/countries-50m.json').then(r => r.json()).then(topo => {
   const geo = topojson.feature(topo, topo.objects.countries);
