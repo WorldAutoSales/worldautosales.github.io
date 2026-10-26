@@ -38,6 +38,14 @@
   .fx-lane-tag{ display:flex; align-items:center; gap:9px; font-weight:800; font-size:13px; color:#fff; }
   .fx-lane-tag i{ width:30px; height:30px; border-radius:10px; display:grid; place-items:center; font-style:normal; font-size:15px; background:linear-gradient(135deg,rgba(34,211,238,.9),rgba(139,92,246,.9)); box-shadow:0 6px 16px -6px rgba(139,92,246,.8); }
   .fx-lane-model .fx-lane-tag i{ background:linear-gradient(135deg,#f472b6,#fb923c); box-shadow:0 6px 16px -6px rgba(244,114,182,.8); }
+  .fx-lane-seg .fx-lane-tag i{ background:linear-gradient(135deg,#34d399,#22d3ee); box-shadow:0 6px 16px -6px rgba(52,211,153,.8); }
+  .fx-segs{ display:grid; gap:10px; }
+  .fx-seggrp{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .fx-seggrp > .fx-seglabel{ font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:#8fa0ff; min-width:92px; }
+  .fx-opt{ border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.06); color:#e9edff; font-weight:700; font-size:12px; padding:5px 11px; border-radius:999px; cursor:pointer; transition:all .15s; }
+  .fx-opt:hover{ background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.4); }
+  .fx-opt.on{ color:#06122b; background:linear-gradient(135deg,#22d3ee,#a78bfa); border-color:transparent; box-shadow:0 4px 14px -4px rgba(34,211,238,.6); }
+  .fx-opt.reset{ background:transparent; border-style:dashed; color:#9fb0ff; }
   .fx-pair{ display:grid; grid-template-columns:minmax(0,1fr) 40px minmax(0,1fr); gap:10px; align-items:end; }
   .fx-vs{ align-self:end; justify-self:center; width:34px; height:34px; margin-bottom:2px; border-radius:50%; display:grid; place-items:center; font-size:10.5px; font-weight:900; letter-spacing:.05em; color:#06122b;
     background:linear-gradient(135deg,#fde68a,#fb923c); box-shadow:0 6px 16px -6px rgba(251,146,60,.8); }
@@ -208,7 +216,7 @@
       <header class="page-header">
         <div class="eyebrow">Manufacturers · Map</div>
         <h1>Who sells what, country by country</h1>
-        <p class="subtitle">Pick a period and, optionally, one manufacturer or, with the Model filter on top, one model (each can be set against a second one for a head-to-head; the model data, about 24 MB, loads the first time you click the Model box). The map shades each country by that manufacturer's sales (or by total market size when "All manufacturers" is selected). Hover a country to see its top 10 manufacturers for the period, split into BEV, PHEV and HEV + ICE + Diesel.</p>
+        <p class="subtitle">Pick a period and, optionally, one manufacturer or, with the Model filter on top, one model (each can be set against a second one for a head-to-head; the model data, about 24 MB, loads the first time you click the Model box). The map shades each country by that manufacturer's sales (or by total market size when "All manufacturers" is selected). Hover a country to see its top 10 manufacturers for the period, split into BEV, PHEV and HEV + ICE + Diesel. The Segment lane narrows everything to one or several car classes (mini to executive, SUV small or large, MPV, pickup, van; assigned per nameplate from the EU segment letters) and/or powertrains.</p>
       </header>
 
       <section class="fx-panel mfr-filters" id="fx-panel">
@@ -269,6 +277,14 @@
               </label>
             </div>
             <div class="fx-status" id="model-status"></div>
+          </div>
+          <div class="fx-lane fx-lane-seg">
+            <div class="fx-lane-tag"><i>🧩</i>Segment</div>
+            <div class="fx-segs">
+              <div class="fx-seggrp" id="seg-class"></div>
+              <div class="fx-seggrp" id="seg-motor"></div>
+              <div class="fx-status" id="seg-status" style="grid-column:auto"></div>
+            </div>
           </div>
         </div>
         <div class="fx-quick" id="fx-quick"></div>
@@ -336,6 +352,7 @@
 <script src="assets/manufacturer-monthly-data.js"></script>
 <script src="assets/manufacturer-yearly-data.js"></script>
 <script src="assets/manufacturer-holdings-data.js"></script>
+<script src="assets/model-class-data.js"></script>
 <script>
 (function(){
 const COLORS = { bev:'#1e8f5f', phev:'#e0a21a', other:'#8a8f98' };
@@ -433,6 +450,42 @@ let groupMode = 'brand', metric = 'units';
 let kind = 'brand';
 const MODEL_BRAND = {};     // model label -> canonical brand (colors, logos, origin)
 let period = null, mfr = '', mfr2 = '';
+// Segment filters (empty set = no filter). Car class works on model rows (assets/model-class-data.js maps a model key to a class); Motorization works on the fuel columns of any row.
+const CLASS_DEFS = [
+  ['A',    'A · Mini',            'Mini / city car (EC segment A): Picanto, Seagull, Alto, Kwid, Dolphin Mini'],
+  ['B',    'B · Small',           'Small car (segment B): Polo, Clio, Yaris, Dolphin, Swift'],
+  ['C',    'C · Compact',         'Compact car (segment C): Golf, Corolla, Civic, ID.3, Octavia'],
+  ['D',    'D · Mid-size',        'Mid-size car (segment D): Passat, Camry, Model 3, 3 Series, Seal'],
+  ['EF',   'E–F · Executive',     'Executive & luxury cars (segments E and F): 5 Series, E-Class, S-Class, Panamera'],
+  ['S',    'Sports',              'Sports cars and coupés (segment S): 911, Mustang, MX-5, Corvette'],
+  ['M',    'MPV / minivan',       'Multi-purpose vehicles and minivans (segment M): Xpander, Carnival, Sienta, Alphard'],
+  ['SUVS', 'SUV small/compact',   'B- and C-segment SUVs: RAV4, Tucson, Qashqai, Song Plus, Tiguan, Nexon'],
+  ['SUVL', 'SUV mid/large',       'D-, E- and F-segment SUVs: Model Y, Highlander, X5, Land Cruiser, Palisade'],
+  ['PU',   'Pickup',              'Pickup trucks: Hilux, F-150, Ranger, Silverado'],
+  ['VAN',  'Van / light comm.',   'Vans and light commercial vehicles: Transit, Sprinter, Hiace, Kangoo'],
+  ['U',    'Unclassified',        'Models not yet assigned to a class (the long tail, about 1% of volume)'],
+];
+const MOTOR_DEFS = [['bev','BEV'],['phev','PHEV'],['hev','HEV'],['petrol','Petrol'],['diesel','Diesel'],['other','Other / n.a.']];
+const clsSel = new Set(), motSel = new Set();
+const filtersActive = () => clsSel.size > 0 || motSel.size > 0;
+const modelDataReady = () => typeof MANUFACTURER_MODEL_MONTHLY !== 'undefined' && typeof MANUFACTURER_MODEL_YEARLY !== 'undefined';
+const _clsCache = new Map();
+function classOf(r){
+  const ck = r.brand + '|' + r.model;
+  let c = _clsCache.get(ck);
+  if(c === undefined){ c = (typeof MODEL_CLASS !== 'undefined' && MODEL_CLASS[modelKey(r.brand, r.model)]) || 'U'; _clsCache.set(ck, c); }
+  return c;
+}
+// units of one row after the Motorization filter: {bev, phev, total}
+function rowUnits(r){
+  const bev = r.bev || 0, phev = r.phev || 0, total = r.total || 0;
+  if(!motSel.size) return { bev, phev, total };
+  const hev = r.hev || 0, petrol = r.petrol || 0, diesel = r.diesel || 0;
+  const f = { bev, phev, hev, petrol, diesel, other: Math.max(0, total - bev - phev - hev - petrol - diesel) };
+  let t = 0; motSel.forEach(k => { t += f[k]; });
+  return { bev: motSel.has('bev') ? bev : 0, phev: motSel.has('phev') ? phev : 0, total: t };
+}
+const classPass = r => !clsSel.size || clsSel.has(classOf(r));
 
 // ---------- data access ----------
 const COUNTRIES = [...new Set([...Object.keys(MANUFACTURER_MONTHLY), ...Object.keys(MANUFACTURER_YEARLY)])].sort();
@@ -482,13 +535,18 @@ function rowsFor(country, p){
 }
 
 // aggregate to entities: Map name -> {bev,phev,other,total}
-function aggregateBrands(country, p){
+function aggregateBrands(country, p, raw){
   const yr = periodYear(p), out = new Map();
-  for(const r of rowsFor(country, p)){
+  // a Car class filter needs model rows: brands are then rebuilt from the models of that class
+  const viaModels = !raw && clsSel.size > 0 && modelDataReady();
+  const src = viaModels ? modelRowsForPeriod(country, p).filter(r => !CATCHALL_MODEL.test(r.model) && classPass(r)) : rowsFor(country, p);
+  for(const r of src){
     const k = entityOf(r.brand, yr);
+    const u = raw ? { bev:r.bev || 0, phev:r.phev || 0, total:r.total || 0 } : rowUnits(r);
+    if(!raw && motSel.size && u.total <= 0) continue;
     const a = out.get(k) || { name:k, bev:0, phev:0, other:0, total:0 };
-    const bev = r.bev || 0, phev = r.phev || 0;
-    a.bev += bev; a.phev += phev; a.total += r.total || 0;
+    const bev = u.bev, phev = u.phev;
+    a.bev += bev; a.phev += phev; a.total += u.total;
     a.other = a.total - a.bev - a.phev;
     out.set(k, a);
   }
@@ -539,13 +597,16 @@ function modelRowsForPeriod(country, p){
   if(y.length) return y;
   return MM.filter(r => +r.year_month.slice(0, 4) === p.year);
 }
-function aggregateModels(country, p){
+function aggregateModels(country, p, raw){
   const out = new Map();
   for(const r of modelRowsForPeriod(country, p)){
     if(CATCHALL_MODEL.test(r.model)) continue;
+    if(!raw && !classPass(r)) continue;
+    const u = raw ? { bev:r.bev || 0, phev:r.phev || 0, total:r.total || 0 } : rowUnits(r);
+    if(!raw && motSel.size && u.total <= 0) continue;
     const name = MODEL_LABEL[modelKey(r.brand, r.model)];
     const a = out.get(name) || { name, bev:0, phev:0, other:0, total:0 };
-    a.bev += r.bev || 0; a.phev += r.phev || 0; a.total += r.total || 0; a.other = a.total - a.bev - a.phev;
+    a.bev += u.bev; a.phev += u.phev; a.total += u.total; a.other = a.total - a.bev - a.phev;
     out.set(name, a);
   }
   if(p.projected){
@@ -623,7 +684,7 @@ function readPeriod(){
 function buildMfrSelect(){
   // every entity with sales in at least one country for the period (grouped lists built by groupedOptions)
   const tot = new Map();
-  COUNTRIES.forEach(c => aggregateBrands(c, period).forEach((a, k) => tot.set(k, (tot.get(k) || 0) + a.total)));
+  COUNTRIES.forEach(c => aggregateBrands(c, period, true).forEach((a, k) => tot.set(k, (tot.get(k) || 0) + a.total)));
   const names = [...tot.entries()].filter(([, v]) => v > 0).map(([k]) => k).sort((a, b) => a.localeCompare(b, 'en', { sensitivity:'base' }));
   if(kind === 'brand'){ if(mfr && !tot.has(mfr)) mfr = ''; if(mfr2 && !tot.has(mfr2)) mfr2 = ''; }
   window.__topBrands = [...tot.entries()].filter(([k, v]) => !isOtherName(k) && v > 0).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([k]) => k);
@@ -647,7 +708,7 @@ function syncModel2Enabled(){
 }
 function buildModelSelect(){
   const tot = new Map();
-  COUNTRIES.forEach(c => aggregateModels(c, period).forEach((a, k) => tot.set(k, (tot.get(k) || 0) + a.total)));
+  COUNTRIES.forEach(c => aggregateModels(c, period, true).forEach((a, k) => tot.set(k, (tot.get(k) || 0) + a.total)));
   const names = [...tot.entries()].filter(([, v]) => v >= 100).map(([k]) => k);
   const top = [...names].sort((a, b) => tot.get(b) - tot.get(a)).slice(0, 100);
   const az = [...names].sort((a, b) => a.localeCompare(b, 'en', { sensitivity:'base' }));
@@ -747,7 +808,7 @@ function compute(){
     const sel = mfr ? m.get(mfr) || null : null;
     const sel2 = mfr2 ? m.get(mfr2) || null : null;
     // shares are of the whole market: in model mode the listed models do not add up to it, so use the brand-level country total
-    const market = kind === 'model' ? ([...aggregateBrands(c, period).values()].reduce((s, a) => s + a.total, 0) || total) : total;
+    const market = (kind === 'model' || filtersActive()) ? ([...aggregateBrands(c, period, true).values()].reduce((s, a) => s + a.total, 0) || total) : total;
     byCountry[c] = {
       list, total, market, sel, sel2,
       rank: sel ? list.indexOf(sel) + 1 : null,
@@ -937,6 +998,7 @@ function renderMap(){
   renderCountryBars();
   renderSpotlight();
   renderChipBar();
+  updateSegStatus(n);
 }
 
 
@@ -951,6 +1013,8 @@ function renderChipBar(){
   let h = `<span class="fx-chip neutral">${esc(periodLabel(period))}</span><span class="fx-chip neutral">${kind === 'model' ? 'Models' : groupMode === 'group' ? 'Parent groups' : 'Brands'}</span>`;
   if(mfr) h += chip(mfr, 1);
   if(mfr && mfr2) h += `<span class="fx-chipvs">VS</span>` + chip(mfr2, 2);
+  if(clsSel.size) h += `<span class="fx-chip neutral">Class: ${CLASS_DEFS.filter(d => clsSel.has(d[0])).map(d => esc(d[1])).join(', ')}<button type="button" data-clear="cls" title="Remove">×</button></span>`;
+  if(motSel.size) h += `<span class="fx-chip neutral">Motorization: ${MOTOR_DEFS.filter(d => motSel.has(d[0])).map(d => esc(d[1])).join(', ')}<button type="button" data-clear="mot" title="Remove">×</button></span>`;
   if(!mfr) h += `<span class="fx-chipvs" style="margin-left:6px">All manufacturers — pick a brand or a model above, or click a quick pick</span>`;
   else h += `<button type="button" class="fx-clear" data-clear="all">Clear selection</button>`;
   bar.innerHTML = h;
@@ -958,6 +1022,7 @@ function renderChipBar(){
 document.getElementById('fx-chipbar').addEventListener('click', e => {
   const b = e.target.closest('[data-clear]'); if(!b) return;
   const w = b.dataset.clear, M1 = kind === 'model' ? selModel : selMfr, M2 = kind === 'model' ? selModel2 : selMfr2;
+  if(w === 'cls' || w === 'mot'){ (w === 'cls' ? clsSel : motSel).clear(); renderSegUI(); refresh(false); return; }
   if(w === '2') M2.value = ''; else { M1.value = ''; M2.value = ''; }
   M1.dispatchEvent(new Event('change'));
 });
@@ -1073,21 +1138,35 @@ function modelYearTotal(country, year, name){
   if(!rows.length) rows = (MANUFACTURER_MODEL_MONTHLY[country] || []).filter(r => +r.year_month.slice(0, 4) === year);
   if(!rows.length) return null;
   let sum = 0;
-  rows.forEach(r => { if(!CATCHALL_MODEL.test(r.model) && MODEL_LABEL[modelKey(r.brand, r.model)] === name) sum += r.total || 0; });
+  rows.forEach(r => { if(!CATCHALL_MODEL.test(r.model) && classPass(r) && MODEL_LABEL[modelKey(r.brand, r.model)] === name) sum += rowUnits(r).total; });
   return sum;
 }
 function entityYearTotal(country, year, name){
   if(kind === 'model' && MODEL_LABEL) return modelYearTotal(country, year, name);
+  if(clsSel.size && modelDataReady()){
+    const mr = modelYearRows(country, year); if(!mr.length) return null;
+    let s = 0; mr.forEach(r => { if(!CATCHALL_MODEL.test(r.model) && classPass(r) && entityOf(r.brand, year) === name) s += rowUnits(r).total; });
+    return s;
+  }
   const rows = (MANUFACTURER_YEARLY[country] || []).filter(r => r.year === year);
   if(!rows.length) return null;
   let sum = 0;
-  rows.forEach(r => { if(entityOf(r.brand, year) === name) sum += r.total || 0; });
+  rows.forEach(r => { if(entityOf(r.brand, year) === name) sum += rowUnits(r).total; });
   return sum;
 }
+function modelYearRows(country, year){
+  let rows = (MANUFACTURER_MODEL_YEARLY[country] || []).filter(r => r.year === year);
+  if(!rows.length) rows = (MANUFACTURER_MODEL_MONTHLY[country] || []).filter(r => +r.year_month.slice(0, 4) === year);
+  return rows;
+}
 function countryYearTotal(country, year){
+  if(clsSel.size && modelDataReady()){
+    const mr = modelYearRows(country, year); if(!mr.length) return null;
+    return mr.reduce((s, r) => s + (!CATCHALL_MODEL.test(r.model) && classPass(r) ? rowUnits(r).total : 0), 0);
+  }
   const rows = (MANUFACTURER_YEARLY[country] || []).filter(r => r.year === year);
   if(!rows.length) return null;
-  return rows.reduce((s, r) => s + (r.total || 0), 0);
+  return rows.reduce((s, r) => s + rowUnits(r).total, 0);
 }
 // "projected current year (annualized from year-to-date) vs. previous full year" growth, for one
 // entity in one country -- a fixed indicator of how this manufacturer is trending in a market this
@@ -1457,8 +1536,10 @@ function topModelsFor(countries){
   countries.forEach(c => modelRowsFor(c).forEach(r => {
     if(CATCHALL_MODEL.test(r.model)) return;   // catch-all rows are not models
     if(kind !== 'model' && entityOf(r.brand, yr) !== mfr) return;
+    if(!classPass(r)) return;
+    const u = rowUnits(r); if(motSel.size && u.total <= 0) return;
     const name = kind === 'model' && MODEL_LABEL ? MODEL_LABEL[modelKey(r.brand, r.model)] : mfrModelLabel(r.brand, r.model), a = agg.get(name) || { name, bev:0, phev:0, other:0, total:0 };
-    a.bev += r.bev || 0; a.phev += r.phev || 0; a.total += r.total || 0; a.other = a.total - a.bev - a.phev; agg.set(name, a);
+    a.bev += u.bev; a.phev += u.phev; a.total += u.total; a.other = a.total - a.bev - a.phev; agg.set(name, a);
   }));
   return [...agg.values()].sort((a, b) => b.total - a.total).slice(0, 10);
 }
@@ -1548,8 +1629,35 @@ document.querySelectorAll('[data-group]').forEach(b => b.onclick = () => {
 });
 document.querySelectorAll('[data-metric]').forEach(b => b.onclick = () => { if(b.disabled) return; metric = b.dataset.metric; setActive('#metric-toggle', 'metric', metric); renderMap(); });
 
+// ---------- segment filters (Car class, Motorization) ----------
+function renderSegUI(){
+  const opt = (grp, key, label, title) => `<button type="button" class="fx-opt${(grp === 'cls' ? clsSel : motSel).has(key) ? ' on' : ''}" data-seg="${grp}" data-k="${key}" title="${esc(title || label)}">${esc(label)}</button>`;
+  document.getElementById('seg-class').innerHTML = `<span class="fx-seglabel">Car class</span>` + CLASS_DEFS.map(d => opt('cls', d[0], d[1], d[2])).join('') + (clsSel.size ? `<button type="button" class="fx-opt reset" data-seg="cls" data-k="">All classes</button>` : '');
+  document.getElementById('seg-motor').innerHTML = `<span class="fx-seglabel">Motorization</span>` + MOTOR_DEFS.map(d => opt('mot', d[0], d[1], d[0] === 'other' ? 'Units not split into BEV / PHEV / HEV / petrol / diesel (including markets that only report plug-ins)' : d[1])).join('') + (motSel.size ? `<button type="button" class="fx-opt reset" data-seg="mot" data-k="">All motorizations</button>` : '');
+}
+function withModelData(cb){
+  if(MODEL_LABEL){ cb(); return; }
+  const st = document.getElementById('seg-status'); st.textContent = 'Loading model data (about 24 MB) for the car class filter…';
+  loadModelData().then(() => { buildModelLabels(); buildModelSelect(); cb(); }).catch(() => { st.textContent = 'Model data could not be loaded.'; });
+}
+document.getElementById('fx-panel').addEventListener('click', e => {
+  const b = e.target.closest('[data-seg]'); if(!b) return;
+  const set = b.dataset.seg === 'cls' ? clsSel : motSel;
+  if(!b.dataset.k) set.clear(); else if(set.has(b.dataset.k)) set.delete(b.dataset.k); else set.add(b.dataset.k);
+  renderSegUI();
+  if(clsSel.size && !MODEL_LABEL) withModelData(() => refresh(false)); else refresh(false);
+});
+function updateSegStatus(nCountries){
+  const st = document.getElementById('seg-status');
+  const parts = [];
+  if(clsSel.size) parts.push(`Car class uses model-level data, so only markets with model detail are shown (${nCountries} for this period); classes are assigned by nameplate and about 99% of model volume is classified.`);
+  if(motSel.size) parts.push('Motorization counts the selected powertrains only; markets that report just BEV/PHEV have no petrol, diesel or hybrid split (their remainder is "Other / n.a.").');
+  st.textContent = parts.join(' ');
+}
+
 buildPeriodSelect();
 readPeriod();
+renderSegUI();
 wireCombo(selMfr, document.getElementById('f-mfr-search'), document.getElementById('f-mfr-list'));
 wireCombo(selMfr2, mfr2SearchInput, document.getElementById('f-mfr2-list'));
 wireCombo(selModel, modelSearchInput, document.getElementById('f-model-list'));
