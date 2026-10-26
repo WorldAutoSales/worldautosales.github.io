@@ -245,10 +245,15 @@ const MAP_NAME_TO_COUNTRY = Object.fromEntries(
 const fmtN = v => Math.round(v).toLocaleString('en-US');
 let currentYear = 'latest'; // 'latest' | '2020' | '2010'
 
+// Some fields use a shorter prefix for their historical columns than their "latest" name
+// (e.g. latest is "population"/"salesTotal", but the 2010/2020 columns are "pop2010"/"sales2010").
+const YEAR_FIELD_ALIAS = { population: 'pop', salesTotal: 'sales' };
+function yearFieldName(base){ return YEAR_FIELD_ALIAS[base] || base; }
+
 // yf() = "year field": picks the Latest field, or the matching 2010/2020 field, for the
 // currently selected snapshot year. Returns null/undefined if that country/year/field has no data.
 function yf(c, base){
-  return currentYear === 'latest' ? c[base] : c[base + currentYear];
+  return currentYear === 'latest' ? c[base] : c[yearFieldName(base) + currentYear];
 }
 function yearLabelFor(c, which){
   if(currentYear !== 'latest') return { year: currentYear, projected: false };
@@ -264,7 +269,7 @@ function yearSuffix(){ return currentYear === 'latest' ? '' : ` — ${currentYea
 // always comparable, even on the per-adult/per-15-64 tabs. ---
 const TREND_ERAS = ['2010', '2020', 'latest'];
 const TREND_ERA_LABELS = { '2010':'2010', '2020':'2020', latest:'Latest' };
-function trendField(base, era){ return era === 'latest' ? base : base + era; }
+function trendField(base, era){ return era === 'latest' ? base : yearFieldName(base) + era; }
 function trendFieldsFor(metric){
   return {
     sales: { pop:'population', total:'salesTotal' },
@@ -632,7 +637,7 @@ function bubbleFieldFor(metric, era){
     oil:   { pop:'population', total:'oilLitres' },
   }[metric];
 }
-function eraField(base, era){ return era === 'latest' ? base : base + era; }
+function eraField(base, era){ return era === 'latest' ? base : yearFieldName(base) + era; }
 
 function bubbleFrames(metric){
   const fld = bubbleFieldFor(metric);
