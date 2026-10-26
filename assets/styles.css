@@ -1603,6 +1603,7 @@ svg.map-svg{ width:100%; height:auto; display:block; }
 .map-svg .country.has-data, .map-svg .country.has-trend{ cursor:pointer; }
 .map-svg .country.has-data:hover, .map-svg .country.has-trend:hover{ stroke:var(--text); stroke-width:1.2; }
 .map-svg .country.researched-no-data:hover{ stroke:var(--text); stroke-width:1; }
+.map-svg .country.researched-no-data.has-brands{ cursor:pointer; }
 .map-svg .country.dom-tom{ stroke:var(--text); stroke-width:0.75; stroke-opacity:.55; }
 .map-svg .country.dom-tom.selected{ stroke-opacity:1; }
 

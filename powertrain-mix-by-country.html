@@ -3539,6 +3539,10 @@ function positionMapTooltip(e){
   mapTooltip.style.opacity = 1;
 }
 
+function hasBrandData(name){
+  return !!((typeof MANUFACTURER_YEARLY !== 'undefined' && (MANUFACTURER_YEARLY[name] || []).length) || (typeof MANUFACTURER_MONTHLY !== 'undefined' && (MANUFACTURER_MONTHLY[name] || []).length));
+}
+
 function renderMap(){
   if(!geoFeatures) return;
   mapG.selectAll('path').data(geoFeatures).join('path')
@@ -3547,6 +3551,7 @@ function renderMap(){
       const name = mapCountryName(d);
       const cls = ['country', entry ? 'has-data' : (isResearchedNoMotorisation(name) ? 'researched-no-data' : 'no-data')];
       if(COUNTRIES_WITH_TREND.has(name)) cls.push('has-trend');
+      if(!entry && isResearchedNoMotorisation(name) && hasBrandData(name)) cls.push('has-brands');
       if(focusedCountry && name === focusedCountry) cls.push('selected');
       return cls.join(' ');
     })
@@ -3564,7 +3569,8 @@ function renderMap(){
     .on('pointerleave', () => { mapTooltip.style.opacity = 0; })
     .on('click', (e, d) => {
       const name = mapCountryName(d);
-      if(!COUNTRIES_WITH_TREND.has(name)) return;
+      // purple / no-trend country: jump straight to its Sales by Brand / Model sections (when it has any)
+      if(!COUNTRIES_WITH_TREND.has(name)){ if(window.focusCountryBrands) window.focusCountryBrands(name); return; }
       if(focusedCountry === name){ clearSelection(); recompute(); }
       else focusCountry(name);
     });
@@ -3574,6 +3580,7 @@ function renderMap(){
       const entry = DATA_BY_NAME[name];
       const cls = ['country', 'dom-tom', entry ? 'has-data' : (isResearchedNoMotorisation(name) ? 'researched-no-data' : 'no-data')];
       if(COUNTRIES_WITH_TREND.has(name)) cls.push('has-trend');
+      if(!entry && isResearchedNoMotorisation(name) && hasBrandData(name)) cls.push('has-brands');
       if(focusedCountry === name) cls.push('selected');
       return cls.join(' ');
     })
@@ -3590,7 +3597,7 @@ function renderMap(){
     })
     .on('pointerleave', () => { mapTooltip.style.opacity = 0; })
     .on('click', (e, [name]) => {
-      if(!COUNTRIES_WITH_TREND.has(name)) return;
+      if(!COUNTRIES_WITH_TREND.has(name)){ if(window.focusCountryBrands) window.focusCountryBrands(name); return; }
       if(focusedCountry === name){ clearSelection(); recompute(); }
       else focusCountry(name);
     });
@@ -5445,6 +5452,19 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = cb.dataset.country === c; });
     recompute();
   }
+  // called by the BEV Share Map when a purple (no-trend) country is clicked: select it and scroll to the brand section
+  window.focusCountryBrands = function(c){
+    if(!mfrCountriesWithModelsSet.has(c)) return false;
+    selectMfrCountry(c);
+    // the sections are re-rendered by recompute(); wait until the brand card is visible before scrolling to it
+    const target = document.getElementById('mfr-section');
+    let tries = 0;
+    (function go(){
+      if(target && target.offsetHeight > 0 && !target.classList.contains('hidden')) target.scrollIntoView({ block:'start' });
+      else if(tries++ < 40) setTimeout(go, 80);
+    })();
+    return true;
+  };
   function wireMfrCountrySelect(sel){
     if(!sel || !MFR_COUNTRIES_WITH_MODELS.length) return;
     sel.innerHTML = MFR_COUNTRIES_WITH_MODELS.map(c => `<option value="${c}">${c}</option>`).join('');
