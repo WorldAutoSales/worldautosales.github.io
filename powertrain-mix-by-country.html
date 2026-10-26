@@ -286,6 +286,7 @@
               <button type="button" class="mode-btn active" data-bubble-mode="trend" title="Adds the preceding full years as a fading trail (5 years if fewer than 6 countries are selected, 3 otherwise), for countries with annual history.">TREND</button>
               <button type="button" class="mode-btn" data-bubble-mode="snapshot" title="One point per country, for the selected period only.">SNAPSHOT</button>
             </div>
+            <button type="button" class="mode-btn hidden" id="bubble-play-btn" title="Replay TREND's trail as an animation — flags walk from the oldest year to the selected period instead of showing a static fading trail.">▶ Replay</button>
           </div>
           <p class="note" id="bubble-note">X = number of BEV units sold, Y = BEV share of that country's total. Each country is its own flag, same size for every market. Hover a flag for exact figures.</p>
           <svg class="chart" id="bubble-svg" viewBox="0 0 900 460" preserveAspectRatio="xMidYMid meet"></svg>
@@ -4445,6 +4446,11 @@ const bubbleWrap = document.getElementById('bubble-svg').closest('.chart-card');
 const BUBBLE_R = 16; // fixed radius for every country — size no longer encodes a metric
 const BUBBLE_BREAK_FRACTION = 0.74; // share of the axis width given to the "normal" (non-outlier) zone
 let bubbleMode = 'trend'; // 'snapshot' | 'trend' — see [data-bubble-mode] wiring below renderBubbleChart; TREND is the default, see updateBubbleModeAuto
+// set at the end of renderBubbleChart() whenever bubbleMode is 'trend' and there's at least a
+// 2-period trail to animate; consumed by playBubbleTrend() below. null in SNAPSHOT mode, or when
+// there's nothing to animate.
+let bubbleAnim = null;
+let bubblePlaying = false;
 
 const BUBBLE_NOTES = {
   snapshot: `X = number of BEV units sold, Y = BEV share of that country's total. Each country is its own flag, same size for every market. Hover a flag for exact figures.`,
@@ -4559,6 +4565,7 @@ function renderBubbleChart(){
   const innerW = W - M.left - M.right;
   const innerH = H - M.top - M.bottom;
 
+  bubblePlaying = false; // a fresh render replaces the DOM any in-flight animation was tweening
   bubbleSvg.selectAll('*').remove();
   if(!DATA.length) return;
 
@@ -4648,9 +4655,12 @@ function renderBubbleChart(){
   // TREND mode: draw trails first so the current-period flags (added below) sit on top of them.
   // Only countries with at least 2 data points in the window get a trail; a country only just
   // added to monthly tracking simply shows its single current-period flag, same as SNAPSHOT.
+  // periodData is hoisted to function scope (not just the if-block) so playBubbleTrend() can
+  // reuse the exact same per-period, per-country figures the static trail was drawn from.
+  let periodData = null;
   if(bubbleMode === 'trend'){
     const trendCurrent = [...selectedMonths][0];
-    const periodData = trendPeriods.map(p => {
+    periodData = trendPeriods.map(p => {
       const key = bubblePeriodKey(p); // substitutes only the current entry, when it's a YTD key
       return {
         period: p,
@@ -4744,7 +4754,59 @@ function renderBubbleChart(){
     .attr('x', d => xScale(d.bev))
     .attr('y', d => yScale(d.bevPct) - BUBBLE_R - 4)
     .text(d => d.country);
+
+  bubbleAnim = (periodData && periodData.length >= 2) ? { nodeGroups, xScale, yScale, periodData, bubbleData } : null;
+  const playBtn = document.getElementById('bubble-play-btn');
+  if(playBtn){
+    playBtn.classList.toggle('hidden', !bubbleAnim);
+    playBtn.disabled = false;
+  }
 }
+
+// animates TREND's static fading trail into motion: flags walk from the oldest period in the
+// trail to the selected (current) period, landing exactly where the static TREND render already
+// puts them — so there's no jump when the animation ends. Only a country with a value at every
+// period in the window actually moves; everyone else just sits still for the whole replay rather
+// than jumping to/from a missing data point.
+function playBubbleTrend(){
+  if(bubblePlaying || !bubbleAnim || bubbleMode !== 'trend') return;
+  const { nodeGroups, xScale, yScale, periodData, bubbleData } = bubbleAnim;
+  if(!periodData || periodData.length < 2) return;
+
+  const frames = {};
+  bubbleData.forEach(d => {
+    const pts = periodData.map(pd => {
+      const rec = pd.byCountry[d.country];
+      if(!rec || rec.total <= 0) return null;
+      return { bev: rec.bev / pd.divisor, bevPct: +(rec.bev / rec.total * 100).toFixed(1) };
+    });
+    if(pts.every(Boolean)) frames[d.country] = pts;
+  });
+
+  bubblePlaying = true;
+  const playBtn = document.getElementById('bubble-play-btn');
+  if(playBtn) playBtn.disabled = true;
+
+  nodeGroups.interrupt().attr('transform', d => {
+    const f = frames[d.country];
+    return f ? `translate(${xScale(f[0].bev)},${yScale(f[0].bevPct)})` : `translate(${xScale(d.bev)},${yScale(d.bevPct)})`;
+  });
+
+  function stop(){ bubblePlaying = false; if(playBtn) playBtn.disabled = false; }
+  let i = 1;
+  function step(){
+    if(i >= periodData.length){ stop(); return; }
+    const idx = i;
+    nodeGroups.transition().duration(850).ease(d3.easeCubicInOut)
+      .attr('transform', d => {
+        const f = frames[d.country];
+        return f ? `translate(${xScale(f[idx].bev)},${yScale(f[idx].bevPct)})` : `translate(${xScale(d.bev)},${yScale(d.bevPct)})`;
+      })
+      .end().then(() => { i++; step(); }).catch(stop); // a filter/period change mid-replay interrupts the transition — just stop cleanly
+  }
+  step();
+}
+document.getElementById('bubble-play-btn').addEventListener('click', playBubbleTrend);
 
 const bubbleNote = document.getElementById('bubble-note');
 
