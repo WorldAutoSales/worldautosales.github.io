@@ -62,12 +62,8 @@
       <div class="chart-mode-toggle metric-toggle" role="group" aria-label="Metric" style="margin-bottom:16px;">
         <button type="button" class="mode-btn active" data-metric="sales">Sales per Capita</button>
         <button type="button" class="mode-btn" data-metric="fleet">Cars on the Road per Capita</button>
+        <button type="button" class="mode-btn" data-metric="fleetadult">Cars on the Road per Adult (15+)</button>
         <button type="button" class="mode-btn" data-metric="oil">Oil Consumption per Capita</button>
-      </div>
-
-      <div class="chart-mode-toggle basis-toggle hidden" id="basis-toggle" role="group" aria-label="Population basis" style="margin:-6px 0 16px;">
-        <button type="button" class="mode-btn" data-basis="person">Per person (all ages)</button>
-        <button type="button" class="mode-btn active" data-basis="adult">Per adult (15+)</button>
       </div>
 
       <div class="stat-row" id="stat-row"></div>
@@ -185,6 +181,7 @@ const METRICS = {
 const COUNTRIES = Object.keys(POPULATION_ENERGY).sort();
 let currentMetric = 'sales';
 let fleetBasis = 'adult';
+let currentTab = 'sales';
 let isolatedCountry = null;
 
 function activeData(){
@@ -319,9 +316,9 @@ function renderBars(data){
     <div class="rank-row isolatable${isolateClass}" data-row-country="${d.country}">
       <div class="country-label">${d.country}</div>
       <div class="bar-track">
-        <div class="bar-seg" style="width:${width}%; background:${ACCENT}" data-country="${d.country}"></div>
+        <div class="bar-seg" style="width:${width}%; background:${ACCENT}" data-country="${d.country}">${width >= 9 ? `<span class="seg-label">${valueText}</span>` : ''}</div>
+        ${width >= 9 ? '' : `<span style="align-self:center; padding-left:6px; font-size:11px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; color:${ACCENT};">${valueText}</span>`}
       </div>
-      <div class="total-label">${valueText} <span style="opacity:.6;font-weight:400;">${m.unitLabel}</span></div>
     </div>`;
   }).join('');
 }
@@ -357,16 +354,20 @@ function isolateCountry(country){
   renderBars(activeData());
 }
 
-function switchMetric(metric){
+function switchMetric(tab){
+  // "Cars on the Road per Adult" is the fleet metric on an adult (15+) population basis
+  let metric = tab;
+  if(tab === 'fleetadult'){ metric = 'fleet'; fleetBasis = 'adult'; }
+  else if(tab === 'fleet'){ fleetBasis = 'person'; }
   currentMetric = metric;
+  currentTab = tab;
   isolatedCountry = null;
-  document.querySelectorAll('[data-metric]').forEach(b => b.classList.toggle('active', b.dataset.metric === metric));
+  document.querySelectorAll('[data-metric]').forEach(b => b.classList.toggle('active', b.dataset.metric === tab));
   const m = METRICS[metric];
   document.getElementById('rank-title').textContent = m.rankTitle;
   document.getElementById('rank-note').textContent = m.rankNote;
   document.getElementById('map-title').textContent = m.mapTitle;
   document.getElementById('map-note').textContent = m.mapNote;
-  document.getElementById('basis-toggle').classList.toggle('hidden', metric !== 'fleet');
   render();
 }
 
@@ -382,22 +383,8 @@ function render(){
 
 document.querySelectorAll('[data-metric]').forEach(btn => {
   btn.addEventListener('click', () => {
-    if(btn.dataset.metric === currentMetric) return;
+    if(btn.dataset.metric === currentTab) return;
     switchMetric(btn.dataset.metric);
-  });
-});
-
-document.querySelectorAll('[data-basis]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    if(btn.dataset.basis === fleetBasis) return;
-    fleetBasis = btn.dataset.basis;
-    document.querySelectorAll('[data-basis]').forEach(b => b.classList.toggle('active', b.dataset.basis === fleetBasis));
-    isolatedCountry = null;
-    const m = METRICS.fleet;
-    document.getElementById('rank-title').textContent = m.rankTitle;
-    document.getElementById('rank-note').textContent = m.rankNote;
-    document.getElementById('map-note').textContent = m.mapNote;
-    render();
   });
 });
 
