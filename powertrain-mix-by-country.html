@@ -95,6 +95,25 @@
           </div>
           <div class="filter-countries" id="filter-fuels"></div>
         </div>
+
+        <div class="filter-group">
+          <div class="filter-label">
+            Car class
+            <span class="filter-bulk">
+              <button type="button" class="filter-bulk-btn" data-target="classes" data-action="check">Check all</button> / <button type="button" class="filter-bulk-btn" data-target="classes" data-action="uncheck">Uncheck all</button>
+            </span>
+          </div>
+          <div class="filter-countries" id="filter-classes"></div>
+          <p class="filter-note" id="class-filter-hint"></p>
+          <div class="card notes-card is-collapsed filter-notes-card">
+            <button type="button" class="notes-toggle" aria-expanded="false">
+              <span>ℹ️ About car classes</span>
+              <span class="notes-hint">Click to expand</span>
+              <span class="notes-arrow">▸</span>
+            </button>
+            <p class="notes-body">There is no single official car classification: the EU's merger decision M.1406 gave the segment letters (A mini, B small, C compact, D mid-size, E–F executive and luxury, S sports, M MPV) that ACEA, JATO and most analysts still use, Euro NCAP and the US EPA use their own size classes. Here every model nameplate is assigned by hand-built rules to one of those letters, with SUVs split by size (small/compact = B and C SUVs, mid/large = D and above) plus pickups and vans; about 99% of model volume is classified, the rest is "Unclassified". Narrowing the classes rebuilds each country's mix from the model tables of the markets that have them, so only the listed models count (national model tables never list every model), the market count shrinks, and the country trend charts and month-over-month movement stay all-car.</p>
+          </div>
+        </div>
       </aside>
 
       <div class="page">
@@ -502,6 +521,7 @@
 <script src="assets/manufacturer-monthly-data.js"></script>
 <script src="assets/manufacturer-model-monthly-data.js"></script>
 <script src="assets/manufacturer-model-yearly-data.js"></script>
+<script src="assets/model-class-data.js"></script>
 <script src="assets/manufacturer-holdings-data.js"></script>
 <script src="assets/electrification-bars.js"></script>
 <script src="assets/country-cars-on-road-data.js"></script>
@@ -2652,6 +2672,9 @@ const FUEL_COLORS = {
 const FUEL_LABELS = { bev:"Battery Electric", phev:"Plug-in Hybrid", hev:"Hybrid", petrol:"Petrol", diesel:"Diesel", others:"Others" };
 const ALL_COUNTRIES = [...new Set(Object.values(MONTHLY_DATA).flatMap(m => Object.keys(m.raw)))].sort();
 const ALL_MONTHS = Object.keys(MONTHLY_DATA);
+const CLASS_KEYS = MODEL_CLASS_DEFS.map(d => d[0]);
+let selectedClasses = new Set(CLASS_KEYS);
+const classFilterActive = () => selectedClasses.size !== CLASS_KEYS.length;
 
 // countries with a dedicated trend page (country.html) — a few have real annual data but couldn't
 // go into any comparison period here (e.g. incomplete fuel split, or incomplete market coverage)
@@ -2766,11 +2789,22 @@ const ALL_COUNTRIES_SORTED = [...ALL_COUNTRIES].sort((a,b) => {
   const ca = COUNTRY_CONTINENT[a] || 'ZZ', cb = COUNTRY_CONTINENT[b] || 'ZZ';
   return ca !== cb ? ca.localeCompare(cb) : a.localeCompare(b);
 });
+// "purple" markets (sales totals known, no powertrain split anywhere) are part of the country / continent filters too:
+// they have no mix to rank, but unchecking one (or its continent / rank tier) removes its purple shading from the map
+const PURPLE_CONTINENT = {"Bolivia":"SA","Cambodia":"ASIA","Egypt":"AFRICA","Guatemala":"NAC","Guyana":"SA","Iran":"MIDEAST","Iraq":"MIDEAST","Kuwait":"MIDEAST","Laos":"ASIA","Moldova":"EU","Myanmar":"ASIA","Nigeria":"AFRICA","Oman":"MIDEAST","Pakistan":"ASIA","Panama":"NAC","Puerto Rico":"NAC","Rwanda":"AFRICA","Saudi Arabia":"MIDEAST","Suriname":"SA","UAE":"MIDEAST","Venezuela":"SA","Yemen":"MIDEAST","Zambia":"AFRICA","Jordan":"MIDEAST","Lebanon":"MIDEAST","Bahrain":"MIDEAST","Syria":"MIDEAST","Bosnia-Herzegovina":"EU"};
+const PURPLE_COUNTRIES = Object.keys(COUNTRY_DATA_QUALITY).filter(c => !COUNTRIES_WITH_TREND.has(c));
+PURPLE_COUNTRIES.forEach(c => { if(!COUNTRY_CONTINENT[c]) COUNTRY_CONTINENT[c] = PURPLE_CONTINENT[c] || 'OTHER'; });
+const PURPLE_SET = new Set(PURPLE_COUNTRIES);
+const FILTER_COUNTRIES = [...ALL_COUNTRIES, ...PURPLE_COUNTRIES];
+const FILTER_COUNTRIES_SORTED = [...FILTER_COUNTRIES].sort((a,b) => {
+  const ca = COUNTRY_CONTINENT[a] || 'ZZ', cb = COUNTRY_CONTINENT[b] || 'ZZ';
+  return ca !== cb ? ca.localeCompare(cb) : a.localeCompare(b);
+});
 
 // --- filter state ---
 let selectedFuels = new Set(FUEL_KEYS);
 let selectedContinents = new Set(ALL_CONTINENTS);
-let selectedCountries = new Set(ALL_COUNTRIES);
+let selectedCountries = new Set(FILTER_COUNTRIES);
 let selectedRankTiers = new Set(RANK_TIER_KEYS);
 // default = the newest month with full (Europe-included) coverage. ACEA's September release (22 Oct 2026)
 // brought Europe up to 2026-09 (55 markets), so September is now the default; earlier months stay selectable.
@@ -2786,6 +2820,14 @@ fuelsBox.innerHTML = FUEL_KEYS.map(k => `
     <span class="swatch" style="background:${FUEL_COLORS[k]}"></span>
     <span class="fc-label">${FUEL_LABELS[k]}</span>
     <button type="button" class="only-btn" data-only-fuel="${k}">Only</button>
+  </label>`).join('');
+
+const classesBox = document.getElementById('filter-classes');
+classesBox.innerHTML = MODEL_CLASS_DEFS.map(d => `
+  <label class="filter-checkbox" title="${d[2].replace(/"/g, '&quot;')}">
+    <input type="checkbox" data-class="${d[0]}" checked>
+    <span class="fc-label">${d[1]}</span>
+    <button type="button" class="only-btn" data-only-class="${d[0]}">Only</button>
   </label>`).join('');
 
 const rankTiersBox = document.getElementById('filter-rank-tiers');
@@ -2806,10 +2848,10 @@ continentsBox.innerHTML = ALL_CONTINENTS.map(code => `
   </label>`).join('');
 
 const countriesBox = document.getElementById('filter-countries-group');
-countriesBox.innerHTML = ALL_COUNTRIES_SORTED.map(c => `
+countriesBox.innerHTML = FILTER_COUNTRIES_SORTED.map(c => `
   <label class="filter-checkbox" data-country-row="${c}">
-    <input type="checkbox" data-country="${c}" checked>
-    <span class="fc-label">${COUNTRY_CONTINENT[c] || 'OTHER'} - ${c}</span>
+    <input type="checkbox" data-country="${c}" checked>${PURPLE_SET.has(c) ? '<span class="swatch" style="background:var(--map-no-motorisation)" title="Sales data only: no powertrain split published"></span>' : ''}
+    <span class="fc-label">${COUNTRY_CONTINENT[c] || 'OTHER'} - ${c}${PURPLE_SET.has(c) ? ' <span style="opacity:.6;font-weight:400">(no split)</span>' : ''}</span>
     <button type="button" class="only-btn" data-only-country="${c}">Only</button>
   </label>`).join('');
 
@@ -2847,8 +2889,86 @@ monthsBox.innerHTML = VISIBLE_MONTHS.map(m => `
 // --- aggregate raw data across a set of periods, per country (no continent/country/focus filters applied) ---
 // defaults to the currently-selected period(s); pass an explicit array to aggregate a different
 // period (e.g. ['2026-projection'] or ['2023-annual']) for ranking/fallback purposes
+// ---- Car class filter: the same per-country objects rebuilt from the model tables, keeping only the selected classes ----
+const MODEL_CATCHALL = /^\((other|unclassified)|^other\/discontinued|^(other|unknown)\b/i;
+const classSig = () => [...selectedClasses].sort().join(',');
+const _classAggCache = new Map();
+// model rows of one country for a period key; monthSet (ytd only) restricts to those month numbers (to compare like with like)
+function modelRowsForKey(country, key, monthSet){
+  const MM = MANUFACTURER_MODEL_MONTHLY[country] || [], MY = MANUFACTURER_MODEL_YEARLY[country] || [];
+  let m;
+  if((m = /^(\d{4})-(\d{2})$/.exec(key))) return { rows: MM.filter(r => r.year_month === key), months: new Set([+m[2]]) };
+  if((m = /^(\d{4})-annual$/.exec(key))){
+    const y = +m[1], yr = MY.filter(r => r.year === y);
+    if(yr.length) return { rows: yr, months: new Set([1,2,3,4,5,6,7,8,9,10,11,12]) };
+    const mr = MM.filter(r => +r.year_month.slice(0, 4) === y), ms = new Set(mr.map(r => +r.year_month.slice(5)));
+    return ms.size === 12 ? { rows: mr, months: ms } : { rows: [], months: new Set() };
+  }
+  if((m = /^(\d{4})-(ytd|projection)$/.exec(key))){
+    const y = +m[1], mr = MM.filter(r => +r.year_month.slice(0, 4) === y && (!monthSet || monthSet.has(+r.year_month.slice(5))));
+    return { rows: mr, months: new Set(mr.map(r => +r.year_month.slice(5))) };
+  }
+  return { rows: [], months: new Set() };
+}
+function sumClassRows(rows){
+  const o = { bev:0, phev:0, hev:0, petrol:0, diesel:0, total:0 };
+  rows.forEach(r => {
+    if(MODEL_CATCHALL.test(r.model) || !selectedClasses.has(modelClassOf(r.brand, r.model))) return;
+    o.bev += r.bev || 0; o.phev += r.phev || 0; o.hev += r.hev || 0; o.petrol += r.petrol || 0; o.diesel += r.diesel || 0; o.total += r.total || 0;
+  });
+  return o;
+}
+function classAggregateOne(key){
+  const ck = key + '|' + classSig();
+  let out = _classAggCache.get(ck);
+  if(out) return out;
+  out = {};
+  const countries = new Set([...Object.keys(MANUFACTURER_MODEL_MONTHLY), ...Object.keys(MANUFACTURER_MODEL_YEARLY)]);
+  const mk = /^(\d{4})-(.+)$/.exec(key), y = +mk[1], kind = mk[2];
+  countries.forEach(c => {
+    const cur = modelRowsForKey(c, key);
+    if(!cur.rows.length) return;
+    const a = sumClassRows(cur.rows);
+    if(a.total <= 0) return;
+    let prior = { bev:0, total:0 };
+    const pk = /^\d{2}$/.test(kind) ? `${y - 1}-${kind}` : (kind === 'ytd' ? `${y - 1}-ytd` : `${y - 1}-annual`);
+    const pr = modelRowsForKey(c, pk, kind === 'ytd' ? cur.months : null);
+    if(pr.rows.length) prior = sumClassRows(pr.rows);
+    // a "projection" scales the months the model table holds up to twelve (shares are unaffected)
+    const f = kind === 'projection' && cur.months.size ? 12 / cur.months.size : 1;
+    const known = a.bev + a.phev + a.hev + a.petrol + a.diesel;
+    const blk = MONTHLY_DATA[key];
+    out[c] = { bev:a.bev * f, phev:a.phev * f, hev:a.hev * f, petrol:a.petrol * f, diesel:a.diesel * f, others:Math.max(0, a.total - known) * f, total:a.total * f,
+      bevPrior:prior.bev, totalPrior:prior.total, asOf:(blk && blk.asOf && blk.asOf[c]) || (blk ? blk.label : key) };
+  });
+  _classAggCache.set(ck, out);
+  return out;
+}
+function classAggregateByCountry(keys){
+  const byCountry = {};
+  ALL_COUNTRIES.forEach(c => { byCountry[c] = { country:c, bev:0, phev:0, hev:0, others:0, petrol:0, diesel:0, total:0, bevPrior:0, totalPrior:0, asOf:'' }; });
+  keys.forEach(k => {
+    if(!MONTHLY_DATA[k]) return;
+    const one = classAggregateOne(k);
+    Object.keys(one).forEach(c => {
+      const d = byCountry[c], v = one[c]; if(!d) return;
+      d.bev += v.bev; d.phev += v.phev; d.hev += v.hev; d.others += v.others; d.petrol += v.petrol; d.diesel += v.diesel; d.total += v.total;
+      d.bevPrior += v.bevPrior; d.totalPrior += v.totalPrior; d.asOf = v.asOf;
+    });
+  });
+  return byCountry;
+}
+function updateClassHint(){
+  const el = document.getElementById('class-filter-hint');
+  if(!el) return;
+  if(!classFilterActive()){ el.textContent = ''; return; }
+  const n = DATA ? DATA.length : 0;
+  el.textContent = `Class filter on: mix of the listed models of the ${selectedClasses.size} selected class${selectedClasses.size === 1 ? '' : 'es'}, ${n} market${n === 1 ? '' : 's'} with model tables for this period.`;
+}
+
 function aggregateByCountry(periodKeys){
   const keys = periodKeys || [...selectedMonths];
+  if(classFilterActive()) return classAggregateByCountry(keys);
   const byCountry = {};
   ALL_COUNTRIES.forEach(c => { byCountry[c] = { country:c, bev:0, phev:0, hev:0, others:0, petrol:0, diesel:0, total:0, bevPrior:0, totalPrior:0, asOf:'' }; });
   keys.forEach(m => {
@@ -2874,8 +2994,14 @@ function aggregateByCountry(periodKeys){
 // is selected instead (no single "prior month" makes sense for those), each country falls back
 // to its own latest two consecutive real months.
 const REAL_MONTH_KEYS = ALL_MONTHS.filter(k => /^\d{4}-\d{2}$/.test(k)).sort().reverse();
-const MOM_PERIOD_AGG = {};
-REAL_MONTH_KEYS.forEach(k => { MOM_PERIOD_AGG[k] = aggregateByCountry([k]); });
+const _momCache = new Map();
+function momAgg(k){
+  if(!REAL_MONTH_KEYS.includes(k)) return undefined;
+  const ck = k + '|' + (classFilterActive() ? classSig() : '');
+  let v = _momCache.get(ck);
+  if(!v){ v = aggregateByCountry([k]); _momCache.set(ck, v); }
+  return v;
+}
 function prevMonthKey(key){
   const [y, m] = key.split('-').map(Number);
   const py = m === 1 ? y - 1 : y, pm = m === 1 ? 12 : m - 1;
@@ -2895,17 +3021,17 @@ function computeMoMMovers(){
     if(fixedAnchor){
       curKey = selectedKey;
       prevKey = prevMonthKey(selectedKey);
-      if(!MOM_PERIOD_AGG[prevKey]) return; // that prior month isn't in this file's data at all
-      if(!(MOM_PERIOD_AGG[curKey][country].total > 0)) return;
+      if(!momAgg(prevKey)) return; // that prior month isn't in this file's data at all
+      if(!(momAgg(curKey)[country].total > 0)) return;
     } else {
       let latestIdx = -1;
       for(let i=0;i<REAL_MONTH_KEYS.length;i++){
-        if(MOM_PERIOD_AGG[REAL_MONTH_KEYS[i]][country].total > 0){ latestIdx = i; break; }
+        if(momAgg(REAL_MONTH_KEYS[i])[country].total > 0){ latestIdx = i; break; }
       }
       if(latestIdx === -1 || latestIdx+1 >= REAL_MONTH_KEYS.length) return;
       curKey = REAL_MONTH_KEYS[latestIdx]; prevKey = REAL_MONTH_KEYS[latestIdx+1];
     }
-    const cur = MOM_PERIOD_AGG[curKey][country], prev = MOM_PERIOD_AGG[prevKey][country];
+    const cur = momAgg(curKey)[country], prev = momAgg(prevKey)[country];
     if(!prev || prev.bev <= 0) return; // no real base to compute a % change from
     movers.push({
       country, curKey, prevKey,
@@ -3485,6 +3611,11 @@ function dataQualityTooltipHTML(name){
 function isResearchedNoMotorisation(name){
   return !!COUNTRY_DATA_QUALITY[name] && !COUNTRIES_WITH_TREND.has(name);
 }
+// a purple market stays purple only while the Country / Continent / Market Rank filters let it through
+function purpleVisible(name){
+  return selectedCountries.has(name) && selectedContinents.has(COUNTRY_CONTINENT[name] || 'OTHER') && passesRankFilter(name);
+}
+const noDataClass = name => (isResearchedNoMotorisation(name) && purpleVisible(name)) ? 'researched-no-data' : 'no-data';
 
 // ---- month-over-month change of the BEV share, shown under the BEV share line of the map tooltip ----
 // green + up arrow when positive; red + down arrow when it falls by 0.5 points or more; yellow (down arrow, or a dash at 0) for a fall of less than 0.5 points.
@@ -3507,7 +3638,7 @@ function bevShareOfMonth(country, key){
 }
 function momTooltipLine(country){
   const cur = [...selectedMonths][0], prev = momPrevKey(cur);
-  if(!prev || MOM_EXCLUDE.has(country)) return '';
+  if(!prev || MOM_EXCLUDE.has(country) || classFilterActive()) return '';
   const a = bevShareOfMonth(country, cur), b = bevShareOfMonth(country, prev);
   if(a == null || b == null) return '';
   const d = Math.round((a - b) * 10) / 10;
@@ -3525,7 +3656,7 @@ function mapTooltipHTML(entry, name){
       (COUNTRIES_WITH_TREND.has(name) ? `<br><span style="opacity:.75">Click to focus trend →</span>` : '');
   } else if(LAST_AVAILABLE_PERIOD[name]){
     base = `${name}<br>No data for this period<br><span style="opacity:.75">Last available: ${LAST_AVAILABLE_PERIOD[name]}</span><br><span style="opacity:.75">Click to focus trend →</span>`;
-  } else if(isResearchedNoMotorisation(name)){
+  } else if(isResearchedNoMotorisation(name) && purpleVisible(name)){
     const total = WORLD_MARKET_TOTALS_2025[name];
     const totalYear = WORLD_MARKET_TOTALS_2025_STALE_YEAR[name] || '2025';
     base = `${name}${total ? `<br><strong>${total.toLocaleString('en-US')}</strong> registrations (${totalYear})` : ''}<br><span style="opacity:.75">Sales data available — no fuel-type/motorisation split published by any source found</span>`;
@@ -3553,9 +3684,9 @@ function renderMap(){
     .attr('class', d => {
       const entry = mapEntry(d);
       const name = mapCountryName(d);
-      const cls = ['country', entry ? 'has-data' : (isResearchedNoMotorisation(name) ? 'researched-no-data' : 'no-data')];
+      const cls = ['country', entry ? 'has-data' : noDataClass(name)];
       if(COUNTRIES_WITH_TREND.has(name)) cls.push('has-trend');
-      if(!entry && isResearchedNoMotorisation(name) && hasBrandData(name)) cls.push('has-brands');
+      if(!entry && noDataClass(name) === 'researched-no-data' && hasBrandData(name)) cls.push('has-brands');
       if(focusedCountry && name === focusedCountry) cls.push('selected');
       return cls.join(' ');
     })
@@ -3582,9 +3713,9 @@ function renderMap(){
   mapG.selectAll('circle.dom-tom').data(Object.entries(DOM_TOM_COORDS)).join('circle')
     .attr('class', ([name]) => {
       const entry = DATA_BY_NAME[name];
-      const cls = ['country', 'dom-tom', entry ? 'has-data' : (isResearchedNoMotorisation(name) ? 'researched-no-data' : 'no-data')];
+      const cls = ['country', 'dom-tom', entry ? 'has-data' : noDataClass(name)];
       if(COUNTRIES_WITH_TREND.has(name)) cls.push('has-trend');
-      if(!entry && isResearchedNoMotorisation(name) && hasBrandData(name)) cls.push('has-brands');
+      if(!entry && noDataClass(name) === 'researched-no-data' && hasBrandData(name)) cls.push('has-brands');
       if(focusedCountry === name) cls.push('selected');
       return cls.join(' ');
     })
@@ -4976,6 +5107,7 @@ function recompute(){
   renderCarsOnRoad();
   renderEvRegulations();
   if(typeof renderMfrSection === 'function') renderMfrSection();
+  updateClassHint();
   updateURL();
 }
 
@@ -4988,7 +5120,8 @@ function updateURL(){
   if(focusedCountry) params.set('country', focusedCountry);
   if(selectedFuels.size !== FUEL_KEYS.length) params.set('fuels', [...selectedFuels].join(','));
   if(selectedContinents.size !== ALL_CONTINENTS.length) params.set('continents', [...selectedContinents].join(','));
-  if(selectedCountries.size !== ALL_COUNTRIES.length) params.set('countries', [...selectedCountries].join(','));
+  if(classFilterActive()) params.set('classes', [...selectedClasses].join(','));
+  if(selectedCountries.size !== FILTER_COUNTRIES.length) params.set('countries', [...selectedCountries].join(','));
   if(selectedRankTiers.size !== RANK_TIER_KEYS.length) params.set('ranktiers', [...selectedRankTiers].join(','));
   const qs = params.toString();
   history.replaceState(null, '', window.location.pathname + (qs ? '?' + qs : ''));
@@ -5012,8 +5145,13 @@ function applyURLState(){
   }
   const countries = params.get('countries');
   if(countries){
-    const set = new Set(countries.split(',').filter(c => ALL_COUNTRIES.includes(c)));
+    const set = new Set(countries.split(',').filter(c => FILTER_COUNTRIES.includes(c)));
     if(set.size) selectedCountries = set;
+  }
+  const classes = params.get('classes');
+  if(classes){
+    const set = new Set(classes.split(',').filter(c => CLASS_KEYS.includes(c)));
+    if(set.size) selectedClasses = set;
   }
   const rankTiers = params.get('ranktiers');
   if(rankTiers){
@@ -5021,6 +5159,7 @@ function applyURLState(){
     if(set.size) selectedRankTiers = set;
   }
   fuelsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = selectedFuels.has(cb.dataset.fuel); });
+  classesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = selectedClasses.has(cb.dataset.class); });
   continentsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = selectedContinents.has(cb.dataset.continent); });
   countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = selectedCountries.has(cb.dataset.country); });
   rankTiersBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = selectedRankTiers.has(cb.dataset.rankTier); });
@@ -5075,12 +5214,27 @@ fuelsBox.addEventListener('click', e => {
   updateURL();
 });
 
+classesBox.addEventListener('change', e => {
+  const cb = e.target;
+  if(!cb.matches('input[type="checkbox"]')) return;
+  if(cb.checked) selectedClasses.add(cb.dataset.class); else selectedClasses.delete(cb.dataset.class);
+  recompute();
+});
+classesBox.addEventListener('click', e => {
+  const btn = e.target.closest('.only-btn');
+  if(!btn) return;
+  const key = btn.dataset.onlyClass;
+  selectedClasses = new Set([key]);
+  classesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = cb.dataset.class === key; });
+  recompute();
+});
+
 // resets country focus/selection (map highlight, country checkboxes) without touching the
 // continent filter — shared by the Clear Selection controls and by the continent filter,
 // which also clears any active country selection when it changes
 function clearSelection(){
   focusedCountry = null;
-  selectedCountries = new Set(ALL_COUNTRIES);
+  selectedCountries = new Set(FILTER_COUNTRIES);
   countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = true; });
 }
 
@@ -5127,7 +5281,7 @@ countriesBox.addEventListener('change', e => {
   if(cb.checked) selectedCountries.add(c); else selectedCountries.delete(c);
   // filtering down to exactly one country is treated the same as clicking it — focus it on
   // the map too, instead of leaving the map in its unfocused multi-country state
-  focusedCountry = selectedCountries.size === 1 ? [...selectedCountries][0] : null;
+  focusedCountry = selectedCountries.size === 1 && COUNTRIES_WITH_TREND.has([...selectedCountries][0]) ? [...selectedCountries][0] : null;
   recompute();
 });
 countriesBox.addEventListener('click', e => {
@@ -5135,7 +5289,7 @@ countriesBox.addEventListener('click', e => {
   if(!btn) return;
   const c = btn.dataset.onlyCountry;
   selectedCountries = new Set([c]);
-  focusedCountry = c;
+  focusedCountry = COUNTRIES_WITH_TREND.has(c) ? c : null;
   countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = cb.dataset.country === c; });
   recompute();
 });
@@ -5156,6 +5310,10 @@ document.querySelectorAll('.filter-bulk-btn').forEach(btn => {
       fuelsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = check);
       renderBars();
       updateURL();
+    } else if(target === 'classes'){
+      selectedClasses = check ? new Set(CLASS_KEYS) : new Set();
+      classesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = check);
+      recompute();
     } else if(target === 'continents'){
       selectedContinents = check ? new Set(ALL_CONTINENTS) : new Set();
       continentsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = check);
@@ -5164,7 +5322,7 @@ document.querySelectorAll('.filter-bulk-btn').forEach(btn => {
       if(focusedCountry) clearSelection();
       recompute();
     } else if(target === 'countries'){
-      selectedCountries = check ? new Set(ALL_COUNTRIES) : new Set();
+      selectedCountries = check ? new Set(FILTER_COUNTRIES) : new Set();
       countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = check);
       focusedCountry = null;
       recompute();
@@ -5181,10 +5339,12 @@ document.getElementById('filter-reset').addEventListener('click', () => {
   focusedCountry = null;
   selectedFuels = new Set(FUEL_KEYS);
   selectedContinents = new Set(ALL_CONTINENTS);
-  selectedCountries = new Set(ALL_COUNTRIES);
+  selectedCountries = new Set(FILTER_COUNTRIES);
+  selectedClasses = new Set(CLASS_KEYS);
   selectedRankTiers = new Set(RANK_TIER_KEYS);
   selectedMonths = new Set([DEFAULT_MONTH]);
   fuelsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+  classesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
   continentsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
   countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
   rankTiersBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);

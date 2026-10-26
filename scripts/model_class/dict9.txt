@@ -1,0 +1,10 @@
+# overrides (loaded last; later wins ties)
+PU: gmc:sierra, gran max pick up, ram pick up
+C: mazda:3, byd:e5
+D: cle, a5l, geely galaxy a7, buick:electra e7, buick:electra l7, electra e7, electra l7, chery:fulwin a8, fulwin a8, deepal:gl07, gl07, geely:xingrui, xingrui
+EF: s90, v90
+M: dacia:jogger, jogger
+B: wuling:bingo, bmw:i3, i3
+SUVS: scenic, scenic v, toyota:rush, haval:m6, mini countryman, mini:aceman, range rover evoque, evoque, discovery sport, changan:x5 plus, vinfast:vf 5, vf 5, vinfast:vf 6, vf 6, mercedes-benz:clase gla, clase gla, fulwin x3, chery:fulwin x3
+SUVL: tiggo 8, tiggo 8 pro, tiggo 9, aito:m8, byd:fang cheng bao ti7, fang cheng bao ti7, ti7, glk glc, mercedes-benz:glk glc, vf 7, vf 8, vf 9, vinfast:vf 7, vinfast:vf 8, vinfast:vf 9
+C: kia:k3, k3 sedan, k3 hatchback

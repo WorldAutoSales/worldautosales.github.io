@@ -1,0 +1,9 @@
+A: lumin, mobi, roomy, qq3, t03, roox, leapmotor:t03, kei
+B: xingyuan, aqua, note, fit, aveo, 207i, solio, altroz, ypsilon, mini, mini iv, renault:5, ut, aion ut, xceed(no)
+C: arrizo 5, avante, eado, bora, k4, k4 sedan, integra, ioniq, samand, soren, ev6(no), uni z(no), qin
+D: arrizo 8, cc, mona m03, mona l03, rt, aion rt, aion s, s, fulwin a9, filante, inspire, zeekr:007, 007, i60, rt
+M: century, buick:century
+SUVS: xceed, raize, rocky, terios, basalt, boreal, symbioz, tivoli, taigo, tharu, tera, starship 7, atto 2, sealion 05, y, aion y, v, aion v, c10, b10, a10, zeekr x, 4, renault:4, ev6, kia:ev6, wuling:starlight, starlight, niva travel, niva legend, niva, t4, tenet, h10, s400, t10x, actyon, smart:#1, #1, ehs, ds 7, rvr, bz, toyota:bz, wildlander, jaecoo 7, 7, 5, ora 5, omoda 5, omoda 9(no), roewe 4, mg roewe 4, 4 mg
+SUVL: xingyue l, boyue l, boyue, cs75, big dog, h5, i6, yu7, c11, c16, tank 300, tank 400, tank 700, tank 500, scorpio, bolero, xuv 700, xuv 7x0, safari, bronco, outback, pathfinder, murano, patrol, armada, ascent, uni k, monjaro, omoda 9, 9, s700, mu x, rx6, prologue, #5, smart:#5, torres, uni z, sealion, polestar 4, kia:ev9, ora:5(no), lingrui, li auto
+PU: ram 1200, ram 700, z24, zamyad:z24, s10, 
+VAN: eeco

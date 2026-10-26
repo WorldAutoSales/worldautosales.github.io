@@ -451,20 +451,7 @@ let kind = 'brand';
 const MODEL_BRAND = {};     // model label -> canonical brand (colors, logos, origin)
 let period = null, mfr = '', mfr2 = '';
 // Segment filters (empty set = no filter). Car class works on model rows (assets/model-class-data.js maps a model key to a class); Motorization works on the fuel columns of any row.
-const CLASS_DEFS = [
-  ['A',    'A · Mini',            'Mini / city car (EC segment A): Picanto, Seagull, Alto, Kwid, Dolphin Mini'],
-  ['B',    'B · Small',           'Small car (segment B): Polo, Clio, Yaris, Dolphin, Swift'],
-  ['C',    'C · Compact',         'Compact car (segment C): Golf, Corolla, Civic, ID.3, Octavia'],
-  ['D',    'D · Mid-size',        'Mid-size car (segment D): Passat, Camry, Model 3, 3 Series, Seal'],
-  ['EF',   'E–F · Executive',     'Executive & luxury cars (segments E and F): 5 Series, E-Class, S-Class, Panamera'],
-  ['S',    'Sports',              'Sports cars and coupés (segment S): 911, Mustang, MX-5, Corvette'],
-  ['M',    'MPV / minivan',       'Multi-purpose vehicles and minivans (segment M): Xpander, Carnival, Sienta, Alphard'],
-  ['SUVS', 'SUV small/compact',   'B- and C-segment SUVs: RAV4, Tucson, Qashqai, Song Plus, Tiguan, Nexon'],
-  ['SUVL', 'SUV mid/large',       'D-, E- and F-segment SUVs: Model Y, Highlander, X5, Land Cruiser, Palisade'],
-  ['PU',   'Pickup',              'Pickup trucks: Hilux, F-150, Ranger, Silverado'],
-  ['VAN',  'Van / light comm.',   'Vans and light commercial vehicles: Transit, Sprinter, Hiace, Kangoo'],
-  ['U',    'Unclassified',        'Models not yet assigned to a class (the long tail, about 1% of volume)'],
-];
+const CLASS_DEFS = MODEL_CLASS_DEFS;   // shared with the Mix by Country page (assets/model-class-data.js)
 const MOTOR_DEFS = [['bev','BEV'],['phev','PHEV'],['hev','HEV'],['petrol','Petrol'],['diesel','Diesel'],['other','Other / n.a.']];
 const clsSel = new Set(), motSel = new Set();
 const filtersActive = () => clsSel.size > 0 || motSel.size > 0;
