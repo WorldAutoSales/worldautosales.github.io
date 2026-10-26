@@ -6,6 +6,13 @@
 <title>World Car Sales — Light-Vehicle Sales, BEV vs ICE and Fleet</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
 <link rel="stylesheet" href="assets/styles.css">
+<style>
+  /* the Million vehicles / % toggle sits on the legend line, right-aligned, and is bold enough to be noticed */
+  #card-b .legend-row, #card-c .legend-row{ align-items:center; }
+  #card-b .legend-row .chart-legend, #card-c .legend-row .chart-legend{ flex:1 1 300px; min-width:0; }
+  #card-b .chart-mode-toggle.lg, #card-c .chart-mode-toggle.lg{ margin-left:auto; flex:0 0 auto; border-color:var(--accent); box-shadow:0 2px 10px -4px color-mix(in srgb, var(--accent) 60%, transparent); }
+  #card-b .chart-mode-toggle.lg .mode-btn, #card-c .chart-mode-toggle.lg .mode-btn{ padding:9px 18px; font-size:13.5px; font-weight:700; }
+</style>
 </head>
 <body>
 
@@ -74,13 +81,15 @@
       <div class="card chart-card" id="card-b">
         <div class="chart-header-row">
           <h2>New light-vehicle sales: BEV vs ICE (world)</h2>
-          <div class="chart-mode-toggle" role="group" aria-label="Units or share">
-            <button type="button" class="mode-btn active" data-mode="units">Million vehicles</button>
-            <button type="button" class="mode-btn" data-mode="share">% of sales</button>
-          </div>
         </div>
         <p class="note">Worldwide light-duty (passenger car and light commercial) sales by powertrain, 2000–2025, plus a projected 2026 (washed-out bar). 2010–2025 are the IEA Global EV Data Explorer's figures; 2026 is this site's projection, not a measurement (see Notes). 2000–2009 (lighter bars) are estimated totals with BEV and PHEV too small to measure — about 30,000 plug-ins on the road at the end of 2009 — so they are shown as zero. "ICE &amp; hybrids" is every light vehicle that cannot be plugged in — petrol, diesel, LPG/CNG and conventional (non-plug-in) hybrids. No country split.</p>
-        <div class="chart-legend" id="legend-b"></div>
+        <div class="legend-row">
+          <div class="chart-legend" id="legend-b"></div>
+          <div class="chart-mode-toggle lg" role="group" aria-label="Units or share">
+            <button type="button" style="cursor:pointer" class="mode-btn active" data-mode="units">Million vehicles</button>
+            <button type="button" style="cursor:pointer" class="mode-btn" data-mode="share">% of sales</button>
+          </div>
+        </div>
         <svg class="chart" id="svg-b" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
         <div class="tooltip" id="tip-b"></div>
       </div>
@@ -88,13 +97,15 @@
       <div class="card chart-card" id="card-c">
         <div class="chart-header-row">
           <h2>Estimated light vehicles on the road (world), since 2000</h2>
-          <div class="chart-mode-toggle" role="group" aria-label="Units or share">
-            <button type="button" class="mode-btn active" data-mode="units">Million vehicles</button>
-            <button type="button" class="mode-btn" data-mode="share">% of fleet</button>
-          </div>
         </div>
         <p class="note">Estimated worldwide stock of light vehicles (cars and light commercial vehicles) in use, 2000–2025, plus a projected 2026 point (washed-out last segment), built from the bottom up: the 50 countries tracked on this site plus an estimated rest of the world. Each country uses real fleet counts where they exist (Eurostat, UK DfT, Japan, US, Mexico, Brazil, Russia) and otherwise ages its new registrations with a survival curve — its own where real cohort statistics exist, else a regional average — scaled to the real counts. The dots are the fleet the IEA implies for 2010–2024; the two methods are independent and agree within about 3% from 2015. The electric part (BEV and PHEV) comes from cumulative IEA sales reconciled to the IEA's measured electric-car stock. This is an estimate, not a census — see Notes.</p>
-        <div class="chart-legend" id="legend-c"></div>
+        <div class="legend-row">
+          <div class="chart-legend" id="legend-c"></div>
+          <div class="chart-mode-toggle lg" role="group" aria-label="Units or share">
+            <button type="button" style="cursor:pointer" class="mode-btn active" data-mode="units">Million vehicles</button>
+            <button type="button" style="cursor:pointer" class="mode-btn" data-mode="share">% of fleet</button>
+          </div>
+        </div>
         <svg class="chart" id="svg-c" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
         <div class="tooltip" id="tip-c"></div>
       </div>
