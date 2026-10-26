@@ -625,10 +625,12 @@ const MONTHLY_DATA = {
       // DesRosiers Automotive Q3 2026 estimate (493,352 new light vehicles) via BestSellingCarsBlog -- Q3 divided evenly across Jul-Sep (same figure repeated each month; Statistics Canada's Q3 table is expected ~8 Dec 2026 and will replace these numbers). BEV = sum of the all-electric nameplates in BSCB's Q3 model table (Tesla is BSCB's own estimate); PHEV / HEV / petrol / diesel = Statistics Canada's Q2 2026 shares of the non-BEV volume applied to the remainder, because the model table cannot separate hybrid variants of a nameplate
       "Canada": [13731,5417,27306,0,111702,6295,164451],
       // car250.com (DLT registrations, basis-switch for this month only -- FTI not yet published as of 2026-10-24); fuel split derived by subtracting car250's Jan-Aug cumulative fuel breakdown from its Jan-Sep cumulative breakdown
-      "Thailand": [19468,2068,14695,86,8028,15765,60110]
+      "Thailand": [19468,2068,14695,86,8028,15765,60110],
+      // BestSellingCarsBlog September 2026 article: 2,027 new cars registered, EV penetration 71.9% (BEV 1,457); hybrids/PHEV inside petrol as in the TD series; replace with TD Table 4.1(e) when out
+      "Hong Kong": [1457,0,0,0,570,0,2027]
     },
-    priorYearBev: {      "Finland":2591,      "Belgium":11966,      "Netherlands":12008,      "Poland":4452,      "Brazil":8195,      "Mexico":2041,      "United Kingdom":72779,      "Luxembourg":1245,      "Switzerland":5182,      "India":18549,      "Taiwan":3837,      "Ireland":1734,      "Ecuador":481,      "Paraguay":38,      "Uruguay":1943,      "China":826000,      "Austria":5383,      "Bulgaria":226,      "Croatia":178,      "Cyprus":151,      "Czechia":1360,      "Estonia":68,      "Greece":850,      "Hungary":905,      "Latvia":175,      "Lithuania":517,      "Malta":283,      "Romania":746,      "Slovakia":324,      "Slovenia":742,      "Iceland":625,      "United States":140579,      "Canada":9549,      "Thailand":9155},
-    priorYearTotal: {      "Finland":5996,      "Belgium":31519,      "Netherlands":32199,      "Poland":49853,      "Brazil":231479,      "Mexico":119766,      "United Kingdom":312891,      "Luxembourg":3779,      "Switzerland":20031,      "India":322414,      "Taiwan":28257,      "Ireland":5611,      "Ecuador":11219,      "Paraguay":2541,      "Uruguay":5239,      "China":2241000,      "Austria":25745,      "Bulgaria":3813,      "Croatia":4723,      "Cyprus":1432,      "Czechia":21370,      "Estonia":1179,      "Greece":12273,      "Hungary":10380,      "Latvia":2087,      "Lithuania":3793,      "Malta":544,      "Romania":12463,      "Slovakia":7188,      "Slovenia":4903,      "Iceland":868,      "United States":1241581,      "Canada":162094,      "Thailand":48350}
+    priorYearBev: {      "Finland":2591,      "Belgium":11966,      "Netherlands":12008,      "Poland":4452,      "Brazil":8195,      "Mexico":2041,      "United Kingdom":72779,      "Luxembourg":1245,      "Switzerland":5182,      "India":18549,      "Taiwan":3837,      "Ireland":1734,      "Ecuador":481,      "Paraguay":38,      "Uruguay":1943,      "China":826000,      "Austria":5383,      "Bulgaria":226,      "Croatia":178,      "Cyprus":151,      "Czechia":1360,      "Estonia":68,      "Greece":850,      "Hungary":905,      "Latvia":175,      "Lithuania":517,      "Malta":283,      "Romania":746,      "Slovakia":324,      "Slovenia":742,      "Iceland":625,      "United States":140579,      "Canada":9549,      "Thailand":9155,      "Hong Kong":3539},
+    priorYearTotal: {      "Finland":5996,      "Belgium":31519,      "Netherlands":32199,      "Poland":49853,      "Brazil":231479,      "Mexico":119766,      "United Kingdom":312891,      "Luxembourg":3779,      "Switzerland":20031,      "India":322414,      "Taiwan":28257,      "Ireland":5611,      "Ecuador":11219,      "Paraguay":2541,      "Uruguay":5239,      "China":2241000,      "Austria":25745,      "Bulgaria":3813,      "Croatia":4723,      "Cyprus":1432,      "Czechia":21370,      "Estonia":1179,      "Greece":12273,      "Hungary":10380,      "Latvia":2087,      "Lithuania":3793,      "Malta":544,      "Romania":12463,      "Slovakia":7188,      "Slovenia":4903,      "Iceland":868,      "United States":1241581,      "Canada":162094,      "Thailand":48350,      "Hong Kong":3972}
   },
   "2026-08": {
     label: "August 2026",
@@ -726,14 +728,16 @@ const MONTHLY_DATA = {
       // uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers), report 'Prodaja novih vozila u Srbiji nastavlja da raste' (8 Oct 2026, MUP first-registration data) -- Q3 2026 delta (Jan-Sep minus H1) split evenly across Jul-Sep (no finer intra-quarter split published); Jan-Sep exact: petrol 11,929, diesel 2,746, hybrid 13,141 (petrol-hybrid 11,325 + diesel-hybrid 1,816), electric 1,166, LPG 461; PHEV not separately reported (folded into HEV/others); Others = LPG 461 + 74 units the report's shares leave unclassified
       "Serbia": [210,0,1544,75,1254,251,3334],
       // DesRosiers Automotive Q3 2026 estimate (493,352 new light vehicles) via BestSellingCarsBlog -- Q3 divided evenly across Jul-Sep (same figure repeated each month; Statistics Canada's Q3 table is expected ~8 Dec 2026 and will replace these numbers). BEV = sum of the all-electric nameplates in BSCB's Q3 model table (Tesla is BSCB's own estimate); PHEV / HEV / petrol / diesel = Statistics Canada's Q2 2026 shares of the non-BEV volume applied to the remainder, because the model table cannot separate hybrid variants of a nameplate
-      "Canada": [13731,5417,27306,0,111702,6295,164451]},
+      "Canada": [13731,5417,27306,0,111702,6295,164451],
+      // BestSellingCarsBlog (Transport Department digest for August not yet published): August total 2,404; fuel split ESTIMATED -- BEV share assumed equal to July (77.4%), hybrids/PHEV inside petrol as in the TD series; replace with TD Table 4.1(e) when out
+      "Hong Kong": [1861,0,0,0,543,0,2404]},
     // BEV units for the same month a year prior — source: world_auto_sales, for YoY %
     priorYearBev: {
       "India": 20204, "South Korea": 23315,
       "Israel":6888,
       "Albania":490,
       "Paraguay":43,
-          "Japan":2649,      "New Zealand":382,      "Brazil":7643,      "Mexico":2439,      "Uruguay":1363,      "China":686000,      "Canada":9549},
+          "Japan":2649,      "New Zealand":382,      "Brazil":7643,      "Mexico":2439,      "Uruguay":1363,      "China":686000,      "Canada":9549,      "Hong Kong":2897},
     // Total (all powertrains) units for the same month a year prior — source: world_auto_sales, for the "Total Car Registrations" stat's YoY
     // Australia omitted — no matching August 2025 monthly figure sourced
     priorYearTotal: {
@@ -741,7 +745,7 @@ const MONTHLY_DATA = {
       "Israel":25847,
       "Albania":7658,
       "Paraguay":2441,
-          "Japan":159854,      "New Zealand":8049,      "Brazil":214744,      "Mexico":126545,      "Uruguay":3886,      "China":1995000,      "Canada":162094}
+          "Japan":159854,      "New Zealand":8049,      "Brazil":214744,      "Mexico":126545,      "Uruguay":3886,      "China":1995000,      "Canada":162094,      "Hong Kong":3410}
   },
   "2026-07": {
     label: "July 2026",
@@ -1737,7 +1741,7 @@ const MONTHLY_DATA = {
       "South Africa": [2275,5806,6730,0,254327,0,269138],      // source: AEB (Association of European Businesses -- Jan-Aug 2026 summed from monthly
       "Russian Federation": [10570,0,0,0,942796,14654,968020],
       // source: Transport Department Hong Kong (Monthly Traffic and Transport Digest, Table 4.1(e)) — first registrations of private cars, new cars only (vehicle status A+B; used/owner imports excluded). BEV is exact; hybrids and plug-in hybrids are registered as petrol and cannot be separated, so PHEV and HEV show 0 and are inside Petrol (Jan-Jul 2026)
-      "Hong Kong": [32448,0,0,0,3293,0,35741]},
+      "Hong Kong": [35766,0,0,0,4406,0,40172]},
     // per-country "as of" coverage, since cutoffs differ by source — surfaced in the Country Detail table's "Data Through" column
     asOf: {
       "Serbia":"through Sep 2026 (9M)",
@@ -1782,7 +1786,7 @@ const MONTHLY_DATA = {
       "Paraguay":"through Sep 2026",
       "Mauritius":"through Jul 2026",
           "South Africa":"through May 2026",      "Russian Federation":"through Sep 2026",
-      "Hong Kong":"through Jul 2026"
+      "Hong Kong":"through Sep 2026"
     },
     // BEV units for the matching prior-year period (same months)
     priorYearBev: {
@@ -1800,7 +1804,7 @@ const MONTHLY_DATA = {
       "Paraguay":547,
       "China":5438000,
       "Serbia":298,
-      "Hong Kong":18058,
+      "Hong Kong":24494,
       "Thailand":82190
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
@@ -1814,7 +1818,7 @@ const MONTHLY_DATA = {
       "Paraguay":21959,
       "China":16950576,
       "Serbia":23968,
-      "Hong Kong":21528,
+      "Hong Kong":28910,
       "Thailand":447778
     }
     // note: China omitted from priorYearBev — no matching Jan-Jul 2025 monthly data sourced (world_auto_sales has no pre-2026 China rows)
@@ -1909,7 +1913,7 @@ const MONTHLY_DATA = {
       "Serbia": [1555, 0, 17521, 713, 15905, 3661, 39355],
           "South Africa": [5460, 13934, 16798, 0, 629966, 0, 666158],      "Russian Federation": [16534, 0, 0, 0, 1297768, 20896, 1335198],
       // source: derived, not published -- each fuel = Jan-Jul 2026 actuals + the average of the last 3 actual months (May-Jul) x the remaining 5 months. Deliberately NO "YTD floor" (the site standard): Hong Kong ended its electric-car first-registration tax concession on 31 March 2026, so Jan-Apr is inflated by a rush (Mar 9,619 and Apr 8,535 new cars vs ~2,000-4,800 other months) and a YTD floor would project 2026 about 40% above 2025
-      "Hong Kong": [45235,0,0,0,5961,0,51196]},
+      "Hong Kong": [41047, 0, 0, 0, 6092, 0, 47139]},
     // Two projection methods, depending on what data exists per country:
     // (1) Every country with a real monthly breakdown — the 31 ACEA/Europe countries, New Zealand, Argentina,
     // Australia, Brazil, Chile, China, India, Israel, Japan, Mexico, South Korea, Taiwan, Vietnam, and the United States (45 total) — trends each fuel's own ABSOLUTE
