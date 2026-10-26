@@ -72,6 +72,9 @@
   .rank-row.world-total .bar-track{ height:26px; }
   /* small numbers sit right after the filled bar, still inside the lighter track */
   .rank-row .bar-track .seg-outside{ align-self:center; padding-left:6px; line-height:1; }
+  .bar-seg .seg-lead{ position:absolute; left:4px; top:50%; transform:translateY(-50%); display:flex; gap:3px; pointer-events:none; }
+  .bar-seg .seg-pill{ background:rgba(255,255,255,.92); border-radius:3px; padding:1px 4px; font-size:10px; font-weight:700; line-height:1.2; font-variant-numeric:tabular-nums; }
+  #country-bars .rank-row .total-label, #continent-bars .rank-row .total-label{ width:84px; color:var(--text); font-weight:700; font-size:12px; }
   .rank-row .bar-track .seg-outside + .seg-outside{ margin-left:0; padding-left:8px; }
   /* legends run across the whole card instead of a narrow column */
   #bars-legend, #continent-bars-legend{ width:auto; flex:1; text-align:left; text-transform:none; letter-spacing:0; font-weight:600; font-size:11.5px;
@@ -855,14 +858,27 @@ const WORLD_LIST_CAP = 40; // only applies to the "World sales by brand / parent
 // room, or appended just after the bar (colored to match its segment) when there isn't -- used by
 // every bar-row chart on this page instead of a separate "total" column at the end of the row
 const BAR_HEADROOM = 0.84;   // the longest bar fills 84% of its track, leaving room for small numbers after it
-function segmentsHTML(parts, widthDenom){
-  let bar = '', outside = [];
-  parts.filter(p => p.value > 0).forEach(p => {
+function segmentsHTML(parts, widthDenom, absorb){
+  const TRACK_PX = 480, CH = 6.6;   // rough track width and digit width, to decide whether a small number fits inside the widest segment
+  const segs = parts.filter(p => p.value > 0).map(p => {
     const pct = 100 * p.value * BAR_HEADROOM / widthDenom;
-    const fits = pct >= 9;
-    const txt = p.display != null ? p.display : fmt(p.value);
-    bar += `<div class="bar-seg" style="width:${pct}%;background:${p.color}" title="${esc(p.label)}">${fits ? `<span class="seg-label">${txt}</span>` : ''}</div>`;
-    if(!fits) outside.push(`<span class="seg-outside" style="color:${p.color}">${txt}</span>`);
+    return { p, pct, fits: pct >= 9, txt: p.display != null ? p.display : fmt(p.value) };
+  });
+  const small = segs.filter(x => !x.fits);
+  let host = null;
+  if(absorb && small.length){
+    // the small numbers (e.g. the green BEV figure) go inside the widest segment when it has room, instead of after the bar
+    const cand = segs.filter(x => x.fits).sort((a, b) => b.pct - a.pct)[0];
+    if(cand){
+      const hostPx = cand.pct / 100 * TRACK_PX, ownW = cand.txt.length * CH, leadW = small.reduce((w, x) => w + x.txt.length * CH + 12, 0);
+      if((hostPx - ownW) / 2 >= leadW + 10) host = cand;
+    }
+  }
+  let bar = '', outside = [];
+  segs.forEach(x => {
+    const lead = x === host ? `<span class="seg-lead">${small.map(sm => `<span class="seg-pill" style="color:${sm.p.color}">${sm.txt}</span>`).join('')}</span>` : '';
+    bar += `<div class="bar-seg" style="width:${x.pct}%;background:${x.p.color}" title="${esc(x.p.label)}">${lead}${x.fits ? `<span class="seg-label">${x.txt}</span>` : ''}</div>`;
+    if(!x.fits && !host) outside.push(`<span class="seg-outside" style="color:${x.p.color}">${x.txt}</span>`);
   });
   return { bar, outside: outside.join('') };
 }
@@ -870,7 +886,7 @@ function segmentsHTML(parts, widthDenom){
 // ---------- single-manufacturer rows: BEV / PHEV / HEV + ICE + Diesel segments, rank badge, share of world, growth ----------
 function fuelLegendHTML(){
   return `<span><i class="sw" style="background:${COLORS.bev}"></i>BEV</span><span><i class="sw" style="background:${COLORS.phev}"></i>PHEV</span><span><i class="sw" style="background:${COLORS.other}"></i>HEV + ICE + Diesel</span>` +
-    `<span class="lg-note">Badge = ${esc(mfr)}'s rank in that market (colored like the map) &middot; % = share of ${esc(mfr)}'s world total &middot; growth = projected ${CUR_YEAR} vs. ${CUR_YEAR - 1} &middot; hover a row for 5-year history and top 10 models</span>`;
+    `<span class="lg-note">Badge = ${esc(mfr)}'s rank in that market (colored like the map) &middot; % on the left = share of ${esc(mfr)}'s world total &middot; number on the right = total sales, all motorizations &middot; hover a row for 5-year history and top 10 models</span>`;
 }
 function fuelParts(sel, marketTotal){
   const mk = (k, label) => {
@@ -880,7 +896,8 @@ function fuelParts(sel, marketTotal){
   return [mk('bev', 'BEV'), mk('phev', 'PHEV'), mk('other', 'HEV + ICE + Diesel')];
 }
 function brandRowHTML(e, widthDenom){
-  const { bar, outside } = segmentsHTML(e.parts, widthDenom);
+  const { bar, outside } = segmentsHTML(e.parts, widthDenom, true);
+  const total = e.parts.reduce((s, p) => s + p.value, 0);
   const rankBadge = e.brandRank ? brandRankBadgeHTML(e.brandRank, mfr) : '<span class="world-rank-badge"></span>';
   const pctOfTotal = e.pctOfWorld != null ? `<span class="pct-of-total" title="Share of ${esc(mfr)}'s world total shown in this chart">${e.pctOfWorld.toFixed(1)}%</span>` : '';
   return `<div class="rank-row${e.cls ? ' ' + e.cls : ''}" data-scope="${e.scope}" data-key="${esc(e.key)}">
@@ -888,7 +905,7 @@ function brandRowHTML(e, widthDenom){
       <span class="country-label">${esc(e.country)}</span>
       ${pctOfTotal}
       <span class="bar-track">${bar.replace(/ title="[^"]*"/g, '')}${outside}</span>
-      ${e.yoyHTML || ''}
+      <span class="total-label" title="Total sales, all motorizations">${fmt(total)}</span>
     </div>`;
 }
 function plainRowHTML(e, widthDenom){
