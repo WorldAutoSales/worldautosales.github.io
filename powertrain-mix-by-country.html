@@ -5629,6 +5629,20 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     if(row.phev > 0) return 'phev';
     return 'ice';
   }
+  // catch-all/residual rows ("(other models)", "Other (unclassified)", "Unknown"...) stand in for
+  // volume no source actually names -- they must never outrank a real nameplate just because the
+  // bucket happens to be large, so every model sort/rank treats them as a separate, lower tier
+  // that always sorts after every real model, however big its own total is
+  function mfrIsCatchAllModel(model){
+    return /^\((other|unclassified)|^other\/discontinued|^(other|unknown)\b/i.test(String(model || ''));
+  }
+  function mfrModelSortCmp(sortKey){
+    return (a, b) => {
+      const ca = mfrIsCatchAllModel(a.model), cb = mfrIsCatchAllModel(b.model);
+      if(ca !== cb) return ca ? 1 : -1;
+      return b[sortKey] - a[sortKey];
+    };
+  }
   const MFR_CATEGORY_COLORS = { bev: FUEL_COLORS.bev, phev: FUEL_COLORS.phev, ice: FUEL_COLORS.petrol };
   const MFR_CATEGORY_LABELS = { bev: 'BEV', phev: 'PHEV', ice: 'ICE' };
   let mfrModelCategoryFilter = new Set(['bev', 'phev', 'ice']); // multi-select; model section only
@@ -5645,10 +5659,10 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const totalRank = new Map();
     const categoryRank = new Map();
     if(!all.length) return { totalRank, categoryRank };
-    all.slice().sort((a,b) => b.total - a.total)
+    all.slice().sort(mfrModelSortCmp('total'))
       .forEach((r,i) => totalRank.set(mfrModelKey(r), i + 1));
     ['bev', 'phev', 'ice'].forEach(cat => {
-      all.filter(r => mfrRowCategory(r) === cat).sort((a,b) => b.total - a.total)
+      all.filter(r => mfrRowCategory(r) === cat).sort(mfrModelSortCmp('total'))
         .forEach((r,i) => categoryRank.set(mfrModelKey(r), i + 1));
     });
     return { totalRank, categoryRank };
@@ -5673,7 +5687,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       ({ totalRank, categoryRank } = mfrModelRankMaps());
     }
     const visible = kind === 'model' ? withPct.filter(r => mfrModelCategoryFilter.has(mfrRowCategory(r))) : withPct;
-    const sorted = visible.slice().sort((a,b) => b[mfrSortKey] - a[mfrSortKey]);
+    const sorted = kind === 'model' ? visible.slice().sort(mfrModelSortCmp(mfrSortKey)) : visible.slice().sort((a,b) => b[mfrSortKey] - a[mfrSortKey]);
     rowsEl.classList.toggle('raw-mode', mode === 'raw');
     const globalMax = Math.max(1, ...sorted.map(r => r.total));
     rowsEl.innerHTML = sorted.map((row, i) => {
@@ -6244,7 +6258,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     if(!svgEl) return;
     const svg = d3.select(svgEl);
     svg.selectAll('*').remove();
-    const rows = buildMfrBrandModelRows(brand).slice().sort((a,b) => b.total - a.total);
+    const rows = buildMfrBrandModelRows(brand).slice().sort(mfrModelSortCmp('total'));
     if(!rows.length) return;
     const { categoryRank } = mfrModelRankMaps();
     // wide left margin: a fixed-width rank column (this brand's own model list, #1 = its
@@ -6322,9 +6336,9 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       const target = yearRows.find(r => r.brand === brand && r.model === model);
       if(!target) return;
       const cat = mfrRowCategory(target);
-      const totalSorted = yearRows.slice().sort((a,b) => b.total - a.total);
+      const totalSorted = yearRows.slice().sort(mfrModelSortCmp('total'));
       const totalIdx = totalSorted.findIndex(r => r.brand === brand && r.model === model);
-      const sameCategory = yearRows.filter(r => mfrRowCategory(r) === cat).sort((a,b) => b.total - a.total);
+      const sameCategory = yearRows.filter(r => mfrRowCategory(r) === cat).sort(mfrModelSortCmp('total'));
       const catIdx = sameCategory.findIndex(r => r.brand === brand && r.model === model);
       if(totalIdx !== -1) rankByYear.set(year, { totalRank: totalIdx + 1, catRank: catIdx !== -1 ? catIdx + 1 : null, cat });
     });
