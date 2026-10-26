@@ -62,7 +62,7 @@
 
       <div class="card chart-card" id="card-a">
         <h2>Global light-vehicle sales, per year</h2>
-        <p class="note">Worldwide new light-vehicle sales (passenger cars, SUVs, pickups and light vans), 2000–2025. 2010–2025 are the IEA's measured figures (2025 is an IEA estimate); 2000–2009 are my estimate, drawn dashed with open dots (see Notes). No light-vehicle series exists for earlier years, so the page starts in 2000.</p>
+        <p class="note">Worldwide new light-vehicle sales (passenger cars, SUVs, pickups and light vans), 2000–2025, plus a 2026 projection (IEA 2025 sales × the growth of the site's own 2026 projection). 2010–2025 are the IEA's measured figures (2025 is an IEA estimate); 2000–2009 are my estimate, drawn dashed with open dots (see Notes). No light-vehicle series exists for earlier years, so the page starts in 2000.</p>
         <div class="chart-legend" id="legend-a"></div>
         <svg class="chart" id="svg-a" viewBox="0 0 900 340" preserveAspectRatio="none"></svg>
         <div class="tooltip" id="tip-a"></div>
@@ -100,7 +100,13 @@
       </div>
 
       <div class="card chart-card" id="card-d">
-        <h2>Motorisation Trends</h2>
+        <div class="chart-header-row">
+          <h2>Motorisation Trends</h2>
+          <div class="chart-mode-toggle" role="group" aria-label="Market set">
+            <button type="button" class="mode-btn active" data-set="all" title="Every market with a powertrain split in that year">All markets with data</button>
+            <button type="button" class="mode-btn" data-set="same" title="Only markets that have data in every year shown, so shares are comparable across years">Same markets every year</button>
+          </div>
+        </div>
         <p class="note" id="motor-note"></p>
         <div class="chart-legend" id="motor-legend"></div>
         <svg class="chart" id="motor-svg" viewBox="0 0 900 300" preserveAspectRatio="none"></svg>
@@ -123,7 +129,7 @@
           <li><strong>Fleet 2026 (projection).</strong> The 2026 point uses each tracked country's 2026 projected registrations (year-to-date plus the site's standard trend, with China at its retail level), rest-of-world sales held at the 2025 level, and BEV/PHEV 2026 sales = IEA 2025 sales × the growth of the site's own 2026 projection (BEV +10%, PHEV −16%; the IEA's own outlook of about 23 million electric cars in 2026 is higher than this). Result: fleet +12 M to about 1,353 M, BEV 66 M, PHEV 31 M (estimated), ICE &amp; hybrids about 1,256 M, i.e. <strong>about −8 M against 2025</strong> — the first decline in this series. It is a projection, not a measurement: a rebound in China's retail market in Q4 would turn it into a flat year, and Japan and Russia fall partly through the model's ageing mechanics on low registration years.</li>
           <li><strong>Fleet electric part.</strong> BEV and PHEV stocks are unchanged from the IEA-based series: cumulative IEA sales with a constant 1.5% yearly loss, the value that best reproduces the IEA's measured global electric-car stock (76 million at end-2025 per GEVO 2026; model: 77 million, within ±3% in every year 2014–2025). BEV/PHEV before 2010 are negligible (~30,000 vehicles at end-2009). ICE &amp; hybrids is the total fleet minus BEV and PHEV, so it includes conventional hybrids. Heavy trucks, buses and two/three-wheelers are not in the fleet.</li>
           <li><strong>BEV vs ICE 2026 (projection).</strong> The 2026 bar is IEA 2025 sales (84.8 million) multiplied by the growth between 2025 and the site's own 2026 projection, measured over the 61 countries that have both a 2025 annual and a 2026 projected fuel split: total about −4%, BEV about +10%, PHEV about −16%, which gives roughly 81.6 million light vehicles, of which 15.4 million BEV, 6.1 million PHEV and 60.2 million ICE and hybrids. It uses the same growth rates as the 2026 fleet point below, so the two charts agree. It is a projection, not a measurement; the IEA's own outlook for 2026 electric-car sales (about 23 million) is higher than this site's trend.</li>
-          <li><strong>Motorisation Trends (moved here from the retired World Auto Sales page).</strong> Sums the monthly new-car registrations by powertrain of the markets with monthly data on this site (assets/market-powertrain-history-data.js, 2023-01 to 2026-07). Markets enter at different dates and some are quarterly or estimated, so a share change between years can partly come from the market mix; fuel splits follow each country's source (e.g. Hong Kong and Japan fold some hybrids into petrol). 2026 is partial.</li>
+          <li><strong>Motorisation Trends.</strong> Built from this site's own country files (Powertrain Mix by Country): 2022-2025 use each market's annual powertrain split, and the current year uses the monthly data of the most recent months in which at least as many markets reported as in June (earlier months are added back while they are as complete as June, later months are left out until they are as complete). Shares are the sum of each fuel over the selected markets divided by the sum of their registrations. "All markets with data" uses every market that has a split in that year (the set grows from 2022 to 2025); "Same markets every year" keeps only the markets present in every year, which is the comparable view. Click a legend chip to isolate one powertrain. Hong Kong, Japan and a few others fold some hybrids into petrol, as in their sources.</li>
           <li>Rounding: values are shown in millions of vehicles; hover the charts for exact figures.</li>
         </ul>
       </div>
@@ -137,7 +143,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="assets/world-car-sales-data.js"></script>
-<script src="assets/market-powertrain-history-data.js"></script>
+<script src="assets/country-yearly-data.js"></script>
+<script src="assets/country-monthly-data.js"></script>
 <script>
 const COL = { sales:'#c1621f', bev:'#1e8f5f', phev:'#2563eb', ice:'#8a7f73' };
 const fmtM = v => (v/1e6).toFixed(1) + ' M';
@@ -173,9 +180,20 @@ function showTip(id, e, html){
   tip.style.opacity = 1; tip.innerHTML = html;
 }
 function hideTip(id){ document.getElementById('tip-'+id).style.opacity = 0; }
+// legend chips; for the stacked charts (b, c) a chip is clickable: it isolates that series, a second click restores all (same behaviour as Mix by Country)
+const ISO = { b:null, c:null }, MODE = { b:'units', c:'units' };
 function legend(id, items){
-  document.getElementById('legend-'+id).innerHTML = items.map(([c,l]) =>
-    `<div class="legend-chip"><span class="swatch" style="background:${c}"></span>${l}</div>`).join('');
+  const el = document.getElementById('legend-'+id);
+  el.innerHTML = items.map(([c,l,k]) =>
+    `<div class="legend-chip${k && ISO[id] && ISO[id] !== k ? ' dimmed' : ''}"${k ? ` data-key="${k}" title="Click to isolate"` : ''}><span class="swatch" style="background:${c}"></span>${l}</div>`).join('');
+  if(!el.__wired){
+    el.__wired = true;
+    el.addEventListener('click', e => {
+      const chip = e.target.closest('.legend-chip[data-key]'); if(!chip) return;
+      ISO[id] = ISO[id] === chip.dataset.key ? null : chip.dataset.key;
+      (id === 'b' ? drawB : drawC)(MODE[id]);
+    });
+  }
 }
 
 // ================= 11A =================
@@ -183,38 +201,42 @@ function drawA(){
   const W=900,H=340,m={top:14,right:16,bottom:30,left:46};
   const {g,iw,ih} = setup('a',W,H,m);
   const S = FLEET_HIST.map(d => ({y:d.y, v:d.sales, est:!d.measuredSales}));
-  const x = d3.scaleLinear().domain([2000,2025]).range([0,iw]);
+  if(PW_2026) S.push({ y:PW_2026.y, v:PW_2026.total, est:false, proj:true });   // 2026 projected: IEA 2025 sales x the growth of the site's own 2026 projection
+  const LAST = S[S.length-1].y;
+  const x = d3.scaleLinear().domain([2000,LAST]).range([0,iw]);
   const y = d3.scaleLinear().domain([0,100e6]).range([ih,0]);
   g.append('g').attr('class','bubble-axis').attr('transform',`translate(0,${ih})`)
-    .call(d3.axisBottom(x).tickValues(d3.range(2000,2026,5).concat([2025]).filter((v,i,a)=>a.indexOf(v)===i)).tickFormat(d3.format('d')));
+    .call(d3.axisBottom(x).tickValues(d3.range(2000,LAST,5).concat([2025,LAST]).filter((v,i,a)=>a.indexOf(v)===i)).tickFormat(d3.format('d')));
   g.append('g').attr('class','bubble-axis').call(d3.axisLeft(y).ticks(5).tickFormat(d => (d/1e6)+' M'));
   const line = d3.line().x(d=>x(d.y)).y(d=>y(d.v));
   for(let i=0;i<S.length-1;i++){
     const a=S[i], b=S[i+1];
     g.append('path').datum([a,b]).attr('fill','none').attr('stroke',COL.sales).attr('stroke-width',2.4)
-      .attr('stroke-dasharray', (a.est || b.est) ? '5,4' : null).attr('d',line);
+      .attr('stroke-dasharray', (a.est || b.est || b.proj) ? '5,4' : null).attr('opacity', b.proj ? 0.55 : 1).attr('d',line);
   }
   g.selectAll('.sd').data(S).join('circle').attr('cx',d=>x(d.y)).attr('cy',d=>y(d.v)).attr('r',3)
-    .attr('fill', d => d.est ? 'var(--surface)' : COL.sales).attr('stroke',COL.sales).attr('stroke-width',1.6);
+    .attr('fill', d => (d.est || d.proj) ? 'var(--surface)' : COL.sales).attr('stroke',COL.sales).attr('stroke-width',1.6).attr('r', d => d.proj ? 4.5 : 3);
+  const pj = S.find(d => d.proj);
+  if(pj) g.append('text').attr('x',x(pj.y)).attr('y',y(pj.v)-10).attr('text-anchor','end').style('font-size','11px').attr('fill','var(--text-muted)').text('2026 projected');
   const guide = g.append('line').attr('class','trend-guideline').attr('y1',0).attr('y2',ih).style('opacity',0);
   g.append('rect').attr('width',iw).attr('height',ih).attr('fill','transparent')
     .on('pointermove', e => {
-      const yr = Math.max(2000, Math.min(2025, Math.round(x.invert(d3.pointer(e)[0]))));
+      const yr = Math.max(2000, Math.min(LAST, Math.round(x.invert(d3.pointer(e)[0]))));
       const s = S.find(d=>d.y===yr), prev = S.find(d=>d.y===yr-1);
       guide.attr('x1',x(yr)).attr('x2',x(yr)).style('opacity',1);
-      let h = `<strong>${yr}</strong><br>Light vehicles sold: <strong>${fmtM(s.v)}</strong>`;
+      let h = `<strong>${yr}</strong>${s.proj ? ' (projection)' : ''}<br>Light vehicles sold: <strong>${fmtM(s.v)}</strong>`;
       if(prev) h += ` (${(s.v/prev.v*100-100>=0?'+':'')}${(s.v/prev.v*100-100).toFixed(1)}% vs ${yr-1})`;
-      h += `<br><span style="opacity:.75">${s.est ? 'estimate (see Notes)' : yr===2025 ? 'IEA estimate' : 'IEA'}</span>`;
+      h += `<br><span style="opacity:.75">${s.proj ? 'IEA 2025 sales × the growth of the site\'s own 2026 projection' : s.est ? 'estimate (see Notes)' : yr===2025 ? 'IEA estimate' : 'IEA'}</span>`;
       showTip('a',e,h);
     })
     .on('pointerleave', () => { guide.style('opacity',0); hideTip('a'); });
-  legend('a', [[COL.sales,'Light-vehicle sales — IEA, 2010–2025 (solid)'],['var(--surface)','2000–2009 estimate (dashed, open dots)']]);
-  document.querySelectorAll('#legend-a .swatch')[1].style.border = '1.5px solid ' + COL.sales;
+  legend('a', [[COL.sales,'Light-vehicle sales — IEA, 2010–2025 (solid)'],['var(--surface)','2000–2009 estimate (dashed, open dots)'],['var(--surface)','2026 projected (light dashed, open dot)']]);
+  document.querySelectorAll('#legend-a .swatch').forEach((sw, i) => { if(i > 0) sw.style.border = '1.5px solid ' + COL.sales; });
 
-  const marks = [2000,2005,2008,2009,2010,2015,2017,2020,2024,2025];
-  const rows = marks.map(yr => {
+  const marks = [2000,2005,2008,2009,2010,2015,2017,2020,2021,2022,2023,2024,2025,2026];
+  const rows = marks.filter(yr => S.find(d=>d.y===yr)).map(yr => {
     const s = S.find(d=>d.y===yr);
-    return `<tr><td>${yr}</td><td class="num">${fmtM(s.v)}</td><td class="num">${s.est?'estimate':yr===2025?'IEA estimate':'IEA'}</td></tr>`;
+    return `<tr><td>${yr}${s.proj ? ' (projected)' : ''}</td><td class="num">${fmtM(s.v)}</td><td class="num">${s.proj ? 'projection' : s.est?'estimate':yr===2025?'IEA estimate':'IEA'}</td></tr>`;
   }).join('');
   document.getElementById('table-a').innerHTML =
     `<thead><tr><th>Year</th><th class="num">Light vehicles sold</th><th class="num">Basis</th></tr></thead><tbody>${rows}</tbody>`;
@@ -231,21 +253,25 @@ function stacked(id, rows, keys, labels, mode, yFmt, tipExtra, xTickEvery){
     keys.forEach(k => o[k] = share ? r[k]/tot*100 : r[k]);
     return o;
   });
+  const iso = ISO[id];
+  const drawKeys = iso ? [iso] : keys;                       // an isolated series is drawn alone and the axis rescales to it
   const years = data.map(d=>d.y);
-  const ymax = share ? 100 : d3.max(data, d => keys.reduce((s,k)=>s+d[k],0))*1.05;
+  const topOf = d => drawKeys.reduce((s,k)=>s+d[k],0);
+  const ymax = iso ? d3.max(data, topOf)*1.1 : share ? 100 : d3.max(data, d => keys.reduce((s,k)=>s+d[k],0))*1.05;
   const y = d3.scaleLinear().domain([0,ymax]).range([ih,0]);
-  return { g, iw, ih, data, years, y, share, ymax, W, H, m };
+  return { g, iw, ih, data, years, y, share, ymax, W, H, m, drawKeys, topOf, iso };
 }
 
 function drawB(mode){
   const keys = ['ice','phev','bev'];
   const rows = WCS.powertrain;
+  MODE.b = mode;
   const c = stacked('b', rows, keys, null, mode);
-  const {g,iw,ih,data,years,y,share} = c;
+  const {g,iw,ih,data,years,y,share,drawKeys,topOf} = c;
   const x = d3.scaleBand().domain(years).range([0,iw]).padding(0.18);
   g.append('g').attr('class','bubble-axis').attr('transform',`translate(0,${ih})`).call(d3.axisBottom(x));
   g.append('g').attr('class','bubble-axis').call(d3.axisLeft(y).ticks(6).tickFormat(d => share ? d+'%' : (d/1e6)+' M'));
-  const stack = d3.stack().keys(keys)(data);
+  const stack = d3.stack().keys(drawKeys)(data);
   stack.forEach(layer => {
     g.selectAll('.b-'+layer.key).data(layer).join('rect')
       .attr('x',d=>x(d.data.y)).attr('width',x.bandwidth())
@@ -255,9 +281,10 @@ function drawB(mode){
   // 2026 = projection: dashed outline around the bar and a label
   const pr = rows.find(r => r.proj);
   if(pr){
-    g.append('rect').attr('x',x(pr.y)-1).attr('width',x.bandwidth()+2).attr('y',y(share ? 100 : pr.total)-1).attr('height',ih-y(share ? 100 : pr.total)+1)
+    const prTop = topOf(data.find(d => d.y === pr.y));
+    g.append('rect').attr('x',x(pr.y)-1).attr('width',x.bandwidth()+2).attr('y',y(prTop)-1).attr('height',ih-y(prTop)+1)
       .attr('fill','none').attr('stroke','var(--text)').attr('stroke-dasharray','4,3').attr('opacity',0.7).style('pointer-events','none');
-    g.append('text').attr('x',x(pr.y)+x.bandwidth()/2).attr('y',Math.max(11, y(share ? 100 : pr.total)-6)).attr('text-anchor','end').attr('dx',x.bandwidth()/2+2)
+    g.append('text').attr('x',x(pr.y)+x.bandwidth()/2).attr('y',Math.max(11, y(prTop)-6)).attr('text-anchor','end').attr('dx',x.bandwidth()/2+2)
       .style('font-size','11px').attr('fill','var(--text-muted)').text('2026 projected');
   }
   g.append('rect').attr('width',iw).attr('height',ih).attr('fill','transparent')
@@ -271,20 +298,21 @@ function drawB(mode){
         (r.proj ? `<br><span style="opacity:.75">IEA 2025 sales × the growth of the site's own 2026 projection: total ${(r.growth.total*100).toFixed(1)}%, BEV ${r.growth.bev>=0?'+':''}${(r.growth.bev*100).toFixed(0)}%, PHEV ${(r.growth.phev*100).toFixed(0)}%</span>` : '')));
     })
     .on('pointerleave', () => hideTip('b'));
-  legend('b', [[COL.bev,'Battery electric (BEV)'],[COL.phev,'Plug-in hybrid (PHEV)'],[COL.ice,'ICE &amp; hybrids (non-plug-in)']]);
+  legend('b', [[COL.bev,'Battery electric (BEV)','bev'],[COL.phev,'Plug-in hybrid (PHEV)','phev'],[COL.ice,'ICE &amp; hybrids (non-plug-in)','ice']]);
 }
 
 // ================= 11C =================
 function drawC(mode){
   const keys = ['ice','phev','bev'];
   const rows = WCS.fleet;
+  MODE.c = mode;
   const c = stacked('c', rows, keys, null, mode);
-  const {g,iw,ih,data,years,y,share} = c;
+  const {g,iw,ih,data,years,y,share,drawKeys,iso} = c;
   const x = d3.scaleLinear().domain([2000,2026]).range([0,iw]);
   g.append('g').attr('class','bubble-axis').attr('transform',`translate(0,${ih})`)
     .call(d3.axisBottom(x).tickValues(d3.range(2000,2027,5).concat([2026])).tickFormat(d3.format('d')));
   g.append('g').attr('class','bubble-axis').call(d3.axisLeft(y).ticks(6).tickFormat(d => share ? d+'%' : (d/1e6)+' M'));
-  const stack = d3.stack().keys(keys)(data);
+  const stack = d3.stack().keys(drawKeys)(data);
   const area = d3.area().x(d=>x(d.data.y)).y0(d=>y(d[0])).y1(d=>y(d[1]));
   stack.forEach(layer => g.append('path').datum(layer).attr('d',area).attr('fill',COL[layer.key]).attr('opacity',0.9));
   // 2026 = projection: wash out the last segment and mark it
@@ -292,7 +320,7 @@ function drawC(mode){
   g.append('rect').attr('x',p0).attr('width',p1-p0).attr('y',0).attr('height',ih).attr('fill','var(--surface)').attr('opacity',0.45).style('pointer-events','none');
   g.append('line').attr('x1',p0).attr('x2',p0).attr('y1',0).attr('y2',ih).attr('stroke','var(--text)').attr('stroke-dasharray','4,3').attr('opacity',0.6).style('pointer-events','none');
   g.append('text').attr('x',p0-6).attr('y',12).attr('text-anchor','end').style('font-size','11px').attr('fill','var(--text-muted)').text('2026 projected →');
-  if(!share){
+  if(!share && !iso){
     g.selectAll('.iea').data(rows.filter(r=>r.iea!=null)).join('circle')
       .attr('cx',d=>x(d.y)).attr('cy',d=>y(d.iea)).attr('r',3).attr('fill','var(--surface)')
       .attr('stroke','var(--text)').attr('stroke-width',1.4);
@@ -313,8 +341,8 @@ function drawC(mode){
         (r.iea!=null ? `<br>IEA-implied fleet: ${fmtM(r.iea)}` : ''));
     })
     .on('pointerleave', () => { guide.style('opacity',0); hideTip('c'); });
-  legend('c', [[COL.bev,'Battery electric (BEV)'],[COL.phev,'Plug-in hybrid (PHEV)'],[COL.ice,'ICE &amp; hybrids (non-plug-in)']]);
-  if(!share){
+  legend('c', [[COL.bev,'Battery electric (BEV)','bev'],[COL.phev,'Plug-in hybrid (PHEV)','phev'],[COL.ice,'ICE &amp; hybrids (non-plug-in)','ice']]);
+  if(!share && !iso){
     document.getElementById('legend-c').insertAdjacentHTML('beforeend',
       '<div class="legend-chip"><span class="swatch" style="background:var(--surface);border:1.5px solid var(--text)"></span>IEA-implied fleet (reference points)</div>');
   }
@@ -330,75 +358,94 @@ function wireToggle(id, fn){
 drawA(); drawB('units'); drawC('units');
 wireToggle('b', drawB); wireToggle('c', drawC);
 
-// ---------- Motorisation Trends: share of new-car registrations by powertrain, summed over every tracked market, year by year ----------
+// ---------- Motorisation Trends: share of new-car registrations by powertrain, summed over the markets with a powertrain split ----------
 (function(){
   const FUEL_KEYS = ['bev','phev','hev','petrol','diesel','others'];
   const FUEL_COLORS = { bev:'#1e8f5f', phev:'#2563eb', hev:'#f4a742', petrol:'#1a1a1a', diesel:'#6b7280', others:'#8b5cf6' };
   const FUEL_LABELS = { bev:'Battery Electric', phev:'Plug-in Hybrid', hev:'Hybrid', petrol:'Petrol', diesel:'Diesel', others:'Others' };
-  const countries = Object.keys(MOTOR_HIST);
-  const years = [...new Set(MOTOR_MONTHS.map(m => m.slice(0, 4)))];
-  document.getElementById('motor-legend').innerHTML = FUEL_KEYS.map(k => `<div class="legend-chip"><span class="swatch" style="background:${FUEL_COLORS[k]}"></span>${FUEL_LABELS[k]}</div>`).join('');
+  const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const hasSplit = r => { const f = FUEL_KEYS.reduce((t, k) => t + (r[k] || 0), 0); return (r.total || 0) > 0 && f > 0 && Math.abs(f - r.total) <= Math.max(5, 0.02 * r.total); };
+  const annual = {};   // year -> Map(country -> annual row with a split)
+  Object.entries(COUNTRY_YEARLY).forEach(([c, rows]) => rows.forEach(r => { if(r.period_type === 'ANNUAL' && r.year >= 2022 && hasSplit(r)) (annual[r.year] = annual[r.year] || new Map()).set(c, r); }));
+  const monthly = {};  // ym -> Map(country -> monthly row with a split)
+  Object.entries(COUNTRY_MONTHLY).forEach(([c, rows]) => rows.forEach(r => { if(hasSplit(r)) (monthly[r.ym] = monthly[r.ym] || new Map()).set(c, r); }));
+  const CUR = Math.max(...Object.keys(monthly).map(m => +m.slice(0, 4)));
+  const curMonths = Object.keys(monthly).filter(m => m.startsWith(String(CUR))).sort();
+  // the current year uses the months in which at least as many markets reported as in June: walk back from June while a month is as complete,
+  // and forward while a month is (nearly) as complete -- the newest months that are still missing markets are left out until they fill in
+  const ref = curMonths.includes(CUR + '-06') ? CUR + '-06' : curMonths[Math.floor(curMonths.length / 2)];
+  const nRef = monthly[ref].size;
+  let lo = curMonths.indexOf(ref), hi = lo;
+  while(lo > 0 && monthly[curMonths[lo - 1]].size >= nRef) lo--;
+  while(hi < curMonths.length - 1 && monthly[curMonths[hi + 1]].size >= nRef * 0.95) hi++;
+  const W = curMonths.slice(lo, hi + 1);
+  const winLabel = `${MON[+W[0].slice(5) - 1]}–${MON[+W[W.length - 1].slice(5) - 1]}`;
+  const annualYears = Object.keys(annual).map(Number).filter(y => y < CUR).sort();
+  const years = [...annualYears, CUR];
+  const inEveryWindowMonth = [...monthly[W[0]].keys()].filter(c => W.every(m => monthly[m].has(c)));
+  const SAME = new Set(inEveryWindowMonth.filter(c => annualYears.every(y => annual[y].has(c))));
 
+  let setMode = 'all', iso = null;
   function yearly(){
-    return years.map(year => {
-      const sums = { bev:0, phev:0, hev:0, petrol:0, diesel:0, others:0, total:0 };
-      let monthsWithData = 0, lastMonth = null;
-      MOTOR_MONTHS.forEach((m, i) => {
-        if(!m.startsWith(year)) return;
-        let any = false;
-        countries.forEach(c => {
-          const row = MOTOR_HIST[c][i];
-          if(!row) return;
-          any = true;
-          const [bev, phev, hev, petrol, diesel, others] = row;
-          const v = { bev, phev, hev, petrol, diesel, others };
-          FUEL_KEYS.forEach(k => { sums[k] += v[k]; sums.total += v[k]; });
-        });
-        if(any){ monthsWithData++; lastMonth = m; }
-      });
-      return { year, monthsWithData, lastMonth, ...sums };
-    }).filter(y => y.monthsWithData > 0);
+    return years.map(y => {
+      const sums = { bev:0, phev:0, hev:0, petrol:0, diesel:0, others:0, total:0 }, used = new Set();
+      const add = (c, r) => { used.add(c); FUEL_KEYS.forEach(k => { sums[k] += r[k] || 0; sums.total += r[k] || 0; }); };
+      if(y < CUR) annual[y].forEach((r, c) => { if(setMode === 'all' || SAME.has(c)) add(c, r); });
+      else W.forEach(m => monthly[m].forEach((r, c) => { if(setMode === 'all' || SAME.has(c)) add(c, r); }));
+      return { year:y, n:used.size, ...sums };
+    });
   }
-  const Y = yearly();
-  const last = Y[Y.length - 1];
-  document.getElementById('motor-note').textContent = `Share of new car registrations by powertrain, summed across the ${countries.length} markets with monthly powertrain data tracked on this site, year by year (Europe, the Americas, Asia-Pacific, South Africa and Israel; markets joined at different dates, see the notes). ${last.monthsWithData < 12 ? last.year + ' is partial (through ' + last.lastMonth + ') and shown as a dashed final segment.' : ''}`;
-
-  const W = 900, H = 300, M = { top:16, right:16, bottom:30, left:38 };
-  const innerW = W - M.left - M.right, innerH = H - M.top - M.bottom;
   const svgSel = d3.select('#motor-svg'), tooltip = document.getElementById('motor-tip'), wrap = document.getElementById('motor-svg').closest('.chart-card');
-  const series = Y.map((y, i) => {
-    const o = { i, year:y.year, total:y.total, monthsWithData:y.monthsWithData, lastMonth:y.lastMonth };
-    FUEL_KEYS.forEach(k => { o[k] = y.total ? y[k] / y.total * 100 : 0; });
-    return o;
+  function draw(){
+    const Y = yearly();
+    document.getElementById('motor-legend').innerHTML = FUEL_KEYS.map(k => `<div class="legend-chip${iso && iso !== k ? ' dimmed' : ''}" data-key="${k}" title="Click to isolate"><span class="swatch" style="background:${FUEL_COLORS[k]}"></span>${FUEL_LABELS[k]}</div>`).join('');
+    const counts = Y.map(y => `${y.year}: ${y.n}`).join(' · ');
+    document.getElementById('motor-note').textContent = `Share of new car registrations by powertrain, summed over ${setMode === 'same' ? `the ${SAME.size} markets that have a powertrain split in every year` : `every market that has a powertrain split that year (markets per year — ${counts})`}. ${annualYears[0]}–${annualYears[annualYears.length - 1]} are annual figures; ${CUR} uses the monthly data of ${winLabel} (months in which at least as many markets reported as in June) and is the dashed final segment. Click a legend chip to isolate one powertrain.`;
+    const Wd = 900, H = 300, M = { top:16, right:16, bottom:30, left:38 }, innerW = Wd - M.left - M.right, innerH = H - M.top - M.bottom;
+    svgSel.selectAll('*').remove();
+    const series = Y.map((y, i) => { const o = { i, year:y.year, n:y.n, total:y.total }; FUEL_KEYS.forEach(k => { o[k] = y.total ? y[k] / y.total * 100 : 0; }); return o; });
+    const keys = iso ? [iso] : FUEL_KEYS;
+    const xScale = d3.scalePoint().domain(series.map(d => d.i)).range([0, innerW]).padding(0.08);
+    const yMax = Math.max(8, d3.max(series, d => Math.max(...keys.map(k => d[k]))) * 1.15);
+    const yScale = d3.scaleLinear().domain([0, yMax]).range([innerH, 0]);
+    const g = svgSel.append('g').attr('transform', `translate(${M.left},${M.top})`);
+    g.append('g').attr('class', 'bubble-axis').attr('transform', `translate(0,${innerH})`)
+      .call(d3.axisBottom(xScale).tickFormat(i => series[i].year === CUR ? `${CUR} (${winLabel})` : series[i].year));
+    g.append('g').attr('class', 'bubble-axis').call(d3.axisLeft(yScale).ticks(5).tickFormat(d => d + '%'));
+    const line = key => d3.line().x(d => xScale(d.i)).y(d => yScale(d[key]));
+    const last = series.length - 1;
+    keys.forEach(k => {
+      const solid = series.slice(0, last), dashed = series.slice(Math.max(last - 1, 0));
+      if(solid.length > 1) g.append('path').datum(solid).attr('class', 'trend-line').attr('stroke', FUEL_COLORS[k]).attr('d', line(k));
+      if(dashed.length > 1) g.append('path').datum(dashed).attr('class', 'trend-line').attr('stroke', FUEL_COLORS[k]).attr('stroke-dasharray', '5,4').attr('d', line(k));
+      g.selectAll(`.motor-dot-${k}`).data(series).join('circle').attr('class', `motor-dot-${k}`)
+        .attr('cx', d => xScale(d.i)).attr('cy', d => yScale(d[k])).attr('r', 3.5).attr('fill', FUEL_COLORS[k]);
+      if(iso) g.selectAll(`.motor-val-${k}`).data(series).join('text').attr('x', d => xScale(d.i)).attr('y', d => yScale(d[k]) - 9).attr('text-anchor', 'middle')
+        .style('font-size', '11px').style('font-weight', 700).attr('fill', FUEL_COLORS[k] === '#1a1a1a' ? 'var(--text)' : FUEL_COLORS[k]).text(d => d[k].toFixed(1) + '%');
+    });
+    const guide = g.append('line').attr('class', 'trend-guideline').attr('y1', 0).attr('y2', innerH).style('opacity', 0);
+    g.append('rect').attr('width', innerW).attr('height', innerH).attr('fill', 'transparent')
+      .on('pointermove', e => {
+        const [mx] = d3.pointer(e);
+        const d = series.reduce((best, s) => (best === null || Math.abs(xScale(s.i) - mx) < Math.abs(xScale(best.i) - mx)) ? s : best, null);
+        if(!d) return;
+        guide.attr('x1', xScale(d.i)).attr('x2', xScale(d.i)).style('opacity', 1);
+        const rect = wrap.getBoundingClientRect();
+        tooltip.style.left = (e.clientX - rect.left) + 'px'; tooltip.style.top = (e.clientY - rect.top - 10) + 'px'; tooltip.style.opacity = 1;
+        tooltip.innerHTML = `<strong>${d.year === CUR ? `${CUR} (${winLabel})` : d.year}</strong><br>` + FUEL_KEYS.map(k => `${FUEL_LABELS[k]}: <strong>${d[k].toFixed(1)}%</strong>`).join('<br>') + `<br>${d.n} markets · ${d.total.toLocaleString('en-US')} registrations`;
+      })
+      .on('pointerleave', () => { guide.style('opacity', 0); tooltip.style.opacity = 0; });
+  }
+  document.getElementById('motor-legend').addEventListener('click', e => {
+    const chip = e.target.closest('.legend-chip[data-key]'); if(!chip) return;
+    iso = iso === chip.dataset.key ? null : chip.dataset.key; draw();
   });
-  const xScale = d3.scalePoint().domain(series.map(d => d.i)).range([0, innerW]).padding(0.05);
-  const yMax = Math.max(10, d3.max(series, d => Math.max(...FUEL_KEYS.map(k => d[k]))) * 1.15);
-  const yScale = d3.scaleLinear().domain([0, yMax]).range([innerH, 0]);
-  const g = svgSel.append('g').attr('transform', `translate(${M.left},${M.top})`);
-  g.append('g').attr('class', 'bubble-axis').attr('transform', `translate(0,${innerH})`)
-    .call(d3.axisBottom(xScale).tickFormat(i => { const d = series.find(s => s.i === i); return d.monthsWithData < 12 ? `${d.year} (partial)` : d.year; }));
-  g.append('g').attr('class', 'bubble-axis').call(d3.axisLeft(yScale).ticks(5).tickFormat(d => d + '%'));
-  const line = key => d3.line().x(d => xScale(d.i)).y(d => yScale(d[key]));
-  const lastComplete = series.reduce((acc, d, idx) => d.monthsWithData >= 12 ? idx : acc, -1);
-  FUEL_KEYS.forEach(k => {
-    const solid = series.slice(0, lastComplete + 1), dashed = series.slice(Math.max(lastComplete, 0));
-    if(solid.length > 1) g.append('path').datum(solid).attr('class', 'trend-line').attr('stroke', FUEL_COLORS[k]).attr('d', line(k));
-    if(dashed.length > 1) g.append('path').datum(dashed).attr('class', 'trend-line').attr('stroke', FUEL_COLORS[k]).attr('stroke-dasharray', '5,4').attr('d', line(k));
-    g.selectAll(`.motor-dot-${k}`).data(series).join('circle').attr('class', `motor-dot-${k}`)
-      .attr('cx', d => xScale(d.i)).attr('cy', d => yScale(d[k])).attr('r', 3.5).attr('fill', FUEL_COLORS[k]);
-  });
-  const guide = g.append('line').attr('class', 'trend-guideline').attr('y1', 0).attr('y2', innerH).style('opacity', 0);
-  g.append('rect').attr('width', innerW).attr('height', innerH).attr('fill', 'transparent')
-    .on('pointermove', e => {
-      const [mx] = d3.pointer(e);
-      const d = series.reduce((best, s) => (best === null || Math.abs(xScale(s.i) - mx) < Math.abs(xScale(best.i) - mx)) ? s : best, null);
-      if(!d) return;
-      guide.attr('x1', xScale(d.i)).attr('x2', xScale(d.i)).style('opacity', 1);
-      const rect = wrap.getBoundingClientRect();
-      tooltip.style.left = (e.clientX - rect.left) + 'px'; tooltip.style.top = (e.clientY - rect.top - 10) + 'px'; tooltip.style.opacity = 1;
-      tooltip.innerHTML = `<strong>${d.year}${d.monthsWithData < 12 ? ` (through ${d.lastMonth})` : ''}</strong><br>` + FUEL_KEYS.map(k => `${FUEL_LABELS[k]}: <strong>${d[k].toFixed(1)}%</strong>`).join('<br>') + `<br>Total: ${d.total.toLocaleString('en-US')}`;
-    })
-    .on('pointerleave', () => { guide.style('opacity', 0); tooltip.style.opacity = 0; });
+  document.querySelectorAll('#card-d [data-set]').forEach(btn => btn.addEventListener('click', () => {
+    setMode = btn.dataset.set;
+    document.querySelectorAll('#card-d [data-set]').forEach(b => b.classList.toggle('active', b === btn));
+    draw();
+  }));
+  draw();
 })();
 </script>
 <script src="assets/notes-toggle.js"></script>
