@@ -69,12 +69,19 @@
   .pe-bubble{ stroke:rgba(0,0,0,.25); stroke-width:.75; cursor:pointer; }
   .pe-bubble-label{ font-size:9.5px; fill:var(--text); pointer-events:none; font-weight:700; paint-order:stroke; stroke:var(--surface); stroke-width:3px; }
   .pe-legend-continent{ display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; font-size:12px; color:var(--text-muted); }
-  .pe-legend-continent span{ display:inline-flex; align-items:center; gap:6px; }
+  .pe-legend-continent .pe-cont-btn{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border:1px solid var(--border); border-radius:999px; background:var(--surface); color:var(--text-muted); font:inherit; font-weight:600; cursor:pointer; transition:opacity .15s, background .15s; }
+  .pe-legend-continent .pe-cont-btn:hover{ background:var(--surface-alt); }
+  .pe-legend-continent .pe-cont-btn.on{ color:var(--text); border-color:var(--text-muted); background:var(--surface-alt); }
+  .pe-legend-continent.has-sel .pe-cont-btn:not(.on){ opacity:.45; }
+  .pe-legend-continent .pe-cont-all{ border-style:dashed; }
   .pe-legend-continent .sw{ width:10px; height:10px; border-radius:50%; display:inline-block; }
+  .pe-bubble.pe-dim{ fill-opacity:.05; stroke-opacity:0; pointer-events:none; }
+  .pe-bubble-label.pe-dim{ display:none; }
+  .pe-cont-hint{ font-size:11.5px; color:var(--text-muted); margin-top:6px; }
 
   /* the 2010/2020/latest trend charts in the rank-row/map tooltips need more room than the
      site-wide tooltip's default max-width, since this page shows two mini charts side by side */
-  .pe-page .tooltip{ max-width:460px; }
+  .pe-page .tooltip{ max-width:490px; }
 </style>
 </head>
 <body>
@@ -167,6 +174,7 @@
           <div class="tooltip" id="map-tooltip"></div>
         </div>
         <div class="map-legend" id="map-legend"></div>
+        <div class="pe-legend-continent" id="map-continent-legend"></div>
       </div>
 
       <div class="card chart-card">
@@ -292,11 +300,14 @@ function ratioAtLatestFor(c){
 // always comparable, even on the per-adult/per-15-64 tabs. ---
 const TREND_ERAS = ['2010', '2020', 'latest'];
 const TREND_ERA_LABELS = { '2010':'2010', '2020':'2020', latest:'Latest' };
-function trendField(base, era){ return era === 'latest' ? base : yearFieldName(base) + era; }
+// the 15-64 head-count only exists for Latest (no historical age split on file), so on the per-15-64 tabs the 2010/2020 bars are n/a
+function trendField(base, era){ return era === 'latest' ? base : base === 'workPop' ? '__no_history' : yearFieldName(base) + era; }
 function trendFieldsFor(metric){
+  const work = (metric === 'sales' && salesBasis === 'work') || (metric === 'fleet' && fleetBasis === 'work');
+  const pop = work ? 'workPop' : 'population';
   return {
-    sales: { pop:'population', total:'salesTotal' },
-    fleet: { pop:'population', total:'fleetTotal' },
+    sales: { pop, total:'salesTotal' },
+    fleet: { pop, total:'fleetTotal' },
     oil:   { pop:'population', total:'oilLitres' },
   }[metric];
 }
@@ -320,56 +331,59 @@ function countryRatioChartSVG(country, fld, isOil){
   });
   if(pts.every(v => v == null)) return '';
   const maxV = Math.max(...pts.filter(v => v != null));
-  const W = 190, H = 110, barW = 34, gap = 24, base = H - 20;
-  const unit = isOil ? 'L/person' : 'cars/100 people';
+  const W = 210, H = 150, barW = 38, gap = 24, base = H - 22;
+  const unit = isOil ? 'L/person' : fld.pop === 'workPop' ? 'cars/100 people aged 15-64' : 'cars/100 people';
   const bars = pts.map((v, i) => {
     const x = 14 + i * (barW + gap);
     const label = TREND_ERA_LABELS[TREND_ERAS[i]];
     if(v == null){
       return `<rect x="${x}" y="${base-4}" width="${barW}" height="4" fill="rgba(255,255,255,.2)" rx="2"></rect>
-        <text x="${x+barW/2}" y="${base+16}" text-anchor="middle" font-size="9.5" fill="var(--bg)" opacity="0.75">${label}</text>
+        <text x="${x+barW/2}" y="${base+15}" text-anchor="middle" font-size="10" fill="var(--bg)" opacity="0.8">${label}</text>
         <text x="${x+barW/2}" y="${base-10}" text-anchor="middle" font-size="8.5" fill="var(--bg)" opacity="0.6">n/a</text>`;
     }
-    const h = Math.max(3, (v / maxV) * (base - 16));
+    const h = Math.max(3, (v / maxV) * (base - 30));
     const y = base - h;
     const fmtV = v >= 100 ? Math.round(v).toLocaleString('en-US') : v.toFixed(1);
     const isLast = i === pts.length - 1;
     return `<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="${isLast ? ACCENT : ACCENT2}" opacity="${isLast ? 1 : 0.5 + i*0.2}" rx="3"></rect>
       <text x="${x+barW/2}" y="${y-6}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--bg)">${fmtV}</text>
-      <text x="${x+barW/2}" y="${base+16}" text-anchor="middle" font-size="9.5" fill="var(--bg)" opacity="0.75">${label}</text>`;
+      <text x="${x+barW/2}" y="${base+15}" text-anchor="middle" font-size="10" fill="var(--bg)" opacity="0.8">${label}</text>`;
   }).join('');
   return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${bars}</svg>
     <div style="font-size:10.5px;opacity:.6;text-align:center;">${unit}</div>`;
 }
 
-// chart 2: the raw totals — bars for the metric's absolute count, plus a yellow line for population
+// chart 2: the raw totals -- the population line lives in its own lane ABOVE the bars so its numbers can never collide with the bar values
 function countryTotalsChartSVG(country, fld){
   const c = POPULATION_ENERGY[country];
   const totals = TREND_ERAS.map(era => c[trendField(fld.total, era)]);
   const pops = TREND_ERAS.map(era => c[trendField(fld.pop, era)]);
   if(totals.every(v => v == null) && pops.every(v => v == null)) return '';
+  const popName = fld.pop === 'workPop' ? 'population 15-64' : 'population';
   const maxTotal = Math.max(1, ...totals.filter(v => v != null));
-  const maxPop = Math.max(1, ...pops.filter(v => v != null));
-  const W = 190, H = 110, barW = 34, gap = 24, base = H - 20, top = 14;
+  const popVals = pops.filter(v => v != null), minPop = Math.min(...popVals), maxPop = Math.max(...popVals);
+  const W = 210, H = 150, barW = 38, gap = 24, base = H - 22;
+  const laneTop = 22, laneBot = 50, barTop = 76;        // population lane: y 22-50 (labels above), bars: tallest bar reaches y 76 (its value label sits just above)
   const totalLabel = { sales:'cars sold', fleet:'cars on road', oil:'litres consumed' }[currentMetric];
+  const cx = i => 14 + i * (barW + gap) + barW / 2;
   const bars = totals.map((v, i) => {
-    const x = 14 + i * (barW + gap);
-    const isLast = i === totals.length - 1;
-    if(v == null) return `<rect x="${x}" y="${base-4}" width="${barW}" height="4" fill="rgba(255,255,255,.2)" rx="2"></rect>`;
-    const h = Math.max(3, (v / maxTotal) * (base - top));
-    const y = base - h;
+    const x = 14 + i * (barW + gap), isLast = i === totals.length - 1;
+    if(v == null) return `<rect x="${x}" y="${base-4}" width="${barW}" height="4" fill="rgba(255,255,255,.2)" rx="2"></rect><text x="${cx(i)}" y="${base-9}" text-anchor="middle" font-size="8.5" fill="var(--bg)" opacity="0.6">n/a</text>`;
+    const h = Math.max(3, (v / maxTotal) * (base - barTop)), y = base - h;
     return `<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="${isLast ? ACCENT : ACCENT2}" opacity="${isLast ? 1 : 0.5 + i*0.2}" rx="3"></rect>
-      <text x="${x+barW/2}" y="${y-6}" text-anchor="middle" font-size="10" font-weight="700" fill="var(--bg)">${fmtCompact(v)}</text>`;
+      <text x="${cx(i)}" y="${y-5}" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--bg)">${fmtCompact(v)}</text>`;
   }).join('');
-  const linePts = pops.map((v, i) => v == null ? null : [14 + i*(barW+gap) + barW/2, base - (v / maxPop) * (base - top)]);
+  // population: min-max scaled inside its lane (a population line from zero would look flat), thin guide line behind
+  const py = v => maxPop === minPop ? (laneTop + laneBot) / 2 : laneBot - (v - minPop) / (maxPop - minPop) * (laneBot - laneTop);
+  const linePts = pops.map((v, i) => v == null ? null : [cx(i), py(v)]);
   const present = linePts.filter(Boolean);
-  const path = present.length > 1
-    ? `<path d="M ${present.map(p => p.join(',')).join(' L ')}" fill="none" stroke="${POP_LINE_COLOR}" stroke-width="2.25"></path>` : '';
-  const dots = linePts.map((p, i) => !p ? '' : `<circle cx="${p[0]}" cy="${p[1]}" r="3.25" fill="${POP_LINE_COLOR}"></circle>
-    <text x="${p[0]}" y="${p[1]-8}" text-anchor="middle" font-size="9" font-weight="700" fill="${POP_LINE_COLOR}">${fmtCompact(pops[i])}</text>`).join('');
-  const labels = TREND_ERAS.map((era, i) => `<text x="${14 + i*(barW+gap) + barW/2}" y="${base+16}" text-anchor="middle" font-size="9.5" fill="var(--bg)" opacity="0.75">${TREND_ERA_LABELS[era]}</text>`).join('');
-  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${bars}${path}${dots}${labels}</svg>
-    <div style="font-size:10.5px;opacity:.6;text-align:center;">${totalLabel} (bars) · <span style="color:${POP_LINE_COLOR}">population</span> (line)</div>`;
+  const path = present.length > 1 ? `<path d="M ${present.map(p => p.map(n => n.toFixed(1)).join(',')).join(' L ')}" fill="none" stroke="${POP_LINE_COLOR}" stroke-width="2.25"></path>` : '';
+  const dots = linePts.map((p, i) => !p ? '' : `<circle cx="${p[0]}" cy="${p[1].toFixed(1)}" r="3.25" fill="${POP_LINE_COLOR}"></circle>
+    <text x="${p[0]}" y="${(p[1] - 7).toFixed(1)}" text-anchor="middle" font-size="9.5" font-weight="700" fill="${POP_LINE_COLOR}">${fmtCompact(pops[i])}</text>`).join('');
+  const lane = `<line x1="8" x2="${W-8}" y1="${laneBot+10}" y2="${laneBot+10}" stroke="var(--bg)" stroke-opacity=".18" stroke-dasharray="3 3"></line>`;
+  const labels = TREND_ERAS.map((era, i) => `<text x="${cx(i)}" y="${base+15}" text-anchor="middle" font-size="10" fill="var(--bg)" opacity="0.8">${TREND_ERA_LABELS[era]}</text>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${lane}${bars}${path}${dots}${labels}</svg>
+    <div style="font-size:10.5px;opacity:.7;text-align:center;">${totalLabel} (bars) · <span style="color:${POP_LINE_COLOR}">${popName}</span> (${fld.pop === 'workPop' ? 'dot' : 'line, own scale'})</div>${fld.pop === 'workPop' ? '<div style="font-size:10px;opacity:.55;text-align:center;">age split only available for Latest</div>' : ''}`;
 }
 
 function countryTrendChartHTML(country){
@@ -380,7 +394,7 @@ function countryTrendChartHTML(country){
   const chart1 = countryRatioChartSVG(country, fld, isOil);
   const chart2 = countryTotalsChartSVG(country, fld);
   if(!chart1 && !chart2) return '';
-  return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.18); display:flex; gap:16px; align-items:flex-start;">
+  return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.18); display:flex; gap:18px; align-items:flex-start;">
     ${chart1 ? `<div>${chart1}</div>` : ''}
     ${chart2 ? `<div>${chart2}</div>` : ''}
   </div>`;
@@ -448,6 +462,9 @@ let fleetBasis = 'person';
 let salesBasis = 'person';
 let currentTab = 'sales';
 let isolatedCountry = null;
+// continent legend buttons: empty set = show everything; otherwise only the selected continents are shown (bars, map, bubbles)
+const contSel = new Set();
+const contShown = c => !contSel.size || contSel.has(c);
 
 function activeData(){
   const m = METRICS[currentMetric];
@@ -526,8 +543,9 @@ function renderMap(){
     .attr('d', path)
     .attr('fill', d => {
       const entry = entryForMapName(d.properties.name);
-      return entry ? colorScale(entry.ratio) : null;
+      return entry ? (contShown(entry.continent) ? colorScale(entry.ratio) : 'var(--surface-alt)') : null;
     })
+    .style('opacity', d => { const e = entryForMapName(d.properties.name); return e && !contShown(e.continent) ? 0.35 : null; })
     .on('pointermove', (e, d) => {
       const entry = entryForMapName(d.properties.name);
       const rect = mapWrap.getBoundingClientRect();
@@ -559,8 +577,10 @@ const barTooltip = document.getElementById('bar-tooltip');
 
 function renderBars(data){
   const m = METRICS[currentMetric];
-  const sorted = [...data].sort((a,b) => b.ratio - a.ratio);
+  const allSorted = [...data].sort((a,b) => b.ratio - a.ratio);
+  const sorted = allSorted.filter(d => contShown(d.continent));
   if(!sorted.length){
+    renderContinentLegend(allSorted, 'rank-continent-legend');
     rankRows.innerHTML = '<div class="legend-nodata">No data for this metric yet.</div>';
     return;
   }
@@ -594,7 +614,7 @@ function renderBars(data){
       </div>
     </div>`;
   }).join('');
-  renderContinentLegend(sorted, 'rank-continent-legend');
+  renderContinentLegend(allSorted, 'rank-continent-legend');
 }
 
 rankRows.addEventListener('pointermove', e => {
@@ -683,6 +703,7 @@ function render(){
   renderMapLegend(data);
   renderMap();
   renderBars(data);
+  renderContinentLegend(data, 'map-continent-legend');
 }
 
 document.querySelectorAll('[data-metric]').forEach(btn => {
@@ -796,6 +817,7 @@ function renderBubble(){
       peBubbleTooltip.style.opacity = 1;
       peBubbleTooltip.innerHTML = `${d.country} — ${ERA_LABELS[ERA_KEYS[eraIdx]]}<br><strong>${f.ratio >= 1000 ? Math.round(f.ratio).toLocaleString('en-US') : f.ratio.toFixed(1)}</strong> ${METRICS[metric].unitLabel}<br><span style="opacity:.7">Population ${fmtN(f.pop)} · total ${Math.round(f.total).toLocaleString('en-US')}</span>`;
     })
+    .classed('pe-dim', d => !contShown(d.continent))
     .on('pointerleave', () => { peBubbleTooltip.style.opacity = 0; });
 
   // top 12 countries by bubble size get a label, to keep the chart legible
@@ -805,6 +827,7 @@ function renderBubble(){
     .attr('x', d => x(d.frames[eraIdx].pop))
     .attr('y', d => y(d.frames[eraIdx].ratio) - r(d.frames[eraIdx].total) - 4)
     .attr('text-anchor','middle')
+    .classed('pe-dim', d => !contShown(d.continent))
     .text(d => d.country);
 
   window.__peBubbleG = g;
@@ -817,9 +840,27 @@ function renderBubble(){
 
 function renderContinentLegend(rows, targetId = 'pe-continent-legend'){
   const present = [...new Set(rows.map(d => d.continent))].sort();
-  document.getElementById(targetId).innerHTML = present.map(c => `
-    <span><span class="sw" style="background:${continentColor(c)}"></span>${c}</span>`).join('');
+  const el = document.getElementById(targetId);
+  el.classList.toggle('has-sel', contSel.size > 0);
+  el.innerHTML = present.map(c => `
+    <button type="button" class="pe-cont-btn${contSel.has(c) ? ' on' : ''}" data-cont="${c}" title="Show only ${c} (click more to add, click again to remove)"><span class="sw" style="background:${continentColor(c)}"></span>${c}</button>`).join('')
+    + (contSel.size ? `<button type="button" class="pe-cont-btn pe-cont-all" data-cont="">Show all</button>` : '');
 }
+document.addEventListener('click', e => {
+  const b = e.target.closest('.pe-legend-continent .pe-cont-btn');
+  if(!b) return;
+  const c = b.dataset.cont;
+  if(!c) contSel.clear();
+  else if(contSel.has(c)) contSel.delete(c);
+  else contSel.add(c);
+  const data = activeData();
+  renderMap();
+  renderBars(data);
+  renderContinentLegend(data, 'map-continent-legend');
+  if(window.__peBubbleRows){
+    renderBubble();
+  }
+});
 
 function updateEraLabel(){
   document.getElementById('pe-era-label').innerHTML = `Showing <strong>${ERA_LABELS[ERA_KEYS[eraIdx]]}</strong> · ${window.__peBubbleRows ? window.__peBubbleRows.length : 0} countries with full 2010→2020→latest coverage for this metric`;
