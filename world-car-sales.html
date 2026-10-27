@@ -98,7 +98,7 @@
         <div class="chart-header-row">
           <h2>Estimated light vehicles on the road (world), since 2000</h2>
         </div>
-        <p class="note">Estimated worldwide stock of light vehicles (cars and light commercial vehicles) in use, 2000–2025, plus a projected 2026 point (washed-out last segment), built from the bottom up: the 50 countries tracked on this site plus an estimated rest of the world. Each country uses real fleet counts where they exist (Eurostat, UK DfT, Japan, US, Mexico, Brazil, Russia) and otherwise ages its new registrations with a survival curve — its own where real cohort statistics exist, else a regional average — scaled to the real counts. The dots are the fleet the IEA implies for 2010–2024; the two methods are independent and agree within about 3% from 2015. The electric part (BEV and PHEV) comes from cumulative IEA sales reconciled to the IEA's measured electric-car stock. This is an estimate, not a census — see Notes.</p>
+        <p class="note">Estimated worldwide stock of light vehicles (cars and light commercial vehicles) in use, 2000–2025, a projected 2026 point, and a simple trend extrapolation out to 2040 (progressively lighter the further out it goes — the accent line marks 2026, the current year), built from the bottom up: the 50 countries tracked on this site plus an estimated rest of the world. Each country uses real fleet counts where they exist (Eurostat, UK DfT, Japan, US, Mexico, Brazil, Russia) and otherwise ages its new registrations with a survival curve — its own where real cohort statistics exist, else a regional average — scaled to the real counts. The dots are the fleet the IEA implies for 2010–2024; the two methods are independent and agree within about 3% from 2015. The electric part (BEV and PHEV) comes from cumulative IEA sales reconciled to the IEA's measured electric-car stock. This is an estimate, not a census — see Notes.</p>
         <div class="legend-row">
           <div class="chart-legend" id="legend-c"></div>
           <div class="chart-mode-toggle lg" role="group" aria-label="Units or share">
@@ -138,6 +138,7 @@
           <li><strong>BEV vs ICE.</strong> 2010–2025: IEA Global EV Data Explorer via Our World in Data: light-vehicle sales (electric + non-electric), electric sales (BEV + PHEV) and the BEV share of electric sales. "ICE &amp; hybrids" is every light vehicle that cannot be plugged in — petrol, diesel, LPG/CNG and conventional (non-plug-in) hybrids; the IEA does not publish a global hybrid (HEV) sales series, so HEV can't be split out. 2025 values are IEA estimates. 2000–2009: totals are the estimates described under “Sales, 2000–2009 (estimate)”; no worldwide BEV or PHEV sales series exists before 2010 (the IEA's starts then), and the plug-in fleet at the end of 2009 was only about 30,000 vehicles, so BEV and PHEV are shown as zero, not measured.</li>
           <li><strong>Fleet method (rebuilt 2026-10-19).</strong> World fleet = the 50 tracked countries + rest of world. For each country (script <code>scripts/build_cars_on_road.py</code>): registrations 2005–2026 from this site's market data, earlier cohorts back-cast, aged with a survival curve (country-specific for Germany, Norway, UK, Netherlands, Japan, China and the US; regional average for the others; table <code>cars_duration_rate</code>), then replaced or scaled by real fleet counts — Eurostat (21 European countries 2013–2025), DfT (UK 2005–2025), Japan (MLIT/JAMA), the US (S&amp;P Global Mobility, 289 M), Mexico (IDF, 35 M), Brazil (Sindipeças), Canada (Statistics Canada, 24.6 M), Australia (BITRE, 20.7 M), India (MoRTH registrations), China (MPS 2018 floor of 200 M small passenger cars) and Russia (Autostat-derived). Countries with no real count (South Korea and the smaller markets) are pure model estimates, typically ±20%; China is the weakest: its only anchor is the 2018 floor, and the 2025 estimate (279 M) is probably 10% low against the Ministry of Public Security's 366 M automobiles (which include trucks and buses). Rest of world (about 60 M of the 2025 total of 1,341 M): OICA passenger-car sales of all countries minus the 50 tracked, converted to light vehicles (×1.07 in 2000 rising to ×1.23 in 2024, the IEA/OICA ratio) and aged with the Latin America curve; fleets that rely on used imports (much of Africa, the Middle East, Central Asia) are undercounted by this method. Survival: cars last about 13–18 years (UK median 12 years for 1990s cohorts, 15.5 for 2008; Netherlands about 18; Germany 16; US 17; China 13). Cross-check: the total sits within about 3% of the fleet the IEA implies for 2015–2024 (1,317 M vs 1,333 M in 2024), but is 11% above it in 2010, where the model has no used-export losses; it replaces the earlier flat-scrappage model (1.39 B in 2025), which was too high.</li>
           <li><strong>Fleet 2026 (projection).</strong> The 2026 point uses each tracked country's 2026 projected registrations (year-to-date plus the site's standard trend, with China at its retail level), rest-of-world sales held at the 2025 level, and BEV/PHEV 2026 sales = IEA 2025 sales × the growth of the site's own 2026 projection (BEV +10%, PHEV −16%; the IEA's own outlook of about 23 million electric cars in 2026 is higher than this). Result: fleet +12 M to about 1,353 M, BEV 66 M, PHEV 31 M (estimated), ICE &amp; hybrids about 1,256 M, i.e. <strong>about −8 M against 2025</strong> — the first decline in this series. It is a projection, not a measurement: a rebound in China's retail market in Q4 would turn it into a flat year, and Japan and Russia fall partly through the model's ageing mechanics on low registration years.</li>
+          <li><strong>Fleet 2027–2040 (trend extrapolation, computed in the page itself, not the Python build).</strong> Each series' (total, BEV, PHEV) 2020–2026 compound annual growth rate — total +1.4%, BEV +46%, PHEV +45% — decays 25% per year toward a modest long-run rate (total 1.0%, roughly population growth; BEV 8%, a maturing market; PHEV 1%, essentially flat), so the explosive early-EV growth tapers off instead of compounding for 14 more years; ICE &amp; hybrids is the remainder, floored at zero. Result: total fleet reaches about 1.58 B by 2040 with BEV+PHEV around 40% of it. This is a simple illustrative continuation of the recent trend, not a scenario from any outside forecaster (IEA, BNEF, etc.) and not built up from the 50-country model the way every other year on this chart is — treat 2027–2040 as a "what if the recent trend keeps decaying toward a plateau" line, progressively faded on the chart the further out it runs.</li>
           <li><strong>Fleet electric part.</strong> BEV and PHEV stocks are unchanged from the IEA-based series: cumulative IEA sales with a constant 1.5% yearly loss, the value that best reproduces the IEA's measured global electric-car stock (76 million at end-2025 per GEVO 2026; model: 77 million, within ±3% in every year 2014–2025). BEV/PHEV before 2010 are negligible (~30,000 vehicles at end-2009). ICE &amp; hybrids is the total fleet minus BEV and PHEV, so it includes conventional hybrids. Heavy trucks, buses and two/three-wheelers are not in the fleet.</li>
           <li><strong>BEV vs ICE 2026 (projection).</strong> The 2026 bar is IEA 2025 sales (84.8 million) multiplied by the growth between 2025 and the site's own 2026 projection, measured over the 61 countries that have both a 2025 annual and a 2026 projected fuel split: total about −4%, BEV about +10%, PHEV about −16%, which gives roughly 81.6 million light vehicles, of which 15.4 million BEV, 6.1 million PHEV and 60.2 million ICE and hybrids. It uses the same growth rates as the 2026 fleet point below, so the two charts agree. It is a projection, not a measurement; the IEA's own outlook for 2026 electric-car sales (about 23 million) is higher than this site's trend.</li>
           <li><strong>Motorisation Trends.</strong> Built from this site's own country files (Powertrain Mix by Country): 2022-2025 use each market's annual powertrain split, and the current year is a dedicated April-to-present point: all the monthly data available from April 2026 to the latest month, each market contributing the months it has published (the newest months are therefore thinner in markets, as in Mix by Country). Shares are the sum of each fuel over the selected markets divided by the sum of their registrations. "All markets with data" uses every market that has a split in that year (the set grows from 2022 to 2025); "Same markets every year" keeps only the markets present in every year, which is the comparable view. Click a legend chip to isolate one powertrain. Hong Kong, Japan and a few others fold some hybrids into petrol, as in their sources.</li>
@@ -166,6 +167,36 @@ const latestPw = PW_HIST[PW_HIST.length-1];
 const FLEET_HIST = WCS.fleet.filter(d => !d.proj);
 const FLEET_2026 = WCS.fleet.find(d => d.proj);
 const latestFl = FLEET_HIST[FLEET_HIST.length-1];
+
+// Simple multi-year extension past 2026 (the site's own near-term projection) out to 2040 --
+// NOT a new bottom-up model like 2026 is, just a continuation of the recent trend: each series'
+// 2020-2026 CAGR, decayed 25%/yr toward a modest long-run rate, so the far-future values taper off
+// instead of compounding today's explosive early-EV growth rate for another 14 years.
+function extendFleetTo2040(){
+  const f2020 = WCS.fleet.find(r => r.y === 2020);
+  const cagr = (a, b, n) => Math.pow(b / a, 1 / n) - 1;
+  const r0 = {
+    total: cagr(f2020.total, FLEET_2026.total, 6),
+    bev: cagr(f2020.bev, FLEET_2026.bev, 6),
+    phev: cagr(f2020.phev, FLEET_2026.phev, 6),
+  };
+  const terminal = { total: 0.010, bev: 0.08, phev: 0.01 }; // roughly population growth, a maturing EV market, and a flat PHEV fleet
+  const decay = 0.75;
+  const rateAt = (k, yearsOut) => terminal[k] + (r0[k] - terminal[k]) * Math.pow(decay, yearsOut);
+  let cur = { total: FLEET_2026.total, bev: FLEET_2026.bev, phev: FLEET_2026.phev };
+  const out = [];
+  for(let y = 2027; y <= 2040; y++){
+    const yearsOut = y - 2026;
+    const total = cur.total * (1 + rateAt('total', yearsOut));
+    const bev = cur.bev * (1 + rateAt('bev', yearsOut));
+    const phev = cur.phev * (1 + rateAt('phev', yearsOut));
+    const ice = Math.max(0, total - bev - phev);
+    cur = { total, bev, phev };
+    out.push({ y, total, bev, phev, ice, proj: true, farProj: true });
+  }
+  return out;
+}
+const FLEET_ALL = WCS.fleet.concat(extendFleetTo2040());
 
 // ---- stat tiles ----
 document.getElementById('stat-row').innerHTML = [
@@ -313,24 +344,38 @@ function drawB(mode){
 }
 
 // ================= 11C =================
+const FLEET_NOW_YEAR = 2026;        // the current year -- this is where the real/near-term projection ends and the long extrapolation starts
+const FLEET_LAST_YEAR = 2040;
 function drawC(mode){
   const keys = ['ice','phev','bev'];
-  const rows = WCS.fleet;
+  const rows = FLEET_ALL;
   MODE.c = mode;
   const c = stacked('c', rows, keys, null, mode);
   const {g,iw,ih,data,years,y,share,drawKeys,iso} = c;
-  const x = d3.scaleLinear().domain([2000,2026]).range([0,iw]);
+  const x = d3.scaleLinear().domain([2000,FLEET_LAST_YEAR]).range([0,iw]);
   g.append('g').attr('class','bubble-axis').attr('transform',`translate(0,${ih})`)
-    .call(d3.axisBottom(x).tickValues(d3.range(2000,2027,5).concat([2026])).tickFormat(d3.format('d')));
+    .call(d3.axisBottom(x).tickValues(d3.range(2000,FLEET_LAST_YEAR+1,5).concat([FLEET_NOW_YEAR,FLEET_LAST_YEAR]).filter((v,i,a)=>a.indexOf(v)===i)).tickFormat(d3.format('d')));
   g.append('g').attr('class','bubble-axis').call(d3.axisLeft(y).ticks(6).tickFormat(d => share ? d+'%' : (d/1e6)+' M'));
+  // 2027-2040 is a simple trend extrapolation (not the detailed model 2026 itself uses), so it
+  // fades out the further it gets from the current year -- a gradient per fill color, full opacity
+  // up to 2026 and tapering down to 2040, rather than a flat "projected" overlay for 14 years.
+  const fadeStart = (FLEET_NOW_YEAR-2000)/(FLEET_LAST_YEAR-2000);
+  const defs = g.append('defs');
+  drawKeys.forEach(k => {
+    const grad = defs.append('linearGradient').attr('id','fleet-fade-'+k).attr('x1','0%').attr('x2','100%').attr('y1','0%').attr('y2','0%');
+    grad.append('stop').attr('offset','0%').attr('stop-color',COL[k]).attr('stop-opacity',0.9);
+    grad.append('stop').attr('offset',(fadeStart*100)+'%').attr('stop-color',COL[k]).attr('stop-opacity',0.9);
+    grad.append('stop').attr('offset','100%').attr('stop-color',COL[k]).attr('stop-opacity',0.3);
+  });
   const stack = d3.stack().keys(drawKeys)(data);
   const area = d3.area().x(d=>x(d.data.y)).y0(d=>y(d[0])).y1(d=>y(d[1]));
-  stack.forEach(layer => g.append('path').datum(layer).attr('d',area).attr('fill',COL[layer.key]).attr('opacity',0.9));
-  // 2026 = projection: wash out the last segment and mark it
-  const p0 = x(2025), p1 = x(2026);
-  g.append('rect').attr('x',p0).attr('width',p1-p0).attr('y',0).attr('height',ih).attr('fill','var(--surface)').attr('opacity',0.45).style('pointer-events','none');
-  g.append('line').attr('x1',p0).attr('x2',p0).attr('y1',0).attr('y2',ih).attr('stroke','var(--text)').attr('stroke-dasharray','4,3').attr('opacity',0.6).style('pointer-events','none');
-  g.append('text').attr('x',p0-6).attr('y',12).attr('text-anchor','end').style('font-size','11px').attr('fill','var(--text-muted)').text('2026 projected →');
+  stack.forEach(layer => g.append('path').datum(layer).attr('d',area).attr('fill','url(#fleet-fade-'+layer.key+')'));
+  // frame the current year -- once the chart runs out to 2040, 2026 sits in the middle of the
+  // pack rather than at the right edge, so mark it clearly instead of just washing out a corner.
+  const xNow = x(FLEET_NOW_YEAR);
+  g.append('line').attr('x1',xNow).attr('x2',xNow).attr('y1',0).attr('y2',ih).attr('stroke','var(--accent)').attr('stroke-width',2).attr('stroke-dasharray','2,3').style('pointer-events','none');
+  g.append('text').attr('x',xNow+6).attr('y',12).style('font-size','11px').attr('font-weight',700).attr('fill','var(--accent)').text('◀ 2026, current year').style('pointer-events','none');
+  g.append('text').attr('x',x(FLEET_LAST_YEAR)-6).attr('y',ih-8).attr('text-anchor','end').style('font-size','10.5px').attr('fill','var(--text-muted)').text('2027–2040: simple trend extrapolation').style('pointer-events','none');
   if(!share && !iso){
     g.selectAll('.iea').data(rows.filter(r=>r.iea!=null)).join('circle')
       .attr('cx',d=>x(d.y)).attr('cy',d=>y(d.iea)).attr('r',3).attr('fill','var(--surface)')
@@ -339,15 +384,16 @@ function drawC(mode){
   const guide = g.append('line').attr('class','trend-guideline').attr('y1',0).attr('y2',ih).style('opacity',0);
   g.append('rect').attr('width',iw).attr('height',ih).attr('fill','transparent')
     .on('pointermove', e => {
-      const yr = Math.max(2000, Math.min(2026, Math.round(x.invert(d3.pointer(e)[0]))));
+      const yr = Math.max(2000, Math.min(FLEET_LAST_YEAR, Math.round(x.invert(d3.pointer(e)[0]))));
       const r = rows.find(d=>d.y===yr), prev = rows.find(d=>d.y===yr-1);
       guide.attr('x1',x(yr)).attr('x2',x(yr)).style('opacity',1);
       const dIce = prev ? (r.ice-prev.ice)/1e6 : null;
-      showTip('c',e,`<strong>${yr}</strong> (${r.proj ? 'projection' : 'estimate'})<br>Fleet: <strong>${fmtM(r.total)}</strong>` +
+      showTip('c',e,`<strong>${yr}</strong> (${r.farProj ? 'trend extrapolation' : r.proj ? 'projection' : 'estimate'})<br>Fleet: <strong>${fmtM(r.total)}</strong>` +
         `<br>BEV: <strong>${fmtM(r.bev)}</strong> (${(r.bev/r.total*100).toFixed(2)}%)` +
         `<br>PHEV${r.proj ? ' (estimated)' : ''}: <strong>${fmtM(r.phev)}</strong> (${(r.phev/r.total*100).toFixed(2)}%)` +
         `<br>ICE &amp; hybrids: <strong>${fmtM(r.ice)}</strong>` + (dIce!=null ? ` (${dIce>=0?'+':''}${dIce.toFixed(1)} M vs ${yr-1})` : '') +
-        (r.proj ? `<br><span style="opacity:.75">2026 sales: BEV ${fmtM(r.bevSales)}, PHEV ${fmtM(r.phevSales)} (IEA 2025 sales × the site's 2026 projected growth: BEV ${(r.growth.bev*100).toFixed(0)}%, PHEV ${(r.growth.phev*100).toFixed(0)}%)</span>` :
+        (r.farProj ? `<br><span style="opacity:.75">Simple extrapolation: each series' 2020-2026 growth rate, decayed toward a modest long-run rate — not the detailed model used for 2026 itself.</span>` :
+         r.proj ? `<br><span style="opacity:.75">2026 sales: BEV ${fmtM(r.bevSales)}, PHEV ${fmtM(r.phevSales)} (IEA 2025 sales × the site's 2026 projected growth: BEV ${(r.growth.bev*100).toFixed(0)}%, PHEV ${(r.growth.phev*100).toFixed(0)}%)</span>` :
           `<br>New sales that year (IEA basis): ${fmtM(r.sales)}${r.measuredSales?'':' (estimated)'}`) +
         (r.iea!=null ? `<br>IEA-implied fleet: ${fmtM(r.iea)}` : ''));
     })
