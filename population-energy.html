@@ -152,6 +152,7 @@
         <p class="note" id="rank-note">Higher = more cars sold relative to population (a "hotter" market). Bar length is proportional to cars sold per 100 people, so the longest bar is the hottest market. Click a row to isolate it on the map.</p>
         <div class="rank-rows raw-mode" id="rank-rows"></div>
         <div class="tooltip" id="bar-tooltip"></div>
+        <div class="pe-legend-continent" id="rank-continent-legend"></div>
       </div>
 
       <div class="card chart-card">
@@ -262,6 +263,17 @@ function yearLabelFor(c, which){
   return { year: c.oilYear, projected: false };
 }
 function yearSuffix(){ return currentYear === 'latest' ? '' : ` — ${currentYear}`; }
+
+// Growth badge helper: re-runs the active metric's own ratio() against "latest" regardless of
+// which year tab is currently selected, so a 2010 (or 2020) row can show how it's changed since.
+function ratioAtLatestFor(c){
+  const m = METRICS[currentMetric];
+  const saved = currentYear;
+  currentYear = 'latest';
+  const r = m.hasEntry(c) ? m.ratio(c) : null;
+  currentYear = saved;
+  return r;
+}
 
 // --- hover mini-chart: 2010 / 2020 / Latest bars for whichever metric tab is active, appended to
 // both the rank-row tooltip and the map tooltip. Always computed on a straight per-person basis
@@ -500,19 +512,35 @@ function renderBars(data){
   }
   const ratios = sorted.map(d => d.ratio);
   const maxRatio = Math.max(...ratios);
+  const showGrowth = currentYear !== 'latest'; // growth-to-latest is only meaningful off the Latest tab
   rankRows.innerHTML = sorted.map(d => {
     const width = maxRatio === 0 ? 10 : d.ratio / maxRatio * 100; // highest ratio always gets the full-length bar now
     const isolateClass = isolatedCountry === d.country ? ' active-isolate' : '';
     const valueText = d.ratio >= 1000 ? Math.round(d.ratio).toLocaleString('en-US') : d.ratio.toFixed(1);
+    const barColor = continentColor(d.continent);
+    let growthHTML = '';
+    if(showGrowth){
+      const latestRatio = ratioAtLatestFor(d);
+      if(latestRatio != null && d.ratio > 0){
+        const pct = (latestRatio - d.ratio) / d.ratio * 100;
+        const pctText = `${pct > 0 ? '+' : ''}${pct.toFixed(0)}%`;
+        const pctClass = pct >= 0 ? 'yoy-up' : 'yoy-down';
+        growthHTML = `<div class="pct-label ${pctClass}" title="Change from ${currentYear} to latest">${pctText}</div>`;
+      } else {
+        growthHTML = `<div class="pct-label" title="No latest-year figure to compare">—</div>`;
+      }
+    }
     return `
     <div class="rank-row isolatable${isolateClass}" data-row-country="${d.country}">
       <div class="country-label">${d.country}</div>
+      ${growthHTML}
       <div class="bar-track">
-        <div class="bar-seg" style="width:${width}%; background:${ACCENT}" data-country="${d.country}">${width >= 9 ? `<span class="seg-label">${valueText}</span>` : ''}</div>
-        ${width >= 9 ? '' : `<span style="align-self:center; padding-left:6px; font-size:11px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; color:${ACCENT};">${valueText}</span>`}
+        <div class="bar-seg" style="width:${width}%; background:${barColor}" data-country="${d.country}">${width >= 9 ? `<span class="seg-label">${valueText}</span>` : ''}</div>
+        ${width >= 9 ? '' : `<span style="align-self:center; padding-left:6px; font-size:11px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; color:${barColor};">${valueText}</span>`}
       </div>
     </div>`;
   }).join('');
+  renderContinentLegend(sorted, 'rank-continent-legend');
 }
 
 rankRows.addEventListener('pointermove', e => {
@@ -734,9 +762,9 @@ function renderBubble(){
   updateEraLabel();
 }
 
-function renderContinentLegend(rows){
+function renderContinentLegend(rows, targetId = 'pe-continent-legend'){
   const present = [...new Set(rows.map(d => d.continent))].sort();
-  document.getElementById('pe-continent-legend').innerHTML = present.map(c => `
+  document.getElementById(targetId).innerHTML = present.map(c => `
     <span><span class="sw" style="background:${continentColor(c)}"></span>${c}</span>`).join('');
 }
 
