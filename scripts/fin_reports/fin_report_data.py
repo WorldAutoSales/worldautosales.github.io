@@ -285,3 +285,190 @@ for ent, y, pt, world, part, label, partlabel, src in [
     ('Maruti Suzuki India', 2025, 'FY', 2422713, 447774, 'India (domestic, incl. sales to other OEMs)', 'Exports', 'Maruti Suzuki FY2025-26: total minus exports'),
 ]:
     add(ent, y, pt, world - part, 'wholesale', 'derived', src, '', region=label)
+
+
+# =====================================================================================================================
+# 2026-10-26 upgrade pass: rows replaced by figures read in the company's own release, filing or official data file.
+# (the rows above are superseded for the entities handled here; drop() removes them, add() puts the official ones.)
+# press_release = company results / sales release or official statistics file; filing = annual report, 10-K, 6-K, HKEX/cninfo filing.
+def drop(ent, year=None, ptype=None, region=None, segment=None, only_conf=None):
+    ROWS[:] = [r for r in ROWS if not (r[0] == ent and (year is None or r[1] == year) and (ptype is None or r[2] == ptype)
+                                      and (region is None or r[5] == region) and (segment is None or r[6] == segment)
+                                      and (only_conf is None or r[10] == only_conf))]
+
+
+UPGRADED = set()
+
+
+def up(ent):
+    UPGRADED.add(ent)
+
+
+# ---- Toyota: official statistics file "Sales, Production, and Export Results for December 2025" (calendar years)
+TU = 'https://global.toyota/en/company/profile/production-sales-figures/202512.html'
+TX = 'Toyota official data file production_sales_figures_en_202512.xlsx (Sales, Sales by country-region)'
+T = 'Toyota Motor (Toyota, Lexus, Daihatsu, Hino)'
+up(T); drop(T)
+TOY = {  # year: (group total, Toyota+Lexus, Daihatsu, Hino)
+    2022: (10483247, 9567184, 766091, 149972), 2023: (11233039, 10307395, 790441, 135203),
+    2024: (10821480, 10159336, 536588, 125556), 2025: (11322575, 10536807, 675285, 110483)}
+TREG = {  # Toyota + Lexus by region 2022-2025 (additive regions + China memo)
+    'Japan': (1289132, 1672970, 1441842, 1501263), 'North America': (2445348, 2617033, 2729987, 2929660),
+    'Latin America': (474564, 478796, 487653, 472049), 'Europe': (1032159, 1126107, 1166325, 1182551),
+    'Asia (excl. Japan)': (3324735, 3318504, 3214633, 3285605), 'Oceania': (280120, 277939, 298480, 300560),
+    'Middle East': (495572, 568257, 586542, 600891), 'Africa': (225554, 247789, 233874, 264228)}
+TCHINA = (1940590, 1907587, 1775995, 1780396)
+for i, y in enumerate((2022, 2023, 2024, 2025)):
+    g, tl, dh, hn = TOY[y]
+    add(T, y, 'CY', g, 'retail', 'press_release', TX, TU, scope='Toyota + Lexus + Daihatsu + Hino', notes='sales outside Japan are defined per country by Toyota')
+    add(T, y, 'CY', tl, 'retail', 'press_release', TX, TU, segment='Toyota + Lexus')
+    add(T, y, 'CY', dh, 'retail', 'press_release', TX, TU, segment='Daihatsu')
+    add(T, y, 'CY', hn, 'retail', 'press_release', TX, TU, segment='Hino')
+    for reg, vals in TREG.items():
+        add(T, y, 'CY', vals[i], 'retail', 'press_release', TX, TU, region=reg, segment='Toyota + Lexus')
+    add(T, y, 'CY', TCHINA[i], 'retail', 'press_release', TX, TU, region='China (memo)', segment='Toyota + Lexus', notes='China incl. Hong Kong and Macau; included in Asia (excl. Japan)', additive=False)
+
+# ---- Tesla 2025: company Q4 release (ir.tesla.com)
+drop('Tesla', 2025)
+add('Tesla', 2025, 'CY', 1636129, 'deliveries', 'press_release', 'Tesla Fourth Quarter 2025 Production, Deliveries & Deployments (2 Jan 2026)', 'https://ir.tesla.com/press-release/tesla-fourth-quarter-2025-production-deliveries-deployments', scope='Model 3/Y/S/X/Cybertruck/Semi', notes='produced 1,654,667')
+up('Tesla')
+
+# ---- Stellantis: full-year 2025 results (Form 6-K / annual report), shipments in thousands
+S = 'Stellantis'
+SF = 'https://www.sec.gov/Archives/edgar/data/1605484/000160548426000019/stellantisnvfy2025pressrel.htm'
+drop(S); up(S)
+for y, tot, regs in [(2025, 5484, [('North America', 1472), ('Enlarged Europe', 2490), ('Middle East & Africa', 453), ('South America', 1000), ('China, India & Asia Pacific', 61), ('Maserati (global)', 7.9)]),
+                     (2024, 5415, [('North America', 1432), ('Enlarged Europe', 2576), ('Middle East & Africa', 423), ('South America', 912), ('China, India & Asia Pacific', 61), ('Maserati (global)', 11.3)])]:
+    add(S, y, 'CY', tot * 1000, 'shipments', 'filing', 'Stellantis Full Year 2025 results (Form 6-K), consolidated shipments', SF, scope='consolidated shipments, Maserati included', notes='thousands rounded; regions sum to the total within rounding')
+    for reg, v in regs:
+        add(S, y, 'CY', round(v * 1000), 'shipments', 'filing', 'Stellantis Full Year 2025 results (Form 6-K), shipments by region', SF, region=reg)
+
+# ---- BYD: HKEX voluntary announcement "Production and sales volume for December 2025"
+B = 'BYD'
+BH = 'https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0101/2026010100423.pdf'
+up(B)
+for y in (2025, 2024):
+    drop(B, y, region='World')
+for y, tot, pas, bev, phev, com in [(2025, 4602436, 4545423, 2256714, 2288709, 57013), (2024, 4272145, 4250370, 1764992, 2485378, 21775)]:
+    add(B, y, 'CY', tot, 'wholesale', 'filing', 'BYD HKEX voluntary announcement: production and sales volume for December 2025 (year-to-date columns)', BH, scope='NEV passenger + commercial, incl. exports', notes=f'passenger {pas:,} (BEV {bev:,}, PHEV {phev:,}); commercial {com:,}')
+    add(B, y, 'CY', bev, 'wholesale', 'filing', 'BYD HKEX announcement December 2025', BH, segment='Passenger BEV')
+    add(B, y, 'CY', phev, 'wholesale', 'filing', 'BYD HKEX announcement December 2025', BH, segment='Passenger PHEV')
+
+# ---- Hyundai / Kia: company releases
+H = 'Hyundai Motor (incl. Genesis)'
+K = 'Kia'
+HG = 'Hyundai Motor Group (Hyundai + Kia)'
+for e in (H, K, HG):
+    drop(e); up(e)
+HU25 = 'https://www.hyundaimotorgroup.com/en/news/hyundai-motor-announces-2025-annual-and-q4-business-results'
+HU24 = 'https://www.hyundai.com/worldwide/en/newsroom/detail/hyundai-motor-reports-2024-global-sales-and-2025-targets-0000000890'
+add(H, 2025, 'CY', 4138389, 'wholesale', 'press_release', 'Hyundai Motor 2025 annual and Q4 business results', HU25, scope='Hyundai + Genesis; Korea counted retail, overseas wholesale')
+add(H, 2025, 'CY', 3425435, 'wholesale', 'press_release', 'Hyundai Motor 2025 annual and Q4 business results (sales outside Korea)', HU25, region='Outside Korea')
+add(H, 2025, 'CY', 4138389 - 3425435, 'retail', 'derived', 'Hyundai Motor 2025: world minus outside Korea', HU25, region='Korea (domestic)')
+add(H, 2024, 'CY', 4141791, 'wholesale', 'press_release', 'Hyundai Motor Reports 2024 Global Sales and 2025 Targets (3 Jan 2025)', HU24, scope='Hyundai + Genesis; Korea counted retail, overseas wholesale', notes='the 23 Jan 2025 annual results release says 4,141,959')
+add(H, 2024, 'CY', 3436781, 'wholesale', 'press_release', 'Hyundai Motor Reports 2024 Global Sales and 2025 Targets', HU24, region='Outside Korea')
+add(H, 2024, 'CY', 705010, 'retail', 'press_release', 'Hyundai Motor Reports 2024 Global Sales and 2025 Targets', HU24, region='Korea (domestic)')
+KU25 = 'https://worldwide.kia.com/en/newsroom/view/?id=161055'
+KU24 = 'https://worldwide.kia.com/en/newsroom/view/?id=161152'
+add(K, 2025, 'CY', 3135803, 'wholesale', 'press_release', 'Kia Announces Global Sales Record for 2025 and Shares 2026 Targets (5 Jan 2026)', KU25, scope='Kia, global wholesale', notes='the 28 Jan 2026 annual results quote 3,135,873')
+add(K, 2025, 'CY', 545776, 'wholesale', 'press_release', 'Kia 2025 global sales release', KU25, region='Korea (domestic)')
+add(K, 2025, 'CY', 3135803 - 545776, 'wholesale', 'derived', 'Kia 2025: world minus Korea (overseas incl. special-purpose vehicles)', KU25, region='Overseas')
+add(K, 2024, 'CY', 3089457, 'wholesale', 'press_release', 'Kia Announces Global Sales Record for 2024 and Shares 2025 Targets (Jan 2025)', KU24, scope='Kia, global wholesale', notes='the 2025 release restates 2024 as 3,089,300')
+add(HG, 2025, 'CY', 4138389 + 3135803, 'wholesale', 'derived', 'Hyundai Motor + Kia (company releases)', '', scope='Hyundai + Genesis + Kia')
+add(HG, 2024, 'CY', 4141791 + 3089457, 'wholesale', 'derived', 'Hyundai Motor + Kia (company releases)', '', scope='Hyundai + Genesis + Kia')
+
+# ---- Honda: fiscal-year automobile unit sales (FY results presentation, May 2026), thousands
+HO = 'Honda Motor'
+HOU = 'https://global.honda/en/investors/library/financialresult/main/08/teaserItems3/018/linkList/04/link/FYE202603_4Q_financial_presentation_script_e_3.pdf'
+up(HO)
+for y, tot, regs in [(2024, 3716, [('Japan', 630), ('North America', 1654), ('Europe', 93), ('Asia', 1182), ('Other regions', 157)]),
+                     (2025, 3387, [('Japan', 605), ('North America', 1605), ('Europe', 90), ('Asia', 929), ('Other regions', 158)])]:
+    add(HO, y, 'FY', tot * 1000, 'retail', 'press_release', 'Honda FY results (year ended March 2026): Honda Group automobile unit sales (thousands)', HOU, scope='Honda Group automobile unit sales incl. affiliates; FY label = year the FY starts', notes='rounded to thousands; Asia includes China')
+    for reg, v in regs:
+        add(HO, y, 'FY', v * 1000, 'retail', 'press_release', 'Honda FY results: automobile unit sales by region (thousands)', HOU, region=reg)
+
+# ---- Mazda / Suzuki / Mitsubishi / Renault / Volvo
+M = 'Mazda Motor'
+MU = 'https://newsroom.mazda.com/en/publicity/release/2026/202601/260129b.html'
+drop(M, 2025); up(M)
+add(M, 2025, 'CY', 1256215, 'retail', 'press_release', 'Mazda Production and Sales Results for December 2025 and for January through December 2025', MU)
+for reg, v in [('United States', 410345), ('Europe', 158922), ('China', 74847), ('Japan', 149481)]:
+    add(M, 2025, 'CY', v, 'retail', 'press_release', 'Mazda Production and Sales Results for December 2025 and for January through December 2025', MU, region=reg)
+SZ = 'Suzuki Motor'
+SZU = 'https://www.globalsuzuki.com/globalnews/2026/0129.html'
+drop(SZ); up(SZ)
+add(SZ, 2025, 'CY', 3295013, 'retail', 'press_release', 'Suzuki December 2025 and Yearly Automobile Production, Sales, and Export Figures', SZU, scope='Suzuki automobiles, global (preliminary)')
+add(SZ, 2025, 'CY', 728952, 'retail', 'press_release', 'Suzuki December 2025 and Yearly figures', SZU, region='Japan')
+add(SZ, 2025, 'CY', 2566061, 'retail', 'press_release', 'Suzuki December 2025 and Yearly figures', SZU, region='Overseas')
+add(SZ, 2025, 'CY', 1844169, 'wholesale', 'press_release', 'Suzuki December 2025 and Yearly figures', SZU, region='India (memo)', notes='Indian domestic wholesales; included in Overseas', additive=False)
+add(SZ, 2024, 'CY', 3249520, 'retail', 'derived', 'Suzuki Dec 2025 release: 2025 total and the stated +1.4% (101.4%)', SZU, scope='Suzuki automobiles, global', notes='approximate')
+add(SZ, 2025, 'FY', 3319975, 'retail', 'press_release', 'Suzuki March 2026 and Fiscal Year 2025 Automobile Production, Sales, and Export Figures', 'https://www.globalsuzuki.com/globalnews/2026/0427a.html', scope='Suzuki automobiles, global; Apr 2025-Mar 2026')
+MI = 'Mitsubishi Motors'
+up(MI)
+add(MI, 2025, 'FY', 797000, 'retail', 'press_release', 'Mitsubishi Motors FY2025 results (year ended March 2026): global retail sales volume', 'https://www.mitsubishi-motors.com/en/investors/library/pdf/financial/2026/260508_FY25Q4_1e.pdf', scope='Apr 2025-Mar 2026, -5% y/y', notes='rounded to thousands')
+RN = 'Renault Group'
+RU = 'https://assets.renaultgroup.com/uploads/2026/01/20260120-Renault-Group-Commercial-Results-2025.pdf'
+drop(RN); up(RN)
+for y, tot, regs in [(2025, 2336807, [('Europe', 1607848), ('Eurasia, Africa & Middle East', 339513), ('Asia Pacific', 98355), ('Latin America', 272558)]),
+                     (2024, 2264775, [('Europe', 1599006), ('Eurasia, Africa & Middle East', 310161), ('Asia Pacific', 92385), ('Latin America', 244855)])]:
+    add(RN, y, 'CY', tot, 'retail', 'press_release', 'Renault Group commercial results 2025 (20 Jan 2026): worldwide sales', RU, scope='Renault + Dacia + Alpine (+ Mobilize), registrations')
+    for reg, v in regs:
+        add(RN, y, 'CY', v, 'retail', 'press_release', 'Renault Group commercial results 2025: sales by region', RU, region=reg)
+    add(RN, y, 'CY', tot - sum(v for _, v in regs), 'retail', 'derived', 'Renault Group: world minus the four regions (French overseas territories, outside the ACEA Europe scope)', RU, region='Other (French overseas territories)')
+V2 = 'Volvo Cars'
+VU2 = 'https://www.media.volvocars.com/global/en-gb/media/pressreleases/322434/volvo-cars-reports-new-global-sales-record-in-2023'
+drop(V2, 2023); up(V2)
+add(V2, 2023, 'CY', 708716, 'retail', 'press_release', 'Volvo Cars reports new global sales record in 2023 (5 Jan 2024)', VU2, scope='Volvo cars, global retail')
+for reg, v in [('Europe', 294794), ('United States', 128701), ('China (memo)', 170091)]:
+    add(V2, 2023, 'CY', v, 'retail', 'press_release', 'Volvo Cars 2023 sales release', VU2, region=reg, additive=reg != 'China (memo)', notes='' if reg != 'China (memo)' else 'part of the rest of world')
+
+# ---- Chinese groups: HKEX / cninfo filings and company news
+GE = 'Geely Automobile Holdings'
+GEU = 'https://www.geelyauto.com.hk/wp-content/uploads/2026/04/e00175_2025-annual-report.pdf'
+drop(GE, 2025); up(GE)
+add(GE, 2025, 'CY', 3024567, 'wholesale', 'filing', 'Geely Automobile Holdings HKEX announcement 1 Jan 2026 and Annual Report 2025: total sales volume', GEU, scope='listed Geely Auto (Geely, Galaxy, Zeekr, Lynk & Co); excludes Volvo Cars')
+add(GE, 2025, 'CY', 420097, 'wholesale', 'filing', 'Geely Automobile Holdings Annual Report 2025: export wholesale volume', GEU, region='Exports')
+add(GE, 2025, 'CY', 2604470, 'wholesale', 'filing', 'Geely Automobile Holdings Annual Report 2025: China wholesale volume', GEU, region='China (domestic)')
+GA = 'GAC Group'
+GAU = 'https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0107/2026010701600.pdf'
+drop(GA); up(GA)
+for y, tot, jv in [(2025, 1721489, [('GAC Honda', 351926), ('GAC Toyota', 756000), ('GAC Motor (Trumpchi)', 319161), ('GAC Aion', 290081)]),
+                   (2024, 2003058, [('GAC Honda', 470633), ('GAC Toyota', 738000), ('GAC Motor (Trumpchi)', 414591), ('GAC Aion', 374884)])]:
+    add(GA, y, 'CY', tot, 'wholesale', 'filing', 'GAC Group HKEX report on production and sales volume for December 2025 (unaudited)', GAU, scope='incl. GAC Honda, GAC Toyota, Aion, Trumpchi; vehicles only (excludes Wuyang-Honda motorcycles)')
+    for seg, v in jv:
+        add(GA, y, 'CY', v, 'wholesale', 'filing', 'GAC Group HKEX report: major investment enterprises', GAU, segment=seg, notes='part of the group total')
+CHN = 'Changan Automobile'
+CHU = 'https://static.cninfo.com.cn/finalpage/2026-04-11/1225093378.PDF'
+drop(CHN, 2025); up(CHN)
+add(CHN, 2025, 'CY', 2913000, 'wholesale', 'filing', 'Chongqing Changan Automobile 2025 annual report summary (cninfo): about 2.913 million vehicles, +8.5%', CHU, scope='Changan brands incl. Avatr, Deepal; listed entity, same total as the press materials', notes='rounded to thousands')
+add(CHN, 2025, 'CY', 637000, 'wholesale', 'filing', 'Chongqing Changan Automobile 2025 annual report summary: overseas', CHU, region='Exports', notes='rounded to thousands')
+add(CHN, 2024, 'CY', 536196, 'wholesale', 'filing', 'Chongqing Changan Automobile 2024 annual report: overseas', 'https://static.cninfo.com.cn/finalpage/2025-04-11/1223057068.PDF', region='Exports')
+add(CHN, 2025, 'CY', 2913000 - 637000, 'wholesale', 'derived', 'Changan 2025: total minus overseas', CHU, region='China (domestic)')
+SA = 'SAIC Motor'
+SAU = 'https://www.saicmotor.com/e/latest_news/saic_motor/63550.shtml'
+drop(SA, 2025); up(SA)
+add(SA, 2025, 'CY', 4507000, 'wholesale', 'press_release', 'SAIC Motor reports record sales in 2025 (company news; same figure in the Annual Report 2025)', SAU, scope='incl. SAIC-GM, SAIC-GM-Wuling, SAIC-VW, MG, IM, Maxus', notes='4.507 M, +12.3%; self-owned brands 2.928 M; NEV 1.643 M')
+add(SA, 2025, 'CY', 1071000, 'wholesale', 'press_release', 'SAIC Motor reports record sales in 2025: export and overseas', SAU, region='Overseas', notes='rounded to thousands')
+add(SA, 2025, 'CY', 4507000 - 1071000, 'wholesale', 'derived', 'SAIC 2025: total minus overseas', SAU, region='China (domestic)')
+GW = 'Great Wall Motor'
+GWU = 'https://www.gwm-global.com/news/3403606.html'
+drop(GW, 2024); up(GW)
+add(GW, 2024, 'CY', 1233292, 'wholesale', 'press_release', 'GWM Achieves Sales of 1.23 Million Vehicles in 2024 (company news)', GWU, scope='Haval, Wey, Tank, Ora, pickups; incl. exports')
+add(GW, 2024, 'CY', 453141, 'wholesale', 'press_release', 'GWM 2024 overseas sales (company news)', GWU, region='Overseas')
+NI = 'NIO'
+drop(NI, 2025); up(NI)
+add(NI, 2025, 'CY', 326028, 'deliveries', 'filing', 'NIO Inc. HKEX voluntary announcement: December and full-year 2025 delivery update (1 Jan 2026)', 'https://www.hkexnews.hk/listedco/listconews/sehk/2026/0101/2026010100039.pdf', scope='NIO + onvo + firefly')
+LI = 'Li Auto'
+drop(LI, 2025); up(LI)
+add(LI, 2025, 'CY', 406343, 'deliveries', 'press_release', 'Li Auto Inc. unaudited Q4 and full-year 2025 results', 'https://ir.lixiang.com/news-releases/news-release-details/li-auto-inc-announces-unaudited-fourth-quarter-and-full-year-4')
+MM = 'Mahindra & Mahindra'
+MMU = 'https://www.mahindra.com/news-room/press-release/en/mahindra-auto-clocks-60272-suvs-and-99969-total-vehicle-sales-in-march-2026'
+drop(MM, 2025, region='World'); drop(MM, 2025, region='Exports'); up(MM)
+add(MM, 2025, 'FY', 1117698, 'wholesale', 'press_release', 'Mahindra FY26 auto sales (March 2026 press release and annual report; excludes SML Isuzu)', MMU, scope='SUVs 660,276 + LCV <3.5t 289,597 + other segments incl. three-wheelers; FY label 2025 = Apr 2025-Mar 2026')
+add(MM, 2025, 'FY', 40990, 'wholesale', 'press_release', 'Mahindra FY26 total exports (March 2026 press release)', MMU, region='Exports')
+
+# ---- complements so that every additive region set sums to its world total
+add('Mazda Motor', 2025, 'CY', 1256215 - 410345 - 158922 - 74847 - 149481, 'retail', 'derived', 'Mazda 2025: world minus United States, Europe, China, Japan', MU, region='Other markets')
+add(V2, 2023, 'CY', 708716 - 294794 - 128701, 'retail', 'derived', 'Volvo Cars 2023: world minus Europe and United States', VU2, region='Rest of world (incl. China)')
+add(CHN, 2024, 'CY', 2684000 - 536196, 'wholesale', 'derived', 'Changan 2024: total minus overseas', CHU, region='China (domestic)')
+add(GW, 2024, 'CY', 1233292 - 453141, 'wholesale', 'derived', 'GWM 2024: total minus overseas', GWU, region='China (domestic)')

@@ -10,7 +10,8 @@ from collections import defaultdict
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
 sys.path.insert(0, HERE)
-from fin_report_data import ENT, ROWS  # noqa: E402
+import fin_report_data  # noqa: E402
+from fin_report_data import ENT, ROWS, UPGRADED  # noqa: E402
 
 
 def q(v):
@@ -80,13 +81,14 @@ comment on column public.sales_manufacturers_year.sales_from_fin_reports is 'Wor
 """
 
 
-def migration_parts(n_chunks=3):
+def migration_parts(n_chunks=3, only=None):
     """DDL + the fact rows in chunks (source doc/url pairs are factored into a per-chunk CTE to keep each statement small)."""
-    parts = [DDL.strip() + '\n']
+    rows_all = [r for r in ROWS if only is None or r[0] in only]
+    parts = [DDL.strip() + '\n'] if only is None else ['delete from public.manufacturer_fin_report_sales where manufacturer in (' + ','.join(q(e) for e in sorted(only)) + ');\n']
     cols = '(manufacturer,parent_group,reporting_level,year,period_type,period_start,period_end,calendar_aligned,region,segment,units,units_basis,scope,additive,confidence,source_doc,source_url,notes)'
-    per = -(-len(ROWS) // n_chunks)
-    for i in range(0, len(ROWS), per):
-        chunk = ROWS[i:i + per]
+    per = max(1, -(-len(rows_all) // n_chunks))
+    for i in range(0, len(rows_all), per):
+        chunk = rows_all[i:i + per]
         srcs = {}
         vals = []
         for ent, y, pt, st, en, region, seg, units, basis, scope, conf, src, url, notes, additive in chunk:
@@ -102,7 +104,7 @@ def migration_parts(n_chunks=3):
         parts.append(ins + '\n')
     # world totals into sales_manufacturers_year (one row per entity-year; CY preferred over FY)
     best = {}
-    for ent, y, pt, st, en, region, seg, units, basis, scope, conf, src, url, notes, additive in ROWS:
+    for ent, y, pt, st, en, region, seg, units, basis, scope, conf, src, url, notes, additive in rows_all:
         if region == 'World' and seg == 'All' and pt in ('CY', 'FY'):
             k = (ent, y)
             if k not in best or (pt == 'CY' and best[k][0] != 'CY'):
@@ -151,5 +153,8 @@ if __name__ == '__main__':
     sql = '\n'.join(parts)
     for i, ptxt in enumerate(parts):
         open(os.path.join(HERE, 'out', 'fin_reports_part%d.sql' % i), 'w', encoding='utf8').write(ptxt)
+    # delta for the entities replaced by official-source rows: delete their rows, reload them (UPGRADED in fin_report_data.py)
+    for i, ptxt in enumerate(migration_parts(n_chunks=2, only=UPGRADED)):
+        open(os.path.join(HERE, 'out', 'fin_reports_delta%d.sql' % i), 'w', encoding='utf8').write(ptxt)
     open(os.path.join(ROOT, 'assets', 'manufacturer-fin-report-sales.js'), 'w', encoding='utf8').write(asset())
     print('sql', len(sql), 'bytes')
