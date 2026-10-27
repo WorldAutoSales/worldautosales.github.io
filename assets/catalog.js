@@ -17,5 +17,13 @@ const STATS_CATALOG = [
     description: "How EV, hybrid, petrol and diesel registrations compare across 31 European markets — ranked by electrified share, May 2026.",
     tag: "May 2026",
     url: "powertrain-mix-by-country.html"
+  },
+  {
+    title: "EV Charging",
+    subject: "World · Charging infrastructure",
+    keywords: ["charging", "charger", "stations", "ports", "ev charging", "supercharger", "tesla", "ionity", "fast charging", "kw", "operators", "brands", "per capita", "per ev"],
+    description: "Public charging points, stations and ports in 58 countries: slow / fast / ultra-fast, per 100k people aged 15-64 and per EV, with brands and power bands, on a map that zooms to street level.",
+    tag: "2019–2026",
+    url: "charging-stations.html"
   }
 ];

@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EV Charging — Stations &amp; Ports by Country</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  .ch-page{ --ch-a:#0ea5a4; --ch-b:#6366f1; }
+  .ch-row{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin:18px 0 10px; }
+  .ch-label{ font-size:12px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; }
+  .ch-seg{ display:inline-flex; gap:5px; background:var(--surface-alt); border-radius:999px; padding:4px; flex-wrap:wrap; }
+  .ch-seg button{ appearance:none; border:none; background:transparent; cursor:pointer; padding:7px 15px; border-radius:999px; font-size:13px; font-weight:700; color:var(--text-muted); }
+  .ch-seg button:hover:not(:disabled){ color:var(--text); }
+  .ch-seg button.active{ background:linear-gradient(135deg,var(--ch-a),var(--ch-b)); color:#fff; box-shadow:0 2px 10px rgba(14,165,164,.35); }
+  .ch-seg button:disabled{ opacity:.35; cursor:not-allowed; }
+  .ch-metrics{ display:flex; flex-wrap:wrap; gap:10px; margin:6px 0 18px; }
+  .ch-metrics .mode-btn{ border:1.5px solid var(--border); border-radius:14px; background:var(--surface); padding:11px 16px; font-size:14px; font-weight:700; color:var(--text-muted); display:inline-flex; gap:8px; align-items:center; cursor:pointer; transition:all .12s; }
+  .ch-metrics .mode-btn:hover{ transform:translateY(-2px); color:var(--text); box-shadow:0 6px 14px rgba(27,31,59,.1); }
+  .ch-metrics .mode-btn.active{ background:linear-gradient(135deg,var(--ch-a),var(--ch-b)); border-color:transparent; color:#fff; box-shadow:0 8px 18px rgba(14,165,164,.35); }
+  .ch-metrics .mode-btn:disabled{ opacity:.35; cursor:not-allowed; transform:none; box-shadow:none; }
+  .ch-stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin:6px 0 18px; }
+  .ch-stat{ padding:14px 16px; border-radius:16px; background:var(--surface); border:1px solid var(--border); border-left:5px solid var(--ch-a); }
+  .ch-stat .l{ font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); }
+  .ch-stat .v{ font-size:25px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; margin:3px 0 1px; }
+  .ch-stat .s{ font-size:11.5px; color:var(--text-muted); }
+  /* map: taller than the other pages, deep zoom */
+  .ch-map{ position:relative; border-radius:14px; overflow:hidden; background:linear-gradient(180deg,#e8f1f8,#f3f7fb); border:1px solid var(--border); }
+  :root[data-theme="dark"] .ch-map, .ch-map.dark{ background:#0c1424; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .ch-map{ background:#0c1424; } }
+  .ch-map svg{ display:block; width:100%; height:min(72vh,640px); cursor:grab; touch-action:none; }
+  .ch-map svg:active{ cursor:grabbing; }
+  .ch-map path.c{ stroke:var(--surface); stroke-width:.5; vector-effect:non-scaling-stroke; cursor:pointer; }
+  .ch-map path.c.nodata{ fill:var(--surface-alt); }
+  .ch-map path.c.sel{ stroke:#f59e0b; stroke-width:1.5; }
+  .ch-map .cell{ pointer-events:none; }
+  .ch-zoom{ position:absolute; right:10px; top:10px; display:flex; flex-direction:column; gap:6px; z-index:5; }
+  .ch-zoom button{ width:34px; height:34px; border-radius:10px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:18px; font-weight:800; cursor:pointer; }
+  .ch-zoomk{ position:absolute; left:10px; top:10px; z-index:5; font-size:11.5px; font-weight:800; padding:4px 9px; border-radius:999px; background:var(--surface); border:1px solid var(--border); color:var(--text-muted); }
+  .ch-layers{ position:absolute; left:10px; bottom:10px; z-index:5; display:flex; gap:6px; flex-wrap:wrap; max-width:70%; }
+  .ch-layers button{ border:1px solid var(--border); background:var(--surface); color:var(--text-muted); font-weight:700; font-size:12px; padding:6px 11px; border-radius:999px; cursor:pointer; }
+  .ch-layers button.on{ background:linear-gradient(135deg,var(--ch-a),var(--ch-b)); color:#fff; border-color:transparent; }
+  .ch-legend{ position:absolute; right:10px; bottom:10px; z-index:5; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:7px 10px; font-size:11px; max-width:46%; }
+  .ch-legend .sc{ display:flex; gap:3px; margin-top:4px; }
+  .ch-legend .sc i{ display:block; width:26px; height:10px; border-radius:2px; }
+  .ch-legend .nm{ display:flex; justify-content:space-between; color:var(--text-muted); font-variant-numeric:tabular-nums; }
+  .ch-tip{ position:absolute; z-index:8; pointer-events:none; opacity:0; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:10px; padding:9px 12px; font-size:12.5px; line-height:1.45; box-shadow:0 8px 24px rgba(0,0,0,.25); max-width:300px; transition:opacity .08s; }
+  .ch-tip b{ font-variant-numeric:tabular-nums; }
+  /* ranking table */
+  .ch-tablewrap{ overflow-x:auto; }
+  table.ch-t{ width:100%; border-collapse:collapse; font-size:13px; font-variant-numeric:tabular-nums; }
+  table.ch-t th{ position:sticky; top:0; background:var(--surface); text-align:right; font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--text-muted); padding:8px 9px; border-bottom:2px solid var(--border); cursor:pointer; white-space:nowrap; user-select:none; }
+  table.ch-t th:first-child, table.ch-t td:first-child{ text-align:left; }
+  table.ch-t th.sorted{ color:var(--text); }
+  table.ch-t th.sorted::after{ content:' ▼'; font-size:9px; }
+  table.ch-t th.sorted.asc::after{ content:' ▲'; }
+  table.ch-t td{ padding:7px 9px; border-bottom:1px solid var(--border); text-align:right; white-space:nowrap; }
+  table.ch-t tr:hover td{ background:var(--surface-alt); }
+  table.ch-t tr.sel td{ background:color-mix(in srgb, var(--ch-a) 14%, transparent); font-weight:700; }
+  table.ch-t td.bar{ background-repeat:no-repeat; background-position:left center; background-size:var(--w,0%) 70%; background-image:linear-gradient(90deg,color-mix(in srgb, var(--ch-a) 28%, transparent),color-mix(in srgb, var(--ch-b) 28%, transparent)); }
+  table.ch-t td.na{ color:var(--text-muted); opacity:.55; }
+  table.ch-t td.cov.lo{ color:#b45309; font-weight:700; }
+  table.ch-t td.cov.hi{ color:#15803d; font-weight:700; }
+  /* brand card */
+  .ch-brandhead{ display:flex; flex-wrap:wrap; gap:12px 18px; align-items:center; margin:4px 0 10px; }
+  .ch-brandhead select{ padding:9px 12px; border-radius:12px; border:1.5px solid var(--border); background:var(--surface); color:var(--text); font-weight:700; font-size:14px; min-width:220px; }
+  .ch-bands{ display:flex; flex-wrap:wrap; gap:6px 14px; font-size:11.5px; color:var(--text-muted); margin:6px 0 10px; }
+  .ch-bands i{ display:inline-block; width:11px; height:11px; border-radius:3px; margin-right:5px; vertical-align:-1px; }
+  .ch-brow{ display:grid; grid-template-columns:150px 1fr 74px 64px; gap:10px; align-items:center; padding:3px 0; font-size:12.5px; }
+  .ch-brow .nm{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:700; }
+  .ch-brow .tr{ display:flex; height:20px; background:var(--surface-alt); border-radius:5px; overflow:hidden; }
+  .ch-brow .tr div{ height:100%; }
+  .ch-brow .n{ text-align:right; font-variant-numeric:tabular-nums; }
+  .ch-brow .n.m{ color:var(--text-muted); }
+  .ch-brow.hd{ font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); font-weight:800; }
+  .ch-note{ font-size:12px; color:var(--text-muted); margin:6px 0 0; line-height:1.55; }
+  .ch-grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px; }
+  @media (max-width:900px){ .ch-grid2{ grid-template-columns:1fr; } .ch-brow{ grid-template-columns:110px 1fr 60px 50px; } .ch-legend{ max-width:92%; bottom:48px; } }
+  .ch-box{ border:1px solid var(--border); border-radius:14px; padding:12px 14px; background:var(--surface); }
+  .ch-box h3{ margin:0 0 8px; font-size:12px; letter-spacing:.09em; text-transform:uppercase; color:var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="index.html">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="50" r="46" fill="var(--surface)" stroke="var(--accent)" stroke-width="4"/>
+        <path d="M20 58 L26 40 C28 35 32 32 38 32 L62 32 C68 32 72 35 74 40 L80 58 L80 66 C80 69 78 71 75 71 L71 71 C68 71 66 69 66 66 L66 64 L34 64 L34 66 C34 69 32 71 29 71 L25 71 C22 71 20 69 20 66 Z" fill="none" stroke="var(--text)" stroke-width="3" stroke-linejoin="round"/>
+        <circle cx="32" cy="64" r="6" fill="var(--text)"/>
+        <circle cx="68" cy="64" r="6" fill="var(--text)"/>
+        <line x1="30" y1="45" x2="70" y2="45" stroke="var(--accent)" stroke-width="3" opacity="0.5"/>
+      </svg>
+      <span class="wordmark">
+        <span class="brand">World Auto</span>
+        <span class="sub">Sales Stats</span>
+      </span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <a href="index.html"><span class="dot"></span>Home</a>
+
+      <div class="nav-heading">Overview</div>
+      <a href="world-car-sales.html"><span class="dot"></span>World Car Sales</a>
+
+      <div class="nav-heading">Powertrain</div>
+      <a href="powertrain-mix-by-country.html"><span class="dot"></span>Mix by Country</a>
+      <a href="manufacturers.html"><span class="dot"></span>Manufacturers</a>
+
+      <div class="nav-heading">Markets</div>
+      <a href="auto-markets-by-country.html"><span class="dot"></span>Auto Markets by Country</a>
+      <a href="population-energy.html"><span class="dot"></span>Population &amp; Energy</a>
+      <a href="charging-stations.html" aria-current="page"><span class="dot"></span>EV Charging</a>
+
+      <div class="nav-heading">Rankings</div>
+      <a href="biggest-movers.html"><span class="dot"></span>Biggest Movers</a>
+
+      <div class="nav-heading">Trends<span class="soon-pill">Soon</span></div>
+    </nav>
+
+    <div class="sidebar-footer">
+      Monthly worldwide car sales &amp; powertrain stats — built for video &amp; social.
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page ch-page">
+      <header class="page-header">
+        <div class="eyebrow">Markets · EV Charging</div>
+        <h1>Public charging: stations, ports and speed, country by country</h1>
+        <p class="subtitle">How many public charging points each country has (IEA, slow / fast / ultra-fast), how that compares with its working-age population and its electric-car fleet, and which networks and speeds make up the network (Open Charge Map, Tesla Superchargers, official US counts). The map zooms down to street level: switch on the station-density or Supercharger layers and zoom in.</p>
+      </header>
+
+      <div class="ch-row">
+        <div class="ch-label">Year</div>
+        <div class="ch-seg" id="year-seg" role="group" aria-label="Year"></div>
+        <div class="ch-label" style="margin-left:10px">Countries</div>
+        <div class="ch-seg" id="scope-seg" role="group" aria-label="Scope">
+          <button type="button" data-scope="all" class="active">All 58</button>
+          <button type="button" data-scope="top30">Top 30 by EV fleet</button>
+          <button type="button" data-scope="iea">With IEA data</button>
+        </div>
+      </div>
+
+      <div class="ch-stats" id="ch-stats"></div>
+
+      <div class="ch-metrics" id="metric-btns" role="group" aria-label="Metric"></div>
+
+      <div class="card chart-card">
+        <h2 id="map-title">Public charging points</h2>
+        <p class="note" id="map-note" style="display:block"></p>
+        <div class="ch-map" id="ch-map">
+          <svg id="ch-svg" viewBox="0 0 940 520" role="img" aria-label="World map shaded by the selected charging metric"></svg>
+          <div class="ch-zoomk" id="ch-zoomk">zoom ×1</div>
+          <div class="ch-zoom">
+            <button type="button" id="z-in" title="Zoom in">+</button>
+            <button type="button" id="z-out" title="Zoom out">−</button>
+            <button type="button" id="z-reset" title="Reset view">⟲</button>
+          </div>
+          <div class="ch-layers" id="ch-layers">
+            <button type="button" data-layer="grid" title="Open Charge Map ports in 0.5° cells (about 55 km): darker = more charging ports">Station density</button>
+            <button type="button" data-layer="tesla" title="Every open Tesla Supercharger site (dot size = stalls)">Tesla Superchargers</button>
+          </div>
+          <div class="ch-legend" id="ch-legend"></div>
+          <div class="ch-tip" id="ch-tip"></div>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <h2>Country table</h2>
+        <p class="note" style="display:block" id="table-note"></p>
+        <div class="ch-tablewrap"><table class="ch-t" id="ch-table"></table></div>
+      </div>
+
+      <div class="card chart-card" id="brand-card">
+        <h2>Who runs the chargers: brands and speeds</h2>
+        <div class="ch-brandhead">
+          <label class="ch-label" for="brand-country">Country</label>
+          <select id="brand-country"></select>
+          <div class="ch-note" id="brand-cov" style="margin:0"></div>
+        </div>
+        <div class="ch-bands" id="brand-legend"></div>
+        <div id="brand-rows"></div>
+        <div class="ch-grid2">
+          <div class="ch-box" id="tesla-box"></div>
+          <div class="ch-box" id="off-box"></div>
+        </div>
+      </div>
+
+      <div class="card notes-card is-collapsed">
+        <button type="button" class="notes-toggle" aria-expanded="false"><span class="chevron">▸</span> Notes, sources and limits <span class="notes-hint">click to expand</span></button>
+        <div class="notes-body">
+          <ul class="note" style="display:block;padding-left:18px;line-height:1.6">
+            <li><strong>Points per country (IEA).</strong> Public charging points from the IEA Global EV Data Explorer (Global EV Outlook 2026 data set, CC BY 4.0): <em>slow</em> up to 22 kW, <em>fast</em> above 22 kW up to 150 kW, <em>ultra-fast</em> above 150 kW. The IEA rounds to two or three significant digits and covers about 50 countries; the rest only appear through Open Charge Map. "Fast + ultra-fast" adds the two upper classes (everything above 22 kW).</li>
+            <li><strong>A point is not a station.</strong> A station (location) hosts one or several charging points (ports). The IEA publishes points only; the station counts come from Open Charge Map (and, for the United States, from the US DOE Alternative Fuels Data Center, which counts 83,559 stations and 262,578 ports).</li>
+            <li><strong>Open Charge Map is a sample.</strong> It is a crowd-sourced registry that also imports operator and government feeds, so its coverage varies a lot: close to complete in the United States, Canada, Norway, Spain, Iceland and New Zealand; partial in Germany, France, the United Kingdom or Italy; nearly empty in China, South Korea and Vietnam. The "OCM coverage" column divides OCM ports by the IEA total; read the brand and speed splits as the make-up of the mapped network, not of the whole country. Private and removed chargers are excluded; ports = the listed number of points, else the sum of connectors.</li>
+            <li><strong>Speed bands</strong> come from the power of each connector in Open Charge Map (&lt;50, 50–99, 100–249, 250–349, 350+ kW); ports of a station are spread over its connectors in proportion. Missing power counts as under 50 kW.</li>
+            <li><strong>Tesla Superchargers</strong> come from supercharge.info (community database, open sites only); Tesla also appears in Open Charge Map under several operator names, so use the Tesla box for Tesla and ignore the Tesla line of the OCM list when they differ.</li>
+            <li><strong>Ratios.</strong> Points per 100,000 people aged 15–64 use the working-age population of this site's Population &amp; Energy page (latest year, applied to every year). Points per 1,000 EVs divide the IEA points by the IEA EV stock (battery-electric + plug-in hybrid cars, 2024 and 2025 only).</li>
+            <li>China: the IEA counts 4.7 million public points (more than the rest of the world together) but Open Charge Map lists almost none, so there is no brand split for China yet (the Tesla box is available).</li>
+          </ul>
+        </div>
+      </div>
+
+      <footer class="page-footer">
+        Charging points: IEA Global EV Data Explorer (CC BY 4.0). Stations, brands, power, density: Open Charge Map (open registry; data providers' licences apply), US DOE Alternative Fuels Data Center, supercharge.info. Population: World Bank / UN. Map boundaries: Natural Earth 1:10m via world-atlas (public domain).
+      </footer>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script src="assets/charging-data.js"></script>
+<script src="assets/charging-grid-data.js"></script>
+<script src="assets/charging-tesla-sites-data.js"></script>
+<script src="assets/notes-toggle.js"></script>
+<script>
+(function(){
+const YEARS = CHARGING.meta.years.map(String), LATEST = String(CHARGING.meta.ieaYear);
+const BAND_COL = ['#9aa5b8', '#38bdf8', '#6366f1', '#a855f7', '#ec4899'];
+const fmt = n => n == null ? '–' : Math.round(n).toLocaleString('en-US');
+const f1 = n => n == null ? '–' : n >= 100 ? Math.round(n).toLocaleString('en-US') : n.toFixed(n >= 10 ? 1 : 2);
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+const MAP_ALIASES = { 'United States of America':'United States', 'Russia':'Russian Federation', 'United Arab Emirates':'UAE', 'Czech Republic':'Czechia', 'Hong Kong S.A.R.':'Hong Kong' };
+const BY = {}; CHARGING.countries.forEach(c => { BY[c.n] = c; });
+
+// ---------- per-country figures ----------
+const pts = (c, y) => { const a = c.iea && c.iea[y]; return a && a[0] != null ? a : null; };
+const total = (c, y) => { const a = pts(c, y); return a ? (a[0] || 0) + (a[1] || 0) + (a[2] || 0) : null; };
+const evs = (c, y) => { const a = c.ev && c.ev[y]; return a && a[0] != null ? (a[0] || 0) + (a[1] || 0) : null; };
+const stationsOf = c => c.off ? c.off.stations : c.ocm ? c.ocm.st : null;
+const ocmCov = c => { const t = total(c, LATEST); return c.ocm && t ? c.ocm.po / t : null; };
+const METRICS = {
+  points: { label:'Charging points', ico:'🔌', title:'Public charging points', unit:'points', get:(c, y) => total(c, y), dec:0,
+            note:'Public charging points per country (IEA): slow + fast + ultra-fast. A point is one vehicle that can charge at a time.' },
+  fast:   { label:'Fast + ultra-fast', ico:'⚡', title:'Fast and ultra-fast public points (above 22 kW)', unit:'points', get:(c, y) => { const a = pts(c, y); return a ? (a[1] || 0) + (a[2] || 0) : null; }, dec:0,
+            note:'Points above 22 kW: DC fast chargers (up to 150 kW) and ultra-fast ones (above 150 kW).' },
+  ultra:  { label:'Ultra-fast', ico:'🚀', title:'Ultra-fast public points (above 150 kW)', unit:'points', get:(c, y) => { const a = pts(c, y); return a ? a[2] || 0 : null; }, dec:0,
+            note:'Points above 150 kW (IEA ultra-fast class).' },
+  per100k:{ label:'Points per 100k aged 15–64', ico:'👷', title:'Public charging points per 100,000 people aged 15–64', unit:'points / 100k', get:(c, y) => { const t = total(c, y); return t != null && c.w ? t / c.w * 1e5 : null; }, dec:1,
+            note:'Charging points divided by the working-age population (15–64), latest population estimate.' },
+  perEV:  { label:'Points per 1,000 EVs', ico:'🚗', title:'Public charging points per 1,000 electric cars on the road', unit:'points / 1,000 EVs', get:(c, y) => { const t = total(c, y), e = evs(c, y); return t != null && e ? t / e * 1000 : null; }, dec:1, years:['2024', '2025'],
+            note:'Charging points per 1,000 battery-electric + plug-in hybrid cars in the fleet (IEA EV stock; 2024 and 2025 only). Higher = less competition per plug.' },
+  stations:{ label:'Stations', ico:'📍', title:'Public charging stations (locations)', unit:'stations', get:c => stationsOf(c), dec:0, snapshot:true,
+            note:'Charging locations: US DOE count for the United States, Open Charge Map for everyone else (partial in many countries — see OCM coverage in the table).' },
+};
+let metric = 'points', year = LATEST, scope = 'all', selected = null, sortKey = null, sortAsc = false;
+const layers = { grid:false, tesla:false };
+
+// top 30 by EV fleet (IEA BEV+PHEV stock 2025, else by IEA points)
+const TOP30 = new Set(CHARGING.countries.slice().sort((a, b) => (evs(b, LATEST) || 0) - (evs(a, LATEST) || 0)).slice(0, 30).map(c => c.n));
+const inScope = c => scope === 'all' || (scope === 'top30' && TOP30.has(c.n)) || (scope === 'iea' && pts(c, LATEST));
+const val = c => METRICS[metric].get(c, METRICS[metric].snapshot ? LATEST : year);
+
+// ---------- controls ----------
+const yearSeg = document.getElementById('year-seg');
+yearSeg.innerHTML = YEARS.map(y => `<button type="button" data-year="${y}" class="${y === year ? 'active' : ''}">${y}</button>`).join('');
+const mb = document.getElementById('metric-btns');
+mb.innerHTML = Object.entries(METRICS).map(([k, m]) => `<button type="button" class="mode-btn${k === metric ? ' active' : ''}" data-metric="${k}"><span>${m.ico}</span>${m.label}</button>`).join('');
+function syncControls(){
+  yearSeg.querySelectorAll('button').forEach(b => { b.classList.toggle('active', b.dataset.year === year); b.disabled = METRICS[metric].years ? !METRICS[metric].years.includes(b.dataset.year) : (METRICS[metric].snapshot); });
+  mb.querySelectorAll('button').forEach(b => { b.classList.toggle('active', b.dataset.metric === metric); });
+  document.querySelectorAll('#scope-seg button').forEach(b => b.classList.toggle('active', b.dataset.scope === scope));
+}
+yearSeg.addEventListener('click', e => { const b = e.target.closest('button'); if(!b || b.disabled) return; year = b.dataset.year; refresh(); });
+mb.addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return; metric = b.dataset.metric;
+  const my = METRICS[metric].years; if(my && !my.includes(year)) year = LATEST;
+  refresh();
+});
+document.getElementById('scope-seg').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; scope = b.dataset.scope; refresh(); });
+
+// ---------- headline cards ----------
+function renderStats(){
+  const cs = CHARGING.countries.filter(inScope);
+  const sum = f => cs.reduce((s, c) => s + (f(c) || 0), 0);
+  const t = sum(c => total(c, year)), fa = sum(c => { const a = pts(c, year); return a ? (a[1] || 0) + (a[2] || 0) : 0; }), ul = sum(c => { const a = pts(c, year); return a ? a[2] || 0 : 0; });
+  const withData = cs.filter(c => total(c, year) != null).length;
+  const prevY = year === '2019' ? null : YEARS[YEARS.indexOf(year) - 1];
+  const tp = prevY ? cs.reduce((s, c) => s + (total(c, prevY) || 0), 0) : null;
+  const w = cs.reduce((s, c) => s + (total(c, year) != null ? c.w || 0 : 0), 0);
+  const st = (x, l, v, s) => `<div class="ch-stat"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
+  document.getElementById('ch-stats').innerHTML =
+    st(0, `Public points · ${year}`, fmt(t), `${withData} countries with IEA data${tp ? ` · ${(100 * (t / tp - 1)).toFixed(0)}% vs ${prevY}` : ''}`) +
+    st(0, 'Fast + ultra-fast', fmt(fa), t ? `${(100 * fa / t).toFixed(0)}% of all points` : '') +
+    st(0, 'Ultra-fast (above 150 kW)', fmt(ul), t ? `${(100 * ul / t).toFixed(1)}% of all points` : '') +
+    st(0, 'Per 100k aged 15–64', w ? f1(t / w * 1e5) : '–', 'average of the countries shown');
+}
+
+// ---------- map ----------
+const svg = d3.select('#ch-svg'), W = 940, H = 520;
+const projection = d3.geoNaturalEarth1(), path = d3.geoPath(projection);
+const root = svg.append('g'), gCountries = root.append('g'), gGrid = root.append('g'), gTesla = root.append('g');
+let feats = null, zk = 1, cur = d3.zoomIdentity;
+const tip = document.getElementById('ch-tip'), mapEl = document.getElementById('ch-map');
+const nameOf = d => MAP_ALIASES[d.properties.name] || d.properties.name;
+const COLORS = ['#e2f5f2', '#a8e0d8', '#5fc3c0', '#2f9bb4', '#3a6bc9', '#4a3aa8', '#2a1f6b'];
+let scale = null;
+function buildScale(){
+  const vs = CHARGING.countries.filter(inScope).map(val).filter(v => v != null && v > 0).sort((a, b) => a - b);
+  if(!vs.length){ scale = null; return; }
+  // quantile classes: robust to China / US being 100x bigger than everyone else
+  const q = i => vs[Math.min(vs.length - 1, Math.floor(i * vs.length / COLORS.length))];
+  scale = { cuts:COLORS.map((_, i) => q(i)), max:vs[vs.length - 1] };
+}
+const colorOf = v => { if(v == null || !scale) return null; let i = 0; scale.cuts.forEach((c, k) => { if(v >= c) i = k; }); return COLORS[i]; };
+function fmtVal(v){ const m = METRICS[metric]; return v == null ? '–' : m.dec ? v.toFixed(v >= 100 ? 0 : m.dec) : fmt(v); }
+function renderLegend(){
+  const lg = document.getElementById('ch-legend');
+  if(!scale){ lg.innerHTML = 'No data'; return; }
+  const m = METRICS[metric];
+  lg.innerHTML = `<div><b>${m.title}</b>${m.snapshot ? '' : ' · ' + year}</div><div class="sc">${COLORS.map(c => `<i style="background:${c}"></i>`).join('')}</div><div class="nm"><span>${fmtVal(scale.cuts[0])}</span><span>${fmtVal(scale.max)}</span></div><div style="color:var(--text-muted);margin-top:2px">Equal-size classes (quantiles) · grey = no data</div>`;
+}
+function renderMap(){
+  if(!feats) return;
+  buildScale(); renderLegend();
+  const m = METRICS[metric];
+  document.getElementById('map-title').textContent = m.title + (m.snapshot ? '' : ' · ' + year);
+  document.getElementById('map-note').textContent = m.note + ' Click a country to see its brands and speeds below; scroll or use + / − to zoom to street level.';
+  gCountries.selectAll('path.c').data(feats, d => d.id || d.properties.name).join('path').attr('class', d => { const c = BY[nameOf(d)]; return 'c ' + (c && inScope(c) && val(c) != null ? '' : 'nodata') + (selected === nameOf(d) ? ' sel' : ''); })
+    .attr('d', path).attr('fill', d => { const c = BY[nameOf(d)]; return c && inScope(c) ? colorOf(val(c)) : null; })
+    .on('pointermove', (e, d) => showTip(e, nameOf(d))).on('pointerleave', () => { tip.style.opacity = 0; })
+    .on('click', (e, d) => { const n = nameOf(d); if(BY[n]) selectCountry(n, true); });
+}
+function showTip(e, n){
+  const c = BY[n], r = mapEl.getBoundingClientRect(); const x = e.clientX - r.left, y = e.clientY - r.top;
+  tip.style.left = Math.min(x + 14, r.width - 310) + 'px'; tip.style.top = Math.max(4, y - 10) + 'px'; tip.style.opacity = 1;
+  if(!c){ tip.innerHTML = `${esc(n)}<br><span style="color:var(--text-muted)">not in this dataset</span>`; return; }
+  const a = pts(c, year), t = total(c, year);
+  tip.innerHTML = `<b>${esc(n)}</b><br>${METRICS[metric].label}: <b>${fmtVal(val(c))}</b> ${METRICS[metric].unit}` +
+    (t != null ? `<br>Points ${year}: <b>${fmt(t)}</b> (slow ${fmt(a[0])} · fast ${fmt(a[1])} · ultra ${fmt(a[2])})` : '<br><span style="color:var(--text-muted)">no IEA figure</span>') +
+    (stationsOf(c) != null ? `<br>Stations: <b>${fmt(stationsOf(c))}</b>${c.off ? ' (official)' : ' (OCM)'}` : '') + (c.tesla ? `<br>Tesla: ${fmt(c.tesla.sites)} sites · ${fmt(c.tesla.stalls)} stalls` : '');
+}
+// zoom: the basemap is 1:10m so countries stay crisp up to street-level-ish scales
+const zoom = d3.zoom().scaleExtent([1, 250]).translateExtent([[-40, -30], [W + 40, H + 30]]).on('zoom', e => {
+  cur = e.transform; zk = cur.k; root.attr('transform', cur);
+  document.getElementById('ch-zoomk').textContent = 'zoom ×' + (zk < 10 ? zk.toFixed(1) : Math.round(zk));
+  gTesla.selectAll('circle').attr('r', d => teslaR(d));
+  if(layers.grid) drawGrid();
+});
+svg.call(zoom).on('dblclick.zoom', null);
+document.getElementById('z-in').onclick = () => svg.transition().duration(200).call(zoom.scaleBy, 1.8);
+document.getElementById('z-out').onclick = () => svg.transition().duration(200).call(zoom.scaleBy, 1 / 1.8);
+document.getElementById('z-reset').onclick = () => svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity);
+const teslaR = d => Math.max(0.35, Math.min(9, (0.9 + Math.sqrt(d[2]) * 0.22) / Math.pow(zk, 0.55)));
+function drawTesla(){
+  gTesla.style('display', layers.tesla ? null : 'none');
+  if(!layers.tesla || !gTesla.selectAll('circle').empty()) return;
+  gTesla.selectAll('circle').data(TESLA_SITES).join('circle').attr('cx', d => projection([d[1], d[0]])[0]).attr('cy', d => projection([d[1], d[0]])[1]).attr('r', teslaR)
+    .attr('fill', '#e11d48').attr('fill-opacity', .72).attr('stroke', '#fff').attr('stroke-width', .15)
+    .append('title').text(d => `Tesla Supercharger · ${d[2]} stalls · ${d[3]} kW`);
+}
+function drawGrid(){
+  gGrid.style('display', layers.grid ? null : 'none');
+  if(!layers.grid) return;
+  if(gGrid.selectAll('path').empty()){
+    const mx = Math.max(...CHARGING_GRID.map(r => r[3]));
+    const col = d3.scaleSequentialLog(d3.interpolateYlGnBu).domain([1, mx]);
+    gGrid.selectAll('path').data(CHARGING_GRID).join('path').attr('class', 'cell').attr('d', r => { const x = r[0] * .5, y = r[1] * .5, p = [[x, y], [x + .5, y], [x + .5, y + .5], [x, y + .5]].map(q => projection(q)); return 'M' + p.map(q => q[0].toFixed(2) + ',' + q[1].toFixed(2)).join('L') + 'Z'; })   // planar quad from the projected corners (a spherical polygon of this size would be wound the wrong way)
+      .attr('fill', r => col(Math.max(1, r[3]))).attr('fill-opacity', .82).attr('stroke', 'none');
+  }
+}
+document.getElementById('ch-layers').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return; const k = b.dataset.layer; layers[k] = !layers[k]; b.classList.toggle('on', layers[k]);
+  drawGrid(); drawTesla();
+});
+d3.json('assets/countries-10m.json').then(topo => {
+  const geo = topojson.feature(topo, topo.objects.countries);
+  // world-atlas 1:10m has a few features wound the wrong way (Maldives reads as "the whole globe except the atolls"): flip any feature larger than a hemisphere
+  const rewind = f => { if(d3.geoArea(f) <= 2 * Math.PI) return f; const fixPoly = poly => d3.geoArea({ type:'Polygon', coordinates:poly }) > 2 * Math.PI ? poly.map(r => r.slice().reverse()) : poly; const g = f.geometry; return Object.assign({}, f, { geometry:{ type:g.type, coordinates: g.type === 'Polygon' ? fixPoly(g.coordinates) : g.coordinates.map(fixPoly) } }); };
+  feats = geo.features.filter(f => f.properties.name !== 'Antarctica').map(rewind);
+  projection.fitExtent([[6, 6], [W - 6, H - 6]], { type:'FeatureCollection', features:feats });
+  renderMap(); drawTesla(); drawGrid();
+});
+
+// ---------- table ----------
+const COLS = [
+  ['n', 'Country', c => c.n, null],
+  ['pts', 'Points', c => total(c, year), 'bar'],
+  ['fast', 'Fast + ultra', c => METRICS.fast.get(c, year), null],
+  ['ultra', 'Ultra-fast', c => METRICS.ultra.get(c, year), null],
+  ['st', 'Stations', c => stationsOf(c), null],
+  ['po', 'OCM ports', c => c.ocm ? c.ocm.po : null, null],
+  ['cov', 'OCM coverage', c => ocmCov(c), 'cov'],
+  ['p100', 'Points / 100k 15–64', c => METRICS.per100k.get(c, year), null],
+  ['pev', 'Points / 1,000 EVs', c => METRICS.perEV.get(c, ['2024', '2025'].includes(year) ? year : LATEST), null],
+  ['ev', 'EVs on the road', c => evs(c, ['2024', '2025'].includes(year) ? year : LATEST), null],
+];
+function renderTable(){
+  const cs = CHARGING.countries.filter(inScope);
+  const key = sortKey || 'pts', col = COLS.find(c => c[0] === key);
+  const rows = cs.map(c => ({ c, v:col[2](c) })).sort((a, b) => { if(key === 'n') return sortAsc ? a.v.localeCompare(b.v) : b.v.localeCompare(a.v); const x = a.v == null ? -Infinity : a.v, y = b.v == null ? -Infinity : b.v; return sortAsc ? x - y : y - x; });
+  const maxPts = Math.max(1, ...cs.map(c => total(c, year) || 0));
+  document.getElementById('table-note').textContent = `${cs.length} countries, ${year}. Click a column to sort, a row to open its brands below. Points and EVs are IEA figures; stations are official (US) or Open Charge Map; OCM coverage = OCM ports ÷ IEA points (low coverage means the brand split is a sample).`;
+  document.getElementById('ch-table').innerHTML = '<thead><tr>' + COLS.map(c => `<th data-k="${c[0]}" class="${c[0] === key ? 'sorted' + (sortAsc ? ' asc' : '') : ''}">${c[1]}</th>`).join('') + '</tr></thead><tbody>' +
+    rows.map(({ c }) => '<tr data-c="' + esc(c.n) + '" class="' + (selected === c.n ? 'sel' : '') + '">' + COLS.map(k => {
+      const v = k[2](c);
+      if(k[0] === 'n') return `<td>${esc(c.n)}</td>`;
+      if(v == null) return '<td class="na">–</td>';
+      if(k[0] === 'cov') return `<td class="cov ${v < .25 ? 'lo' : v >= .8 ? 'hi' : ''}">${Math.round(v * 100)}%</td>`;
+      if(k[0] === 'p100' || k[0] === 'pev') return `<td>${f1(v)}</td>`;
+      if(k[0] === 'pts') return `<td class="bar" style="--w:${(100 * v / maxPts).toFixed(1)}%">${fmt(v)}</td>`;
+      return `<td>${fmt(v)}</td>`;
+    }).join('') + '</tr>').join('') + '</tbody>';
+}
+document.getElementById('ch-table').addEventListener('click', e => {
+  const th = e.target.closest('th'); if(th){ const k = th.dataset.k; if((sortKey || 'pts') === k) sortAsc = !sortAsc; else { sortKey = k; sortAsc = k === 'n'; } renderTable(); return; }
+  const tr = e.target.closest('tr[data-c]'); if(tr) selectCountry(tr.dataset.c, false);
+});
+
+// ---------- brand card ----------
+const sel = document.getElementById('brand-country');
+sel.innerHTML = CHARGING.countries.slice().sort((a, b) => (b.ocm ? b.ocm.po : 0) - (a.ocm ? a.ocm.po : 0)).map(c => `<option value="${esc(c.n)}">${esc(c.n)}</option>`).join('');
+sel.addEventListener('change', () => selectCountry(sel.value, false));
+document.getElementById('brand-legend').innerHTML = CHARGING.meta.bands.map((b, i) => `<span><i style="background:${BAND_COL[i]}"></i>${b}</span>`).join('');
+function renderBrands(){
+  const n = selected || sel.value, c = BY[n]; if(!c) return; sel.value = n;
+  const cov = ocmCov(c), t = total(c, LATEST);
+  document.getElementById('brand-cov').innerHTML = c.ocm ? `Open Charge Map lists <b>${fmt(c.ocm.st)}</b> stations and <b>${fmt(c.ocm.po)}</b> ports` + (t ? ` — ${Math.round(100 * cov)}% of the IEA's ${fmt(t)} points${cov < .25 ? ' (low coverage: treat the split as a sample)' : ''}.` : ' (no IEA total for this country).') : 'No Open Charge Map data.';
+  const bs = c.ocm ? c.ocm.brands : [];
+  const mx = Math.max(1, ...bs.map(b => b[2]));
+  document.getElementById('brand-rows').innerHTML = bs.length ? `<div class="ch-brow hd"><span>Brand</span><span>Ports by speed</span><span style="text-align:right">Ports</span><span style="text-align:right">Stations</span></div>` +
+    bs.map(b => `<div class="ch-brow"><span class="nm" title="${esc(b[0])}">${esc(b[0])}</span><span class="tr">${[3, 4, 5, 6, 7].map((k, i) => `<div style="width:${(100 * b[k] / mx).toFixed(2)}%;background:${BAND_COL[i]}" title="${CHARGING.meta.bands[i]}: ${fmt(b[k])}"></div>`).join('')}</span><span class="n">${fmt(b[2])}</span><span class="n m">${fmt(b[1])}</span></div>`).join('') +
+    `<p class="ch-note">All brands of the country are folded into at most 15 rows; the speed colors show how many of each brand's ports sit in each power band. Share of ports at 50 kW or more: <b>${c.ocm.po ? Math.round(100 * (c.ocm.bands[1] + c.ocm.bands[2] + c.ocm.bands[3] + c.ocm.bands[4]) / c.ocm.po) : 0}%</b> (ultra-fast 350 kW+: ${fmt(c.ocm.bands[4])} ports).</p>` : '<p class="ch-note">No brand data for this country.</p>';
+  const tb = c.tesla;
+  document.getElementById('tesla-box').innerHTML = '<h3>Tesla Superchargers (supercharge.info)</h3>' + (tb ? `<div><b>${fmt(tb.sites)}</b> open sites · <b>${fmt(tb.stalls)}</b> stalls</div><div class="ch-note">Stalls by site power: ${CHARGING.meta.bands.map((b, i) => `<span style="white-space:nowrap"><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${BAND_COL[i]};margin-right:3px"></i>${b} ${fmt(tb.b[i])}</span>`).join(' · ')}</div>` : '<div class="ch-note">No Supercharger listed.</div>');
+  let ob = '<h3>Official counts</h3>';
+  if(c.off) ob += `<div><b>${fmt(c.off.stations)}</b> stations · <b>${fmt(c.off.ports)}</b> ports (${fmt(c.off.ports_dc_fast)} DC fast, ${fmt(c.off.ports_l2)} Level 2) — ${esc(c.off.source)}, ${c.off.as_of}.</div>`;
+  if(c.iso === 'US' || c.iso === 'CA') ob += `<div class="ch-note" style="margin-top:6px">Ports by network (US DOE AFDC; United States and Canada combined for multi-country networks):</div><div class="ch-note">${CHARGING.meta.afdcNetworks.slice(0, 14).map(x => `${esc(x[0])} <b>${fmt(x[1])}</b>`).join(' · ')}</div>`;
+  if(!c.off && c.iso !== 'CA') ob += '<div class="ch-note">No national station count found for this country; the IEA gives points only.</div>';
+  document.getElementById('off-box').innerHTML = ob;
+}
+function selectCountry(n, scroll){
+  selected = n; renderMap(); renderTable(); renderBrands();
+  if(scroll) document.getElementById('brand-card').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function refresh(){ syncControls(); renderStats(); renderMap(); renderTable(); renderBrands(); }
+selected = 'Norway'; refresh();
+})();
+</script>
+</body>
+</html>
