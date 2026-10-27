@@ -62,6 +62,7 @@ def load_yearly():
 MK, YR = load_markets(), load_yearly()
 CURVES = json.load(open(DATA / 'cars_duration_curves.json'))
 ANCH = json.load(open(DATA / 'fleet_real_anchors.json'))
+PRE2005 = json.load(open(DATA / 'registrations_pre2005.json'))['series']
 CN = {int(k): v for k, v in json.load(open(DATA / 'china_domestic_pc_2005_2020.json'))['series'].items()}
 
 
@@ -95,6 +96,7 @@ def registrations(c):
     r5, r10 = tot[2005], tot.get(2010, tot[2005])
     g = min(max(math.log(r10 / r5) / 5, 0.0), 0.25) if r5 > 0 and r10 > 0 else 0.0
     for y in range(1980, 2005): tot[y] = r5 * math.exp(-g * (2005 - y))
+    for y, v in PRE2005.get(c, {}).items(): tot[int(y)] = v   # real pre-2005 registrations where a national series exists
     return tot, bev, anchor_year, g, filled
 
 
