@@ -62,6 +62,18 @@
   table.ch-t td.na{ color:var(--text-muted); opacity:.55; }
   table.ch-t td.cov.lo{ color:#b45309; font-weight:700; }
   table.ch-t td.cov.hi{ color:#15803d; font-weight:700; }
+
+  .ch-legendbtns{ display:flex; flex-wrap:wrap; gap:7px; margin:8px 0 12px; }
+  .ch-legendbtns button{ display:inline-flex; align-items:center; gap:7px; border:1.5px solid var(--border); background:var(--surface); color:var(--text); font-weight:700; font-size:12.5px; padding:6px 13px; border-radius:999px; cursor:pointer; }
+  .ch-legendbtns button i{ width:12px; height:12px; border-radius:3px; display:inline-block; }
+  .ch-legendbtns button.off{ opacity:.4; text-decoration:line-through; }
+  .ch-legendbtns button.all{ background:var(--surface-alt); }
+  .ch-rk{ display:grid; grid-template-columns:130px 1fr 72px; gap:10px; align-items:center; padding:2px 0; font-size:12.5px; }
+  .ch-rk .nm{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:700; }
+  .ch-rk .tr{ display:flex; height:19px; background:var(--surface-alt); border-radius:5px; overflow:hidden; }
+  .ch-rk .tr div{ height:100%; }
+  .ch-rk .v{ text-align:right; font-variant-numeric:tabular-nums; font-weight:700; }
+  .ch-rk .v.s{ color:var(--text-muted); font-weight:500; }
   /* brand card */
   .ch-brandhead{ display:flex; flex-wrap:wrap; gap:12px 18px; align-items:center; margin:4px 0 10px; }
   .ch-brandhead select{ padding:9px 12px; border-radius:12px; border:1.5px solid var(--border); background:var(--surface); color:var(--text); font-weight:700; font-size:14px; min-width:220px; }
@@ -129,8 +141,8 @@
     <div class="page ch-page">
       <header class="page-header">
         <div class="eyebrow">Markets · EV Charging</div>
-        <h1>Public charging: stations, ports and speed, country by country</h1>
-        <p class="subtitle">How many public charging points each country has (IEA, slow / fast / ultra-fast), how that compares with its working-age population and its electric-car fleet, and which networks and speeds make up the network (Open Charge Map, Tesla Superchargers, official US counts). The map zooms down to street level: switch on the station-density or Supercharger layers and zoom in.</p>
+        <h1>Public charging: ports, stations and speed, country by country</h1>
+        <p class="subtitle">How many public charging ports each country has (a port = one socket that charges one car at a time; IEA, split slow / fast / ultra-fast), how that compares with its working-age population and its electric-car fleet, and which companies and speeds make up the network (Open Charge Map, Tesla Superchargers, official US and Canadian counts). Only public chargers are counted — no home or private workplace chargers. The map zooms down to street level: switch on the station-density or Supercharger layers and zoom in.</p>
       </header>
 
       <div class="ch-row">
@@ -149,7 +161,7 @@
       <div class="ch-metrics" id="metric-btns" role="group" aria-label="Metric"></div>
 
       <div class="card chart-card">
-        <h2 id="map-title">Public charging points</h2>
+        <h2 id="map-title">Public charging ports</h2>
         <p class="note" id="map-note" style="display:block"></p>
         <div class="ch-map" id="ch-map">
           <svg id="ch-svg" viewBox="0 0 940 520" role="img" aria-label="World map shaded by the selected charging metric"></svg>
@@ -174,8 +186,32 @@
         <div class="ch-tablewrap"><table class="ch-t" id="ch-table"></table></div>
       </div>
 
+
+      <div class="card chart-card">
+        <h2>Ports per 1,000 electric cars</h2>
+        <p class="note" style="display:block" id="rk-ev-note"></p>
+        <div class="ch-legendbtns" id="lg-ev"></div>
+        <div id="rk-ev"></div>
+      </div>
+
+      <div class="card chart-card">
+        <h2>Ports per 100,000 people aged 15–64</h2>
+        <p class="note" style="display:block" id="rk-pop-note"></p>
+        <div class="ch-legendbtns" id="lg-pop"></div>
+        <div id="rk-pop"></div>
+      </div>
+
+      <div class="card chart-card" id="company-card">
+        <h2>Charging companies, world view</h2>
+        <p class="note" style="display:block">The largest charging companies by ports in the 58 countries of this page, split by continent. Click a continent in the legend to take it in or out. China is counted from the EVCIPA operator ranking (public ports, July 2025); Tesla from supercharge.info; everywhere else from Open Charge Map, which is a partial sample outside the United States, Canada, Spain and a few other countries — read it as a ranking of what is mapped, not a census.</p>
+        <div class="ch-row" style="margin:6px 0 8px"><div class="ch-label">Count</div><div class="ch-seg" id="co-metric"><button type="button" data-m="ports" class="active">Ports</button><button type="button" data-m="stations">Stations</button></div></div>
+        <div class="ch-legendbtns" id="lg-co"></div>
+        <div id="co-rows"></div>
+        <p class="ch-note" id="co-note"></p>
+      </div>
+
       <div class="card chart-card" id="brand-card">
-        <h2>Who runs the chargers: brands and speeds</h2>
+        <h2>Who runs the chargers: companies and speeds</h2>
         <div class="ch-brandhead">
           <label class="ch-label" for="brand-country">Country</label>
           <select id="brand-country"></select>
@@ -193,19 +229,20 @@
         <button type="button" class="notes-toggle" aria-expanded="false"><span class="chevron">▸</span> Notes, sources and limits <span class="notes-hint">click to expand</span></button>
         <div class="notes-body">
           <ul class="note" style="display:block;padding-left:18px;line-height:1.6">
-            <li><strong>Points per country (IEA).</strong> Public charging points from the IEA Global EV Data Explorer (Global EV Outlook 2026 data set, CC BY 4.0): <em>slow</em> up to 22 kW, <em>fast</em> above 22 kW up to 150 kW, <em>ultra-fast</em> above 150 kW. The IEA rounds to two or three significant digits and covers about 50 countries; the rest only appear through Open Charge Map. "Fast + ultra-fast" adds the two upper classes (everything above 22 kW).</li>
-            <li><strong>Point, port, connector, station.</strong> A <em>charging point</em> (IEA, Europe) and a <em>port</em> (US DOE, Open Charge Map) are the same thing: one socket position that charges one vehicle at a time. A <em>connector</em> is the plug itself; one point can offer several (CCS and CHAdeMO, for instance) but still serves a single car, so counting connectors would inflate the total. A <em>station</em> is the location and hosts one or several points. When Open Charge Map gives no number of points for a station, the ports are counted as the sum of its connectors, which can overstate them slightly. The IEA publishes points only; stations come from Open Charge Map and, where an official count exists, from the US DOE (83,559 stations, 262,578 ports) and Natural Resources Canada (14,743 locations, 39,654 public ports, March 2026).</li>
-            <li><strong>Open Charge Map is a sample.</strong> It is a crowd-sourced registry that also imports operator and government feeds, so its coverage varies a lot: close to complete in the United States, Canada, Norway, Spain, Iceland and New Zealand; partial in Germany, France, the United Kingdom or Italy; nearly empty in China, South Korea and Vietnam. The "OCM coverage" column divides OCM ports by the IEA total; read the brand and speed splits as the make-up of the mapped network, not of the whole country. Private and removed chargers are excluded; ports = the listed number of points, else the sum of connectors.</li>
+            <li><strong>Ports per country (IEA).</strong> Public charging ports (the IEA calls them charging points) from the IEA Global EV Data Explorer (Global EV Outlook 2026 data set, CC BY 4.0): <em>slow</em> up to 22 kW, <em>fast</em> above 22 kW up to 150 kW, <em>ultra-fast</em> above 150 kW. The IEA (which calls them charging points) rounds to two or three significant digits and covers about 50 countries; the rest only appear through Open Charge Map. "Fast + ultra-fast" adds the two upper classes (everything above 22 kW).</li>
+            <li><strong>Port, connector, station.</strong> This page uses one word, <em>port</em>: one socket position that charges one car at a time. It is what the IEA and the EU call a charging point and what the US DOE and Open Charge Map call a port or point. A <em>connector</em> is the plug itself; one port can offer several (CCS and CHAdeMO, for instance) but still serves a single car, so counting connectors would inflate the total. A <em>station</em> is the location and hosts one or several ports. When Open Charge Map gives no number of ports for a station, the ports are counted as the sum of its connectors, which can overstate them slightly. The IEA publishes ports only; stations come from Open Charge Map and, where an official count exists, from the US DOE (83,559 stations, 262,578 ports) and Natural Resources Canada (14,743 locations, 39,654 public ports, March 2026).</li>
+            <li><strong>Open Charge Map is a sample.</strong> It is a crowd-sourced registry that also imports operator and government feeds, so its coverage varies a lot: close to complete in the United States, Canada, Norway, Spain, Iceland and New Zealand; partial in Germany, France, the United Kingdom or Italy; nearly empty in China, South Korea and Vietnam. The "Brand data coverage" column divides the ports mapped in Open Charge Map by the IEA total; read the brand and speed splits as the make-up of the mapped network, not of the whole country. Private and removed chargers are excluded; ports = the listed number of points, else the sum of connectors.</li>
             <li><strong>Speed bands</strong> come from the power of each connector in Open Charge Map (&lt;50, 50–99, 100–249, 250–349, 350+ kW); ports of a station are spread over its connectors in proportion. Missing power counts as under 50 kW.</li>
             <li><strong>Tesla Superchargers</strong> come from supercharge.info (community database, open sites only); Tesla also appears in Open Charge Map under several operator names, so use the Tesla box for Tesla and ignore the Tesla line of the OCM list when they differ.</li>
-            <li><strong>Ratios.</strong> Points per 100,000 people aged 15–64 use the working-age population of this site's Population &amp; Energy page (latest year, applied to every year). Points per 1,000 EVs divide the IEA points by the IEA EV stock (battery-electric + plug-in hybrid cars, 2024 and 2025 only).</li>
-            <li>China: the IEA counts 4.7 million public points (more than the rest of the world together) but Open Charge Map lists almost none. The brand card therefore uses the China Charging Alliance (EVCIPA) ranking of public charging piles by operator for July 2025 (top 15 = 84.1% of public piles), without station or speed split; the Tesla box is available.</li>
+            <li><strong>Public only.</strong> Every figure counts public chargers: the IEA's public ports, Open Charge Map without private or restricted sites, the US DOE and Canadian public counts. Home chargers and private workplace or fleet chargers are not included anywhere.</li>
+            <li><strong>Ratios.</strong> Ports per 100,000 people aged 15–64 use the working-age population of this site's Population &amp; Energy page (latest year, applied to every year). Ports per 1,000 EVs divide the IEA ports by the IEA EV stock (battery-electric + plug-in hybrid cars, 2024 and 2025 only).</li>
+            <li>China: the IEA counts 4.7 million public ports (more than the rest of the world together) but Open Charge Map lists almost none. The brand card therefore uses the China Charging Alliance (EVCIPA) ranking of public charging piles by operator for July 2025 (top 15 = 84.1% of public piles), without station or speed split; the Tesla box is available.</li>
           </ul>
         </div>
       </div>
 
       <footer class="page-footer">
-        Charging points: IEA Global EV Data Explorer (CC BY 4.0). Stations, brands, power, density: Open Charge Map (open registry; data providers' licences apply), US DOE Alternative Fuels Data Center, supercharge.info. Population: World Bank / UN. Map boundaries: Natural Earth 1:10m via world-atlas (public domain).
+        Charging ports: IEA Global EV Data Explorer (CC BY 4.0). Stations, brands, power, density: Open Charge Map (open registry; data providers' licences apply), US DOE Alternative Fuels Data Center, supercharge.info. Population: World Bank / UN. Map boundaries: Natural Earth 1:10m via world-atlas (public domain).
       </footer>
     </div>
   </main>
@@ -234,16 +271,16 @@ const evs = (c, y) => { const a = c.ev && c.ev[y]; return a && a[0] != null ? (a
 const stationsOf = c => c.off ? c.off.stations : c.ocm ? c.ocm.st : null;
 const ocmCov = c => { const t = total(c, LATEST); return c.ocm && t ? c.ocm.po / t : null; };
 const METRICS = {
-  points: { label:'Charging points', ico:'🔌', title:'Public charging points', unit:'points', get:(c, y) => total(c, y), dec:0,
-            note:'Public charging points per country (IEA): slow + fast + ultra-fast. A point is one vehicle that can charge at a time.' },
-  fast:   { label:'Fast + ultra-fast', ico:'⚡', title:'Fast and ultra-fast public points (above 22 kW)', unit:'points', get:(c, y) => { const a = pts(c, y); return a ? (a[1] || 0) + (a[2] || 0) : null; }, dec:0,
-            note:'Points above 22 kW: DC fast chargers (up to 150 kW) and ultra-fast ones (above 150 kW).' },
-  ultra:  { label:'Ultra-fast', ico:'🚀', title:'Ultra-fast public points (above 150 kW)', unit:'points', get:(c, y) => { const a = pts(c, y); return a ? a[2] || 0 : null; }, dec:0,
-            note:'Points above 150 kW (IEA ultra-fast class).' },
-  per100k:{ label:'Points per 100k aged 15–64', ico:'👷', title:'Public charging points per 100,000 people aged 15–64', unit:'points / 100k', get:(c, y) => { const t = total(c, y); return t != null && c.w ? t / c.w * 1e5 : null; }, dec:1,
-            note:'Charging points divided by the working-age population (15–64), latest population estimate.' },
-  perEV:  { label:'Points per 1,000 EVs', ico:'🚗', title:'Public charging points per 1,000 electric cars on the road', unit:'points / 1,000 EVs', get:(c, y) => { const t = total(c, y), e = evs(c, y); return t != null && e ? t / e * 1000 : null; }, dec:1, years:['2024', '2025'],
-            note:'Charging points per 1,000 battery-electric + plug-in hybrid cars in the fleet (IEA EV stock; 2024 and 2025 only). Higher = less competition per plug.' },
+  points: { label:'Ports', ico:'🔌', title:'Public charging ports', unit:'ports', get:(c, y) => total(c, y), dec:0,
+            note:'Public charging ports per country (IEA): slow + fast + ultra-fast. A port is one socket: one car charges at a time. Public only, home chargers excluded.' },
+  fast:   { label:'Fast ports (>22 kW)', ico:'⚡', title:'Fast and ultra-fast public ports (above 22 kW)', unit:'ports', get:(c, y) => { const a = pts(c, y); return a ? (a[1] || 0) + (a[2] || 0) : null; }, dec:0,
+            note:'Ports above 22 kW: DC fast chargers (up to 150 kW) and ultra-fast ones (above 150 kW).' },
+  ultra:  { label:'Ultra-fast (>150 kW)', ico:'🚀', title:'Ultra-fast public ports (above 150 kW)', unit:'ports', get:(c, y) => { const a = pts(c, y); return a ? a[2] || 0 : null; }, dec:0,
+            note:'Ports above 150 kW (IEA ultra-fast class).' },
+  per100k:{ label:'Ports per 100k aged 15–64', ico:'👷', title:'Public charging ports per 100,000 people aged 15–64', unit:'ports / 100k', get:(c, y) => { const t = total(c, y); return t != null && c.w ? t / c.w * 1e5 : null; }, dec:1,
+            note:'Charging ports divided by the working-age population (15–64), latest population estimate.' },
+  perEV:  { label:'Ports per 1,000 EVs', ico:'🚗', title:'Public charging ports per 1,000 electric cars on the road', unit:'ports / 1,000 EVs', get:(c, y) => { const t = total(c, y), e = evs(c, y); return t != null && e ? t / e * 1000 : null; }, dec:1, years:['2024', '2025'],
+            note:'Charging ports per 1,000 battery-electric + plug-in hybrid cars in the fleet (IEA EV stock; 2024 and 2025 only). Higher = less competition per plug.' },
   stations:{ label:'Stations', ico:'📍', title:'Public charging stations (locations)', unit:'stations', get:c => stationsOf(c), dec:0, snapshot:true,
             note:'Charging locations: US DOE count for the United States, Open Charge Map for everyone else (partial in many countries — see OCM coverage in the table).' },
 };
@@ -284,10 +321,10 @@ function renderStats(){
   const w = cs.reduce((s, c) => s + (total(c, year) != null ? c.w || 0 : 0), 0);
   const st = (x, l, v, s) => `<div class="ch-stat"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
   document.getElementById('ch-stats').innerHTML =
-    st(0, `Public points · ${year}`, fmt(t), `${withData} countries with IEA data${tp ? ` · ${(100 * (t / tp - 1)).toFixed(0)}% vs ${prevY}` : ''}`) +
-    st(0, 'Fast + ultra-fast', fmt(fa), t ? `${(100 * fa / t).toFixed(0)}% of all points` : '') +
-    st(0, 'Ultra-fast (above 150 kW)', fmt(ul), t ? `${(100 * ul / t).toFixed(1)}% of all points` : '') +
-    st(0, 'Per 100k aged 15–64', w ? f1(t / w * 1e5) : '–', 'average of the countries shown');
+    st(0, `Public ports · ${year}`, fmt(t), `${withData} countries with IEA data${tp ? ` · ${(100 * (t / tp - 1)).toFixed(0)}% vs ${prevY}` : ''}`) +
+    st(0, 'Fast ports (>22 kW)', fmt(fa), t ? `${(100 * fa / t).toFixed(0)}% of all ports` : '') +
+    st(0, 'Ultra-fast (above 150 kW)', fmt(ul), t ? `${(100 * ul / t).toFixed(1)}% of all ports` : '') +
+    st(0, 'Ports per 100k aged 15–64', w ? f1(t / w * 1e5) : '–', 'average of the countries shown');
 }
 
 // ---------- map ----------
@@ -331,7 +368,7 @@ function showTip(e, n){
   if(!c){ tip.innerHTML = `${esc(n)}<br><span style="color:var(--text-muted)">not in this dataset</span>`; return; }
   const a = pts(c, year), t = total(c, year);
   tip.innerHTML = `<b>${esc(n)}</b><br>${METRICS[metric].label}: <b>${fmtVal(val(c))}</b> ${METRICS[metric].unit}` +
-    (t != null ? `<br>Points ${year}: <b>${fmt(t)}</b> (slow ${fmt(a[0])} · fast ${fmt(a[1])} · ultra ${fmt(a[2])})` : '<br><span style="color:var(--text-muted)">no IEA figure</span>') +
+    (t != null ? `<br>Ports ${year}: <b>${fmt(t)}</b> (slow ${fmt(a[0])} · fast ${fmt(a[1])} · ultra ${fmt(a[2])})` : '<br><span style="color:var(--text-muted)">no IEA figure</span>') +
     (stationsOf(c) != null ? `<br>Stations: <b>${fmt(stationsOf(c))}</b>${c.off ? ' (official)' : ' (OCM)'}` : '') + (c.tesla ? `<br>Tesla: ${fmt(c.tesla.sites)} sites · ${fmt(c.tesla.stalls)} stalls` : '');
 }
 // zoom: the basemap is 1:10m so countries stay crisp up to street-level-ish scales
@@ -379,22 +416,20 @@ d3.json('assets/countries-10m.json').then(topo => {
 // ---------- table ----------
 const COLS = [
   ['n', 'Country', c => c.n, null],
-  ['pts', 'Points', c => total(c, year), 'bar'],
-  ['fast', 'Fast + ultra', c => METRICS.fast.get(c, year), null],
-  ['ultra', 'Ultra-fast', c => METRICS.ultra.get(c, year), null],
+  ['pts', 'Ports', c => total(c, year), 'bar'],
+  ['fast', 'Fast ports (>22 kW)', c => METRICS.fast.get(c, year), null],
   ['st', 'Stations', c => stationsOf(c), null],
-  ['po', 'OCM ports', c => c.ocm ? c.ocm.po : null, null],
-  ['cov', 'OCM coverage', c => ocmCov(c), 'cov'],
-  ['p100', 'Points / 100k 15–64', c => METRICS.per100k.get(c, year), null],
-  ['pev', 'Points / 1,000 EVs', c => METRICS.perEV.get(c, ['2024', '2025'].includes(year) ? year : LATEST), null],
+  ['p100', 'Ports / 100k aged 15–64', c => METRICS.per100k.get(c, year), null],
+  ['pev', 'Ports / 1,000 EVs', c => METRICS.perEV.get(c, ['2024', '2025'].includes(year) ? year : LATEST), null],
   ['ev', 'EVs on the road', c => evs(c, ['2024', '2025'].includes(year) ? year : LATEST), null],
+  ['cov', 'Brand data coverage', c => ocmCov(c), 'cov'],
 ];
 function renderTable(){
   const cs = CHARGING.countries.filter(inScope);
   const key = sortKey || 'pts', col = COLS.find(c => c[0] === key);
   const rows = cs.map(c => ({ c, v:col[2](c) })).sort((a, b) => { if(key === 'n') return sortAsc ? a.v.localeCompare(b.v) : b.v.localeCompare(a.v); const x = a.v == null ? -Infinity : a.v, y = b.v == null ? -Infinity : b.v; return sortAsc ? x - y : y - x; });
   const maxPts = Math.max(1, ...cs.map(c => total(c, year) || 0));
-  document.getElementById('table-note').textContent = `${cs.length} countries, ${year}. Click a column to sort, a row to open its brands below. Points and EVs are IEA figures; stations are official (US) or Open Charge Map; OCM coverage = OCM ports ÷ IEA points (low coverage means the brand split is a sample).`;
+  document.getElementById('table-note').textContent = `${cs.length} countries, ${year}. Click a column to sort, a row to open its companies below. Ports and EVs are IEA figures (public ports only); stations are official (US, Canada) or Open Charge Map; brand data coverage = ports mapped in Open Charge Map ÷ IEA ports (low coverage means the company split is a sample).`;
   document.getElementById('ch-table').innerHTML = '<thead><tr>' + COLS.map(c => `<th data-k="${c[0]}" class="${c[0] === key ? 'sorted' + (sortAsc ? ' asc' : '') : ''}">${c[1]}</th>`).join('') + '</tr></thead><tbody>' +
     rows.map(({ c }) => '<tr data-c="' + esc(c.n) + '" class="' + (selected === c.n ? 'sel' : '') + '">' + COLS.map(k => {
       const v = k[2](c);
@@ -419,20 +454,20 @@ document.getElementById('brand-legend').innerHTML = CHARGING.meta.bands.map((b, 
 function renderBrands(){
   const n = selected || sel.value, c = BY[n]; if(!c) return; sel.value = n;
   const cov = ocmCov(c), t = total(c, LATEST);
-  document.getElementById('brand-cov').innerHTML = c.ocm ? `Open Charge Map lists <b>${fmt(c.ocm.st)}</b> stations and <b>${fmt(c.ocm.po)}</b> ports` + (t ? ` — ${Math.round(100 * cov)}% of the IEA's ${fmt(t)} points${cov < .25 ? ' (low coverage: treat the split as a sample)' : ''}.` : ' (no IEA total for this country).') : 'No Open Charge Map data.';
+  document.getElementById('brand-cov').innerHTML = c.ocm ? `Open Charge Map lists <b>${fmt(c.ocm.st)}</b> stations and <b>${fmt(c.ocm.po)}</b> ports` + (t ? ` — ${Math.round(100 * cov)}% of the IEA's ${fmt(t)} ports${cov < .25 ? ' (low coverage: treat the split as a sample)' : ''}.` : ' (no IEA total for this country).') : 'No Open Charge Map data.';
   const bs = c.ocm ? c.ocm.brands : [];
   const mx = Math.max(1, ...bs.map(b => b[2]));
   const bandless = bs.length && bs.every(b => b[3] == null);   // China: operator ranking by public piles only
   document.getElementById('brand-cov').innerHTML = bandless ? esc(c.bnote || '') : (c.ocm ? `Open Charge Map lists <b>${fmt(c.ocm.st)}</b> stations and <b>${fmt(c.ocm.po)}</b> ports` + (t ? ` — ${Math.round(100 * cov)}% of the IEA's ${fmt(t)} points${cov < .25 ? ' (low coverage: treat the split as a sample)' : ''}.` : ' (no IEA total for this country).') : 'No Open Charge Map data.');
-  document.getElementById('brand-rows').innerHTML = bs.length ? `<div class="ch-brow hd"><span>Brand</span><span>${bandless ? 'Public charging piles' : 'Ports by speed'}</span><span style="text-align:right">${bandless ? 'Piles' : 'Ports'}</span><span style="text-align:right">Stations</span></div>` +
+  document.getElementById('brand-rows').innerHTML = bs.length ? `<div class="ch-brow hd"><span>Company</span><span>${bandless ? 'Public charging ports' : 'Ports by speed'}</span><span style="text-align:right">${'Ports'}</span><span style="text-align:right">Stations</span></div>` +
     bs.map(b => `<div class="ch-brow"><span class="nm" title="${esc(b[0])}">${esc(b[0])}</span><span class="tr">${b[3] == null ? `<div style="width:${(100 * b[2] / mx).toFixed(2)}%;background:linear-gradient(90deg,var(--ch-a),var(--ch-b))" title="${fmt(b[2])}"></div>` : [3, 4, 5, 6, 7].map((k, i) => `<div style="width:${(100 * b[k] / mx).toFixed(2)}%;background:${BAND_COL[i]}" title="${CHARGING.meta.bands[i]}: ${fmt(b[k])}"></div>`).join('')}</span><span class="n">${fmt(b[2])}</span><span class="n m">${b[1] == null ? '–' : fmt(b[1])}</span></div>`).join('') +
-    (bandless ? `<p class="ch-note">${esc(c.bnote || '')}</p>` : `<p class="ch-note">All brands of the country are folded into at most 15 rows; the speed colors show how many of each brand's ports sit in each power band. Share of ports at 50 kW or more: <b>${c.ocm.po ? Math.round(100 * (c.ocm.bands[1] + c.ocm.bands[2] + c.ocm.bands[3] + c.ocm.bands[4]) / c.ocm.po) : 0}%</b> (ultra-fast 350 kW+: ${fmt(c.ocm.bands[4])} ports).</p>`) : '<p class="ch-note">No brand data for this country.</p>';
+    (bandless ? `<p class="ch-note">${esc(c.bnote || '')}</p>` : `<p class="ch-note">Companies are the network operators (who runs and bills the charger), folded into at most 15 rows per country; a charger sitting in a Walmart, Couche-Tard or hotel car park shows under its operator (ChargePoint, Electrify America, Circuit électrique, Tesla…) unless the chain runs it itself; the speed colors show how many of each brand's ports sit in each power band. Share of ports at 50 kW or more: <b>${c.ocm.po ? Math.round(100 * (c.ocm.bands[1] + c.ocm.bands[2] + c.ocm.bands[3] + c.ocm.bands[4]) / c.ocm.po) : 0}%</b> (ultra-fast 350 kW+: ${fmt(c.ocm.bands[4])} ports).</p>`) : '<p class="ch-note">No brand data for this country.</p>';
   const tb = c.tesla;
   document.getElementById('tesla-box').innerHTML = '<h3>Tesla Superchargers (supercharge.info)</h3>' + (tb ? `<div><b>${fmt(tb.sites)}</b> open sites · <b>${fmt(tb.stalls)}</b> stalls</div><div class="ch-note">Stalls by site power: ${CHARGING.meta.bands.map((b, i) => `<span style="white-space:nowrap"><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${BAND_COL[i]};margin-right:3px"></i>${b} ${fmt(tb.b[i])}</span>`).join(' · ')}</div>` : '<div class="ch-note">No Supercharger listed.</div>');
   let ob = '<h3>Official counts</h3>';
   if(c.off) ob += `<div><b>${fmt(c.off.stations)}</b> stations · <b>${fmt(c.off.ports)}</b> ports (${fmt(c.off.ports_dc_fast)} DC fast, ${fmt(c.off.ports_l2)} Level 2) — ${esc(c.off.source)}, ${c.off.as_of}.</div>`;
-  if(c.iso === 'US' || c.iso === 'CA') ob += `<div class="ch-note" style="margin-top:6px">Ports by network (US DOE AFDC; United States and Canada combined for multi-country networks):</div><div class="ch-note">${CHARGING.meta.afdcNetworks.slice(0, 14).map(x => `${esc(x[0])} <b>${fmt(x[1])}</b>`).join(' · ')}</div>`;
-  if(!c.off && c.iso !== 'CA') ob += '<div class="ch-note">No national station count found for this country; the IEA gives points only.</div>';
+  if(c.iso === 'US' || c.iso === 'CA') ob += `<div class="ch-note" style="margin-top:6px">Ports by network (US DOE AFDC; United States and Canada combined for multi-country networks):</div><div class="ch-note">${CHARGING.meta.afdcNetworks.slice(0, 30).map(x => `${esc(x[0])} <b>${fmt(x[1])}</b>`).join(' · ')}</div>`;
+  if(!c.off && c.iso !== 'CA') ob += '<div class="ch-note">No national station count found for this country; the IEA gives ports only.</div>';
   document.getElementById('off-box').innerHTML = ob;
 }
 function selectCountry(n, scroll){
@@ -440,7 +475,43 @@ function selectCountry(n, scroll){
   if(scroll) document.getElementById('brand-card').scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
-function refresh(){ syncControls(); renderStats(); renderMap(); renderTable(); renderBrands(); }
+
+// ---------- continents: shared legend buttons ----------
+const CONT_COL = { 'Asia':'#f97316', 'Europe':'#3b82f6', 'North America':'#10b981', 'South America':'#a855f7', 'Oceania':'#06b6d4', 'Middle East':'#eab308', 'Africa':'#64748b' };
+const CONTS = Object.keys(CONT_COL), ISO_CONT = {}; CHARGING.countries.forEach(c => { ISO_CONT[c.iso] = c.cont || 'Asia'; });
+const contOn = { ev:new Set(CONTS), pop:new Set(CONTS), co:new Set(CONTS) };
+function renderLegend2(id, key, fn){
+  const el = document.getElementById(id);
+  el.innerHTML = '<button type="button" class="all" data-all="1">All</button>' + CONTS.filter(k => CHARGING.countries.some(c => (c.cont || 'Asia') === k)).map(k => `<button type="button" data-c="${esc(k)}" class="${contOn[key].has(k) ? '' : 'off'}"><i style="background:${CONT_COL[k]}"></i>${k}</button>`).join('');
+  el.onclick = e => { const b = e.target.closest('button'); if(!b) return; if(b.dataset.all){ CONTS.forEach(k => contOn[key].add(k)); } else { const k = b.dataset.c; contOn[key].has(k) ? contOn[key].delete(k) : contOn[key].add(k); if(!contOn[key].size) CONTS.forEach(x => contOn[key].add(x)); } fn(); };
+}
+function renderRatio(id, noteId, legId, key, mkey){
+  const m = METRICS[mkey], y = m.years && !m.years.includes(year) ? LATEST : year;
+  renderLegend2(legId, key, () => renderRatio(id, noteId, legId, key, mkey));
+  const rows = CHARGING.countries.filter(c => inScope(c) && contOn[key].has(c.cont || 'Asia')).map(c => ({ c, v:m.get(c, y) })).filter(r => r.v != null && r.v > 0).sort((a, b) => b.v - a.v);
+  const mx = Math.max(1, ...rows.map(r => r.v));
+  document.getElementById(noteId).textContent = `${m.note} ${y}. ${rows.length} countries. Bars are coloured by continent; the scope and year follow the buttons at the top of the page.`;
+  document.getElementById(id).innerHTML = rows.map(r => `<div class="ch-rk"><span class="nm" title="${esc(r.c.n)}">${esc(r.c.n)}</span><span class="tr"><div style="width:${(100 * r.v / mx).toFixed(2)}%;background:${CONT_COL[r.c.cont || 'Asia']}"></div></span><span class="v">${f1(r.v)}</span></div>`).join('') || '<p class="ch-note">No country matches.</p>';
+}
+// ---------- companies, world ----------
+let coMetric = 'ports';
+document.getElementById('co-metric').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; coMetric = b.dataset.m; document.querySelectorAll('#co-metric button').forEach(x => x.classList.toggle('active', x === b)); renderCompanies(); });
+function renderCompanies(){
+  renderLegend2('lg-co', 'co', renderCompanies);
+  const idx = coMetric === 'ports' ? 1 : 0;
+  const rows = CHARGING.worldBrands.map(w => {
+    const per = {}; let tot = 0, nc = 0;
+    Object.entries(w.c).forEach(([iso, v]) => { const k = ISO_CONT[iso]; if(!contOn.co.has(k) || v[idx] == null) return; per[k] = (per[k] || 0) + v[idx]; tot += v[idx]; nc++; });
+    return { b:w.b, per, tot, nc };
+  }).filter(r => r.tot > 0).sort((a, b) => b.tot - a.tot).slice(0, 25);
+  const mx = Math.max(1, ...rows.map(r => r.tot));
+  document.getElementById('co-rows').innerHTML = rows.map(r => `<div class="ch-rk" style="grid-template-columns:170px 1fr 84px"><span class="nm" title="${esc(r.b)}">${esc(r.b)}</span><span class="tr">${CONTS.filter(k => r.per[k]).map(k => `<div style="width:${(100 * r.per[k] / mx).toFixed(2)}%;background:${CONT_COL[k]}" title="${k}: ${fmt(r.per[k])}"></div>`).join('')}</span><span class="v">${fmt(r.tot)}<br><span class="s" style="font-size:10.5px">${r.nc} ${r.nc === 1 ? 'country' : 'countries'}</span></span></div>`).join('');
+  const sel = CHARGING.countries.filter(c => contOn.co.has(c.cont || 'Asia'));
+  const mapped = sel.reduce((s, c) => s + (c.iso === 'CN' ? 4286000 : (c.ocm ? c.ocm.po : 0)), 0), iea = sel.reduce((s, c) => s + (total(c, LATEST) || 0), 0);
+  const un = sel.reduce((s, c) => s + (CHARGING.unattributed[c.iso] || 0), 0);
+  document.getElementById('co-note').innerHTML = `Selected continents: <b>${fmt(mapped)}</b> ports mapped (IEA total for the same countries: <b>${fmt(iea)}</b>), of which <b>${fmt(un)}</b> sit with an unknown operator or an independent site owner and are not ranked here. Chargers hosted by a retailer, hotel or Couche-Tard store count under whoever operates them.`;
+}
+function refresh(){ syncControls(); renderStats(); renderMap(); renderTable(); renderBrands(); renderRatio('rk-ev', 'rk-ev-note', 'lg-ev', 'ev', 'perEV'); renderRatio('rk-pop', 'rk-pop-note', 'lg-pop', 'pop', 'per100k'); renderCompanies(); }
 selected = 'Norway'; refresh();
 })();
 </script>

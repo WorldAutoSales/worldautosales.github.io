@@ -42,7 +42,7 @@ AFDC_NETWORKS_NA = [
     ('SWTCH Energy', 4002), ('AmpUp', 3513), ('PowerFlex', 3000), ('EvGateway', 2788), ('ChargeLab', 2573), ('EVoke Systems', 2538),
     ('OpConnect', 2066), ('Noodoe', 2001), ('IONNA', 1688), ('EVCS', 1589), ('Ford Charge', 1364), ('FLASH', 1259), ('QuickCharge', 1249),
     ('EnviroSpark', 1203), ('Rivian Adventure Network', 1172), ('EVOLV Charging', 1181), ('ChargeUP', 1146), ('synergEV', 1050),
-    ('Francis Energy', 1013), ('BC Hydro', 924), ('Walmart', 916), ('bp pulse', 850), ('Mercedes-Benz High-Power Charging', 810),
+    ('Francis Energy', 1013), ('BC Hydro', 924), ('Walmart', 916), ('CircleK/Couche-Tard Recharge (Canada)', 246), ('CircleK Charge (US)', 140), ('bp pulse', 850), ('Mercedes-Benz High-Power Charging', 810),
     ('ZEF Network', 795), ('Shell Recharge', 684), ('Rivian Waypoints', 539), ('Electrify Canada', 272), ('Non-Networked', 18008),
 ]
 AFDC_NETWORKS_SOURCE = 'US DOE Alternative Fuels Data Center, charging networks (ports; US and Canada combined for multi-country networks)'

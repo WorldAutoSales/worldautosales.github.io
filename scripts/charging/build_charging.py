@@ -125,7 +125,7 @@ def tesla():
 def ocm_country(iso, ops, usage):
     f = os.path.join(CACHE, 'ocm', iso + '.json')
     if not os.path.exists(f):
-        return None, []
+        return None, [], {}
     st = po = 0
     bands = [0] * 5
     brands = defaultdict(lambda: [0, 0, 0, 0, 0, 0, 0])   # stations, ports, then 5 bands
@@ -166,7 +166,7 @@ def ocm_country(iso, ops, usage):
     out = [[k] + [round(x) for x in v] for k, v in keep]
     if rest:
         out.append(['Other brands'] + [round(sum(v[i] for v in rest)) for i in range(7)])
-    return {'st': st, 'po': round(po), 'bands': [round(x) for x in bands], 'brands': out}, cells
+    return {'st': st, 'po': round(po), 'bands': [round(x) for x in bands], 'brands': out}, cells, {k: [v[0], round(v[1])] for k, v in brands.items()}
 
 
 def main():
@@ -177,6 +177,7 @@ def main():
     usage = {u['ID']: u['Title'] for u in ref['UsageTypes']}
     tby, tpts = tesla()
     countries, grid = [], {}
+    world_brands = defaultdict(dict)
     for iso, (name, iea_name, tname) in COUNTRIES.items():
         e = {'n': name, 'iso': iso}
         pe = pop.get(name)
@@ -192,13 +193,24 @@ def main():
         if tname and tname in tby:
             t = tby[tname]
             e['tesla'] = {'sites': t['sites'], 'stalls': t['stalls'], 'b': t['b']}
-        o, cells = ocm_country(iso, ops, usage)
+        o, cells, allb = ocm_country(iso, ops, usage)
+        world_in = {k: v for k, v in allb.items()}
         if o:
             e['ocm'] = o
             for (x, y), v in cells.items():
                 grid.setdefault((x, y), [0, 0, 0])
                 for i in range(3):
                     grid[(x, y)][i] += v[i]
+        wb = dict(world_in)
+        if e.get('tesla'):
+            wb['Tesla'] = [e['tesla']['sites'], e['tesla']['stalls']]      # supercharge.info replaces the partial OCM Tesla listing
+        if iso == 'CN':
+            wb = {n: [None, v] for n, v in CHINA_OPERATORS}
+            wb['Other operators'] = [None, round(sum(v for _, v in CHINA_OPERATORS) / CHINA_TOP15_SHARE - sum(v for _, v in CHINA_OPERATORS))]
+            if e.get('tesla'):
+                wb['Tesla'] = [e['tesla']['sites'], e['tesla']['stalls']]
+        for b, v in wb.items():
+            world_brands[b][iso] = v
         if iso == 'CN':      # OCM is nearly empty for China: use the EVCIPA operator ranking (piles only)
             top = sum(v for _, v in CHINA_OPERATORS)
             e['ocm_brands_ocm'] = e.get('ocm', {}).get('brands')
@@ -206,13 +218,17 @@ def main():
             e['bnote'] = CHINA_NOTE
             e.pop('ocm_brands_ocm', None)
         countries.append(e)
+    skip = {UNKNOWN, SELF, 'Other brands', 'Other operators'}
+    ranked = sorted(((sum((v[1] or 0) for v in d.values()), b) for b, d in world_brands.items() if b not in skip), reverse=True)[:70]
+    wbrands = [{'b': b, 'c': {iso: v for iso, v in world_brands[b].items()}} for _, b in ranked]
+    unattributed = {iso: sum((world_brands[b].get(iso) or [0, 0])[1] or 0 for b in skip if iso in world_brands[b]) for iso in COUNTRIES}
     meta = {'snapshot': SNAPSHOT, 'ieaYear': 2025, 'years': YEARS, 'bands': BANDS,
-            'afdcNetworks': AFDC_NETWORKS_NA,
+            'afdcNetworks': sorted(AFDC_NETWORKS_NA, key=lambda x: -x[1]),
             'sources': {'iea': 'IEA Global EV Data Explorer / Global EV Outlook 2026 (CC BY 4.0): public charging points; slow <=22 kW, fast 22-150 kW, ultra-fast >150 kW',
                         'ocm': 'Open Charge Map (open registry of charging locations, crowd-sourced and imported from operators; coverage varies by country)',
                         'tesla': 'supercharge.info (community database of Tesla Supercharger sites)',
                         'afdc': 'US DOE Alternative Fuels Data Center'}}
-    js = '// Public EV charging by country. Built by scripts/charging/build_charging.py -- see the notes card on charging-stations.html for sources and caveats.\nconst CHARGING = ' + json.dumps({'meta': meta, 'countries': countries}, ensure_ascii=False, separators=(',', ':')) + ';\n'
+    js = '// Public EV charging by country. Built by scripts/charging/build_charging.py -- see the notes card on charging-stations.html for sources and caveats.\nconst CHARGING = ' + json.dumps({'meta': meta, 'countries': countries, 'worldBrands': wbrands, 'unattributed': unattributed}, ensure_ascii=False, separators=(',', ':')) + ';\n'
     open(os.path.join(ROOT, 'assets', 'charging-data.js'), 'w', encoding='utf8').write(js)
     cells = sorted(([x, y] + v for (x, y), v in grid.items()), key=lambda r: (r[0], r[1]))
     open(os.path.join(ROOT, 'assets', 'charging-grid-data.js'), 'w', encoding='utf8').write(
