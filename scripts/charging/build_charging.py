@@ -25,7 +25,7 @@ from charging_sql import write_sql  # noqa: E402
 IEA = os.path.join(HERE, 'data', 'iea')
 CACHE = os.path.join(ROOT, '.scratch', 'chg')
 YEARS = [2019, 2022, 2023, 2024, 2025]
-BANDS = ['<50 kW', '50-99 kW', '100-249 kW', '250-349 kW', '350+ kW']
+BANDS = ['Level 2 (<12 kW)', 'Slow (12-49 kW)', 'Fast (50-149 kW)', 'Ultra-fast (150-349 kW)', 'Mega-fast (350+ kW)']
 SNAPSHOT = '2026-10-27'
 
 # ---- brand normalisation (OCM operator titles -> one brand)
@@ -73,11 +73,11 @@ def brand_of(title):
 
 
 def band_of(kw):
-    if kw is None or kw < 50:
+    if kw is None or kw < 12:      # missing power counts as Level 2 (1-8% of connectors, mostly plain AC)
         return 0
-    if kw < 100:
+    if kw < 50:
         return 1
-    if kw < 250:
+    if kw < 150:
         return 2
     if kw < 350:
         return 3
@@ -128,8 +128,10 @@ def ocm_country(iso, ops, usage):
         return None, [], {}
     st = po = 0
     bands = [0] * 5
-    brands = defaultdict(lambda: [0, 0, 0, 0, 0, 0, 0])   # stations, ports, then 5 bands
+    brands = defaultdict(lambda: [0] * 7)   # stations, ports, then 5 bands
     cells = defaultdict(lambda: [0, 0, 0])
+    mix = [0] * 6                           # connectors with a known power: <12 kW, 12-22, 22-50, 50-150, 150-350, 350+ (feeds the re-cut of the IEA slow / fast classes)
+    fst = fpo = 0                           # stations / ports with at least 50 kW, Tesla excluded (Tesla Superchargers come from supercharge.info)
     for p in json.load(open(f, encoding='utf8')):
         if p.get('StatusTypeID') in (100, 150, 200, 210):
             continue
@@ -141,7 +143,10 @@ def ocm_country(iso, ops, usage):
         # spread the ports over the power bands in proportion to the connectors
         alloc = [0.0] * 5
         for c in conns or [{'PowerKW': None, 'Quantity': 1}]:
-            alloc[band_of(c.get('PowerKW'))] += (c.get('Quantity') or 1)
+            kw = c.get('PowerKW')
+            alloc[band_of(kw)] += (c.get('Quantity') or 1)
+            if kw is not None:
+                mix[0 if kw < 12 else 1 if kw <= 22.01 else 2 if kw < 50 else 3 if kw < 150 else 4 if kw < 350 else 5] += (c.get('Quantity') or 1)
         tot = sum(alloc) or 1
         alloc = [a * n / tot for a in alloc]
         b = brand_of(ops.get(p.get('OperatorID')))
@@ -154,19 +159,22 @@ def ocm_country(iso, ops, usage):
         e[1] += n
         for i in range(5):
             e[2 + i] += alloc[i]
+        if b != 'Tesla' and sum(alloc[2:]) > 0:
+            fst += 1
+            fpo += sum(alloc[2:])
         ai = p.get('AddressInfo') or {}
         if ai.get('Latitude') is not None and ai.get('Longitude') is not None:
             k = (int(ai['Longitude'] // 0.5), int(ai['Latitude'] // 0.5))
             cells[k][0] += 1
             cells[k][1] += n
-            cells[k][2] += sum(alloc[1:])
+            cells[k][2] += sum(alloc[2:])
     top = sorted(brands.items(), key=lambda kv: -kv[1][1])
     keep = [(k, v) for k, v in top[:14]]
     rest = [v for k, v in top[14:]]
     out = [[k] + [round(x) for x in v] for k, v in keep]
     if rest:
         out.append(['Other brands'] + [round(sum(v[i] for v in rest)) for i in range(7)])
-    return {'st': st, 'po': round(po), 'bands': [round(x) for x in bands], 'brands': out}, cells, {k: [v[0], round(v[1])] for k, v in brands.items()}
+    return {'st': st, 'po': round(po), 'bands': [round(x) for x in bands], 'brands': out, 'fs': [fst, round(fpo)], 'mix': mix}, cells, {k: [v[0], round(v[1])] for k, v in brands.items()}
 
 
 def main():
@@ -218,13 +226,34 @@ def main():
             e['bnote'] = CHINA_NOTE
             e.pop('ocm_brands_ocm', None)
         countries.append(e)
+    # re-cut of the IEA classes (slow <=22 kW, fast 22-150 kW, ultra-fast >150 kW) to Level 2 <12 / slow 12-49 / fast 50-149 / ultra-fast 150+:
+    #   u = share of 12-22 kW among the connectors <=22 kW (moves part of IEA "slow" from Level 2 to slow),
+    #   s = share of 22-49 kW among the 22-149 kW connectors (moves part of IEA "fast" down to slow).
+    # Open Charge Map shares are used where it lists at least a quarter of the country's IEA ports, else the world pool; the IEA gives nothing above 150 kW
+    def cov_of(c):
+        a25 = (c.get('iea') or {}).get('2025') or [None, None, None]
+        iea_tot = sum(v or 0 for v in a25)
+        return (c['ocm']['po'] / iea_tot) if iea_tot and c.get('ocm') else 0
+    pool = [0] * 4
+    for c in countries:
+        m = (c.get('ocm') or {}).get('mix')
+        if m and c['iso'] != 'CN' and cov_of(c) >= 0.25:
+            pool[0] += m[0]; pool[1] += m[1]; pool[2] += m[2]; pool[3] += m[3]
+    pool_u = pool[1] / max(1, pool[0] + pool[1])
+    pool_s = pool[2] / max(1, pool[2] + pool[3])
+    for c in countries:
+        m = (c.get('ocm') or {}).get('mix')
+        if m and c['iso'] != 'CN' and cov_of(c) >= 0.25 and m[0] + m[1] >= 250 and m[2] + m[3] >= 250:
+            c['sh'] = [round(m[1] / (m[0] + m[1]), 3), round(m[2] / (m[2] + m[3]), 3), 'ocm']
+        else:
+            c['sh'] = [round(pool_u, 3), round(pool_s, 3), 'pool']
     skip = {UNKNOWN, SELF, 'Other brands', 'Other operators'}
     ranked = sorted(((sum((v[1] or 0) for v in d.values()), b) for b, d in world_brands.items() if b not in skip), reverse=True)[:70]
     wbrands = [{'b': b, 'c': {iso: v for iso, v in world_brands[b].items()}} for _, b in ranked]
     unattributed = {iso: sum((world_brands[b].get(iso) or [0, 0])[1] or 0 for b in skip if iso in world_brands[b]) for iso in COUNTRIES}
-    meta = {'snapshot': SNAPSHOT, 'ieaYear': 2025, 'years': YEARS, 'bands': BANDS,
+    meta = {'snapshot': SNAPSHOT, 'ieaYear': 2025, 'years': YEARS, 'bands': BANDS, 'poolShare': [round(pool_u, 3), round(pool_s, 3)],
             'afdcNetworks': sorted(AFDC_NETWORKS_NA, key=lambda x: -x[1]),
-            'sources': {'iea': 'IEA Global EV Data Explorer / Global EV Outlook 2026 (CC BY 4.0): public charging points; slow <=22 kW, fast 22-150 kW, ultra-fast >150 kW',
+            'sources': {'iea': 'IEA Global EV Data Explorer / Global EV Outlook 2026 (CC BY 4.0): public charging points; slow <=22 kW, fast 22-150 kW, ultra-fast >150 kW (the page re-cuts slow at 50 kW with Open Charge Map shares)',
                         'ocm': 'Open Charge Map (open registry of charging locations, crowd-sourced and imported from operators; coverage varies by country)',
                         'tesla': 'supercharge.info (community database of Tesla Supercharger sites)',
                         'afdc': 'US DOE Alternative Fuels Data Center'}}

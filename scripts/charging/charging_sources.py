@@ -26,12 +26,13 @@ COUNTRIES = {
     'RU': ('Russian Federation', 'Russia', None), 'JO': ('Jordan', 'Jordan', 'Jordan'),
 }
 
+# stations_dc_fast = stations with at least one DC fast port (AFDC API ev_charging_level=dc_fast, 2026-10-27; Canada counted in the same API)
 # US: Alternative Fuels Data Center (US DOE), "Electric Charging Stations and Ports by State", data last updated 2026-10-27
 OFFICIAL = {
-    'CA': dict(stations=14743, ports=39654, ports_dc_fast=8431, ports_l2=31172, year=2026, as_of='2026-03-25',
+    'CA': dict(stations=14743, ports=39654, ports_dc_fast=8431, stations_dc_fast=3062, ports_l2=31172, year=2026, as_of='2026-03-25',
                source='Natural Resources Canada charging stations locator (public ports and locations, some networks not listed), as reported in the 2026 Electric Autonomy network report',
                url='https://electricautonomy.ca/data-trackers/public-charging-networks/2026-04-01/2026-ev-charging-network-report-steady-progress/'),
-    'US': dict(stations=83559, ports=262578, ports_dc_fast=79200, ports_l2=182673, ports_l1=693, year=2026, as_of='2026-10-27',
+    'US': dict(stations=83559, ports=262578, ports_dc_fast=79200, stations_dc_fast=16744, ports_l2=182673, ports_l1=693, year=2026, as_of='2026-10-27',
                source='US DOE Alternative Fuels Data Center (public + legacy chargers, excl. residential)', url='https://afdc.energy.gov/stations/states'),
 }
 

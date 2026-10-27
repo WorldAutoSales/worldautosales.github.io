@@ -10,13 +10,13 @@ DDL = """create table if not exists public.charging_country_year (
   primary key (country, year));
 create table if not exists public.charging_country_snapshot (
   country text not null, iso2 text not null, snapshot_date date not null,
-  ocm_stations integer, ocm_ports integer, ocm_ports_lt50 integer, ocm_ports_50_99 integer, ocm_ports_100_249 integer, ocm_ports_250_349 integer, ocm_ports_350plus integer,
-  tesla_sites integer, tesla_stalls integer, official_stations integer, official_ports integer, official_ports_dc_fast integer, workpop_15_64 bigint,
+  ocm_stations integer, ocm_ports integer, ocm_ports_lt12 integer, ocm_ports_12_49 integer, ocm_ports_50_149 integer, ocm_ports_150_349 integer, ocm_ports_350plus integer, ocm_fast_stations integer, ocm_fast_ports integer,
+  tesla_sites integer, tesla_stalls integer, official_stations integer, official_ports integer, official_ports_dc_fast integer, official_stations_dc_fast integer, workpop_15_64 bigint, share_12_22_of_le22 numeric, share_22_49_of_22_149 numeric,
   notes text default 'OCM = Open Charge Map (crowd-sourced registry, coverage varies by country: compare ocm_ports with the IEA points); Tesla = supercharge.info open sites; official = US DOE AFDC',
   primary key (country, snapshot_date));
 create table if not exists public.charging_country_brand (
   country text not null, iso2 text not null, snapshot_date date not null, brand text not null,
-  stations integer, ports integer, ports_lt50 integer, ports_50_99 integer, ports_100_249 integer, ports_250_349 integer, ports_350plus integer,
+  stations integer, ports integer, ports_lt12 integer, ports_12_49 integer, ports_50_149 integer, ports_150_349 integer, ports_350plus integer,
   source text not null default 'Open Charge Map',
   primary key (country, snapshot_date, brand));
 comment on table public.charging_country_year is 'Public EV charging points per country and year (IEA Global EV Data Explorer), slow / fast / ultra-fast, plus IEA EV stock for 2024-2025. Built by scripts/charging/build_charging.py.';
@@ -51,13 +51,15 @@ def write_sql(countries, snapshot, out):
     for c in countries:
         o = c.get('ocm') or {}
         b = o.get('bands') or [None] * 5
+        fs = o.get('fs') or [None, None]
+        sh = (c.get('sh') or [None, None])[:2]
         t = c.get('tesla') or {}
         of = c.get('off') or {}
-        sn.append('(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)' % (q(c['n']), q(c['iso']), q(snapshot), q(o.get('st')), q(o.get('po')), q(b[0]), q(b[1]), q(b[2]), q(b[3]), q(b[4]),
-                                                                           q(t.get('sites')), q(t.get('stalls')), q(of.get('stations')), q(of.get('ports')), q(of.get('ports_dc_fast')), q(c.get('w'))))
+        sn.append('(%s)' % ','.join(q(v) for v in (c['n'], c['iso'], snapshot, o.get('st'), o.get('po'), b[0], b[1], b[2], b[3], b[4], fs[0], fs[1],
+                                                   t.get('sites'), t.get('stalls'), of.get('stations'), of.get('ports'), of.get('ports_dc_fast'), of.get('stations_dc_fast'), c.get('w'), sh[0], sh[1])))
         for r in o.get('brands') or []:
-            br.append('(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)' % (q(c['n']), q(c['iso']), q(snapshot), q(r[0]), q(r[1]), q(r[2]), q(r[3]), q(r[4]), q(r[5]), q(r[6]), q(r[7])))
-    w('charging_2_snapshot.sql', 'insert into public.charging_country_snapshot (country,iso2,snapshot_date,ocm_stations,ocm_ports,ocm_ports_lt50,ocm_ports_50_99,ocm_ports_100_249,ocm_ports_250_349,ocm_ports_350plus,tesla_sites,tesla_stalls,official_stations,official_ports,official_ports_dc_fast,workpop_15_64) values\n' +
+            br.append('(%s)' % ','.join(q(v) for v in (c['n'], c['iso'], snapshot, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7])))
+    w('charging_2_snapshot.sql', 'insert into public.charging_country_snapshot (country,iso2,snapshot_date,ocm_stations,ocm_ports,ocm_ports_lt12,ocm_ports_12_49,ocm_ports_50_149,ocm_ports_150_349,ocm_ports_350plus,ocm_fast_stations,ocm_fast_ports,tesla_sites,tesla_stalls,official_stations,official_ports,official_ports_dc_fast,official_stations_dc_fast,workpop_15_64,share_12_22_of_le22,share_22_49_of_22_149) values\n' +
       ',\n'.join(sn) + '\non conflict (country, snapshot_date) do nothing;\n')
-    w('charging_3_brand.sql', 'insert into public.charging_country_brand (country,iso2,snapshot_date,brand,stations,ports,ports_lt50,ports_50_99,ports_100_249,ports_250_349,ports_350plus) values\n' + ',\n'.join(br) + '\non conflict (country, snapshot_date, brand) do nothing;\n')
+    w('charging_3_brand.sql', 'insert into public.charging_country_brand (country,iso2,snapshot_date,brand,stations,ports,ports_lt12,ports_12_49,ports_50_149,ports_150_349,ports_350plus) values\n' + ',\n'.join(br) + '\non conflict (country, snapshot_date, brand) do nothing;\n')
     return len(yr), len(sn), len(br)
