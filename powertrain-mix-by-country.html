@@ -453,7 +453,6 @@
               <button type="button" class="mode-btn active" data-mfr-model-mode="raw" title="Show actual unit counts — bars scaled to the top-selling row shown."># of Units</button>
             </div>
           </div>
-          <p class="note" id="mfr-model-note">Bars show each model's total new registrations; the green segment is its BEV share of that total. Sorted by total sales.</p>
           <div class="mfr-coverage-note hidden" id="mfr-model-coverage-note"></div>
           <div class="mfr-country-row">
             <div class="chart-legend" id="mfr-category-filter"></div>
@@ -466,6 +465,7 @@
           </div>
           <div class="rank-rows" id="mfr-model-rank-rows"></div>
           <div class="tooltip" id="mfr-model-tooltip"></div>
+          <p class="note" id="mfr-model-note">Bars show each model's total new registrations; the green segment is its BEV share of that total. Sorted by total sales.</p>
         </div>
 
         <div class="card chart-card hidden" id="ev-regulations-card">
@@ -5954,9 +5954,12 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     `).join('');
   }
   function mfrNoteText(kind){
-    const sourceNote = mfrMonthly
+    let sourceNote = mfrMonthly
       ? (MFR_MONTHLY_SOURCE_NOTE[mfrCountry] || '')
       : (kind === 'model' ? (MFR_YEARLY_MODEL_SOURCE_NOTE[mfrCountry] || '') : (MFR_SOURCE_NOTE[mfrCountry] || ''));
+    // the "(added YYYY-MM-DD)" marker on model-level source notes is for our own record of when a
+    // country's model data was loaded -- useful in the data file, not to a reader of the page.
+    if(kind === 'model') sourceNote = sourceNote.replace(/\(added \d{4}-\d{2}-\d{2}\)\s*/g, '');
     const noun = kind === 'model' ? 'model' : 'brand';
     const scope = kind === 'model' ? 'across all brands' : '';
     const splitNote = kind === 'model' ? ' A model sold with more than one powertrain is split into separate BEV / PHEV / ICE rows (ICE combines hybrid, petrol and diesel).' : '';
