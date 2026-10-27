@@ -40,6 +40,9 @@
   .ch-zoomk{ position:absolute; left:10px; top:10px; z-index:5; font-size:11.5px; font-weight:800; padding:4px 9px; border-radius:999px; background:var(--surface); border:1px solid var(--border); color:var(--text-muted); }
   .ch-layers{ position:absolute; left:10px; bottom:10px; z-index:5; display:flex; gap:6px; flex-wrap:wrap; max-width:70%; }
   .ch-layers button{ border:1px solid var(--border); background:var(--surface); color:var(--text-muted); font-weight:700; font-size:12px; padding:6px 11px; border-radius:999px; cursor:pointer; }
+  .ch-layers select{ border:1px solid var(--border); background:var(--surface); color:var(--text-muted); font-weight:700; font-size:12px; padding:6px 9px; border-radius:999px; cursor:pointer; max-width:190px; }
+  .ch-layers select.on{ background:linear-gradient(135deg,var(--ch-a),var(--ch-b)); color:#fff; border-color:transparent; }
+  .ch-map canvas.bcv{ position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; z-index:2; }
   .ch-layers button.act{ border-style:dashed; }
   .ch-layers button.on{ background:linear-gradient(135deg,var(--ch-a),var(--ch-b)); color:#fff; border-color:transparent; }
   .ch-legend{ position:absolute; right:10px; bottom:10px; z-index:5; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:7px 10px; font-size:11px; max-width:46%; }
@@ -182,11 +185,13 @@
             <button type="button" data-layer="tesla" title="Every open Tesla Supercharger site (dot size = stalls)">Tesla Superchargers</button>
             <button type="button" data-layer="ce" title="Circuit électrique sites (Hydro-Québec network): AFDC/NRCan locator + Open Charge Map. Dot size = ports">Circuit électrique</button>
             <button type="button" data-layer="ct" title="Couche-Tard / Circle K charging sites in Canada: AFDC/NRCan locator. Dot size = ports">Couche-Tard / Circle K</button>
+            <select id="brand-pick" title="Show every mapped site of one charging company (Open Charge Map + AFDC)"><option value="">Company sites…</option></select>
             <button type="button" id="z-qc" class="act" title="Zoom to southern Québec and show the Circuit électrique and Couche-Tard layers">Zoom to Québec</button>
           </div>
           <div class="ch-legend" id="ch-legend"></div>
           <div class="ch-tip" id="ch-tip"></div>
         </div>
+        <p class="ch-note" id="brand-sum" style="display:none"></p>
       </div>
 
       <div class="card chart-card">
@@ -265,6 +270,7 @@
 <script src="assets/charging-grid-data.js"></script>
 <script src="assets/charging-tesla-sites-data.js"></script>
 <script src="assets/charging-qc-networks-data.js"></script>
+<script src="assets/charging-brand-index.js"></script>
 <script src="assets/notes-toggle.js"></script>
 <script>
 (function(){
@@ -417,13 +423,13 @@ const zoom = d3.zoom().scaleExtent([1, 250]).translateExtent([[-40, -30], [W + 4
   document.getElementById('ch-zoomk').textContent = 'zoom ×' + (zk < 10 ? zk.toFixed(1) : Math.round(zk));
   gTesla.selectAll('circle').attr('r', d => qcR(d));
   gQc.selectAll('circle').attr('r', d => qcR(d));
+  scheduleBrand();
   if(layers.grid) drawGrid();
 });
 svg.call(zoom).on('dblclick.zoom', null);
 document.getElementById('z-in').onclick = () => svg.transition().duration(200).call(zoom.scaleBy, 1.8);
 document.getElementById('z-out').onclick = () => svg.transition().duration(200).call(zoom.scaleBy, 1 / 1.8);
 document.getElementById('z-reset').onclick = () => svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity);
-const teslaR = d => Math.max(0.35, Math.min(9, (0.9 + Math.sqrt(d[2]) * 0.22) / Math.pow(zk, 0.55)));
 function drawTesla(){
   gTesla.style('display', layers.tesla ? null : 'none');
   if(!layers.tesla || !gTesla.selectAll('circle').empty()) return;
@@ -446,6 +452,57 @@ function drawQc(){
   });
   gQc.select('g.q-ct').raise();
 }
+// ---- company site layer: one canvas (up to ~27k dots stay smooth while zooming), data loaded per brand from assets/brand-sites/<f>.js
+const BR_COL = ['#e11d48', '#2563eb', '#16a34a', '#f59e0b', '#9333ea', '#0891b2', '#ea580c', '#db2777', '#4d7c0f', '#0d9488', '#7c3aed', '#b45309'];
+const brandCv = document.createElement('canvas'); brandCv.className = 'bcv'; mapEl.appendChild(brandCv);
+let brandSel = null, brandPts = null, brandRaf = 0;
+function brandGeom(){ const r = svg.node().getBoundingClientRect(), sc = Math.min(r.width / W, r.height / H); return { w:r.width, h:r.height, sc, ox:(r.width - W * sc) / 2, oy:(r.height - H * sc) / 2 }; }
+function drawBrand(){
+  brandRaf = 0;
+  const g = brandGeom(), dpr = window.devicePixelRatio || 1;
+  if(brandCv.width !== Math.round(g.w * dpr) || brandCv.height !== Math.round(g.h * dpr)){ brandCv.width = Math.round(g.w * dpr); brandCv.height = Math.round(g.h * dpr); }
+  const ctx = brandCv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, g.w, g.h);
+  if(!brandPts) return;
+  const col = brandSel.col, fine = cur.k > 5, zr = Math.pow(cur.k, 0.28);
+  ctx.fillStyle = col; ctx.globalAlpha = .85; ctx.strokeStyle = '#111'; ctx.lineWidth = .5;
+  for(const q of brandPts){
+    const x = (cur.x + cur.k * q[0]) * g.sc + g.ox, y = (cur.y + cur.k * q[1]) * g.sc + g.oy;
+    if(x < -8 || y < -8 || x > g.w + 8 || y > g.h + 8) continue;
+    const r = Math.min(7, (0.75 + 0.26 * Math.sqrt(q[2])) * zr * (g.sc > 1 ? 1 : 0.9));
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill(); if(fine) ctx.stroke();
+  }
+}
+const scheduleBrand = () => { if(!brandRaf) brandRaf = requestAnimationFrame(drawBrand); };
+window.addEventListener('resize', scheduleBrand);
+function showBrand(name){
+  const sum = document.getElementById('brand-sum'), pick = document.getElementById('brand-pick');
+  pick.classList.toggle('on', !!name);
+  if(!name){ brandSel = brandPts = null; sum.style.display = 'none'; scheduleBrand(); return; }
+  const ix = BRAND_INDEX.find(b => b.b === name); if(!ix || !feats) return;
+  brandSel = { name, col:BR_COL[BRAND_INDEX.indexOf(ix) % BR_COL.length] };
+  sum.style.display = ''; sum.textContent = 'Loading ' + name + '…';
+  const done = () => {
+    const rows = (window.BRAND_SITES || {})[name]; if(!rows || brandSel.name !== name) return;
+    brandPts = rows.map(r => { const q = projection([r[1], r[0]]); return [q[0], q[1], r[2]]; });
+    const cov = ix.rep ? Math.round(100 * ix.p / ix.rep) : null;
+    sum.innerHTML = `<i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${brandSel.col};margin-right:6px;vertical-align:-1px"></i><b>${esc(name)}</b>: ${fmt(ix.n)} sites mapped · ${fmt(ix.p)} ports (${fmt(ix.fp)} fast, 50+ kW)` +
+      (ix.rep ? ` — the company-ranking cards count ${fmt(ix.rep)} ports for this brand${cov != null ? (cov > 100 ? ' (the map lists more: it also holds sites the ranking misses)' : ` (${cov}% mapped)`) : ''}` : '') +
+      `. Positions: ${ix.a ? fmt(ix.a) + ' from the US DOE AFDC / NRCan station locator' : ''}${ix.a && ix.o ? ' + ' : ''}${ix.o ? fmt(ix.o) + ' from Open Charge Map' : ''}; sites listed by both sources are counted once (within 120 m).`;
+    // fit the view on the dense part of the network (3rd to 97th percentile of the positions)
+    const xs = brandPts.map(q => q[0]).sort((a, b) => a - b), ys = brandPts.map(q => q[1]).sort((a, b) => a - b), qi = (a, f) => a[Math.min(a.length - 1, Math.floor(f * a.length))];
+    const x0 = qi(xs, .03), x1 = qi(xs, .97), y0 = qi(ys, .03), y1 = qi(ys, .97);
+    const k = Math.max(1, Math.min(60, 0.85 * Math.min(W / Math.max(8, x1 - x0), H / Math.max(8, y1 - y0))));
+    svg.transition().duration(700).call(zoom.transform, d3.zoomIdentity.translate(W / 2 - k * (x0 + x1) / 2, H / 2 - k * (y0 + y1) / 2).scale(k));
+    scheduleBrand();
+  };
+  if((window.BRAND_SITES || {})[name]) done();
+  else { const sc = document.createElement('script'); sc.src = 'assets/brand-sites/' + ix.f + '.js'; sc.onload = done; sc.onerror = () => { sum.textContent = 'Could not load ' + name + '.'; }; document.head.appendChild(sc); }
+}
+(function(){
+  const pick = document.getElementById('brand-pick');
+  pick.innerHTML += BRAND_INDEX.slice().sort((a, b) => b.p - a.p).map(b => `<option value="${esc(b.b)}">${esc(b.b)} · ${fmt(b.n)} sites</option>`).join('');
+  pick.onchange = () => showBrand(pick.value);
+})();
 function drawGrid(){
   gGrid.style('display', layers.grid ? null : 'none');
   if(!layers.grid) return;
