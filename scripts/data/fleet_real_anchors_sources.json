@@ -8,5 +8,6 @@
  "Canada": "Statistics Canada Table 23-10-0308-01 / The Daily 2025-10-17: light-duty vehicles registered 24.6M in 2024, +4.2% (almost +1M) vs 2023 (2023 = 23.6M derived)",
  "India": "MoRTH Road Transport Year Book via CEIC: registered cars, jeeps and taxis 46.2M (2021), 49.05M (2022); registered, not net of unreported scrapping",
  "China": "MPS via China Daily (2019): small passenger cars first exceeded 200M at end-2018 (floor). MPS end-2025: 366M automobiles incl. trucks/buses (passenger share not published in sources found); NEV 43.97M",
- "Australia": "BITRE Road vehicles Australia January 2026 (Table 1/4): passenger vehicles + light commercial vehicles on register at 31 Jan 2024/2025/2026 (used as end of 2023/2024/2025): 19.77M / 20.27M / 20.69M; BEV/FCEV 160k / 249k / 356k"
+ "Australia": "BITRE Road vehicles Australia January 2026 (Table 1/4): passenger vehicles + light commercial vehicles on register at 31 Jan 2024/2025/2026 (used as end of 2023/2024/2025): 19.77M / 20.27M / 20.69M; BEV/FCEV 160k / 249k / 356k",
+ "Finland": "Statistics Finland table 11ie 'Cars by driving power' (= Traficom 'Passenger cars in traffic on 31 December'), passenger cars IN TRAFFIC, total and electricity, 2005-2025 (full history by fuel 1990-2025 and quarterly 2008Q1-2026Q3 in scripts/data/finland_fleet_by_fuel.json). Eurostat road_eqs_carage counts ALL registered cars for Finland (3.79M in 2025, incl. ~1.1M temporarily deregistered cars not in traffic); in-traffic is 2.70M"
 }

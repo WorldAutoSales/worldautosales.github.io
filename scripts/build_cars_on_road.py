@@ -13,7 +13,7 @@ Method (v2, 2026-10-16)
      Curves give the share of a cohort still on the road at age 1..25; age 0 = 100%; cars older than 25 are not counted.
   3. Modelled stock(t) = sum_y R(y) * S(t - y), BEV and non-BEV separately.
   4. Real fleet anchors (scripts/data/fleet_real_anchors.json: Eurostat road_eqs_carage / road_eqs_carpda 2013-2025,
-     DfT VEH1111 for Great Britain 2005-2025) replace the model in the years they cover (method REAL). Years before the
+     DfT VEH1111 for Great Britain 2005-2025; Finland = Statistics Finland/Traficom cars in traffic 2005-2025) replace the model in the years they cover (method REAL). Years before the
      first anchor are the model scaled to match it (MODEL_ANCHORED_BACK); years after the last anchor up to 2026 are the
      model scaled by the last real/model ratio (MODEL_ANCHORED). Countries without anchors are pure model (MODEL_RAW).
   5. 2027-2041: total stock is held constant at the anchor year (2026) total; each year's new registrations are
@@ -205,7 +205,7 @@ HEADER = """// On-road passenger-car fleet estimates (BEV vs non-BEV), by countr
 // Rebuilt 2026-10-16 by scripts/build_cars_on_road.py (method documented in that file's docstring);
 // mirrors the Supabase table `country_cars_on_road` (project rtmlxvjpjxcvjdykrkvm).
 //   REAL                 = real observed passenger-car fleet: Eurostat road_eqs_carage / road_eqs_carpda
-//                          (22 European countries, 2013-2025), DfT VEH1111 (Great Britain 2005-2025), or an
+//                          (22 European countries, 2013-2025; Finland instead uses Statistics Finland / Traficom cars IN TRAFFIC 2005-2025, since Eurostat counts all registered cars), DfT VEH1111 (Great Britain 2005-2025), or an
 //                          official/industry fleet count (Japan MLIT/JAMA, United States S&P Global Mobility,
 //                          Mexico IDF, Brazil Sindipecas, Canada StatCan, Australia BITRE, India MoRTH, China MPS 2018
 //                          floor, Russia Autostat-derived) for the listed years.
@@ -237,7 +237,7 @@ METHODS = ['REAL', 'MODEL_ANCHORED_BACK', 'MODEL_ANCHORED', 'MODEL_RAW', 'MODEL_
 def country_note(c, i):
     s = 'Survival curve: %s%s.' % (i['curve'], '' if i['curve'] == c else ' (region average)')
     if i['anchored']:
-        s += ' Real fleet counts used where available (anchor years %s-%s; REAL rows), model scaled to them elsewhere.' % tuple(i['anchor_years'])
+        s += ' Real fleet counts used where available (anchor years %s-%s; REAL rows%s), model scaled to them elsewhere.' % (tuple(i['anchor_years']) + (', Statistics Finland / Traficom passenger cars IN TRAFFIC, not all registered' if c == 'Finland' else '',))
     else:
         s += ' No real fleet count found: pure model with estimated pre-2005 cohorts (typical error +/-20%).'
     s += ' 2027-2041: total held at the 2026 level, BEV-share growth %.3f (own %s).' % (i['g'], i['g_own'])
