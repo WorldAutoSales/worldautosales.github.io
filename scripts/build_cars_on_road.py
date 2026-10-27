@@ -13,7 +13,7 @@ Method (v2, 2026-10-16)
      Curves give the share of a cohort still on the road at age 1..25; age 0 = 100%; cars older than 25 are not counted.
   3. Modelled stock(t) = sum_y R(y) * S(t - y), BEV and non-BEV separately.
   4. Real fleet anchors (scripts/data/fleet_real_anchors.json: Eurostat road_eqs_carage / road_eqs_carpda 2013-2025,
-     DfT VEH1111 for Great Britain 2005-2025; Finland = Statistics Finland/Traficom cars in traffic 2005-2025) replace the model in the years they cover (method REAL). Years before the
+     DfT VEH1111 for Great Britain 2005-2025; Finland = Statistics Finland/Traficom and Iceland = Statistics Iceland cars in traffic 2005-2025) replace the model in the years they cover (method REAL). Years before the
      first anchor are the model scaled to match it (MODEL_ANCHORED_BACK); years after the last anchor up to 2026 are the
      model scaled by the last real/model ratio (MODEL_ANCHORED). Countries without anchors are pure model (MODEL_RAW).
   5. 2027-2041: total stock is held constant at the anchor year (2026) total; each year's new registrations are
@@ -39,7 +39,7 @@ for c in ('Argentina', 'Brazil', 'Chile', 'Colombia', 'Ecuador', 'Mexico', 'Peru
 for c in ('Morocco', 'South Africa'): CURVE_KEY[c] = 'Africa'
 for c in ('Israel', 'Turkey'): CURVE_KEY[c] = 'Middle East'
 for c in ('Czechia', 'Hungary', 'Poland', 'Romania', 'Russian Federation', 'Slovakia'): CURVE_KEY[c] = 'East Europe'
-for c in ('Austria', 'Belgium', 'Denmark', 'Finland', 'France', 'Greece', 'Ireland', 'Italy', 'Portugal', 'Spain', 'Sweden', 'Switzerland'): CURVE_KEY[c] = 'West Europe'
+for c in ('Austria', 'Belgium', 'Denmark', 'Finland', 'France', 'Greece', 'Iceland', 'Ireland', 'Italy', 'Portugal', 'Spain', 'Sweden', 'Switzerland'): CURVE_KEY[c] = 'West Europe'
 for c in ('India', 'Indonesia', 'Kazakhstan', 'Malaysia', 'Philippines', 'Singapore', 'South Korea', 'Taiwan', 'Thailand', 'Uzbekistan', 'Vietnam'): CURVE_KEY[c] = 'Asia (rest)'
 EUROPE_GROUP = {'West Europe', 'East Europe', 'Middle East', 'Germany', 'Norway', 'United Kingdom', 'Netherlands'}
 
@@ -237,7 +237,7 @@ METHODS = ['REAL', 'MODEL_ANCHORED_BACK', 'MODEL_ANCHORED', 'MODEL_RAW', 'MODEL_
 def country_note(c, i):
     s = 'Survival curve: %s%s.' % (i['curve'], '' if i['curve'] == c else ' (region average)')
     if i['anchored']:
-        s += ' Real fleet counts used where available (anchor years %s-%s; REAL rows%s), model scaled to them elsewhere.' % (tuple(i['anchor_years']) + (', Statistics Finland / Traficom passenger cars IN TRAFFIC, not all registered' if c == 'Finland' else '',))
+        s += ' Real fleet counts used where available (anchor years %s-%s; REAL rows%s), model scaled to them elsewhere.' % (tuple(i['anchor_years']) + ({'Finland': ', Statistics Finland / Traficom passenger cars IN TRAFFIC, not all registered', 'Iceland': ', Statistics Iceland passenger cars in traffic; 2023 BEV modelled because the national and Eurostat counts disagree'}.get(c, ''),))
     else:
         s += ' No real fleet count found: pure model with estimated pre-2005 cohorts (typical error +/-20%).'
     s += ' 2027-2041: total held at the 2026 level, BEV-share growth %.3f (own %s).' % (i['g'], i['g_own'])
