@@ -40,6 +40,7 @@
   .ch-zoomk{ position:absolute; left:10px; top:10px; z-index:5; font-size:11.5px; font-weight:800; padding:4px 9px; border-radius:999px; background:var(--surface); border:1px solid var(--border); color:var(--text-muted); }
   .ch-layers{ position:absolute; left:10px; bottom:10px; z-index:5; display:flex; gap:6px; flex-wrap:wrap; max-width:70%; }
   .ch-layers button{ border:1px solid var(--border); background:var(--surface); color:var(--text-muted); font-weight:700; font-size:12px; padding:6px 11px; border-radius:999px; cursor:pointer; }
+  .ch-layers button.act{ border-style:dashed; }
   .ch-layers button.on{ background:linear-gradient(135deg,var(--ch-a),var(--ch-b)); color:#fff; border-color:transparent; }
   .ch-legend{ position:absolute; right:10px; bottom:10px; z-index:5; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:7px 10px; font-size:11px; max-width:46%; }
   .ch-legend .sc{ display:flex; gap:3px; margin-top:4px; }
@@ -175,6 +176,9 @@
           <div class="ch-layers" id="ch-layers">
             <button type="button" data-layer="grid" title="Open Charge Map ports in 0.5° cells (about 55 km): darker = more charging ports">Station density</button>
             <button type="button" data-layer="tesla" title="Every open Tesla Supercharger site (dot size = stalls)">Tesla Superchargers</button>
+            <button type="button" data-layer="ce" title="Circuit électrique sites (Hydro-Québec network): AFDC/NRCan locator + Open Charge Map. Dot size = ports">Circuit électrique</button>
+            <button type="button" data-layer="ct" title="Couche-Tard / Circle K charging sites in Canada: AFDC/NRCan locator. Dot size = ports">Couche-Tard / Circle K</button>
+            <button type="button" id="z-qc" class="act" title="Zoom to southern Québec and show the Circuit électrique and Couche-Tard layers">Zoom to Québec</button>
           </div>
           <div class="ch-legend" id="ch-legend"></div>
           <div class="ch-tip" id="ch-tip"></div>
@@ -254,6 +258,7 @@
 <script src="assets/charging-data.js"></script>
 <script src="assets/charging-grid-data.js"></script>
 <script src="assets/charging-tesla-sites-data.js"></script>
+<script src="assets/charging-qc-networks-data.js"></script>
 <script src="assets/notes-toggle.js"></script>
 <script>
 (function(){
@@ -292,7 +297,7 @@ const METRICS = {
             note:'Charging locations: official counts for the United States and Canada, Open Charge Map elsewhere, shown only where Open Charge Map lists at least a quarter of the IEA ports and averages 2 to 10 ports per station (grey = not reliable).' },
 };
 let metric = 'points', year = LATEST, scope = 'all', selected = null, sortKey = null, sortAsc = false;
-const layers = { grid:false, tesla:false };
+const layers = { grid:false, tesla:false, ce:false, ct:false };
 
 // top 30 by EV fleet (IEA BEV+PHEV stock 2025, else by IEA points)
 const TOP30 = new Set(CHARGING.countries.slice().sort((a, b) => (evs(b, LATEST) || 0) - (evs(a, LATEST) || 0)).slice(0, 30).map(c => c.n));
@@ -337,7 +342,7 @@ function renderStats(){
 // ---------- map ----------
 const svg = d3.select('#ch-svg'), W = 940, H = 520;
 const projection = d3.geoNaturalEarth1(), path = d3.geoPath(projection);
-const root = svg.append('g'), gCountries = root.append('g'), gGrid = root.append('g'), gTesla = root.append('g');
+const root = svg.append('g'), gCountries = root.append('g'), gGrid = root.append('g'), gTesla = root.append('g'), gQc = root.append('g');
 let feats = null, zk = 1, cur = d3.zoomIdentity;
 const tip = document.getElementById('ch-tip'), mapEl = document.getElementById('ch-map');
 const nameOf = d => MAP_ALIASES[d.properties.name] || d.properties.name;
@@ -383,6 +388,7 @@ const zoom = d3.zoom().scaleExtent([1, 250]).translateExtent([[-40, -30], [W + 4
   cur = e.transform; zk = cur.k; root.attr('transform', cur);
   document.getElementById('ch-zoomk').textContent = 'zoom ×' + (zk < 10 ? zk.toFixed(1) : Math.round(zk));
   gTesla.selectAll('circle').attr('r', d => teslaR(d));
+  gQc.selectAll('circle').attr('r', d => qcR(d));
   if(layers.grid) drawGrid();
 });
 svg.call(zoom).on('dblclick.zoom', null);
@@ -397,6 +403,21 @@ function drawTesla(){
     .attr('fill', '#e11d48').attr('fill-opacity', .72).attr('stroke', '#fff').attr('stroke-width', .15)
     .append('title').text(d => `Tesla Supercharger · ${d[2]} stalls · ${d[3]} kW`);
 }
+// Circuit électrique (green) and Couche-Tard / Circle K (orange) sites; ports drive the dot size, the Circle K dots are drawn on top
+const QC_STYLE = { ce:{ fill:'#22c55e', name:'Circuit électrique' }, ct:{ fill:'#f97316', name:'Couche-Tard / Circle K' } };
+const qcR = d => Math.max(0.12, Math.min(6, (0.5 + Math.sqrt(d[2]) * 0.2) / Math.pow(zk, 0.68)));
+function drawQc(){
+  ['ce', 'ct'].forEach(k => {
+    let g = gQc.select('g.q-' + k);
+    if(g.empty()) g = gQc.append('g').attr('class', 'q-' + k);
+    g.style('display', layers[k] ? null : 'none');
+    if(!layers[k] || !g.selectAll('circle').empty() || !feats) return;
+    g.selectAll('circle').data(QC_NETWORKS[k]).join('circle').attr('cx', d => projection([d[1], d[0]])[0]).attr('cy', d => projection([d[1], d[0]])[1]).attr('r', qcR)
+      .attr('fill', QC_STYLE[k].fill).attr('fill-opacity', .85).attr('stroke', '#111').attr('stroke-width', .5).attr('vector-effect', 'non-scaling-stroke')
+      .append('title').text(d => `${QC_STYLE[k].name} · ${d[2]} port${d[2] > 1 ? 's' : ''}${d[3] ? ' (' + d[3] + ' fast)' : ''}`);
+  });
+  gQc.select('g.q-ct').raise();
+}
 function drawGrid(){
   gGrid.style('display', layers.grid ? null : 'none');
   if(!layers.grid) return;
@@ -408,16 +429,25 @@ function drawGrid(){
   }
 }
 document.getElementById('ch-layers').addEventListener('click', e => {
-  const b = e.target.closest('button'); if(!b) return; const k = b.dataset.layer; layers[k] = !layers[k]; b.classList.toggle('on', layers[k]);
-  drawGrid(); drawTesla();
+  const b = e.target.closest('button[data-layer]'); if(!b) return; const k = b.dataset.layer; layers[k] = !layers[k]; b.classList.toggle('on', layers[k]);
+  drawGrid(); drawTesla(); drawQc();
 });
+document.getElementById('z-qc').onclick = () => {
+  ['ce', 'ct'].forEach(k => { layers[k] = true; document.querySelector(`#ch-layers [data-layer="${k}"]`).classList.add('on'); });
+  drawQc();
+  // southern Québec, where nearly all of both networks sit (about -79.5..-64 E, 44.9..48.8 N)
+  const a = projection([-79.5, 48.8]), b = projection([-64, 44.9]);
+  const k = Math.min((W - 40) / (b[0] - a[0]), (H - 40) / (b[1] - a[1]));
+  const t = d3.zoomIdentity.translate(W / 2 - k * (a[0] + b[0]) / 2, H / 2 - k * (a[1] + b[1]) / 2).scale(k);
+  svg.transition().duration(700).call(zoom.transform, t);
+};
 d3.json('assets/countries-10m.json').then(topo => {
   const geo = topojson.feature(topo, topo.objects.countries);
   // world-atlas 1:10m has a few features wound the wrong way (Maldives reads as "the whole globe except the atolls"): flip any feature larger than a hemisphere
   const rewind = f => { if(d3.geoArea(f) <= 2 * Math.PI) return f; const fixPoly = poly => d3.geoArea({ type:'Polygon', coordinates:poly }) > 2 * Math.PI ? poly.map(r => r.slice().reverse()) : poly; const g = f.geometry; return Object.assign({}, f, { geometry:{ type:g.type, coordinates: g.type === 'Polygon' ? fixPoly(g.coordinates) : g.coordinates.map(fixPoly) } }); };
   feats = geo.features.filter(f => f.properties.name !== 'Antarctica').map(rewind);
   projection.fitExtent([[6, 6], [W - 6, H - 6]], { type:'FeatureCollection', features:feats });
-  renderMap(); drawTesla(); drawGrid();
+  renderMap(); drawTesla(); drawGrid(); drawQc();
 });
 
 // ---------- table ----------
