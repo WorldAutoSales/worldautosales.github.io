@@ -71,6 +71,10 @@
   .pe-legend-continent{ display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; font-size:12px; color:var(--text-muted); }
   .pe-legend-continent span{ display:inline-flex; align-items:center; gap:6px; }
   .pe-legend-continent .sw{ width:10px; height:10px; border-radius:50%; display:inline-block; }
+
+  /* the 2010/2020/latest trend charts in the rank-row/map tooltips need more room than the
+     site-wide tooltip's default max-width, since this page shows two mini charts side by side */
+  .pe-page .tooltip{ max-width:460px; }
 </style>
 </head>
 <body>
@@ -296,11 +300,18 @@ function trendFieldsFor(metric){
     oil:   { pop:'population', total:'oilLitres' },
   }[metric];
 }
-function countryTrendChartHTML(country){
+const POP_LINE_COLOR = "#FFD43B"; // population line is always yellow, independent of metric/continent colors
+function fmtCompact(v){
+  if(v == null) return 'n/a';
+  if(v >= 1e9) return (v/1e9).toFixed(1) + 'B';
+  if(v >= 1e6) return (v/1e6).toFixed(1) + 'M';
+  if(v >= 1e3) return (v/1e3).toFixed(0) + 'K';
+  return Math.round(v).toLocaleString('en-US');
+}
+
+// chart 1: the per-100-people (or per-person, for oil) ratio, one bar per era
+function countryRatioChartSVG(country, fld, isOil){
   const c = POPULATION_ENERGY[country];
-  if(!c) return '';
-  const fld = trendFieldsFor(currentMetric);
-  const isOil = currentMetric === 'oil';
   const pts = TREND_ERAS.map(era => {
     const pop = c[trendField(fld.pop, era)];
     const total = c[trendField(fld.total, era)];
@@ -309,27 +320,69 @@ function countryTrendChartHTML(country){
   });
   if(pts.every(v => v == null)) return '';
   const maxV = Math.max(...pts.filter(v => v != null));
-  const W = 210, H = 96, barW = 40, gap = 20, base = H - 18;
+  const W = 190, H = 110, barW = 34, gap = 24, base = H - 20;
   const unit = isOil ? 'L/person' : 'cars/100 people';
   const bars = pts.map((v, i) => {
-    const x = 10 + i * (barW + gap);
+    const x = 14 + i * (barW + gap);
     const label = TREND_ERA_LABELS[TREND_ERAS[i]];
     if(v == null){
       return `<rect x="${x}" y="${base-4}" width="${barW}" height="4" fill="rgba(255,255,255,.2)" rx="2"></rect>
-        <text x="${x+barW/2}" y="${base+14}" text-anchor="middle" font-size="9" fill="var(--bg)" opacity="0.75">${label}</text>
-        <text x="${x+barW/2}" y="${base-10}" text-anchor="middle" font-size="8" fill="var(--bg)" opacity="0.6">n/a</text>`;
+        <text x="${x+barW/2}" y="${base+16}" text-anchor="middle" font-size="9.5" fill="var(--bg)" opacity="0.75">${label}</text>
+        <text x="${x+barW/2}" y="${base-10}" text-anchor="middle" font-size="8.5" fill="var(--bg)" opacity="0.6">n/a</text>`;
     }
-    const h = Math.max(3, (v / maxV) * (base - 14));
+    const h = Math.max(3, (v / maxV) * (base - 16));
     const y = base - h;
     const fmtV = v >= 100 ? Math.round(v).toLocaleString('en-US') : v.toFixed(1);
     const isLast = i === pts.length - 1;
     return `<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="${isLast ? ACCENT : ACCENT2}" opacity="${isLast ? 1 : 0.5 + i*0.2}" rx="3"></rect>
-      <text x="${x+barW/2}" y="${y-5}" text-anchor="middle" font-size="10" font-weight="700" fill="var(--bg)">${fmtV}</text>
-      <text x="${x+barW/2}" y="${base+14}" text-anchor="middle" font-size="9" fill="var(--bg)" opacity="0.75">${label}</text>`;
+      <text x="${x+barW/2}" y="${y-6}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--bg)">${fmtV}</text>
+      <text x="${x+barW/2}" y="${base+16}" text-anchor="middle" font-size="9.5" fill="var(--bg)" opacity="0.75">${label}</text>`;
   }).join('');
-  return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.18);">
-    <svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${bars}</svg>
-    <div style="font-size:10px;opacity:.6;text-align:center;">${unit} — 2010 · 2020 · latest</div>
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${bars}</svg>
+    <div style="font-size:10.5px;opacity:.6;text-align:center;">${unit}</div>`;
+}
+
+// chart 2: the raw totals — bars for the metric's absolute count, plus a yellow line for population
+function countryTotalsChartSVG(country, fld){
+  const c = POPULATION_ENERGY[country];
+  const totals = TREND_ERAS.map(era => c[trendField(fld.total, era)]);
+  const pops = TREND_ERAS.map(era => c[trendField(fld.pop, era)]);
+  if(totals.every(v => v == null) && pops.every(v => v == null)) return '';
+  const maxTotal = Math.max(1, ...totals.filter(v => v != null));
+  const maxPop = Math.max(1, ...pops.filter(v => v != null));
+  const W = 190, H = 110, barW = 34, gap = 24, base = H - 20, top = 14;
+  const totalLabel = { sales:'cars sold', fleet:'cars on road', oil:'litres consumed' }[currentMetric];
+  const bars = totals.map((v, i) => {
+    const x = 14 + i * (barW + gap);
+    const isLast = i === totals.length - 1;
+    if(v == null) return `<rect x="${x}" y="${base-4}" width="${barW}" height="4" fill="rgba(255,255,255,.2)" rx="2"></rect>`;
+    const h = Math.max(3, (v / maxTotal) * (base - top));
+    const y = base - h;
+    return `<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="${isLast ? ACCENT : ACCENT2}" opacity="${isLast ? 1 : 0.5 + i*0.2}" rx="3"></rect>
+      <text x="${x+barW/2}" y="${y-6}" text-anchor="middle" font-size="10" font-weight="700" fill="var(--bg)">${fmtCompact(v)}</text>`;
+  }).join('');
+  const linePts = pops.map((v, i) => v == null ? null : [14 + i*(barW+gap) + barW/2, base - (v / maxPop) * (base - top)]);
+  const present = linePts.filter(Boolean);
+  const path = present.length > 1
+    ? `<path d="M ${present.map(p => p.join(',')).join(' L ')}" fill="none" stroke="${POP_LINE_COLOR}" stroke-width="2.25"></path>` : '';
+  const dots = linePts.map((p, i) => !p ? '' : `<circle cx="${p[0]}" cy="${p[1]}" r="3.25" fill="${POP_LINE_COLOR}"></circle>
+    <text x="${p[0]}" y="${p[1]-8}" text-anchor="middle" font-size="9" font-weight="700" fill="${POP_LINE_COLOR}">${fmtCompact(pops[i])}</text>`).join('');
+  const labels = TREND_ERAS.map((era, i) => `<text x="${14 + i*(barW+gap) + barW/2}" y="${base+16}" text-anchor="middle" font-size="9.5" fill="var(--bg)" opacity="0.75">${TREND_ERA_LABELS[era]}</text>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${bars}${path}${dots}${labels}</svg>
+    <div style="font-size:10.5px;opacity:.6;text-align:center;">${totalLabel} (bars) · <span style="color:${POP_LINE_COLOR}">population</span> (line)</div>`;
+}
+
+function countryTrendChartHTML(country){
+  const c = POPULATION_ENERGY[country];
+  if(!c) return '';
+  const fld = trendFieldsFor(currentMetric);
+  const isOil = currentMetric === 'oil';
+  const chart1 = countryRatioChartSVG(country, fld, isOil);
+  const chart2 = countryTotalsChartSVG(country, fld);
+  if(!chart1 && !chart2) return '';
+  return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.18); display:flex; gap:16px; align-items:flex-start;">
+    ${chart1 ? `<div>${chart1}</div>` : ''}
+    ${chart2 ? `<div>${chart2}</div>` : ''}
   </div>`;
 }
 
