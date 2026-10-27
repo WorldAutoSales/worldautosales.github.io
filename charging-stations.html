@@ -53,13 +53,14 @@
   .ch-tip b{ font-variant-numeric:tabular-nums; }
   /* ranking table */
   .ch-tablewrap{ overflow-x:auto; }
-  table.ch-t{ width:100%; border-collapse:collapse; font-size:13px; font-variant-numeric:tabular-nums; }
-  table.ch-t th{ position:sticky; top:0; background:var(--surface); text-align:right; font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--text-muted); padding:8px 9px; border-bottom:2px solid var(--border); cursor:pointer; white-space:nowrap; user-select:none; }
-  table.ch-t th:first-child, table.ch-t td:first-child{ text-align:left; }
+  table.ch-t{ width:100%; border-collapse:collapse; font-size:11.5px; font-variant-numeric:tabular-nums; }
+  table.ch-t th{ position:sticky; top:0; background:var(--surface); text-align:right; font-size:9.5px; letter-spacing:.01em; text-transform:uppercase; color:var(--text-muted); padding:8px 3px; border-bottom:2px solid var(--border); cursor:pointer; white-space:nowrap; line-height:1.25; vertical-align:bottom; user-select:none; }
+  table.ch-t th.rk, table.ch-t td.rk{ text-align:right; width:1%; color:var(--text-muted); font-weight:700; cursor:default; padding-right:6px; }
+  table.ch-t th:nth-child(2), table.ch-t td:nth-child(2){ text-align:left; }
   table.ch-t th.sorted{ color:var(--text); }
   table.ch-t th.sorted::after{ content:' ▼'; font-size:9px; }
   table.ch-t th.sorted.asc::after{ content:' ▲'; }
-  table.ch-t td{ padding:7px 9px; border-bottom:1px solid var(--border); text-align:right; white-space:nowrap; }
+  table.ch-t td{ padding:6px 3px; border-bottom:1px solid var(--border); text-align:right; white-space:nowrap; }
   table.ch-t tr:hover td{ background:var(--surface-alt); }
   table.ch-t tr.sel td{ background:color-mix(in srgb, var(--ch-a) 14%, transparent); font-weight:700; }
   table.ch-t td.bar{ background-repeat:no-repeat; background-position:left center; background-size:var(--w,0%) 70%; background-image:linear-gradient(90deg,color-mix(in srgb, var(--ch-a) 28%, transparent),color-mix(in srgb, var(--ch-b) 28%, transparent)); }
@@ -83,7 +84,7 @@
   .ch-brandhead{ display:flex; flex-wrap:wrap; gap:12px 18px; align-items:center; margin:4px 0 10px; }
   .ch-brandhead select{ padding:9px 12px; border-radius:12px; border:1.5px solid var(--border); background:var(--surface); color:var(--text); font-weight:700; font-size:14px; min-width:220px; }
   .ch-t td.mixc{ white-space:nowrap; font-variant-numeric:tabular-nums; }
-  .ch-t .mixb{ display:inline-flex; width:64px; height:9px; border-radius:3px; overflow:hidden; margin-right:7px; vertical-align:middle; background:var(--surface-alt); }
+  .ch-t .mixb{ display:inline-flex; width:26px; height:8px; border-radius:3px; overflow:hidden; margin-right:4px; vertical-align:middle; background:var(--surface-alt); }
   .ch-t .mixb i{ display:block; height:100%; }
   .ch-t td.lb{ color:var(--text-muted); }
   .ch-bands{ display:flex; flex-wrap:wrap; gap:6px 14px; font-size:11.5px; color:var(--text-muted); margin:6px 0 10px; }
@@ -539,15 +540,15 @@ d3.json('assets/countries-10m.json').then(topo => {
 const COLS = [
   ['n', 'Country', c => c.n, null],
   ['pts', 'Ports', c => total(c, year), 'bar'],
-  ['fast', 'Fast ports (50+ kW)', c => METRICS.fast.get(c, year), null, 'Ports of 50 kW and more: the IEA fast + ultra-fast classes with the 22–49 kW part removed. The 22–49 kW share comes from Open Charge Map connectors where it lists at least 25% of the ports of the country, else from the world pool, so this is an estimate.'],
-  ['mix', 'Speed mix', c => { const k = classes(c, year); const t = total(c, year); return k && t ? (k[2] + k[3]) / t : null; }, 'mix', 'Estimated split of the ports: Level 2 (<12 kW) · slow (12–49 kW) · fast (50–149 kW) · ultra-fast (150+ kW). Sorted by the share of fast ports (50+ kW). Hover a bar for the numbers.'],
-  ['fst', 'Fast stations (50+ kW)', c => { const f = fastStations(c); return f ? f.n : null; }, 'fst', 'Stations with at least one 50+ kW port: official DC fast counts for the United States and Canada; elsewhere Open Charge Map stations with a 50+ kW connector plus Tesla Supercharger sites, shown only where they list at least a quarter of the estimated fast ports. "≥" = lower bound (less than 60% of the estimated fast ports are listed).'],
+  ['fast', 'Fast ports<br>50+ kW', c => METRICS.fast.get(c, year), null, 'Ports of 50 kW and more: the IEA fast + ultra-fast classes with the 22–49 kW part removed. The 22–49 kW share comes from Open Charge Map connectors where it lists at least 25% of the ports of the country, else from the world pool, so this is an estimate.'],
+  ['mix', 'Speed<br>mix', c => { const k = classes(c, year); const t = total(c, year); return k && t ? (k[2] + k[3]) / t : null; }, 'mix', 'Estimated split of the ports: Level 2 (<12 kW) · slow (12–49 kW) · fast (50–149 kW) · ultra-fast (150+ kW). Sorted by the share of fast ports (50+ kW). Hover a bar for the numbers.'],
+  ['fst', 'Fast stations<br>50+ kW', c => { const f = fastStations(c); return f ? f.n : null; }, 'fst', 'Stations with at least one 50+ kW port: official DC fast counts for the United States and Canada; elsewhere Open Charge Map stations with a 50+ kW connector plus Tesla Supercharger sites, shown only where they list at least a quarter of the estimated fast ports. "≥" = lower bound (less than 60% of the estimated fast ports are listed).'],
   ['st', 'Stations', c => stationsOf(c), null, 'Official count (US, Canada) or Open Charge Map; shown only where Open Charge Map lists at least 25% of the IEA ports and averages 2 to 10 ports per station (otherwise the listing practice makes the count meaningless)'],
-  ['pps', 'Avg ports / station', c => avgPPS(c), 'pps', 'Ports divided by stations, from one source only (official or Open Charge Map). A normal site has 2 to 10 ports; where a source lists one station per socket (below 2) or merges sites (above 10) the average and the station count are left blank.'],
-  ['f100', 'Fast ports / 100k aged 15–64', c => METRICS.fast100k.get(c, year), null, 'Fast ports (50+ kW) per 100,000 people aged 15–64. All-port ratios are available as map metrics above.'],
-  ['fev', 'Fast ports / 1,000 EVs', c => METRICS.fastEV.get(c, ['2024', '2025'].includes(year) ? year : LATEST), null, 'Fast ports (50+ kW) per 1,000 battery-electric + plug-in hybrid cars (IEA EV stock; 2024 and 2025 only). All-port ratios are available as map metrics above.'],
-  ['ev', 'EVs on the road', c => evs(c, ['2024', '2025'].includes(year) ? year : LATEST), null],
-  ['cov', 'Company data coverage', c => ocmCov(c), 'cov', 'Share of the IEA ports that Open Charge Map actually lists in this country. High = the company and speed split below describes most of the network; low = it is only a sample.'],
+  ['pps', 'Ports /<br>station', c => avgPPS(c), 'pps', 'Ports divided by stations, from one source only (official or Open Charge Map). A normal site has 2 to 10 ports; where a source lists one station per socket (below 2) or merges sites (above 10) the average and the station count are left blank.'],
+  ['f100', 'Fast ports<br>/100k 15–64', c => METRICS.fast100k.get(c, year), null, 'Fast ports (50+ kW) per 100,000 people aged 15–64. All-port ratios are available as map metrics above.'],
+  ['fev', 'Fast ports<br>/1,000 EVs', c => METRICS.fastEV.get(c, ['2024', '2025'].includes(year) ? year : LATEST), null, 'Fast ports (50+ kW) per 1,000 battery-electric + plug-in hybrid cars (IEA EV stock; 2024 and 2025 only). All-port ratios are available as map metrics above.'],
+  ['ev', 'EVs on<br>the road', c => evs(c, ['2024', '2025'].includes(year) ? year : LATEST), null],
+  ['cov', 'Data<br>coverage', c => ocmCov(c), 'cov', 'Share of the IEA ports that Open Charge Map actually lists in this country. High = the company and speed split below describes most of the network; low = it is only a sample.'],
 ];
 function renderTable(){
   const cs = CHARGING.countries.filter(inScope);
@@ -555,8 +556,8 @@ function renderTable(){
   const rows = cs.map(c => ({ c, v:col[2](c) })).sort((a, b) => { if(key === 'n') return sortAsc ? a.v.localeCompare(b.v) : b.v.localeCompare(a.v); const x = a.v == null ? -Infinity : a.v, y = b.v == null ? -Infinity : b.v; return sortAsc ? x - y : y - x; });
   const maxPts = Math.max(1, ...cs.map(c => total(c, year) || 0));
   document.getElementById('table-note').textContent = `${cs.length} countries, ${year}. Click a column to sort, a row to open its companies below. Ports and EVs are IEA figures (public ports only); stations are official (US, Canada) or Open Charge Map; company data coverage = ports listed in Open Charge Map ÷ IEA ports (low coverage means the company split is only a sample). Stations and the average ports per station are blank where Open Charge Map sees less than a quarter of a country's ports or lists single sockets as stations (under 2 ports per station); the average always uses one source.`;
-  document.getElementById('ch-table').innerHTML = '<thead><tr>' + COLS.map(c => `<th data-k="${c[0]}" title="${esc(c[4] || '')}" class="${c[0] === key ? 'sorted' + (sortAsc ? ' asc' : '') : ''}">${c[1]}</th>`).join('') + '</tr></thead><tbody>' +
-    rows.map(({ c }) => '<tr data-c="' + esc(c.n) + '" class="' + (selected === c.n ? 'sel' : '') + '">' + COLS.map(k => {
+  document.getElementById('ch-table').innerHTML = '<thead><tr><th class="rk" title="Rank in the current sort order">#</th>' + COLS.map(c => `<th data-k="${c[0]}" title="${esc(c[1].replace(/<br>/g, ' ') + (c[4] ? ' — ' + c[4] : ''))}" class="${c[0] === key ? 'sorted' + (sortAsc ? ' asc' : '') : ''}">${c[1]}</th>`).join('') + '</tr></thead><tbody>' +
+    rows.map(({ c, v: sv }, i) => '<tr data-c="' + esc(c.n) + '" class="' + (selected === c.n ? 'sel' : '') + '"><td class="rk">' + (sv == null ? '–' : i + 1) + '</td>' + COLS.map(k => {
       const v = k[2](c);
       if(k[0] === 'n') return `<td>${esc(c.n)}</td>`;
       if(v == null) return '<td class="na">–</td>';
@@ -570,7 +571,7 @@ function renderTable(){
     }).join('') + '</tr>').join('') + '</tbody>';
 }
 document.getElementById('ch-table').addEventListener('click', e => {
-  const th = e.target.closest('th'); if(th){ const k = th.dataset.k; if((sortKey || 'pts') === k) sortAsc = !sortAsc; else { sortKey = k; sortAsc = k === 'n'; } renderTable(); return; }
+  const th = e.target.closest('th'); if(th){ const k = th.dataset.k; if(!k) return; if((sortKey || 'pts') === k) sortAsc = !sortAsc; else { sortKey = k; sortAsc = k === 'n'; } renderTable(); return; }
   const tr = e.target.closest('tr[data-c]'); if(tr) selectCountry(tr.dataset.c, false);
 });
 
