@@ -68,6 +68,40 @@
   .fx-chipvs{ font-size:10.5px; font-weight:900; color:var(--text-muted); letter-spacing:.08em; }
   .fx-clear{ margin-left:auto; border:1px solid var(--border); background:transparent; color:var(--text-muted); font-weight:700; font-size:12px; padding:5px 12px; border-radius:999px; cursor:pointer; }
   .fx-clear:hover{ color:var(--accent); border-color:var(--accent); }
+  /* ---------- filters live in a sticky left column (narrow layout: lanes stack, each pair is one column) ---------- */
+  .filters-panel.mfr-side{ width:344px; gap:0; padding-right:4px; }
+  .mfr-side .fx-panel{ margin:0; padding:16px 14px 14px; border-radius:18px; }
+  .mfr-side .fx-head{ flex-direction:column; align-items:stretch; gap:12px; margin-bottom:12px; }
+  .mfr-side .fx-title{ font-size:15.5px; line-height:1.25; }
+  .mfr-side .fx-global{ flex-direction:column; align-items:stretch; gap:10px; }
+  .mfr-side .fx-seg{ flex-wrap:wrap; }
+  .mfr-side .fx-panel select.fx-select{ min-width:0; }
+  .mfr-side .fx-lane{ grid-template-columns:1fr; gap:8px; padding:10px 11px; }
+  .mfr-side .fx-pair{ grid-template-columns:1fr; gap:6px; }
+  .mfr-side .fx-vs{ justify-self:start; margin:0 0 0 4px; width:28px; height:28px; font-size:9.5px; }
+  .mfr-side .fx-status{ grid-column:auto; }
+  .mfr-side .fx-seggrp > .fx-seglabel{ flex-basis:100%; min-width:0; }
+  .mfr-side .mfr-combo-list{ max-height:240px; }
+  .mfr-side .fx-quick{ margin-top:12px; }
+  @media (max-width:1000px){ .filters-panel.mfr-side{ width:100%; } .mfr-side .fx-lane{ grid-template-columns:1fr; } }
+  /* ---------- compare toggles (country / continent cards) and reported-vs-tracked rows ---------- */
+  .cmp-bar{ display:flex; flex-wrap:wrap; gap:12px 26px; align-items:center; margin:6px 0 16px; padding:12px 14px; border-radius:16px; background:var(--surface-alt); border:1px solid var(--border); }
+  .cmp-group{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .cmp-label{ font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; font-weight:800; color:var(--text-muted); }
+  .cmp-seg{ display:inline-flex; padding:4px; gap:3px; border-radius:14px; background:var(--surface); border:1px solid var(--border); }
+  .cmp-seg button{ border:0; background:transparent; color:var(--text-muted); font-weight:800; font-size:14px; padding:9px 20px; border-radius:10px; cursor:pointer; transition:all .15s; }
+  .cmp-seg button:hover:not(.active){ color:var(--text); background:var(--surface-alt); }
+  .cmp-seg button.active{ color:#fff; background:linear-gradient(135deg,#6366f1,#8b5cf6); box-shadow:0 4px 14px -4px rgba(99,102,241,.6); }
+  .cmp-seg button[data-cmp="bev"].active{ background:linear-gradient(135deg,#15803d,#1e8f5f); box-shadow:0 4px 14px -4px rgba(30,143,95,.6); }
+  .cmp-seg button[data-cmp="nonbev"].active{ background:linear-gradient(135deg,#6b7280,#8a8f98); box-shadow:0 4px 14px -4px rgba(107,114,128,.6); }
+  .cmp-switch{ display:inline-flex; align-items:center; gap:11px; border:1px solid var(--border); background:var(--surface); color:var(--text); padding:7px 16px 7px 9px; border-radius:999px; font-weight:800; font-size:14px; cursor:pointer; }
+  .cmp-switch .track{ position:relative; width:42px; height:24px; border-radius:999px; background:var(--border); transition:background .15s; flex-shrink:0; }
+  .cmp-switch .knob{ position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.35); transition:left .15s; }
+  .cmp-switch.on .track{ background:linear-gradient(135deg,#15803d,#1e8f5f); }
+  .cmp-switch.on .knob{ left:21px; }
+  .cmp-switch:disabled{ opacity:.45; cursor:not-allowed; }
+  .rank-row.fin-gap .country-label{ font-style:italic; color:var(--text-muted); }
+  .rank-row.fin-reported .country-label{ color:var(--text); }
   /* ---------- spotlight card: KPIs, powertrain donut, five-year trend ---------- */
   .fx-spot-head{ display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:6px 14px; }
   .fx-spot-head h2{ margin:0; }
@@ -212,13 +246,8 @@
   </aside>
 
   <main class="main">
-    <div class="page">
-      <header class="page-header">
-        <div class="eyebrow">Manufacturers · Map</div>
-        <h1>Who sells what, country by country</h1>
-        <p class="subtitle">Pick a period and, optionally, one manufacturer or, with the Model filter on top, one model (each can be set against a second one for a head-to-head; the model data, about 24 MB, loads the first time you click the Model box). The map shades each country by that manufacturer's sales (or by total market size when "All manufacturers" is selected). Hover a country to see its top 10 manufacturers for the period, split into BEV, PHEV and HEV + ICE + Diesel. The Segment lane narrows everything to one or several car classes (mini to executive, SUV small or large, MPV, pickup, van; assigned per nameplate from the EU segment letters) and/or powertrains.</p>
-      </header>
-
+    <div class="content-with-filters">
+      <aside class="filters-panel mfr-side">
       <section class="fx-panel mfr-filters" id="fx-panel">
         <div class="fx-head">
           <div class="fx-brand"><span class="fx-pulse"></span><div><div class="fx-kicker">Explore</div><div class="fx-title">Pick a brand or a model, or set two head to head</div></div></div>
@@ -289,6 +318,14 @@
         </div>
         <div class="fx-quick" id="fx-quick"></div>
       </section>
+      </aside>
+    <div class="page">
+      <header class="page-header">
+        <div class="eyebrow">Manufacturers · Map</div>
+        <h1>Who sells what, country by country</h1>
+        <p class="subtitle">Pick a period and, optionally, one manufacturer or, with the Model filter on top, one model (each can be set against a second one for a head-to-head; the model data, about 24 MB, loads the first time you click the Model box). The map shades each country by that manufacturer's sales (or by total market size when "All manufacturers" is selected). Hover a country to see its top 10 manufacturers for the period, split into BEV, PHEV and HEV + ICE + Diesel. The Segment lane narrows everything to one or several car classes (mini to executive, SUV small or large, MPV, pickup, van; assigned per nameplate from the EU segment letters) and/or powertrains.</p>
+      </header>
+
       <div class="fx-chipbar" id="fx-chipbar"></div>
 
       <div class="card chart-card">
@@ -316,6 +353,7 @@
 
       <div class="card chart-card hidden" id="continent-bars-card">
         <h2 id="continent-bars-title">Continent by continent</h2>
+        <div class="cmp-bar hidden" data-cmpbar></div>
         <div class="chart-mode-toggle hidden" id="bars-group-toggle" role="group" aria-label="Group by" style="margin:2px 0 10px;">
           <button type="button" class="mode-btn active" data-group="brand">Brand</button>
           <button type="button" class="mode-btn" data-group="group">Parent group</button>
@@ -330,6 +368,7 @@
 
       <div class="card chart-card" id="bars-card">
         <h2 id="bars-title">Sales by country</h2>
+        <div class="cmp-bar hidden" data-cmpbar></div>
         <p class="note" id="bars-note" style="display:block"></p>
         <div class="rank-rows-header">
           <span class="rrh-spacer"></span>
@@ -340,8 +379,9 @@
 
       <div class="card chart-card">
         <h2>How to read this page</h2>
-        <p class="note" style="display:block">Coverage: about 50 countries with brand-level data (monthly from January 2025 where available, yearly back to 2008 for the longest series). Countries drawn in beige have no manufacturer breakdown on this site. Where a source publishes no powertrain split for a brand, its sales are counted as HEV + ICE + Diesel (and a few countries publish totals only). Hong Kong's registry folds hybrids and plug-in hybrids into petrol, so its PHEV share shows 0% even though some plug-in hybrids are in the grey bar; its BEV share is exact. Yearly periods use each country's yearly series; the running year (2026) is offered as "(Projected)" — each brand's year-to-date total through the latest month loaded for that country, annualized to a full-year run-rate (year-to-date &times; 12 / months loaded) — rather than a raw partial total, so it's comparable to the complete prior years in the same list. Every brand has one permanent color taken from its logo (Toyota red, Ford blue, BMW silver…) and each country carries a badge with its winner's logo; logos come from the open-source simple-icons set, so brands without one (BYD, Perodua, Stellantis, VinFast…) show their initials instead. "Parent group" attributes each brand to its owner as of the selected year (e.g. Volvo and Polestar count under Geely, not Ford, from 2010 onward).</p>
+        <p class="note" style="display:block">Coverage: about 50 countries with brand-level data (monthly from January 2025 where available, yearly back to 2008 for the longest series). Countries drawn in beige have no manufacturer breakdown on this site. Where a source publishes no powertrain split for a brand, its sales are counted as HEV + ICE + Diesel (and a few countries publish totals only). Hong Kong's registry folds hybrids and plug-in hybrids into petrol, so its PHEV share shows 0% even though some plug-in hybrids are in the grey bar; its BEV share is exact. Yearly periods use each country's yearly series; the running year (2026) is offered as "(Projected)" — each brand's year-to-date total through the latest month loaded for that country, annualized to a full-year run-rate (year-to-date &times; 12 / months loaded) — rather than a raw partial total, so it's comparable to the complete prior years in the same list. Every brand has one permanent color taken from its logo (Toyota red, Ford blue, BMW silver…) and each country carries a badge with its winner's logo; logos come from the open-source simple-icons set, so brands without one (BYD, Perodua, Stellantis, VinFast…) show their initials instead. "Compare / Split switches above the continent and country charts redo them for BEV only or non-BEV only (PHEV counts as non-BEV), or cut every bar into BEV and non-BEV. For a manufacturer or parent group with a worldwide total in its financial reports (annual reports, 10-K / 20-F, official year-end sales releases; full years only), the charts add a "Reported worldwide" row and a hatched "Unclassified" row: reported sales minus the sum of the tracked countries, i.e. markets without brand data here, differences of basis (reported wholesale or deliveries vs. registrations) and joint-venture brands that this site files under another owner (Wuling under SAIC, for instance). The reported figures, regions and sources are in the Supabase table manufacturer_fin_report_sales. Parent group" attributes each brand to its owner as of the selected year (e.g. Volvo and Polestar count under Geely, not Ford, from 2010 onward).</p>
       </div>
+    </div>
     </div>
   </main>
 </div>
@@ -353,6 +393,7 @@
 <script src="assets/manufacturer-yearly-data.js"></script>
 <script src="assets/manufacturer-holdings-data.js"></script>
 <script src="assets/model-class-data.js"></script>
+<script src="assets/manufacturer-fin-report-sales.js"></script>
 <script>
 (function(){
 const COLORS = { bev:'#1e8f5f', phev:'#e0a21a', other:'#8a8f98' };
@@ -983,6 +1024,7 @@ function renderMap(){
     '. The badge in each country is its winner (a plain badge with initials where no logo is available). Scroll or use the buttons to zoom, drag to pan.';
   renderContinentBars();
   renderCountryBars();
+  renderCmpBars();
   renderSpotlight();
   renderChipBar();
   updateSegStatus(n);
@@ -1083,6 +1125,8 @@ function renderSpotlight(){
       kpi('#1 in', wins + (wins === 1 ? ' market' : ' markets'), `top 5 in ${top5} markets`, '#f59e0b') +
       (best ? kpi('Best market', esc(best[0]), `${compactN(best[1].sel.total)} units · #${best[1].rank}`, '#ec4899') : '') +
       kpi('BEV share', (100 * t.bev / (t.total || 1)).toFixed(1) + '%', `${compactN(t.bev)} electric units`, COLORS.bev);
+    const fin = !filtersActive() ? finFor(mfr) : null;
+    if(fin) kpis += kpi('Reported worldwide', compactN(fin.units), `financial reports · ${finBasisShort(fin)}`, '#334155') + kpi('Unclassified', fin.units > t.total ? compactN(fin.units - t.total) : 'none', `${(100 * t.total / fin.units).toFixed(0)}% of the reported total sits in the tracked markets`, '#9ca3af');
     donuts = `<div class="fx-donut">${donutSVG(mixParts(t), (100 * t.bev / (t.total || 1)).toFixed(0) + '%', 'BEV')}<div>${esc(mfr)}</div></div>`;
     histNames = [mfr]; histTitle = 'Five-year trend';
   } else {
@@ -1302,10 +1346,99 @@ function segmentsHTML(parts, widthDenom, absorb){
   return { bar, outside: outside.join('') };
 }
 
+// ---------- compare toggles (BEV only / Non-BEV only, BEV / Non-BEV split) + reported-vs-tracked world totals ----------
+// cmpMode: 'all' | 'bev' | 'nonbev' decides which units the bars compare; splitOn cuts each bar into BEV and non-BEV (PHEV counts as non-BEV).
+let cmpMode = 'all', splitOn = false;
+const NONBEV_LABEL = 'Non-BEV (PHEV + HEV + ICE + Diesel)';
+const sideU = sel => { const t = sel ? Math.max(sel.total, 0) : 0, b = sel ? Math.min(Math.max(sel.bev, 0), t) : 0; return { bev:b, non:t - b, total:t }; };
+const cmpValue = sel => { const u = sideU(sel); return cmpMode === 'bev' ? u.bev : cmpMode === 'nonbev' ? u.non : u.total; };
+const sumParts = parts => parts.reduce((s, p) => s + p.value, 0);
+// bar segments of ONE manufacturer for the active toggles (single-manufacturer view)
+function cmpFuelParts(sel, marketTotal){
+  const u = sideU(sel);
+  const mk = (v, color, label) => ({ value:v, color, label:`${label}: ${fmt(v)}`, display: metric === 'share' ? (100 * v / marketTotal).toFixed(1) + '%' : undefined });
+  if(cmpMode === 'bev') return [mk(u.bev, COLORS.bev, 'BEV')];
+  if(cmpMode === 'nonbev') return [mk(u.non, COLORS.other, 'Non-BEV')];
+  if(splitOn) return [mk(u.bev, COLORS.bev, 'BEV'), mk(u.non, COLORS.other, NONBEV_LABEL)];
+  return fuelParts(sel, marketTotal);
+}
+// head-to-head: A and B are sideU() results; each side keeps its own color, non-BEV is the lighter tint of it
+const lite = c => `color-mix(in srgb, ${c} 38%, #ffffff)`;
+function matchParts(A, B){
+  const c1 = matchFlatColor(1), c2 = matchFlatColor(2);
+  const P = (v, color, label) => ({ value:v, color, label:`${label}: ${fmt(v)}` });
+  if(cmpMode === 'bev') return [P(A.bev, c1, `${mfr} BEV`), P(B.bev, c2, `${mfr2} BEV`)];
+  if(cmpMode === 'nonbev') return [P(A.non, c1, `${mfr} non-BEV`), P(B.non, c2, `${mfr2} non-BEV`)];
+  if(splitOn) return [P(A.bev, c1, `${mfr} BEV`), P(A.non, lite(c1), `${mfr} non-BEV`), P(B.bev, c2, `${mfr2} BEV`), P(B.non, lite(c2), `${mfr2} non-BEV`)];
+  return [P(A.total, c1, mfr), P(B.total, c2, mfr2)];
+}
+const matchTotal = (A, B) => cmpMode === 'bev' ? A.bev + B.bev : cmpMode === 'nonbev' ? A.non + B.non : A.total + B.total;
+function matchLegendHTML(){
+  const c1 = matchFlatColor(1), c2 = matchFlatColor(2), sw = c => `<span class="sw" style="background:${c}"></span>`;
+  const tag = cmpMode === 'bev' ? ' &middot; BEV only' : cmpMode === 'nonbev' ? ' &middot; non-BEV only' : '';
+  let h = `${sw(c1)}${esc(mfr)} &nbsp; ${sw(c2)}${esc(mfr2)}${tag}`;
+  if(splitOn && cmpMode === 'all') h += ` &nbsp; <span style="color:var(--text-muted);font-weight:500">solid = BEV, light = non-BEV (PHEV + HEV + ICE + Diesel)</span>`;
+  return h;
+}
+const CMP_TIPS = { all:'Every vehicle sold', bev:'Battery-electric vehicles only: bars, ranking and numbers all use BEV units', nonbev:'Everything except battery-electric (PHEV, HEV, petrol, diesel): bars, ranking and numbers use those units' };
+function renderCmpBars(){
+  const md = mode();
+  document.querySelectorAll('[data-cmpbar]').forEach(el => {
+    if(md === 'market'){ el.classList.add('hidden'); el.innerHTML = ''; return; }
+    el.classList.remove('hidden');
+    const b = (k, t) => `<button type="button" data-cmp="${k}" class="${cmpMode === k ? 'active' : ''}" title="${CMP_TIPS[k]}">${t}</button>`;
+    const on = splitOn && cmpMode === 'all';
+    el.innerHTML = `<div class="cmp-group"><span class="cmp-label">Compare</span><div class="cmp-seg" role="group" aria-label="Compare">${b('all', 'All sales')}${b('bev', 'BEV only')}${b('nonbev', 'Non-BEV only')}</div></div>` +
+      `<div class="cmp-group"><span class="cmp-label">Split</span><button type="button" class="cmp-switch${on ? ' on' : ''}" data-split aria-pressed="${on}" ${cmpMode !== 'all' ? 'disabled' : ''} title="${cmpMode !== 'all' ? 'Pick All sales to split each bar into BEV and non-BEV' : 'Cut each bar into BEV and non-BEV (plug-in hybrids count as non-BEV)'}"><span class="track"><span class="knob"></span></span>BEV / Non-BEV split</button></div>`;
+  });
+}
+function refreshBarCards(){ renderContinentBars(); renderCountryBars(); renderCmpBars(); }
+document.addEventListener('click', e => {
+  const c = e.target.closest('[data-cmp]');
+  if(c){ cmpMode = c.dataset.cmp; refreshBarCards(); return; }
+  const s = e.target.closest('[data-split]');
+  if(s && !s.disabled){ splitOn = !splitOn; refreshBarCards(); }
+});
+
+// ---- real world totals from the companies' financial reports (assets/manufacturer-fin-report-sales.js), to expose the gap with the tracked countries ----
+const FIN_ENT = new Map(), FIN_BY_SITE = new Map();
+(typeof FIN_REPORT_SALES !== 'undefined' ? FIN_REPORT_SALES : []).forEach(e => { FIN_ENT.set(e.name, e); e.sites.forEach(s => FIN_BY_SITE.set(s, e)); });
+// brands that are the whole company (used when the list is by brand instead of parent group)
+const FIN_BRAND_ALIAS = { 'Tesla':'Tesla', 'Kia':'Kia', 'Volvo':'Volvo Cars', 'Mazda':'Mazda Motor', 'Subaru':'Subaru Corporation', 'Mitsubishi':'Mitsubishi Motors', 'Perodua':'Perodua', 'Proton':'Proton', 'Li Auto':'Li Auto', 'XPeng':'XPeng', 'Leapmotor':'Leapmotor', 'Xiaomi':'Xiaomi (auto)' };
+const finActive = () => cmpMode === 'all' && !filtersActive();      // a reported total only compares with unfiltered all-sales volumes
+const HATCH = 'repeating-linear-gradient(135deg,#6b7384 0 6px,#99a2b2 6px 12px)';
+function finFor(name){
+  if(kind !== 'brand' || !period || period.type !== 'year' || period.projected) return null;
+  const e = groupMode === 'group' ? FIN_BY_SITE.get(name) : FIN_ENT.get(FIN_BRAND_ALIAS[name]);
+  const y = e && e.years[String(period.year)];
+  return y ? Object.assign({ ent:e }, y) : null;
+}
+const finBasisShort = f => `${f.basis}${f.pt === 'FY' ? ', fiscal year Apr–Mar' : ''}`;
+const finTip = f => `${f.ent.name}: ${fmt(f.units)} (${finBasisShort(f)}; ${String(f.conf).replace('_', ' ')}). ${f.scope || ''} Source: ${f.src}`;
+const GAP_TIP = 'Reported worldwide sales minus the sum of the countries tracked here: markets this site has no brand data for, plus any difference in basis (reported wholesale or deliveries vs. registrations) and joint-venture brands this site attributes to another owner (e.g. Wuling under SAIC).';
+function finRowHTML(label, parts, widthDenom, pct, cls, tip){
+  const { bar, outside } = segmentsHTML(parts, widthDenom, true);
+  return `<div class="rank-row ${cls}" title="${esc(tip || '')}"><span class="world-rank-badge"></span><span class="country-label">${label}</span>` +
+    `<span class="pct-of-total">${pct != null ? pct.toFixed(1) + '%' : ''}</span><span class="bar-track">${bar.replace(/ title="[^"]*"/g, '')}${outside}</span><span class="total-label">${fmt(sumParts(parts))}</span></div>`;
+}
+const finReportedRow = f => finRowHTML('Reported total', [{ value:f.units, color:'#334155', label:'Reported worldwide' }], f.units, 100, 'world-total fin-reported', finTip(f));
+const finGapRow = (gap, f, denom) => finRowHTML('Unclassified', [{ value:gap, color:HATCH, label:`Unclassified: ${fmt(gap)}` }], denom, 100 * gap / f.units, 'fin-gap', GAP_TIP);
+function finNote(f, tracked){
+  const gap = f.units - tracked;
+  return ` Reported worldwide: ${fmt(f.units)} (${finBasisShort(f)}, ${f.ent.name}). The tracked countries add up to ${fmt(tracked)} (${(100 * tracked / f.units).toFixed(0)}%).` +
+    (gap > 0 ? ` The hatched "Unclassified" row (${fmt(gap)}) is the remainder: markets without brand data here, basis differences, and joint-venture brands that sit under another owner.` : ' They already exceed the reported figure (registrations vs. reported wholesale or deliveries), so there is no unclassified remainder.');
+}
+
 // ---------- single-manufacturer rows: BEV / PHEV / HEV + ICE + Diesel segments, rank badge, share of world, growth ----------
 function fuelLegendHTML(){
-  return `<span><i class="sw" style="background:${COLORS.bev}"></i>BEV</span><span><i class="sw" style="background:${COLORS.phev}"></i>PHEV</span><span><i class="sw" style="background:${COLORS.other}"></i>HEV + ICE + Diesel</span>` +
-    `<span class="lg-note">Badge = ${esc(mfr)}'s rank in that market (colored like the map) &middot; % on the left = share of ${esc(mfr)}'s world total &middot; number on the right = total sales, all motorizations &middot; hover a row for 5-year history and top 10 models</span>`;
+  const sw = (c, t) => `<span><i class="sw" style="background:${c}"></i>${t}</span>`;
+  let k;
+  if(cmpMode === 'bev') k = sw(COLORS.bev, 'BEV only');
+  else if(cmpMode === 'nonbev') k = sw(COLORS.other, NONBEV_LABEL + ' only');
+  else if(splitOn) k = sw(COLORS.bev, 'BEV') + sw(COLORS.other, NONBEV_LABEL);
+  else k = sw(COLORS.bev, 'BEV') + sw(COLORS.phev, 'PHEV') + sw(COLORS.other, 'HEV + ICE + Diesel');
+  const badge = cmpMode === 'all' ? `Badge = ${esc(mfr)}'s rank in that market (colored like the map) &middot; ` : '';
+  return k + `<span class="lg-note">${badge}% on the left = share of ${esc(mfr)}'s world total shown in this chart &middot; number on the right = ${cmpMode === 'all' ? 'total sales, all motorizations' : 'the units compared'} &middot; hover a row for 5-year history and top 10 models</span>`;
 }
 function fuelParts(sel, marketTotal){
   const mk = (k, label) => {
@@ -1356,18 +1489,26 @@ function aggScope(countries){
 function renderContinentBarsForBrand(card, title, note, legend, rows){
   title.textContent = `${mfr} — continent by continent`;
   legend.innerHTML = fuelLegendHTML();
+  const f = finActive() ? finFor(mfr) : null;
   const make = (scope, key, label, cls) => {
     const cs = scopeCountries(scope, key), a = aggScope(cs);
-    return { scope, key, country:label, cls, a, parts: fuelParts(a.sel, a.marketTotal), brandRank:a.rank, total:a.sel.total, yoyHTML: yoyLabelHTML(yoyProjectedScope(cs, mfr)) };
+    const parts = cmpFuelParts(a.sel, a.marketTotal), total = sumParts(parts);
+    return { scope, key, country:label, cls, a, parts, brandRank: cmpMode === 'all' ? a.rank : null, total, yoyHTML: yoyLabelHTML(yoyProjectedScope(cs, mfr)) };
   };
   const conts = [...new Set(Object.keys(byCountry).map(continentOf))]
-    .map(k => make('continent', k, CONTINENT_LABELS[k] || k)).filter(x => x.total > 0).sort((a, b) => b.total - a.total);
-  const world = make('world', 'World', 'World', 'world-total');
+    .map(k => make('continent', k, CONTINENT_LABELS[k] || k)).filter(x => x.total > 0);
+  const world = make('world', 'World', f ? 'World (tracked countries)' : 'World', 'world-total');
   if(!world.total){ rows.innerHTML = `<div class="note" style="display:block">No data for this selection.</div>`; note.textContent = ''; return; }
-  world.pctOfWorld = 100; conts.forEach(x => { x.pctOfWorld = 100 * x.total / world.total; });
-  const denom = conts.length ? conts[0].total : 1;
-  rows.innerHTML = brandRowHTML(world, world.total) + conts.map(x => brandRowHTML(x, denom)).join('');
-  note.textContent = `${mfr} sales by continent, ${periodLabel(period)}. Top row is the worldwide total; the continent rows below are scaled to each other, not to the world row.${metric === 'share' ? ' Numbers are points of each market.' : ''}`;
+  const base = f ? f.units : world.total;
+  world.pctOfWorld = 100 * world.total / base; conts.forEach(x => { x.pctOfWorld = 100 * x.total / base; });
+  const gap = f ? f.units - world.total : 0;
+  const items = conts.map(x => ({ v:x.total, x })).concat(gap > 0 ? [{ v:gap, gap }] : []).sort((a, b) => b.v - a.v);
+  const denom = items.length ? items[0].v : 1;
+  rows.innerHTML = (f ? finReportedRow(f) : '') + brandRowHTML(world, world.total) +
+    items.map(it => it.gap ? finGapRow(it.gap, f, denom) : brandRowHTML(it.x, denom)).join('');
+  note.textContent = `${mfr} sales by continent, ${periodLabel(period)}${cmpMode === 'bev' ? ', BEV only' : cmpMode === 'nonbev' ? ', non-BEV only' : ''}. ` +
+    (f ? 'The top row is the reported worldwide total, then the tracked countries, then the continents scaled to each other.' : 'Top row is the worldwide total; the continent rows below are scaled to each other, not to the world row.') +
+    (metric === 'share' ? ' Numbers are points of each market.' : '') + (f ? finNote(f, world.total) : '');
 }
 
 // ---------- the "big picture" card: world sales leaderboard (market mode) or world total +
@@ -1384,7 +1525,6 @@ function renderContinentBars(){
     toggle.classList.remove('hidden');
     const byGroup = groupMode === 'group';
     title.textContent = byGroup ? 'World sales by parent group' : 'World sales by brand';
-    legend.innerHTML = `<span><i class="sw" style="background:${COLORS.bev}"></i>BEV</span><span><i class="sw" style="background:${COLORS.phev}"></i>PHEV</span><span><i class="sw" style="background:${COLORS.other}"></i>HEV + ICE + Diesel</span>`;
     const world = new Map();
     Object.values(byCountry).forEach(d => d.list.forEach(a => {
       if(isOtherName(a.name)) return;
@@ -1393,55 +1533,64 @@ function renderContinentBars(){
       world.set(a.name, e);
     }));
     const worldTotal = [...world.values()].reduce((s, e) => s + e.total, 0);
-    const built = [...world.entries()].sort((a, b) => b[1].total - a[1].total).slice(0, WORLD_LIST_CAP);
-    const widthDenom = built.length ? built[0][1].total : 1;
-    rows.innerHTML = built.map(([name, e]) => {
+    // companies with a reported worldwide total are ranked by it: tracked countries plus the hatched "Unclassified" remainder
+    const finOn = !filtersActive();
+    const ranked = [...world.entries()].map(([name, e]) => {
+      const f = finOn ? finFor(name) : null, gap = f ? Math.max(0, f.units - e.total) : 0;
+      return { name, e, f, gap, eff:e.total + gap };
+    }).sort((a, b) => b.eff - a.eff).slice(0, WORLD_LIST_CAP);
+    const anyFin = ranked.some(r => r.gap > 0);
+    legend.innerHTML = `<span><i class="sw" style="background:${COLORS.bev}"></i>BEV</span><span><i class="sw" style="background:${COLORS.phev}"></i>PHEV</span><span><i class="sw" style="background:${COLORS.other}"></i>HEV + ICE + Diesel</span>` +
+      (anyFin ? `<span><i class="sw" style="background:${HATCH}"></i>Unclassified = reported worldwide sales minus the tracked countries</span>` : '');
+    const widthDenom = ranked.length ? ranked[0].eff : 1;
+    rows.innerHTML = ranked.map(({ name, e, f, gap }) => {
       const parts = [
         { value:e.bev, color:COLORS.bev, label:`BEV: ${fmt(e.bev)}` },
         { value:e.phev, color:COLORS.phev, label:`PHEV: ${fmt(e.phev)}` },
         { value:e.other, color:COLORS.other, label:`HEV + ICE + Diesel: ${fmt(e.other)}` },
       ];
+      if(gap > 0) parts.push({ value:gap, color:HATCH, label:`Unclassified: ${fmt(gap)} (reported ${fmt(f.units)} minus tracked ${fmt(e.total)})` });
       const { bar, outside } = segmentsHTML(parts, widthDenom);
       const pct = worldTotal ? `<span class="pct-of-total">${(100 * e.total / worldTotal).toFixed(1)}%</span>` : '';
-      return `<div class="rank-row">
+      return `<div class="rank-row"${f ? ` title="${esc(finTip(f))}"` : ''}>
         <span class="country-label">${esc(name)}</span>
         ${pct}
         <span class="bar-track">${bar}${outside}</span>
       </div>`;
     }).join('');
-    note.textContent = `Top ${WORLD_LIST_CAP} ${byGroup ? 'parent groups' : 'brands'} worldwide by volume, ${periodLabel(period)}. Bars are split into BEV, PHEV and HEV + ICE + Diesel. Pick a manufacturer above to focus this chart on one market instead.`;
+    note.textContent = `Top ${WORLD_LIST_CAP} ${byGroup ? 'parent groups' : 'brands'} worldwide by volume, ${periodLabel(period)}. Bars are split into BEV, PHEV and HEV + ICE + Diesel; the % is the share of the volume in the tracked countries.` +
+      (anyFin ? ` Where the company's financial reports give a worldwide total, the bar is extended by a hatched "Unclassified" segment (reported worldwide minus tracked countries) and the list is ranked by the reported figure; hover a row for the source.` : '') +
+      ` Pick a manufacturer above to focus this chart on one market instead.`;
     return;
   }
 
   // match mode: world total + continent breakdown
   toggle.classList.add('hidden');
   title.textContent = `${mfr} vs. ${mfr2} — continent by continent`;
-  legend.innerHTML = `<span class="sw" style="background:${matchFlatColor(1)}"></span>${mfr} &nbsp; <span class="sw" style="background:${matchFlatColor(2)}"></span>${mfr2}`;
+  legend.innerHTML = matchLegendHTML();
 
   const byContinent = new Map();
-  let worldU1 = 0, worldU2 = 0;
+  const W = { a:{ bev:0, non:0, total:0 }, b:{ bev:0, non:0, total:0 } };
+  const addTo = (acc, u) => { acc.bev += u.bev; acc.non += u.non; acc.total += u.total; };
   Object.entries(byCountry).forEach(([c, d]) => {
-    const u1 = d.sel ? d.sel.total : 0, u2 = d.sel2 ? d.sel2.total : 0;
-    worldU1 += u1; worldU2 += u2;
-    if(!u1 && !u2) return;
+    const a = sideU(d.sel), b = sideU(d.sel2);
+    addTo(W.a, a); addTo(W.b, b);
+    if(matchTotal(a, b) <= 0) return;
     const cont = continentOf(c);
-    const e = byContinent.get(cont) || { u1:0, u2:0 };
-    e.u1 += u1; e.u2 += u2;
+    const e = byContinent.get(cont) || { a:{ bev:0, non:0, total:0 }, b:{ bev:0, non:0, total:0 } };
+    addTo(e.a, a); addTo(e.b, b);
     byContinent.set(cont, e);
   });
-  const contRows = [...byContinent.entries()].sort((a, b) => (b[1].u1 + b[1].u2) - (a[1].u1 + a[1].u2));
-  const contDenom = d3.max(contRows, ([, e]) => e.u1 + e.u2) || 1;
-  const twoParts = (u1, u2) => [
-    { value:u1, color:matchFlatColor(1), label:`${mfr}: ${fmt(u1)}` },
-    { value:u2, color:matchFlatColor(2), label:`${mfr2}: ${fmt(u2)}` },
-  ];
-  const worldSeg = segmentsHTML(twoParts(worldU1, worldU2), worldU1 + worldU2 || 1);
+  const contRows = [...byContinent.entries()].sort((x, y) => matchTotal(y[1].a, y[1].b) - matchTotal(x[1].a, x[1].b));
+  const contDenom = d3.max(contRows, ([, e]) => matchTotal(e.a, e.b)) || 1;
+  const worldParts = matchParts(W.a, W.b);
+  const worldSeg = segmentsHTML(worldParts, sumParts(worldParts) || 1);
   const worldRow = `<div class="rank-row world-total">
       <span class="country-label">World total</span>
       <span class="bar-track">${worldSeg.bar}${worldSeg.outside}</span>
     </div>`;
   const continentRows = contRows.map(([cont, e]) => {
-    const seg = segmentsHTML(twoParts(e.u1, e.u2), contDenom);
+    const seg = segmentsHTML(matchParts(e.a, e.b), contDenom);
     return `<div class="rank-row">
       <span class="country-label">${CONTINENT_LABELS[cont] || cont}</span>
       <span class="bar-track">${seg.bar}${seg.outside}</span>
@@ -1449,7 +1598,9 @@ function renderContinentBars(){
   }).join('');
 
   rows.innerHTML = worldRow + continentRows;
-  note.textContent = `${mfr} vs. ${mfr2} combined volume, ${periodLabel(period)}, by continent. Top row is the worldwide total; the continent rows below are scaled to each other, not to the world row.`;
+  const fa = finActive() ? finFor(mfr) : null, fb = finActive() ? finFor(mfr2) : null;
+  note.textContent = `${mfr} vs. ${mfr2} combined volume, ${periodLabel(period)}${cmpMode === 'bev' ? ', BEV only' : cmpMode === 'nonbev' ? ', non-BEV only' : ''}, by continent. Top row is the tracked worldwide total; the continent rows below are scaled to each other, not to the world row.` +
+    (fa || fb ? ` Reported worldwide (financial reports): ${[fa && `${mfr} ${fmt(fa.units)} (tracked ${fmt(W.a.total)})`, fb && `${mfr2} ${fmt(fb.units)} (tracked ${fmt(W.b.total)})`].filter(Boolean).join(' · ')}.` : '');
 }
 // ---------- country-by-country card: rank mode (single manufacturer) or match mode; hidden in
 // market mode (no manufacturer picked -- there's no single country breakdown to show) ----------
@@ -1461,45 +1612,53 @@ function renderCountryBars(){
         legend = document.getElementById('bars-legend'), rows = document.getElementById('country-bars');
 
   let built; // [{country, parts:[{value,color,label,display?}], brandRank?, pctOfWorld?, yoyHTML?}]
+  let finTop = '', f = null;
   if(md === 'match'){
     title.textContent = `${mfr} vs. ${mfr2} — country by country`;
-    legend.innerHTML = `<span class="sw" style="background:${matchFlatColor(1)}"></span>${mfr} &nbsp; <span class="sw" style="background:${matchFlatColor(2)}"></span>${mfr2}`;
+    legend.innerHTML = matchLegendHTML();
     built = Object.entries(byCountry)
-      .map(([c, d]) => ({ country:c, u1:d.sel ? d.sel.total : 0, u2:d.sel2 ? d.sel2.total : 0 }))
-      .filter(x => x.u1 > 0 || x.u2 > 0)
-      .sort((a, b) => (b.u1 + b.u2) - (a.u1 + a.u2))
-      .map(x => ({
-        country:x.country,
-        parts:[
-          { value:x.u1, color:matchFlatColor(1), label:`${mfr}: ${fmt(x.u1)}` },
-          { value:x.u2, color:matchFlatColor(2), label:`${mfr2}: ${fmt(x.u2)}` },
-        ],
-      }));
-    note.textContent = `All ${built.length} markets where ${mfr} and/or ${mfr2} sell, ${periodLabel(period)}, sorted by combined volume.`;
+      .map(([c, d]) => { const a = sideU(d.sel), b = sideU(d.sel2); return { country:c, a, b, v:matchTotal(a, b) }; })
+      .filter(x => x.v > 0)
+      .sort((x, y) => y.v - x.v)
+      .map(x => ({ country:x.country, parts:matchParts(x.a, x.b) }));
+    const tag = cmpMode === 'bev' ? ' (BEV only)' : cmpMode === 'nonbev' ? ' (non-BEV only)' : '';
+    note.textContent = `All ${built.length} markets where ${mfr} and/or ${mfr2} sell, ${periodLabel(period)}${tag}, sorted by combined volume.`;
   } else {
     title.textContent = `${mfr} — country by country`;
     legend.innerHTML = fuelLegendHTML();
-    const worldTotal = Object.values(byCountry).reduce((s, d) => s + (d.sel ? d.sel.total : 0), 0);
+    f = finActive() ? finFor(mfr) : null;
+    const worldTotal = Object.values(byCountry).reduce((s, d) => s + (d.sel ? cmpValue(d.sel) : 0), 0);
     const all = Object.entries(byCountry)
-      .filter(([, d]) => d.sel)
-      .map(([c, d]) => ({ country:c, total:d.sel.total, rank:d.rank, share: 100 * d.sel.total / (d.market || d.total), sel:d.sel, marketTotal:(d.market || d.total) }))
+      .filter(([, d]) => d.sel && cmpValue(d.sel) > 0)
+      .map(([c, d]) => ({ country:c, total:cmpValue(d.sel), rank:d.rank, sel:d.sel, marketTotal:(d.market || d.total) }))
       .sort((a, b) => b.total - a.total);
+    const denomWorld = f ? f.units : worldTotal;
     built = all.map(x => ({
       country:x.country, scope:'country', key:x.country,
-      brandRank: x.rank,
-      pctOfWorld: worldTotal ? 100 * x.total / worldTotal : null,
+      brandRank: cmpMode === 'all' ? x.rank : null,
+      pctOfWorld: denomWorld ? 100 * x.total / denomWorld : null,
       yoyHTML: yoyLabelHTML(yoyProjected(x.country, mfr)),
-      parts: fuelParts(x.sel, x.marketTotal),
+      parts: cmpFuelParts(x.sel, x.marketTotal),
     }));
-    note.textContent = `All ${all.length} markets with ${mfr} sales, ${periodLabel(period)}, sorted by units. Bars are split into BEV, PHEV and HEV + ICE + Diesel${metric === 'share' ? '; numbers are points of the country\'s market' : ''}.`;
+    const tag = cmpMode === 'bev' ? ' BEV only,' : cmpMode === 'nonbev' ? ' non-BEV only,' : '';
+    note.textContent = `All ${all.length} markets with ${mfr} sales,${tag} ${periodLabel(period)}, sorted by units. ` +
+      (cmpMode !== 'all' ? 'Bars show only the compared units' : splitOn ? 'Bars are split into BEV and non-BEV' : 'Bars are split into BEV, PHEV and HEV + ICE + Diesel') +
+      (metric === 'share' ? '; numbers are points of the country\'s market' : '') + '.' +
+      (f ? finNote(f, worldTotal) : '');
+    if(f){
+      const gap = f.units - worldTotal;
+      if(gap > 0) built.push({ gap:true, country:'Unclassified', parts:[{ value:gap, color:HATCH, label:`Unclassified: ${fmt(gap)}` }], pctOfWorld:100 * gap / f.units });
+      built.sort((a, b) => sumParts(b.parts) - sumParts(a.parts));
+      finTop = finReportedRow(f);
+    }
   }
 
   if(!built.length){ rows.innerHTML = `<div class="note" style="display:block">No data for this selection.</div>`; return; }
   // bar LENGTH is scaled to the biggest row shown (widthDenom), same convention as the other
   // rank-row charts on this site -- every segment's width divides by that same fixed denominator,
   // so segments concatenate to the row's true proportional length rather than always filling 100%
-  const widthDenom = d3.max(built, e => e.parts.reduce((s, p) => s + p.value, 0)) || 1;
-  rows.innerHTML = built.map(e => e.scope ? brandRowHTML(e, widthDenom) : plainRowHTML(e, widthDenom)).join('');
+  const widthDenom = d3.max(built, e => sumParts(e.parts)) || 1;
+  rows.innerHTML = finTop + built.map(e => e.gap ? finRowHTML(esc(e.country), e.parts, widthDenom, e.pctOfWorld, 'fin-gap', GAP_TIP) : e.scope ? brandRowHTML(e, widthDenom) : plainRowHTML(e, widthDenom)).join('');
 }
 
 // ---------- hover panel on a row's name or bar: 5-year history + top 10 models ----------
