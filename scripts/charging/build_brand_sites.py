@@ -39,7 +39,7 @@ def slug(b):
 
 
 class Sites:
-    """sites of one brand, deduplicated within about 120 m"""
+    """sites of one brand: records within about 120 m are one site (ports added when they come from the same source)"""
     def __init__(self):
         self.cells = {}
         self.rows = []
@@ -59,7 +59,11 @@ class Sites:
     def add(self, lat, lon, ports, fast, src):
         i = self.find(lat, lon)
         if i is not None:
-            return False
+            r = self.rows[i]
+            if r[4] == src:          # same source at the same spot (several units of one site): add the ports, keep one dot
+                r[2] += max(1, int(round(ports)))
+                r[3] += int(round(min(fast, max(1, ports))))
+            return False             # other source: it is the same site, the first source wins
         self.cells[self.key(lat, lon)] = len(self.rows)
         self.rows.append([round(lat, 5), round(lon, 5), max(1, int(round(ports))), int(round(min(fast, max(1, ports)))), src])
         return True

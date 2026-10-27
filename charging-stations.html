@@ -40,6 +40,23 @@
   .ch-zoomk{ position:absolute; left:10px; top:10px; z-index:5; font-size:11.5px; font-weight:800; padding:4px 9px; border-radius:999px; background:var(--surface); border:1px solid var(--border); color:var(--text-muted); }
   .ch-layers{ position:absolute; left:10px; bottom:10px; z-index:5; display:flex; gap:6px; flex-wrap:wrap; max-width:70%; }
   .ch-layers button{ border:1px solid var(--border); background:var(--surface); color:var(--text-muted); font-weight:700; font-size:12px; padding:6px 11px; border-radius:999px; cursor:pointer; }
+  .ch-maptools{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:8px 0 10px; }
+  .ch-maptools select, .ch-multi > button{ border:1px solid var(--border); background:var(--surface); color:var(--text); font-weight:700; font-size:12.5px; padding:7px 12px; border-radius:999px; cursor:pointer; }
+  .ch-multi{ position:relative; }
+  .ch-multi > button.on{ background:linear-gradient(135deg,var(--ch-a),var(--ch-b)); color:#fff; border-color:transparent; }
+  .ch-multi-panel{ position:absolute; left:0; top:calc(100% + 6px); z-index:30; width:330px; max-width:86vw; background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.28); padding:8px; }
+  .ch-multi-panel[hidden]{ display:none; }
+  .ch-multi-panel .bar{ display:flex; gap:6px; margin-bottom:6px; flex-wrap:wrap; }
+  .ch-multi-panel .bar input{ flex:1 1 100%; border:1px solid var(--border); background:var(--surface-alt); color:var(--text); border-radius:8px; padding:6px 9px; font-size:12.5px; }
+  .ch-multi-panel .bar button{ flex:1; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:8px; padding:5px 8px; font-size:12px; font-weight:700; cursor:pointer; }
+  .ch-multi-panel .list{ max-height:300px; overflow:auto; }
+  .ch-multi-panel label{ display:flex; align-items:center; gap:8px; padding:4px 6px; border-radius:6px; font-size:12.5px; cursor:pointer; }
+  .ch-multi-panel label:hover{ background:var(--surface-alt); }
+  .ch-multi-panel label i{ width:11px; height:11px; border-radius:50%; flex:none; border:1px solid rgba(0,0,0,.45); }
+  .ch-multi-panel label span.n{ margin-left:auto; color:var(--text-muted); font-size:11.5px; font-variant-numeric:tabular-nums; }
+  .ch-sum{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:8px; font-size:12.5px; color:var(--text-muted); }
+  .ch-sum span{ display:inline-flex; align-items:center; gap:6px; white-space:nowrap; }
+  .ch-sum i{ width:11px; height:11px; border-radius:50%; border:1px solid rgba(0,0,0,.45); }
   .ch-layers select{ border:1px solid var(--border); background:var(--surface); color:var(--text-muted); font-weight:700; font-size:12px; padding:6px 9px; border-radius:999px; cursor:pointer; max-width:190px; }
   .ch-layers select.on{ background:linear-gradient(135deg,var(--ch-a),var(--ch-b)); color:#fff; border-color:transparent; }
   .ch-map canvas.bcv{ position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; z-index:2; }
@@ -173,6 +190,17 @@
       <div class="card chart-card">
         <h2 id="map-title">Public charging ports</h2>
         <p class="note" id="map-note" style="display:block"></p>
+        <div class="ch-maptools">
+          <label class="ch-label" for="map-country">Country</label>
+          <select id="map-country" title="Zoom to a country and keep only its dots (companies and Tesla layers)"><option value="">All countries</option></select>
+          <div class="ch-multi" id="brand-multi">
+            <button type="button" id="bm-btn" title="Pick one or several charging companies to draw every mapped site">Companies: none ▾</button>
+            <div class="ch-multi-panel" id="bm-panel" hidden>
+              <div class="bar"><input type="search" id="bm-q" placeholder="Search a company…"><button type="button" id="bm-all">Check all</button><button type="button" id="bm-none">Uncheck all</button></div>
+              <div class="list" id="bm-list"></div>
+            </div>
+          </div>
+        </div>
         <div class="ch-map" id="ch-map">
           <svg id="ch-svg" viewBox="0 0 940 520" role="img" aria-label="World map shaded by the selected charging metric"></svg>
           <div class="ch-zoomk" id="ch-zoomk">zoom ×1</div>
@@ -184,15 +212,12 @@
           <div class="ch-layers" id="ch-layers">
             <button type="button" data-layer="grid" title="Open Charge Map ports in 0.5° cells (about 55 km): darker = more charging ports">Station density</button>
             <button type="button" data-layer="tesla" title="Every open Tesla Supercharger site (dot size = stalls)">Tesla Superchargers</button>
-            <button type="button" data-layer="ce" title="Circuit électrique sites (Hydro-Québec network): AFDC/NRCan locator + Open Charge Map. Dot size = ports">Circuit électrique</button>
-            <button type="button" data-layer="ct" title="Couche-Tard / Circle K charging sites in Canada: AFDC/NRCan locator. Dot size = ports">Couche-Tard / Circle K</button>
-            <select id="brand-pick" title="Show every mapped site of one charging company (Open Charge Map + AFDC)"><option value="">Company sites…</option></select>
-            <button type="button" id="z-qc" class="act" title="Zoom to southern Québec and show the Circuit électrique and Couche-Tard layers">Zoom to Québec</button>
+            <button type="button" id="z-qc" class="act" title="Zoom to southern Québec and show Circuit électrique and Couche-Tard / Circle K">Zoom to Québec</button>
           </div>
           <div class="ch-legend" id="ch-legend"></div>
           <div class="ch-tip" id="ch-tip"></div>
         </div>
-        <p class="ch-note" id="brand-sum" style="display:none"></p>
+        <div class="ch-sum" id="brand-sum" style="display:none"></div>
       </div>
 
       <div class="card chart-card">
@@ -270,7 +295,6 @@
 <script src="assets/charging-data.js"></script>
 <script src="assets/charging-grid-data.js"></script>
 <script src="assets/charging-tesla-sites-data.js"></script>
-<script src="assets/charging-qc-networks-data.js"></script>
 <script src="assets/charging-brand-index.js"></script>
 <script src="assets/notes-toggle.js"></script>
 <script>
@@ -331,7 +355,7 @@ const METRICS = {
             note:'All charging ports, every speed, per 1,000 battery-electric + plug-in hybrid cars in the fleet (IEA EV stock; 2024 and 2025 only).' },
 };
 let metric = 'points', year = LATEST, scope = 'all', selected = null, sortKey = null, sortAsc = false;
-const layers = { grid:false, tesla:false, ce:false, ct:false };
+const layers = { grid:false, tesla:false };
 
 // top 30 by EV fleet (IEA BEV+PHEV stock 2025, else by IEA points)
 const TOP30 = new Set(CHARGING.countries.slice().sort((a, b) => (evs(b, LATEST) || 0) - (evs(a, LATEST) || 0)).slice(0, 30).map(c => c.n));
@@ -376,7 +400,7 @@ function renderStats(){
 // ---------- map ----------
 const svg = d3.select('#ch-svg'), W = 940, H = 520;
 const projection = d3.geoNaturalEarth1(), path = d3.geoPath(projection);
-const root = svg.append('g'), gCountries = root.append('g'), gGrid = root.append('g'), gTesla = root.append('g'), gQc = root.append('g');
+const root = svg.append('g'), gCountries = root.append('g'), gGrid = root.append('g'), gTesla = root.append('g');
 let feats = null, zk = 1, cur = d3.zoomIdentity;
 const tip = document.getElementById('ch-tip'), mapEl = document.getElementById('ch-map');
 const nameOf = d => MAP_ALIASES[d.properties.name] || d.properties.name;
@@ -423,7 +447,6 @@ const zoom = d3.zoom().scaleExtent([1, 250]).translateExtent([[-40, -30], [W + 4
   cur = e.transform; zk = cur.k; root.attr('transform', cur);
   document.getElementById('ch-zoomk').textContent = 'zoom ×' + (zk < 10 ? zk.toFixed(1) : Math.round(zk));
   gTesla.selectAll('circle').attr('r', d => qcR(d));
-  gQc.selectAll('circle').attr('r', d => qcR(d));
   scheduleBrand();
   if(layers.grid) drawGrid();
 });
@@ -437,72 +460,127 @@ function drawTesla(){
   gTesla.selectAll('circle').data(TESLA_SITES).join('circle').attr('cx', d => projection([d[1], d[0]])[0]).attr('cy', d => projection([d[1], d[0]])[1]).attr('r', qcR)
     .attr('fill', '#e11d48').attr('fill-opacity', .85).attr('stroke', '#111').attr('stroke-width', .5).attr('vector-effect', 'non-scaling-stroke')
     .append('title').text(d => `Tesla Supercharger · ${d[2]} stalls · ${d[3]} kW`);
+  applyTeslaFilter();
 }
-// Circuit électrique (green) and Couche-Tard / Circle K (orange) sites; ports drive the dot size, the Circle K dots are drawn on top
-const QC_STYLE = { ce:{ fill:'#22c55e', name:'Circuit électrique' }, ct:{ fill:'#f97316', name:'Couche-Tard / Circle K' } };
+function applyTeslaFilter(){ const iso = ctryName && BY[ctryName] ? BY[ctryName].iso : null; gTesla.selectAll('circle').style('display', d => !iso || d[4] === iso ? null : 'none'); }
 const qcR = d => Math.max(0.12, Math.min(6, (0.5 + Math.sqrt(d[2]) * 0.2) / Math.pow(zk, 0.68)));
-function drawQc(){
-  ['ce', 'ct'].forEach(k => {
-    let g = gQc.select('g.q-' + k);
-    if(g.empty()) g = gQc.append('g').attr('class', 'q-' + k);
-    g.style('display', layers[k] ? null : 'none');
-    if(!layers[k] || !g.selectAll('circle').empty() || !feats) return;
-    g.selectAll('circle').data(QC_NETWORKS[k]).join('circle').attr('cx', d => projection([d[1], d[0]])[0]).attr('cy', d => projection([d[1], d[0]])[1]).attr('r', qcR)
-      .attr('fill', QC_STYLE[k].fill).attr('fill-opacity', .85).attr('stroke', '#111').attr('stroke-width', .5).attr('vector-effect', 'non-scaling-stroke')
-      .append('title').text(d => `${QC_STYLE[k].name} · ${d[2]} port${d[2] > 1 ? 's' : ''}${d[3] ? ' (' + d[3] + ' fast)' : ''}`);
-  });
-  gQc.select('g.q-ct').raise();
+// ---- country filter: zoom to the main territory and keep only the dots inside it (point-in-country by rasterising the country at high resolution)
+const geoPath = d3.geoPath(projection);
+let ctryName = null, ctryMask = null, ctryBox = null;
+const ctryFeat = n => feats && feats.find(f => nameOf(f) === n);
+function mainPart(f){
+  if(f.geometry.type !== 'MultiPolygon') return f;
+  let best = null, ba = -1;
+  f.geometry.coordinates.forEach(c => { const a = d3.geoArea({ type:'Polygon', coordinates:c }); if(a > ba){ ba = a; best = c; } });
+  return { type:'Feature', properties:f.properties, geometry:{ type:'Polygon', coordinates:best } };
 }
-// ---- company site layer: one canvas (up to ~27k dots stay smooth while zooming), data loaded per brand from assets/brand-sites/<f>.js
-const BR_COL = ['#e11d48', '#2563eb', '#16a34a', '#f59e0b', '#9333ea', '#0891b2', '#ea580c', '#db2777', '#4d7c0f', '#0d9488', '#7c3aed', '#b45309'];
+function buildCtry(name){
+  ctryMask = ctryBox = null; if(!name) return;
+  const f = ctryFeat(name); if(!f) return;
+  const [[x0, y0], [x1, y1]] = geoPath.bounds(mainPart(f)), pad = 0.4;
+  const bx = x0 - pad, by = y0 - pad, bw = x1 - x0 + 2 * pad, bh = y1 - y0 + 2 * pad, sc = Math.min(3000 / bw, 3000 / bh, 400);
+  const cv = document.createElement('canvas'); cv.width = Math.max(1, Math.ceil(bw * sc)); cv.height = Math.max(1, Math.ceil(bh * sc));
+  const ctx = cv.getContext('2d', { willReadFrequently:true }); ctx.setTransform(sc, 0, 0, sc, -bx * sc, -by * sc);
+  ctx.fillStyle = '#000'; ctx.beginPath(); d3.geoPath(projection, ctx)(f); ctx.fill();
+  const data = ctx.getImageData(0, 0, cv.width, cv.height).data, w = cv.width, h = cv.height;
+  ctryBox = [x0, y0, x1, y1];
+  ctryMask = (px, py) => { const ix = Math.floor((px - bx) * sc), iy = Math.floor((py - by) * sc); return ix >= 0 && iy >= 0 && ix < w && iy < h && data[(iy * w + ix) * 4 + 3] > 0; };
+}
+function fitBox(x0, y0, x1, y1, maxK){
+  const k = Math.max(1, Math.min(maxK || 60, 0.88 * Math.min(W / Math.max(6, x1 - x0), H / Math.max(6, y1 - y0))));
+  svg.transition().duration(700).call(zoom.transform, d3.zoomIdentity.translate(W / 2 - k * (x0 + x1) / 2, H / 2 - k * (y0 + y1) / 2).scale(k));
+}
+// ---- company layer: several companies at once on one canvas (about 110k dots when all are checked), data loaded per company from assets/brand-sites/<f>.js
+const BR_SORTED = BRAND_INDEX.slice().sort((a, b) => b.p - a.p);
+const brandCol = name => { const i = BR_SORTED.findIndex(b => b.b === name); return `hsl(${Math.round((i * 137.508) % 360)},${i % 2 ? 78 : 66}%,${i % 3 === 0 ? 40 : i % 3 === 1 ? 50 : 58}%)`; };
 const brandCv = document.createElement('canvas'); brandCv.className = 'bcv'; mapEl.appendChild(brandCv);
-let brandSel = null, brandPts = null, brandRaf = 0;
+const selBrands = new Set(), brandData = {};
+let brandRaf = 0, brandToken = 0;
 function brandGeom(){ const r = svg.node().getBoundingClientRect(), sc = Math.min(r.width / W, r.height / H); return { w:r.width, h:r.height, sc, ox:(r.width - W * sc) / 2, oy:(r.height - H * sc) / 2 }; }
 function drawBrand(){
   brandRaf = 0;
   const g = brandGeom(), dpr = window.devicePixelRatio || 1;
   if(brandCv.width !== Math.round(g.w * dpr) || brandCv.height !== Math.round(g.h * dpr)){ brandCv.width = Math.round(g.w * dpr); brandCv.height = Math.round(g.h * dpr); }
   const ctx = brandCv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, g.w, g.h);
-  if(!brandPts) return;
-  const col = brandSel.col, fine = cur.k > 5, zr = Math.pow(cur.k, 0.28);
-  ctx.fillStyle = col; ctx.globalAlpha = .85; ctx.strokeStyle = '#111'; ctx.lineWidth = .5;
-  for(const q of brandPts){
-    const x = (cur.x + cur.k * q[0]) * g.sc + g.ox, y = (cur.y + cur.k * q[1]) * g.sc + g.oy;
-    if(x < -8 || y < -8 || x > g.w + 8 || y > g.h + 8) continue;
-    const r = Math.min(7, (0.75 + 0.26 * Math.sqrt(q[2])) * zr * (g.sc > 1 ? 1 : 0.9));
-    ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill(); if(fine) ctx.stroke();
+  const fine = cur.k > 5, zr = Math.pow(cur.k, 0.28) * (g.sc > 1 ? 1 : 0.9);
+  ctx.globalAlpha = .85; ctx.strokeStyle = 'rgba(0,0,0,.4)'; ctx.lineWidth = .4;
+  for(const name of selBrands){
+    const d = brandData[name]; if(!d || !d.vis) continue;
+    ctx.fillStyle = d.col; ctx.beginPath();
+    for(const q of d.vis){
+      const x = (cur.x + cur.k * q[0]) * g.sc + g.ox, y = (cur.y + cur.k * q[1]) * g.sc + g.oy;
+      if(x < -8 || y < -8 || x > g.w + 8 || y > g.h + 8) continue;
+      const r = Math.min(7, (0.75 + 0.26 * Math.sqrt(q[2])) * zr);
+      ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, 6.2832);
+    }
+    ctx.fill(); if(fine) ctx.stroke();
   }
 }
 const scheduleBrand = () => { if(!brandRaf) brandRaf = requestAnimationFrame(drawBrand); };
 window.addEventListener('resize', scheduleBrand);
-function showBrand(name){
-  const sum = document.getElementById('brand-sum'), pick = document.getElementById('brand-pick');
-  pick.classList.toggle('on', !!name);
-  if(!name){ brandSel = brandPts = null; sum.style.display = 'none'; scheduleBrand(); return; }
-  const ix = BRAND_INDEX.find(b => b.b === name); if(!ix || !feats) return;
-  brandSel = { name, col:BR_COL[BRAND_INDEX.indexOf(ix) % BR_COL.length] };
-  sum.style.display = ''; sum.textContent = 'Loading ' + name + '…';
-  const done = () => {
-    const rows = (window.BRAND_SITES || {})[name]; if(!rows || brandSel.name !== name) return;
-    brandPts = rows.map(r => { const q = projection([r[1], r[0]]); return [q[0], q[1], r[2]]; });
-    const cov = ix.rep ? Math.round(100 * ix.p / ix.rep) : null;
-    sum.innerHTML = `<i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${brandSel.col};margin-right:6px;vertical-align:-1px"></i><b>${esc(name)}</b>: ${fmt(ix.n)} sites mapped · ${fmt(ix.p)} ports (${fmt(ix.fp)} fast, 50+ kW)` +
-      (ix.rep ? ` — the company-ranking cards count ${fmt(ix.rep)} ports for this brand${cov != null ? (cov > 100 ? ' (the map lists more: it also holds sites the ranking misses)' : ` (${cov}% mapped)`) : ''}` : '') +
-      `. Positions: ${ix.a ? fmt(ix.a) + ' from the US DOE AFDC / NRCan station locator' : ''}${ix.a && ix.o ? ' + ' : ''}${ix.o ? fmt(ix.o) + ' from Open Charge Map' : ''}; sites listed by both sources are counted once (within 120 m).`;
-    // fit the view on the dense part of the network (3rd to 97th percentile of the positions)
-    const xs = brandPts.map(q => q[0]).sort((a, b) => a - b), ys = brandPts.map(q => q[1]).sort((a, b) => a - b), qi = (a, f) => a[Math.min(a.length - 1, Math.floor(f * a.length))];
-    const x0 = qi(xs, .03), x1 = qi(xs, .97), y0 = qi(ys, .03), y1 = qi(ys, .97);
-    const k = Math.max(1, Math.min(60, 0.85 * Math.min(W / Math.max(8, x1 - x0), H / Math.max(8, y1 - y0))));
-    svg.transition().duration(700).call(zoom.transform, d3.zoomIdentity.translate(W / 2 - k * (x0 + x1) / 2, H / 2 - k * (y0 + y1) / 2).scale(k));
-    scheduleBrand();
-  };
-  if((window.BRAND_SITES || {})[name]) done();
-  else { const sc = document.createElement('script'); sc.src = 'assets/brand-sites/' + ix.f + '.js'; sc.onload = done; sc.onerror = () => { sum.textContent = 'Could not load ' + name + '.'; }; document.head.appendChild(sc); }
+const loadBrand = name => new Promise(res => {
+  if((window.BRAND_SITES || {})[name]) return res(true);
+  const ix = BRAND_INDEX.find(b => b.b === name); if(!ix) return res(false);
+  const sc = document.createElement('script'); sc.src = 'assets/brand-sites/' + ix.f + '.js'; sc.onload = () => res(true); sc.onerror = () => res(false); document.head.appendChild(sc);
+});
+function brandVis(d){ d.vis = ctryMask ? d.pts.filter(q => ctryMask(q[0], q[1])) : d.pts; d.visFor = ctryName; }
+function summarize(){
+  const el = document.getElementById('brand-sum'), btn = document.getElementById('bm-btn');
+  btn.textContent = selBrands.size ? `Companies: ${selBrands.size} selected ▾` : 'Companies: none ▾'; btn.classList.toggle('on', selBrands.size > 0);
+  if(!selBrands.size){ el.style.display = 'none'; return; }
+  let ts = 0, tp = 0; const parts = [];
+  for(const name of selBrands){
+    const d = brandData[name];
+    if(!d || !d.vis){ parts.push(`<span><i style="background:${brandCol(name)}"></i>${esc(name)}: loading…</span>`); continue; }
+    const ports = d.vis.reduce((x, q) => x + q[2], 0); ts += d.vis.length; tp += ports;
+    parts.push(`<span><i style="background:${d.col}"></i><b>${esc(name)}</b> ${fmt(d.vis.length)} sites · ${fmt(ports)} ports</span>`);
+  }
+  if(selBrands.size > 1) parts.push(`<span><b>Total</b> ${fmt(ts)} sites · ${fmt(tp)} ports</span>`);
+  parts.push(`<span style="white-space:normal">${ctryName ? esc(ctryName) + ' (main territory)' : 'All countries'} · positions from the US DOE AFDC / NRCan locator (United States, Canada) and Open Charge Map (elsewhere); a site found in both is counted once. Dot size = ports.</span>`);
+  el.innerHTML = parts.join(''); el.style.display = '';
 }
+async function refreshBrands(fit){
+  const token = ++brandToken;
+  summarize();
+  await Promise.all([...selBrands].map(loadBrand));
+  if(token !== brandToken || !feats) return;
+  for(const name of selBrands){
+    let d = brandData[name];
+    if(!d){
+      const rows = (window.BRAND_SITES || {})[name]; if(!rows) continue;
+      d = brandData[name] = { col:brandCol(name), pts:rows.map(r => { const q = projection([r[1], r[0]]); return [q[0], q[1], r[2], r[3]]; }) };
+    }
+    if(d.visFor !== ctryName || !d.vis) brandVis(d);
+  }
+  summarize(); scheduleBrand();
+  if(fit && !ctryName && selBrands.size && selBrands.size <= 8){
+    const pts = [...selBrands].flatMap(n => brandData[n] && brandData[n].vis ? brandData[n].vis : []); if(!pts.length) return;
+    const xs = pts.map(q => q[0]).sort((a, b) => a - b), ys = pts.map(q => q[1]).sort((a, b) => a - b), qi = (a, f) => a[Math.min(a.length - 1, Math.floor(f * a.length))];
+    fitBox(qi(xs, .03), qi(ys, .03), qi(xs, .97), qi(ys, .97));
+  }
+}
+// ---- controls: country select, company multi-select
 (function(){
-  const pick = document.getElementById('brand-pick');
-  pick.innerHTML += BRAND_INDEX.slice().sort((a, b) => b.p - a.p).map(b => `<option value="${esc(b.b)}">${esc(b.b)} · ${fmt(b.n)} sites</option>`).join('');
-  pick.onchange = () => showBrand(pick.value);
+  const cs = document.getElementById('map-country');
+  cs.innerHTML += Object.keys(CONT_COL).sort().map(k => { const l = CHARGING.countries.filter(c => (c.cont || 'Asia') === k).sort((x, y) => x.n.localeCompare(y.n)); return l.length ? `<optgroup label="${k}">${l.map(c => `<option value="${esc(c.n)}">${esc(c.n)}</option>`).join('')}</optgroup>` : ''; }).join('');
+  cs.onchange = () => {
+    ctryName = cs.value || null; buildCtry(ctryName); applyTeslaFilter();
+    for(const n of selBrands) if(brandData[n]) brandVis(brandData[n]);
+    summarize(); scheduleBrand();
+    if(ctryBox) fitBox(ctryBox[0], ctryBox[1], ctryBox[2], ctryBox[3], 200); else svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+  };
+  const list = document.getElementById('bm-list'), panel = document.getElementById('bm-panel'), q = document.getElementById('bm-q');
+  list.innerHTML = BR_SORTED.map(b => `<label data-n="${esc(b.b.toLowerCase())}"><input type="checkbox" value="${esc(b.b)}"><i style="background:${brandCol(b.b)}"></i>${esc(b.b)}<span class="n">${fmt(b.n)} sites</span></label>`).join('');
+  const boxes = () => [...list.querySelectorAll('input')];
+  const sync = () => boxes().forEach(i => { i.checked = selBrands.has(i.value); });
+  const visible = () => boxes().filter(i => i.closest('label').style.display !== 'none');
+  list.onchange = e => { const i = e.target; if(i.checked) selBrands.add(i.value); else selBrands.delete(i.value); refreshBrands(true); };
+  document.getElementById('bm-all').onclick = () => { visible().forEach(i => selBrands.add(i.value)); sync(); refreshBrands(false); };
+  document.getElementById('bm-none').onclick = () => { visible().forEach(i => selBrands.delete(i.value)); sync(); refreshBrands(false); };
+  q.oninput = () => { const t = q.value.trim().toLowerCase(); list.querySelectorAll('label').forEach(l => { l.style.display = !t || l.dataset.n.includes(t) ? '' : 'none'; }); };
+  document.getElementById('bm-btn').onclick = e => { panel.hidden = !panel.hidden; e.stopPropagation(); };
+  document.addEventListener('click', e => { if(!panel.hidden && !e.target.closest('#brand-multi')) panel.hidden = true; });
+  window.__bmSync = sync;
 })();
 function drawGrid(){
   gGrid.style('display', layers.grid ? null : 'none');
@@ -516,11 +594,11 @@ function drawGrid(){
 }
 document.getElementById('ch-layers').addEventListener('click', e => {
   const b = e.target.closest('button[data-layer]'); if(!b) return; const k = b.dataset.layer; layers[k] = !layers[k]; b.classList.toggle('on', layers[k]);
-  drawGrid(); drawTesla(); drawQc();
+  drawGrid(); drawTesla();
 });
 document.getElementById('z-qc').onclick = () => {
-  ['ce', 'ct'].forEach(k => { layers[k] = true; document.querySelector(`#ch-layers [data-layer="${k}"]`).classList.add('on'); });
-  drawQc();
+  document.getElementById('map-country').value = ''; ctryName = null; buildCtry(null); applyTeslaFilter(); for(const n of selBrands) if(brandData[n]) brandVis(brandData[n]);
+  selBrands.clear(); selBrands.add('Circuit électrique'); selBrands.add('Couche-Tard / Circle K'); window.__bmSync(); refreshBrands(false);
   // southern Québec, where nearly all of both networks sit (about -79.5..-64 E, 44.9..48.8 N)
   const a = projection([-79.5, 48.8]), b = projection([-64, 44.9]);
   const k = Math.min((W - 40) / (b[0] - a[0]), (H - 40) / (b[1] - a[1]));
@@ -533,7 +611,7 @@ d3.json('assets/countries-10m.json').then(topo => {
   const rewind = f => { if(d3.geoArea(f) <= 2 * Math.PI) return f; const fixPoly = poly => d3.geoArea({ type:'Polygon', coordinates:poly }) > 2 * Math.PI ? poly.map(r => r.slice().reverse()) : poly; const g = f.geometry; return Object.assign({}, f, { geometry:{ type:g.type, coordinates: g.type === 'Polygon' ? fixPoly(g.coordinates) : g.coordinates.map(fixPoly) } }); };
   feats = geo.features.filter(f => f.properties.name !== 'Antarctica').map(rewind);
   projection.fitExtent([[6, 6], [W - 6, H - 6]], { type:'FeatureCollection', features:feats });
-  renderMap(); drawTesla(); drawGrid(); drawQc();
+  renderMap(); drawTesla(); drawGrid(); if(selBrands.size) refreshBrands(false);
 });
 
 // ---------- table ----------
