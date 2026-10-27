@@ -56,7 +56,7 @@ def write_sql(countries, snapshot, out):
         sn.append('(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)' % (q(c['n']), q(c['iso']), q(snapshot), q(o.get('st')), q(o.get('po')), q(b[0]), q(b[1]), q(b[2]), q(b[3]), q(b[4]),
                                                                            q(t.get('sites')), q(t.get('stalls')), q(of.get('stations')), q(of.get('ports')), q(of.get('ports_dc_fast')), q(c.get('w'))))
         for r in o.get('brands') or []:
-            br.append('(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)' % (q(c['n']), q(c['iso']), q(snapshot), q(r[0]), r[1], r[2], r[3], r[4], r[5], r[6], r[7]))
+            br.append('(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)' % (q(c['n']), q(c['iso']), q(snapshot), q(r[0]), q(r[1]), q(r[2]), q(r[3]), q(r[4]), q(r[5]), q(r[6]), q(r[7])))
     w('charging_2_snapshot.sql', 'insert into public.charging_country_snapshot (country,iso2,snapshot_date,ocm_stations,ocm_ports,ocm_ports_lt50,ocm_ports_50_99,ocm_ports_100_249,ocm_ports_250_349,ocm_ports_350plus,tesla_sites,tesla_stalls,official_stations,official_ports,official_ports_dc_fast,workpop_15_64) values\n' +
       ',\n'.join(sn) + '\non conflict (country, snapshot_date) do nothing;\n')
     w('charging_3_brand.sql', 'insert into public.charging_country_brand (country,iso2,snapshot_date,brand,stations,ports,ports_lt50,ports_50_99,ports_100_249,ports_250_349,ports_350plus) values\n' + ',\n'.join(br) + '\non conflict (country, snapshot_date, brand) do nothing;\n')

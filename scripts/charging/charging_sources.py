@@ -28,6 +28,9 @@ COUNTRIES = {
 
 # US: Alternative Fuels Data Center (US DOE), "Electric Charging Stations and Ports by State", data last updated 2026-10-27
 OFFICIAL = {
+    'CA': dict(stations=14743, ports=39654, ports_dc_fast=8431, ports_l2=31172, year=2026, as_of='2026-03-25',
+               source='Natural Resources Canada charging stations locator (public ports and locations, some networks not listed), as reported in the 2026 Electric Autonomy network report',
+               url='https://electricautonomy.ca/data-trackers/public-charging-networks/2026-04-01/2026-ev-charging-network-report-steady-progress/'),
     'US': dict(stations=83559, ports=262578, ports_dc_fast=79200, ports_l2=182673, ports_l1=693, year=2026, as_of='2026-10-27',
                source='US DOE Alternative Fuels Data Center (public + legacy chargers, excl. residential)', url='https://afdc.energy.gov/stations/states'),
 }
@@ -44,3 +47,11 @@ AFDC_NETWORKS_NA = [
 ]
 AFDC_NETWORKS_SOURCE = 'US DOE Alternative Fuels Data Center, charging networks (ports; US and Canada combined for multi-country networks)'
 AFDC_NETWORKS_URL = 'https://afdc.energy.gov/stations/charging-networks'
+
+# China: public charging piles by operator, China Charging Alliance (EVCIPA) statistics for July 2025 as tabulated by CarNewsChina
+# (https://carnewschina.com/?p=236276). The top 15 hold 84.1% of the public piles, which implies about 4.29 M public piles in total.
+CHINA_OPERATORS = [('TELD', 807000), ('Star Charge', 703000), ('YKC (Yunkuaichong)', 656000), ('Orange Charge', 268000), ('EV King', 238000), ('State Grid', 196000),
+                   ('Lv C-Chong', 142000), ('Car Energy Net', 109000), ('Hoo Energy', 95000), ('China Southern Power Grid', 90000), ('EV Power', 79000),
+                   ('Kunlun', 64000), ('Wancheng Wanchong', 55000), ('Winlands', 53000), ('Hard Hitter', 49000)]
+CHINA_TOP15_SHARE = 0.841
+CHINA_NOTE = 'Public charging piles by operator, China Charging Alliance (EVCIPA), July 2025, as tabulated by CarNewsChina. No station count or speed split; "Other operators" = the 15.9% outside the top 15.'

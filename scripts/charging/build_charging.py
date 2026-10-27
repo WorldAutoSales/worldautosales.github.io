@@ -19,7 +19,7 @@ from collections import defaultdict
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
 sys.path.insert(0, HERE)
-from charging_sources import COUNTRIES, OFFICIAL, AFDC_NETWORKS_NA  # noqa: E402
+from charging_sources import COUNTRIES, OFFICIAL, AFDC_NETWORKS_NA, CHINA_OPERATORS, CHINA_TOP15_SHARE, CHINA_NOTE  # noqa: E402
 from charging_sql import write_sql  # noqa: E402
 
 IEA = os.path.join(HERE, 'data', 'iea')
@@ -199,6 +199,12 @@ def main():
                 grid.setdefault((x, y), [0, 0, 0])
                 for i in range(3):
                     grid[(x, y)][i] += v[i]
+        if iso == 'CN':      # OCM is nearly empty for China: use the EVCIPA operator ranking (piles only)
+            top = sum(v for _, v in CHINA_OPERATORS)
+            e['ocm_brands_ocm'] = e.get('ocm', {}).get('brands')
+            e.setdefault('ocm', {})['brands'] = [[n, None, v, None, None, None, None, None] for n, v in CHINA_OPERATORS] + [['Other operators', None, round(top / CHINA_TOP15_SHARE - top), None, None, None, None, None]]
+            e['bnote'] = CHINA_NOTE
+            e.pop('ocm_brands_ocm', None)
         countries.append(e)
     meta = {'snapshot': SNAPSHOT, 'ieaYear': 2025, 'years': YEARS, 'bands': BANDS,
             'afdcNetworks': AFDC_NETWORKS_NA,
