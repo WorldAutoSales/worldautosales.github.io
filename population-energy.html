@@ -144,7 +144,6 @@
         <button type="button" class="mode-btn active" data-metric="sales"><span class="ico">🚗</span>Sales per Capita</button>
         <button type="button" class="mode-btn" data-metric="salesw"><span class="ico">💼</span>Sales per 15-64</button>
         <button type="button" class="mode-btn" data-metric="fleet"><span class="ico">🛣️</span>Cars on the Road per Capita</button>
-        <button type="button" class="mode-btn" data-metric="fleetadult"><span class="ico">🙋</span>Cars on the Road per Adult (15+)</button>
         <button type="button" class="mode-btn" data-metric="fleetw"><span class="ico">👷</span>Cars on the Road per 15-64</button>
         <button type="button" class="mode-btn" data-metric="oil"><span class="ico">⛽</span>Oil Consumption per Capita</button>
       </div>
@@ -393,12 +392,6 @@ const BASIS = {
     pop: c => yf(c,'population'),
     popText: c => `population ${fmtN(yf(c,'population'))}`,
   },
-  adult: {
-    noun:'Adults (15+)', one:'adult', unit:'cars/100 adults', per100:'100 Adults (15+)', short:'Adult (15+)', desc:'the adult population (15 and over)',
-    ok: c => currentYear === 'latest' && c.adultPop != null,
-    pop: c => c.adultPop,
-    popText: c => `adult (15+) population ${fmtN(c.adultPop)} of ${fmtN(c.population)} inhabitants`,
-  },
   work: {
     noun:'Working-age adults (15-64)', one:'working-age adult', unit:'cars/100 15-64', per100:'100 Working-Age Adults', short:'15-64', desc:'the working-age population (15 to 64)',
     ok: c => currentYear === 'latest' && c.workPop != null,
@@ -406,8 +399,8 @@ const BASIS = {
     popText: c => `15-64 population ${fmtN(c.workPop)} of ${fmtN(c.population)} inhabitants`,
   },
 };
-const TAB_DEF = { sales:['sales','person'], salesw:['sales','work'], fleet:['fleet','person'], fleetadult:['fleet','adult'], fleetw:['fleet','work'], oil:['oil',null] };
-const AGE_SPLIT_TABS = ['salesw','fleetadult','fleetw'];
+const TAB_DEF = { sales:['sales','person'], salesw:['sales','work'], fleet:['fleet','person'], fleetw:['fleet','work'], oil:['oil',null] };
+const AGE_SPLIT_TABS = ['salesw','fleetw'];
 
 const METRICS = {
   sales: {
@@ -450,7 +443,7 @@ const METRICS = {
 
 const COUNTRIES = Object.keys(POPULATION_ENERGY).sort();
 let currentMetric = 'sales';
-let fleetBasis = 'adult';
+let fleetBasis = 'person';
 let salesBasis = 'person';
 let currentTab = 'sales';
 let isolatedCountry = null;
@@ -669,7 +662,6 @@ function switchYear(year){
 }
 
 function switchMetric(tab){
-  // "Cars on the Road per Adult" is the fleet metric on an adult (15+) population basis
   const [metric, basis] = TAB_DEF[tab];
   if(metric === 'sales') salesBasis = basis;
   else if(metric === 'fleet') fleetBasis = basis;
