@@ -21,6 +21,7 @@ ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
 sys.path.insert(0, HERE)
 from charging_sources import COUNTRIES, OFFICIAL, AFDC_NETWORKS_NA, CHINA_OPERATORS, CHINA_TOP15_SHARE, CHINA_NOTE  # noqa: E402
 from charging_sql import write_sql  # noqa: E402
+from ocm_names import name_brand  # noqa: E402
 
 IEA = os.path.join(HERE, 'data', 'iea')
 CACHE = os.path.join(ROOT, '.scratch', 'chg')
@@ -30,6 +31,7 @@ SNAPSHOT = '2026-10-27'
 
 # ---- brand normalisation (OCM operator titles -> one brand)
 ALIASES = [
+    (r'couche|circle ?k', 'Couche-Tard / Circle K'),
     (r'^tesla', 'Tesla'), (r'chargepoint', 'ChargePoint'), (r'^blink', 'Blink'), (r'^flo$|^flo ', 'FLO'), (r'circuit electrique|circuit .lectrique', 'Circuit électrique'),
     (r'iberdrola|bp pulse|bp ?pulse|chargemaster|polar ', 'bp pulse'), (r'enel x|enel way|enel', 'Enel X Way'), (r'evgo', 'EVgo'), (r'pod ?point', 'Pod Point'),
     (r'ev ?connect', 'EV Connect'), (r'^loop', 'Loop'), (r'shell recharge|newmotion|greenlots|shell ', 'Shell Recharge'), (r'electrify america', 'Electrify America'),
@@ -150,6 +152,8 @@ def ocm_country(iso, ops, usage):
         tot = sum(alloc) or 1
         alloc = [a * n / tot for a in alloc]
         b = brand_of(ops.get(p.get('OperatorID')))
+        if b == UNKNOWN:
+            b = name_brand(iso, p.get('ID')) or b     # NOBIL-type imports keep the station name but not the operator
         st += 1
         po += n
         for i in range(5):

@@ -16,6 +16,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
 sys.path.insert(0, HERE)
 import build_charging as bc  # noqa: E402
+from ocm_names import name_brand  # noqa: E402
 from charging_sources import COUNTRIES  # noqa: E402
 
 CACHE = os.path.join(ROOT, '.scratch', 'chg')
@@ -116,6 +117,8 @@ def main():
             if p.get('StatusTypeID') in (100, 150, 200, 210) or 'Private' in usage.get(p.get('UsageTypeID'), ''):
                 continue
             b = brand_name(ops.get(p.get('OperatorID')))
+            if b == bc.UNKNOWN:
+                b = name_brand(iso, p.get('ID')) or b
             if b not in want:
                 continue
             ai = p.get('AddressInfo') or {}
