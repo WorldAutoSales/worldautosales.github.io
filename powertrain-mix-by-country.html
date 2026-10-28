@@ -519,6 +519,7 @@
 <script src="assets/country-yearly-data.js"></script>
 <script src="assets/country-monthly-data.js"></script>
 <script src="assets/world-market-totals-2025.js"></script>
+<script src="assets/population-energy-data.js"></script>
 <script src="assets/manufacturer-yearly-data.js"></script>
 <script src="assets/manufacturer-monthly-data.js"></script>
 <script src="assets/manufacturer-model-monthly-data.js"></script>
@@ -5084,8 +5085,18 @@ function renderStats(){
   const top = DATA[0], bottom = DATA[DATA.length-1];
   const monthLabel = selectedMonths.size === 1 ? MONTHLY_DATA[[...selectedMonths][0]].label : `${selectedMonths.size} months`;
 
+  // weight of the shown markets in the world: share of the 2025 world new-vehicle market (OICA-style totals, same reference the ranking uses)
+  // and share of the world population (World Bank 2024, via the Population & Energy page data; world = 8.16 billion)
+  const WORLD_POP = 8.16e9, wmtTotal = Object.values(WORLD_MARKET_TOTALS_2025).reduce((a, b) => a + b, 0);
+  let wmtShown = 0, popShown = 0; const noSales = [], noPop = [];
+  DATA.forEach(d => {
+    const w = WORLD_MARKET_TOTALS_2025[d.country]; if(w) wmtShown += w; else noSales.push(d.country);
+    const pe = typeof POPULATION_ENERGY !== 'undefined' && POPULATION_ENERGY[d.country]; if(pe && pe.population) popShown += pe.population; else noPop.push(d.country);
+  });
+  const worldNote = `Shown markets' 2025 new-vehicle sales ÷ the 2025 world market (${(wmtTotal / 1e6).toFixed(0)} M, ~150 countries)` + (noSales.length ? `. No 2025 world figure for: ${noSales.join(', ')}` : '');
+  const popNote = `Shown markets' population ÷ world population (World Bank 2024, ${(WORLD_POP / 1e9).toFixed(2)} billion)` + (noPop.length ? `. No population on file for: ${noPop.join(', ')}` : '');
   const stats = [
-    {label:'Markets Shown', value:DATA.length, small:`of ${ALL_COUNTRIES.length}`},
+    {label:'Markets Shown', value:DATA.length, small:`of ${ALL_COUNTRIES.length}`, extra:[[(wmtTotal ? (100 * wmtShown / wmtTotal).toFixed(1) : '0') + '% of world sales', worldNote], [(100 * popShown / WORLD_POP).toFixed(1) + '% of world population', popNote]]},
     {label:'BEV Share (avg)', value:avgPct+'%', small:monthLabel, yoy:totalYoy},
     {label:'Highest', value: top ? top.bevPct+'%' : '—', small: top ? top.country : ''},
     {label:'Lowest', value: bottom ? bottom.bevPct+'%' : '—', small: bottom ? bottom.country : ''},
@@ -5096,6 +5107,7 @@ function renderStats(){
     <div class="stat">
       <div class="label">${s.label}</div>
       <div class="value">${s.value}<small>${s.small}</small>${s.yoy == null ? '' : `<small class="stat-yoy ${s.yoy >= 0 ? 'yoy-up' : 'yoy-down'}">${s.yoy > 0 ? '+' : ''}${s.yoy}% YoY</small>`}</div>
+      ${(s.extra || []).map(([t, n]) => `<div class="stat-sub" title="${n.replace(/"/g, '&quot;')}">${t}</div>`).join('')}
     </div>`).join('');
 }
 
