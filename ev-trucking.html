@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EV Trucking — The Electric Truck Race</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚛</text></svg>">
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  .tk-page{ --tk-a:#f59e0b; --tk-b:#e11d48; --tk-c:#0ea5e9; --tk-ink:#1b1f3b; }
+  .tk-label{ font-size:12px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; }
+  /* hero */
+  .tk-hero{ position:relative; overflow:hidden; border-radius:22px; padding:28px 30px 22px; margin:6px 0 18px; color:#fff;
+    background:radial-gradient(1200px 400px at 85% -10%, rgba(245,158,11,.55), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(225,29,72,.5), transparent 60%), linear-gradient(135deg,#0f1226,#1b1f3b 55%,#2a1b3b);
+    display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:26px; box-shadow:0 18px 44px rgba(15,18,38,.35); }
+  .tk-hero .tk-eyebrow{ font-size:12px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#fcd34d; }
+  .tk-big{ font-size:clamp(48px,8vw,92px); font-weight:900; letter-spacing:-.04em; line-height:1; margin:8px 0 6px; font-variant-numeric:tabular-nums;
+    background:linear-gradient(90deg,#fde68a,#fb923c 55%,#fb7185); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .tk-hero-sub{ font-size:15px; color:#d6d9ee; max-width:520px; line-height:1.5; }
+  .tk-hero-sub b{ color:#fff; }
+  #hero-spark{ width:100%; height:92px; margin-top:12px; display:block; }
+  .tk-kpis{ display:grid; grid-template-columns:1fr 1fr; gap:12px; align-content:center; }
+  .tk-kpi{ background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); border-radius:16px; padding:14px 16px; backdrop-filter:blur(4px); }
+  .tk-kpi .v{ font-size:30px; font-weight:900; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .tk-kpi .l{ font-size:12.5px; color:#cfd3ec; line-height:1.4; margin-top:2px; }
+  @media (max-width:900px){ .tk-hero{ grid-template-columns:1fr; padding:22px 18px; } }
+  /* insight tiles */
+  .tk-ins{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin:0 0 18px; }
+  .tk-in{ border:1px solid var(--border); background:var(--surface); border-radius:16px; padding:14px 16px; border-left:5px solid var(--tk-a); }
+  .tk-in .e{ font-size:22px; }
+  .tk-in .h{ font-size:20px; font-weight:900; letter-spacing:-.02em; margin:2px 0; }
+  .tk-in .t{ font-size:12.5px; color:var(--text-muted); line-height:1.5; }
+  /* controls */
+  .tk-bar{ position:sticky; top:0; z-index:20; display:flex; flex-wrap:wrap; align-items:center; gap:12px 16px; padding:10px 14px; margin:0 0 16px; border:1px solid var(--border); border-radius:16px; background:color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter:blur(8px); box-shadow:0 6px 20px rgba(27,31,59,.08); }
+  @media (max-width:700px){ .tk-bar{ position:static; } }
+  .tk-seg{ display:inline-flex; gap:4px; background:var(--surface-alt); border-radius:999px; padding:4px; }
+  .tk-seg button{ appearance:none; border:none; background:transparent; cursor:pointer; padding:7px 14px; border-radius:999px; font-size:13px; font-weight:800; color:var(--text-muted); }
+  .tk-seg button:hover{ color:var(--text); }
+  .tk-seg button.active{ background:linear-gradient(135deg,var(--tk-a),var(--tk-b)); color:#fff; box-shadow:0 2px 10px rgba(225,29,72,.3); }
+  .tk-play{ appearance:none; border:none; cursor:pointer; width:42px; height:42px; border-radius:50%; font-size:16px; font-weight:900; color:#fff; background:linear-gradient(135deg,var(--tk-a),var(--tk-b)); box-shadow:0 6px 16px rgba(225,29,72,.35); }
+  .tk-year{ display:flex; align-items:center; gap:12px; flex:1; min-width:230px; }
+  .tk-year .y{ font-size:30px; font-weight:900; letter-spacing:-.03em; min-width:70px; font-variant-numeric:tabular-nums; }
+  .tk-year input[type=range]{ flex:1; accent-color:var(--tk-b); height:6px; }
+  /* layout */
+  .tk-two{ display:grid; grid-template-columns:minmax(0,1.55fr) minmax(0,1fr); gap:16px; align-items:start; }
+  @media (max-width:1100px){ .tk-two{ grid-template-columns:1fr; } }
+  .tk-map{ position:relative; border-radius:14px; overflow:hidden; border:1px solid var(--border); background:linear-gradient(180deg,#e8f1f8,#f3f7fb); }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .tk-map{ background:#0c1424; } }
+  :root[data-theme="dark"] .tk-map{ background:#0c1424; }
+  .tk-map svg{ display:block; width:100%; height:auto; }
+  .tk-map path.c{ stroke:var(--surface); stroke-width:.4; transition:fill .45s ease; cursor:default; }
+  .tk-map path.c.has{ cursor:pointer; }
+  .tk-map path.c.has:hover{ stroke:#1b1f3b; stroke-width:1.2; }
+  .tk-map path.c.sel{ stroke:#1b1f3b; stroke-width:1.8; }
+  .tk-map path.c.nodata{ fill:var(--surface-alt); }
+  .tk-leg{ position:absolute; left:12px; bottom:10px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:7px 10px; font-size:11px; }
+  .tk-leg .sc{ width:190px; height:10px; border-radius:3px; margin:4px 0 2px; }
+  .tk-leg .nm{ display:flex; justify-content:space-between; color:var(--text-muted); font-variant-numeric:tabular-nums; }
+  .tk-tip{ position:absolute; z-index:8; pointer-events:none; opacity:0; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:12px; padding:10px 12px; font-size:12.5px; line-height:1.45; box-shadow:0 10px 28px rgba(0,0,0,.22); min-width:190px; transition:opacity .08s; }
+  .tk-tip b{ font-variant-numeric:tabular-nums; }
+  .tk-tip svg{ display:block; margin-top:6px; }
+  /* race */
+  .tk-race{ position:relative; }
+  .tk-rr{ position:absolute; left:0; right:0; height:30px; display:grid; grid-template-columns:116px 1fr 64px; gap:10px; align-items:center; font-size:12.5px; transition:transform .7s cubic-bezier(.2,.8,.2,1), opacity .5s; cursor:pointer; }
+  .tk-rr .nm{ font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tk-rr .tr{ height:20px; background:var(--surface-alt); border-radius:6px; overflow:hidden; }
+  .tk-rr .tr i{ display:block; height:100%; width:0; border-radius:6px; transition:width .7s cubic-bezier(.2,.8,.2,1); }
+  .tk-rr .v{ text-align:right; font-weight:800; font-variant-numeric:tabular-nums; }
+  .tk-rr.sel .nm{ color:var(--tk-b); }
+  .tk-rr:hover .tr{ outline:2px solid var(--tk-a); }
+  .tk-chk{ display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:var(--text-muted); cursor:pointer; margin-top:6px; }
+  /* charts */
+  .tk-chart{ position:relative; }
+  .tk-chart svg{ width:100%; height:auto; display:block; overflow:visible; }
+  .tk-chart .ax text{ fill:var(--text-muted); font-size:11px; }
+  .tk-chart .ax line, .tk-chart .ax path{ stroke:var(--border); }
+  .tk-chart .grid line{ stroke:var(--border); stroke-dasharray:2 4; }
+  .tk-ctip{ position:absolute; z-index:6; pointer-events:none; opacity:0; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:8px 11px; font-size:12px; line-height:1.5; box-shadow:0 8px 22px rgba(0,0,0,.2); white-space:nowrap; }
+  .tk-lg{ display:flex; flex-wrap:wrap; gap:6px 16px; font-size:12.5px; font-weight:700; margin:6px 0 4px; }
+  .tk-lg span{ display:inline-flex; align-items:center; gap:6px; cursor:default; }
+  .tk-lg i{ width:14px; height:5px; border-radius:3px; display:inline-block; }
+  .tk-lg i.sq{ width:11px; height:11px; border-radius:3px; }
+  /* spotlight */
+  .tk-sp-head{ display:flex; flex-wrap:wrap; align-items:center; gap:10px 16px; margin-bottom:10px; }
+  .tk-sp-head select{ padding:9px 12px; border-radius:12px; border:1.5px solid var(--border); background:var(--surface); color:var(--text); font-weight:800; font-size:15px; }
+  .tk-sp-kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(112px,1fr)); gap:10px; margin:6px 0 12px; }
+  .tk-sp-kpis div{ background:var(--surface-alt); border-radius:12px; padding:10px 12px; }
+  .tk-sp-kpis b{ display:block; font-size:21px; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .tk-sp-kpis span{ font-size:11px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text-muted); }
+  /* waffle */
+  .tk-chips{ display:flex; flex-wrap:wrap; gap:7px; margin:6px 0 14px; }
+  .tk-chips button{ border:1.5px solid var(--border); background:var(--surface); color:var(--text); font-weight:800; font-size:12.5px; padding:6px 13px; border-radius:999px; cursor:pointer; }
+  .tk-chips button.active{ background:linear-gradient(135deg,var(--tk-a),var(--tk-b)); color:#fff; border-color:transparent; }
+  .tk-wf{ display:grid; grid-template-columns:minmax(0,320px) minmax(0,1fr); gap:24px; align-items:center; }
+  @media (max-width:760px){ .tk-wf{ grid-template-columns:1fr; } }
+  .tk-grid{ display:grid; grid-template-columns:repeat(10,1fr); gap:5px; max-width:320px; }
+  .tk-grid i{ display:block; aspect-ratio:1; border-radius:50%; background:var(--surface-alt); transform:scale(.4); opacity:0; animation:tkpop .45s forwards; }
+  @keyframes tkpop{ to{ transform:scale(1); opacity:1; } }
+  .tk-wf-t{ font-size:clamp(20px,3vw,30px); font-weight:900; letter-spacing:-.02em; line-height:1.15; }
+  .tk-wf-l{ display:flex; flex-direction:column; gap:7px; margin-top:12px; font-size:13.5px; }
+  .tk-wf-l span{ display:flex; align-items:center; gap:9px; }
+  .tk-wf-l i{ width:13px; height:13px; border-radius:50%; flex:none; }
+  .tk-wf-l b{ font-variant-numeric:tabular-nums; }
+  /* oil + segments */
+  .tk-bars{ display:flex; flex-direction:column; gap:9px; margin:8px 0; }
+  .tk-bar-row{ display:grid; grid-template-columns:210px 1fr 140px; gap:10px; align-items:center; font-size:13px; }
+  @media (max-width:760px){ .tk-bar-row{ grid-template-columns:120px 1fr 70px; } }
+  .tk-bar-row .tr{ height:22px; background:var(--surface-alt); border-radius:7px; overflow:hidden; }
+  .tk-bar-row .tr i{ display:block; height:100%; border-radius:7px; width:0; transition:width 1.1s cubic-bezier(.2,.8,.2,1); }
+  .tk-bar-row .v{ text-align:right; font-weight:800; font-variant-numeric:tabular-nums; }
+  .tk-callout{ margin-top:12px; padding:14px 16px; border-radius:14px; background:linear-gradient(135deg,rgba(245,158,11,.14),rgba(225,29,72,.1)); border:1px solid color-mix(in srgb, var(--tk-a) 40%, var(--border)); font-size:13.5px; line-height:1.6; }
+  .tk-callout b{ font-size:15px; }
+  /* makers */
+  .tk-mk{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; }
+  .tk-mc{ border:1px solid var(--border); border-radius:16px; padding:15px 16px; background:var(--surface); position:relative; overflow:hidden; }
+  .tk-mc::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--c,var(--tk-a)); }
+  .tk-mc h3{ margin:0 0 4px; font-size:15px; display:flex; align-items:center; gap:8px; }
+  .tk-mc .nm{ font-size:13px; font-weight:800; margin:2px 0 6px; }
+  .tk-mc p{ margin:6px 0 0; font-size:12.5px; color:var(--text-muted); line-height:1.55; }
+  .tk-mc .chip{ display:inline-block; margin:3px 5px 0 0; padding:3px 9px; border-radius:999px; font-size:11.5px; font-weight:800; background:var(--surface-alt); }
+  /* table */
+  .tk-tw{ overflow-x:auto; }
+  table.tk-t{ width:100%; border-collapse:collapse; font-size:13px; font-variant-numeric:tabular-nums; }
+  table.tk-t th{ text-align:right; font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--text-muted); padding:8px 8px; border-bottom:2px solid var(--border); cursor:pointer; white-space:nowrap; user-select:none; }
+  table.tk-t th:nth-child(2), table.tk-t td:nth-child(2){ text-align:left; }
+  table.tk-t th.rk, table.tk-t td.rk{ width:1%; color:var(--text-muted); font-weight:800; cursor:default; }
+  table.tk-t th.sorted{ color:var(--text); }
+  table.tk-t th.sorted::after{ content:' ▼'; font-size:9px; }
+  table.tk-t th.sorted.asc::after{ content:' ▲'; }
+  table.tk-t td{ padding:7px 8px; border-bottom:1px solid var(--border); text-align:right; white-space:nowrap; }
+  table.tk-t tr{ cursor:pointer; }
+  table.tk-t tr:hover td{ background:var(--surface-alt); }
+  table.tk-t tr.sel td{ background:color-mix(in srgb, var(--tk-a) 16%, transparent); font-weight:800; }
+  table.tk-t td.bar{ background-repeat:no-repeat; background-position:left center; background-size:var(--w,0%) 70%; background-image:linear-gradient(90deg,color-mix(in srgb, var(--tk-a) 35%, transparent),color-mix(in srgb, var(--tk-b) 35%, transparent)); }
+  table.tk-t td.na{ color:var(--text-muted); opacity:.5; }
+  .tk-note{ font-size:12px; color:var(--text-muted); margin:8px 0 0; line-height:1.55; }
+  .tk-toggle{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700; color:var(--text-muted); cursor:pointer; margin:4px 0; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="index.html">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="50" r="46" fill="var(--surface)" stroke="var(--accent)" stroke-width="4"/>
+        <path d="M20 58 L26 40 C28 35 32 32 38 32 L62 32 C68 32 72 35 74 40 L80 58 L80 66 C80 69 78 71 75 71 L71 71 C68 71 66 69 66 66 L66 64 L34 64 L34 66 C34 69 32 71 29 71 L25 71 C22 71 20 69 20 66 Z" fill="none" stroke="var(--text)" stroke-width="3" stroke-linejoin="round"/>
+        <circle cx="32" cy="64" r="6" fill="var(--text)"/>
+        <circle cx="68" cy="64" r="6" fill="var(--text)"/>
+        <line x1="30" y1="45" x2="70" y2="45" stroke="var(--accent)" stroke-width="3" opacity="0.5"/>
+      </svg>
+      <span class="wordmark">
+        <span class="brand">World Auto</span>
+        <span class="sub">Sales Stats</span>
+      </span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <a href="index.html"><span class="dot"></span>Home</a>
+
+      <div class="nav-heading">Overview</div>
+      <a href="world-car-sales.html"><span class="dot"></span>World Car Sales</a>
+
+      <div class="nav-heading">Powertrain</div>
+      <a href="powertrain-mix-by-country.html"><span class="dot"></span>Mix by Country</a>
+      <a href="manufacturers.html"><span class="dot"></span>Manufacturers</a>
+
+      <div class="nav-heading">Markets</div>
+      <a href="auto-markets-by-country.html"><span class="dot"></span>Auto Markets by Country</a>
+      <a href="population-energy.html"><span class="dot"></span>Population &amp; Energy</a>
+      <a href="charging-stations.html"><span class="dot"></span>EV Charging</a>
+      <a href="ev-trucking.html" aria-current="page"><span class="dot"></span>EV Trucking</a>
+
+      <div class="nav-heading">Rankings</div>
+      <a href="biggest-movers.html"><span class="dot"></span>Biggest Movers</a>
+
+      <div class="nav-heading">Trends<span class="soon-pill">Soon</span></div>
+    </nav>
+
+    <div class="sidebar-footer">
+      Monthly worldwide car sales &amp; powertrain stats — built for video &amp; social.
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page tk-page">
+      <header class="page-header">
+        <div class="eyebrow">Markets · EV Trucking</div>
+        <h1>The electric truck race</h1>
+        <p class="subtitle">Trucks burn more oil than any road vehicle except cars — and in 2025 they began to electrify at scale. Explore how many electric trucks, vans and buses each country sells, how fast their share of sales is climbing, who is winning, and what it means for diesel. Data: IEA Global EV Outlook 2026 (CC BY 4.0), with ACEA, ICCT and manufacturer context.</p>
+      </header>
+
+      <section class="tk-hero" id="hero">
+        <div>
+          <div class="tk-eyebrow">Electric trucks sold worldwide in <span id="hero-year">2025</span></div>
+          <div class="tk-big" id="hero-big">0</div>
+          <div class="tk-hero-sub" id="hero-sub"></div>
+          <svg id="hero-spark" viewBox="0 0 560 92" preserveAspectRatio="none" aria-hidden="true"></svg>
+        </div>
+        <div class="tk-kpis" id="hero-kpis"></div>
+      </section>
+
+      <div class="tk-ins" id="insights"></div>
+
+      <div class="tk-bar" id="tk-bar">
+        <div class="tk-seg" id="seg-mode" role="group" aria-label="Vehicle class">
+          <button type="button" data-v="Trucks" class="active">🚛 Trucks</button>
+          <button type="button" data-v="Vans">🚐 Vans</button>
+          <button type="button" data-v="Buses">🚌 Buses</button>
+        </div>
+        <div class="tk-seg" id="seg-metric" role="group" aria-label="Metric">
+          <button type="button" data-v="sShare" class="active">Share of sales</button>
+          <button type="button" data-v="sales">Units sold</button>
+          <button type="button" data-v="stock">On the road</button>
+        </div>
+        <div class="tk-year">
+          <button type="button" class="tk-play" id="play" aria-label="Play through the years" title="Play">▶</button>
+          <div class="y" id="year-lbl">2025</div>
+          <input type="range" id="year" min="0" max="13" value="13" aria-label="Year">
+        </div>
+      </div>
+
+      <div class="tk-two">
+        <div class="card chart-card">
+          <h2 id="map-title">Share of new trucks that are electric</h2>
+          <p class="note" id="map-note" style="display:block"></p>
+          <div class="tk-map" id="tk-map">
+            <svg id="map-svg" viewBox="0 0 960 500" role="img" aria-label="World map shaded by electric share"></svg>
+            <div class="tk-leg" id="map-leg"></div>
+            <div class="tk-tip" id="map-tip"></div>
+          </div>
+          <p class="tk-note" id="map-foot"></p>
+        </div>
+        <div class="card chart-card">
+          <h2 id="race-title">Race: top markets</h2>
+          <p class="note" id="race-note" style="display:block">Press play: bars re-rank as the years pass. Click a country to open its spotlight.</p>
+          <div class="tk-race" id="race"></div>
+          <label class="tk-chk" id="china-wrap"><input type="checkbox" id="hide-china"> Hide China (see the rest of the world)</label>
+        </div>
+      </div>
+
+      <div class="card chart-card" id="spot-card">
+        <div class="tk-sp-head">
+          <h2 style="margin:0">Country spotlight</h2>
+          <select id="sp-sel" aria-label="Country"></select>
+        </div>
+        <div class="tk-sp-kpis" id="sp-kpis"></div>
+        <div class="tk-lg" id="sp-lg"></div>
+        <div class="tk-chart" id="sp-chart"></div>
+        <p class="tk-note" id="sp-note"></p>
+      </div>
+
+      <div class="card chart-card">
+        <h2>The takeoff: electric truck sales by region</h2>
+        <p class="note" style="display:block">Medium and heavy trucks (above 3.5 t). Bars show units sold, the line the world's share of electric among all new trucks (right axis). Hover a year.</p>
+        <div class="tk-lg" id="tk-lg"></div>
+        <div class="tk-chart" id="takeoff"></div>
+      </div>
+
+      <div class="card chart-card">
+        <h2>Trucks are where cars were four years ago</h2>
+        <p class="note" style="display:block">Share of new vehicle sales that are electric, world. Switch on the shift to line trucks up with cars.</p>
+        <label class="tk-toggle"><input type="checkbox" id="shift"> Shift trucks <b id="shift-n">4</b> years back to overlay them on cars</label>
+        <div class="tk-lg" id="cmp-lg"></div>
+        <div class="tk-chart" id="cmp"></div>
+        <p class="tk-note" id="cmp-note"></p>
+      </div>
+
+      <div class="card chart-card">
+        <h2>Out of 100 trucks sold…</h2>
+        <p class="note" style="display:block">Pick a market. Dots are new trucks sold in the year shown; coloured dots are electric.</p>
+        <div class="tk-chips" id="wf-chips"></div>
+        <div class="tk-wf">
+          <div class="tk-grid" id="wf-grid"></div>
+          <div>
+            <div class="tk-wf-t" id="wf-title"></div>
+            <div class="tk-wf-l" id="wf-leg"></div>
+            <p class="tk-note" id="wf-note"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <h2>Heavy vs medium, and what sits behind the numbers</h2>
+        <p class="note" style="display:block">Electric heavy freight trucks almost tripled in a year; China swapped diesel for batteries faster than for gas.</p>
+        <div class="tk-bars" id="seg-bars"></div>
+        <div class="tk-callout" id="seg-call"></div>
+      </div>
+
+      <div class="card chart-card">
+        <h2>What electric trucks keep out of the tank</h2>
+        <p class="note" style="display:block">Trucks are the second-largest oil-consuming transport mode, after cars. Here is how much oil electric vehicles displaced in 2025 and what the IEA expects next.</p>
+        <div class="tk-bars" id="oil-bars"></div>
+        <div class="tk-callout" id="oil-call"></div>
+      </div>
+
+      <div class="card chart-card">
+        <h2>Who builds them</h2>
+        <p class="note" style="display:block">The electric truck business does not look like the diesel one: in China, newcomers from construction machinery took roughly 30% of the market in 2025, and trade barely exists — only 3% of electric trucks cross a border (25% for electric cars).</p>
+        <div class="tk-mk" id="makers"></div>
+      </div>
+
+      <div class="card chart-card">
+        <h2 id="tbl-title">Every market</h2>
+        <p class="note" style="display:block" id="tbl-note"></p>
+        <div class="tk-tw"><table class="tk-t" id="tk-table"></table></div>
+      </div>
+
+      <div class="card notes-card is-collapsed">
+        <button type="button" class="notes-toggle" aria-expanded="false"><span class="chevron">▸</span> Notes, sources and limits <span class="notes-hint">click to expand</span></button>
+        <div class="notes-body">
+          <ul class="note" style="display:block;padding-left:18px;line-height:1.6">
+            <li><strong>Source of the numbers.</strong> IEA Global EV Data Explorer, Global EV Outlook 2026 (CC BY 4.0), pulled from its public API: electric vehicle sales, stock and shares for trucks, vans, buses and cars, 2012–2025. "Electric" means battery-electric + plug-in hybrid + fuel-cell. Battery-electric made up 97% of electric truck sales in 2025; fuel-cell trucks are a small niche (about 23,000 on the road, all in China).</li>
+            <li><strong>What is a truck.</strong> The IEA counts medium and heavy trucks above 3.5 tonnes (freight trucks). Vans are light commercial vehicles; buses cover city and coach models. The US figures are mostly medium-duty delivery vehicles (over 95% of 2025 US electric truck sales).</li>
+            <li><strong>Who is on the map.</strong> The IEA reports 21 countries individually for trucks; the US and India are not published as separate truck lines (North America sold about 20,000 electric trucks in 2025, Canada 2,700; India about 800). Countries in grey are not "zero": they are simply inside regional totals.</li>
+            <li><strong>Rounding.</strong> The IEA rounds to two or three significant digits, so shares and units are approximate and small countries can show the same figure in two years. Shares are percent of new sales, not of the fleet.</li>
+            <li><strong>Out of 100 trucks.</strong> World and country dots use the IEA sales share; the rest is shown as "diesel &amp; other" because the IEA does not split the conventional remainder by fuel. China's split (electric above 25%, natural gas 15%) is from the IEA text; the EU split is ACEA's first-half-2026 registrations (electrically chargeable 4.8%, diesel 92.1%).</li>
+            <li><strong>Oil figures.</strong> Oil displaced by EVs (1.7 mb/d in 2025; electric trucks in China more than 10% of it; 1.3–1.5 mb/d for trucks and buses in 2035) are the IEA's. "About 10,000 litres per truck" is simple arithmetic on those figures (0.17 mb/d over roughly 970,000 Chinese electric trucks) and is a floor, since the IEA says "more than 10%".</li>
+            <li><strong>Manufacturers.</strong> The IEA publishes market shares by manufacturer group only as a chart; this page quotes its text (incumbent top-5, new entrants, battery supply, trade). No free source gives unit sales for each electric truck brand.</li>
+            <li><strong>Sources:</strong> <a href="https://www.iea.org/reports/global-ev-outlook-2026/trends-in-other-ev-modes" target="_blank" rel="noopener">IEA Global EV Outlook 2026</a> · <a href="https://electrive.com/2026/07/29/acea-reports-strong-growth-for-electric-trucks-and-buses-in-the-eu" target="_blank" rel="noopener">ACEA via electrive, H1 2026</a> · <a href="https://theicct.org/publication/zero-emission-medium-and-heavy-duty-vehicle-market-in-china-a-2025-update-may26/" target="_blank" rel="noopener">ICCT, zero-emission trucks in China</a>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <footer class="page-footer">
+        Electric truck, van, bus and car data: IEA Global EV Data Explorer (CC BY 4.0). EU registrations: ACEA. Map boundaries: Natural Earth via world-atlas (public domain).
+      </footer>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script src="assets/ev-trucks-data.js"></script>
+<script src="assets/notes-toggle.js"></script>
+<script>
+(function(){
+const Y = EVT.years, R = EVT.regions, LAST = Y.length - 1;
+const AGG = new Set(['World', 'Advanced Economies', 'Developing Economies excl. China', 'Asia Pacific', 'Europe', 'European Union', 'Latin America', 'Africa', 'Middle East and Caspian', 'Southeast Asia']);
+const CONT = { 'China':'Asia', 'Japan':'Asia', 'Indonesia':'Asia', 'Malaysia':'Asia', 'Philippines':'Asia', 'Singapore':'Asia', 'United Arab Emirates':'Middle East', 'South Africa':'Africa', 'Canada':'North America', 'United States':'North America', 'Uruguay':'South America', 'Russia':'Europe' };
+const CONT_COL = { 'Asia':'#dc2626', 'Europe':'#1e3a8a', 'North America':'#16a34a', 'South America':'#b8860b', 'Oceania':'#14b8a6', 'Middle East':'#d2b48c', 'Africa':'#111827' };
+const colOf = n => CONT_COL[CONT[n] || 'Europe'];
+const SHORT = { 'United Arab Emirates':'UAE', 'United Kingdom':'UK' };
+const MAP_NAME = { 'United States of America':'United States' };
+const MODE_ICO = { Trucks:'🚛', Vans:'🚐', Buses:'🚌' }, MODE_LBL = { Trucks:'trucks', Vans:'vans', Buses:'buses' };
+let mode = 'Trucks', metric = 'sShare', yi = LAST, selected = 'China', hideChina = false, timer = null;
+
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+const fmt = n => n == null ? '–' : Math.round(n).toLocaleString('en-US');
+const compact = n => n == null ? '–' : n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, '') + 'M' : n >= 1e3 ? (n / 1e3).toFixed(n >= 1e4 ? 0 : 1).replace(/\.0$/, '') + 'k' : String(Math.round(n));
+const pct = n => n == null ? '–' : (n >= 10 ? Math.round(n) : n >= 1 ? n.toFixed(1).replace(/\.0$/, '') : n.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')) + '%';
+const ser = (reg, m, k) => (R[reg] && R[reg][m] && R[reg][m][k]) || null;
+const at = (reg, m, k, i) => { const a = ser(reg, m, k); return a ? a[i == null ? yi : i] : null; };
+const METRICS = {
+  sShare:{ lbl:'Share of sales', fmt:pct, title:m => `Share of new ${MODE_LBL[m]} that are electric`, unit:'of new sales' },
+  sales:{ lbl:'Units sold', fmt:compact, title:m => `Electric ${MODE_LBL[m]} sold`, unit:'sold' },
+  stock:{ lbl:'On the road', fmt:compact, title:m => `Electric ${MODE_LBL[m]} on the road`, unit:'on the road' },
+};
+const countries = m => Object.keys(R).filter(r => !AGG.has(r) && R[r][m] && (R[r][m].sales || R[r][m].sShare));
+const INTERP = d3.interpolateRgbBasis(['#fff1cf', '#fdc668', '#f97316', '#dc2626', '#7f1d1d']);
+
+// ---------- hero ----------
+const W0 = 'World';
+function countUp(el, to, ms){
+  const t0 = performance.now();
+  const step = t => { const k = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - k, 3); el.textContent = fmt(to * e); if(k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+function hero(){
+  const s = ser(W0, 'Trucks', 'sales'), sh = ser(W0, 'Trucks', 'sShare'), st = ser(W0, 'Trucks', 'stock');
+  const v25 = s[LAST], v24 = s[LAST - 1], v20 = s[Y.indexOf(2020)], ch = ser('China', 'Trucks', 'sales')[LAST];
+  countUp(document.getElementById('hero-big'), v25, 1600);
+  document.getElementById('hero-year').textContent = Y[LAST];
+  document.getElementById('hero-sub').innerHTML = `That is <b>${(v25 / v24).toFixed(1)}×</b> the year before and <b>${Math.round(v25 / v20)}×</b> the ${fmt(v20)} sold in 2020. Medium and heavy trucks above 3.5 tonnes, battery-electric, plug-in hybrid and hydrogen.`;
+  // first year the car share reached the truck share of the last year
+  const cs = ser(W0, 'Cars', 'sShare'), tNow = sh[LAST], carYear = Y[cs.findIndex(v => v != null && v >= tNow)];
+  const k = [
+    [pct(tNow), `of all trucks sold in ${Y[LAST]} were electric (${pct(sh[LAST - 1])} in ${Y[LAST - 1]})`],
+    [Math.round(100 * ch / v25) + '%', `of them sold in China (${compact(ch)} trucks)`],
+    [compact(st[LAST]), `electric trucks on the road, up from ${compact(st[Y.indexOf(2020)])} in 2020`],
+    [(Y[LAST] - carYear) + ' yrs', `behind cars: trucks are at ${pct(tNow)}, cars passed that in ${carYear}`],
+  ];
+  document.getElementById('hero-kpis').innerHTML = k.map(([v, l]) => `<div class="tk-kpi"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+  // sparkline
+  const sv = d3.select('#hero-spark'), x = d3.scaleLinear([0, Y.length - 1], [4, 556]), y = d3.scaleLinear([0, d3.max(s)], [86, 6]);
+  const line = d3.line().x((d, i) => x(i)).y(d => y(d)).curve(d3.curveMonotoneX), area = d3.area().x((d, i) => x(i)).y0(88).y1(d => y(d)).curve(d3.curveMonotoneX);
+  sv.append('defs').html('<linearGradient id="hg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fb923c" stop-opacity=".55"/><stop offset="1" stop-color="#fb923c" stop-opacity="0"/></linearGradient>');
+  sv.append('path').attr('d', area(s)).attr('fill', 'url(#hg)');
+  const p = sv.append('path').attr('d', line(s)).attr('fill', 'none').attr('stroke', '#fde68a').attr('stroke-width', 2.5).attr('vector-effect', 'non-scaling-stroke');
+  const L = p.node().getTotalLength(); p.attr('stroke-dasharray', L).attr('stroke-dashoffset', L).transition().duration(1800).ease(d3.easeCubicOut).attr('stroke-dashoffset', 0);
+}
+function insights(){
+  const out = [];
+  const sh = c => at(c, 'Trucks', 'sShare', LAST), sl = c => at(c, 'Trucks', 'sales', LAST);
+  const cs = countries('Trucks').filter(c => sl(c) >= 300);
+  const topS = cs.slice().sort((a, b) => sh(b) - sh(a));
+  const eur = ['Germany', 'United Kingdom', 'France', 'Netherlands', 'Sweden', 'Switzerland', 'Norway', 'Denmark', 'Spain', 'Finland'].filter(c => R[c]);
+  const eTop = eur.slice().sort((a, b) => sl(b) - sl(a))[0];
+  const best = topS.filter(c => c !== 'China')[0];
+  out.push(['🏆', `${best}: ${pct(sh(best))}`, `Outside China, ${best} has the highest electric share of new trucks — about 1 in ${Math.round(100 / sh(best))}.`]);
+  out.push(['📈', `${pct(sh('China'))} in China`, `One in four trucks sold in China was electric in 2025 — more than the 15% that run on natural gas, for the first time.`]);
+  out.push(['🛣️', `${eTop} leads Europe`, `${fmt(sl(eTop))} electric trucks sold in ${Y[LAST]}; the European Union as a whole sold ${fmt(at('European Union', 'Trucks', 'sales', LAST))} (${pct(at('European Union', 'Trucks', 'sShare', LAST))} of new trucks).`]);
+  out.push(['🔋', '97% battery-electric', `Hydrogen is a footnote: about ${fmt(ser(W0, 'Trucks', 'fcevStock')[LAST])} fuel-cell trucks are on the road worldwide, nearly all in China.`]);
+  out.push(['🚛', 'Trucks overtook vans and buses', `World electric share of new sales in ${Y[LAST]}: trucks ${pct(at(W0, 'Trucks', 'sShare', LAST))}, buses ${pct(at(W0, 'Buses', 'sShare', LAST))}, vans ${pct(at(W0, 'Vans', 'sShare', LAST))}.`]);
+  out.push(['🌐', 'Only 3% cross a border', `Of the ~440,000 electric trucks built in 2025, just over 12,000 were traded — against a quarter of electric cars. China exported under 0.5% of its output.`]);
+  document.getElementById('insights').innerHTML = out.map(([e, h, t]) => `<div class="tk-in"><div class="e">${e}</div><div class="h">${esc(h)}</div><div class="t">${t}</div></div>`).join('');
+}
+
+// ---------- map ----------
+const mapSvg = d3.select('#map-svg'), mapTip = document.getElementById('map-tip'), mapBox = document.getElementById('tk-map');
+const projection = d3.geoNaturalEarth1(), path = d3.geoPath(projection);
+let feats = null, scale = null;
+const nameOf = f => MAP_NAME[f.properties.name] || f.properties.name;
+function buildScale(){
+  const vals = countries(mode).map(c => at(c, mode, metric)).filter(v => v != null && v > 0);
+  const mx = Math.max(1, d3.max(vals) || 1);
+  if(metric === 'sShare') scale = d3.scaleSequentialSqrt(INTERP).domain([0, Math.max(10, mx)]);
+  else scale = d3.scaleSequentialLog(INTERP).domain([Math.max(10, d3.min(vals) || 10), mx]).clamp(true);
+  scale.mx = mx;
+}
+function colorFor(c){ const v = at(c, mode, metric); if(v == null) return null; if(v <= 0) return INTERP(0); return scale(v); }
+function drawLegend(){
+  const el = document.getElementById('map-leg'), stops = d3.range(0, 1.01, .1).map(t => INTERP(t)).join(',');
+  el.innerHTML = `<div style="font-weight:800">${esc(METRICS[metric].title(mode))} · ${Y[yi]}</div><div class="sc" style="background:linear-gradient(90deg,${stops})"></div><div class="nm"><span>${metric === 'sShare' ? '0%' : 'few'}</span><span>${METRICS[metric].fmt(scale.mx)}</span></div><div style="margin-top:4px;color:var(--text-muted)"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--surface-alt);border:1px solid var(--border);vertical-align:-1px;margin-right:5px"></span>not published by country</div>`;
+}
+function spark(reg, k, w, h){
+  const a = ser(reg, mode, k) || []; const vals = a.map(v => v == null ? null : v); const mx = d3.max(vals) || 1;
+  const x = i => 2 + i * (w - 4) / (Y.length - 1), y = v => h - 3 - (v / mx) * (h - 8);
+  let d = ''; vals.forEach((v, i) => { if(v != null) d += (d && vals[i - 1] != null ? 'L' : 'M') + x(i).toFixed(1) + ',' + y(v).toFixed(1); });
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><path d="${d}" fill="none" stroke="#f97316" stroke-width="2"/><circle cx="${x(yi)}" cy="${vals[yi] != null ? y(vals[yi]) : h}" r="3.5" fill="#e11d48"/></svg>`;
+}
+function renderMap(){
+  if(!feats) return;
+  buildScale(); drawLegend();
+  const has = new Set(countries(mode));
+  mapSvg.selectAll('path.c').data(feats, d => d.id || d.properties.name).join('path').attr('class', d => { const n = nameOf(d), live = has.has(n) && at(n, mode, metric) != null; return 'c ' + (live ? 'has' : has.has(n) ? 'nodata has' : 'nodata') + (n === selected ? ' sel' : ''); }).attr('d', path)
+    .attr('fill', d => { const n = nameOf(d); return has.has(n) && at(n, mode, metric) != null ? colorFor(n) : null; })
+    .on('pointermove', (e, d) => {
+      const n = nameOf(d), r = mapBox.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+      mapTip.style.left = Math.min(x + 14, r.width - 220) + 'px'; mapTip.style.top = Math.max(4, y - 10) + 'px'; mapTip.style.opacity = 1;
+      if(!has.has(n)){ mapTip.innerHTML = `<b>${esc(n)}</b><br><span style="color:var(--text-muted)">not published separately by the IEA (inside regional totals)</span>`; return; }
+      if(at(n, mode, metric) == null){ mapTip.innerHTML = `<b>${esc(n)}</b> · ${Y[yi]}<br><span style="color:var(--text-muted)">no figure for this year</span>${spark(n, 'sShare', 200, 38)}`; return; }
+      mapTip.innerHTML = `<b>${esc(n)}</b> · ${Y[yi]}<br>${MODE_ICO[mode]} sold <b>${fmt(at(n, mode, 'sales'))}</b> · share <b>${pct(at(n, mode, 'sShare'))}</b><br>on the road <b>${fmt(at(n, mode, 'stock'))}</b>${spark(n, 'sShare', 200, 38)}<span style="color:var(--text-muted);font-size:11px">electric share of sales, ${Y[0]}–${Y[LAST]}</span>`;
+    })
+    .on('pointerleave', () => { mapTip.style.opacity = 0; })
+    .on('click', (e, d) => { const n = nameOf(d); if(has.has(n)) pick(n); });
+  document.getElementById('map-title').textContent = METRICS[metric].title(mode) + ' · ' + Y[yi];
+  document.getElementById('map-note').textContent = metric === 'sShare' ? 'Darker = a bigger part of new sales is electric. Hover a country for its trend, click it for the spotlight.' : 'Darker = more electric vehicles (log scale, so small markets stay visible). Hover a country for its trend, click it for the spotlight.';
+  document.getElementById('map-foot').textContent = `${has.size} countries are reported individually for ${MODE_LBL[mode]}; the rest sit inside the IEA's regional totals (shown in grey on the map, not zero).`;
+}
+fetch('assets/countries-50m.json').then(r => r.json()).then(topo => {
+  const geo = topojson.feature(topo, topo.objects.countries);
+  feats = geo.features.filter(f => f.properties.name !== 'Antarctica');
+  projection.fitExtent([[6, 6], [954, 494]], { type:'FeatureCollection', features:feats });
+  renderMap();
+});
+
+// ---------- race ----------
+const raceEl = document.getElementById('race'), rows = {}, ROW = 31, TOPN = 12;
+function renderRace(){
+  const m = metric, list = countries(mode).filter(c => !(hideChina && c === 'China')).map(c => ({ c, v:at(c, mode, m) })).filter(r => r.v != null && r.v > 0).sort((a, b) => b.v - a.v);
+  const mx = d3.max(list, r => r.v) || 1;
+  raceEl.style.height = (TOPN * ROW) + 'px';
+  Object.keys(rows).forEach(c => { if(!list.slice(0, TOPN).some(r => r.c === c)){ rows[c].style.opacity = 0; rows[c].style.pointerEvents = 'none'; rows[c].style.transform = `translateY(${TOPN * ROW + 20}px)`; } });
+  list.slice(0, TOPN).forEach((r, i) => {
+    let el = rows[r.c];
+    if(!el){
+      el = rows[r.c] = document.createElement('div'); el.className = 'tk-rr'; el.style.transform = `translateY(${TOPN * ROW + 20}px)`; el.style.opacity = 0;
+      el.innerHTML = `<span class="nm"></span><span class="tr"><i></i></span><span class="v"></span>`; el.onclick = () => pick(r.c); raceEl.appendChild(el);
+    }
+    el.classList.toggle('sel', r.c === selected); el.style.pointerEvents = '';
+    el.querySelector('.nm').textContent = SHORT[r.c] || r.c; el.querySelector('.nm').title = r.c;
+    const bar = el.querySelector('i'); bar.style.background = colOf(r.c); bar.style.width = Math.max(1.5, 100 * (m === 'sShare' ? r.v / mx : Math.sqrt(r.v / mx))) + '%';
+    el.querySelector('.v').textContent = METRICS[m].fmt(r.v);
+    requestAnimationFrame(() => { el.style.transform = `translateY(${i * ROW}px)`; el.style.opacity = 1; });
+  });
+  document.getElementById('race-title').textContent = `${MODE_ICO[mode]} ${METRICS[m].lbl.toLowerCase().replace(/^./, s => s.toUpperCase())} · top markets, ${Y[yi]}`;
+  document.getElementById('china-wrap').style.display = (m === 'sShare') ? 'none' : '';
+}
+
+// ---------- generic line chart ----------
+function lineChart(host, series, o){
+  o = o || {}; const W = 720, H = o.h || 270, m = { t:16, r:104, b:28, l:42 };
+  const el = d3.select(host).html(''); const svg = el.append('svg').attr('viewBox', `0 0 ${W} ${H}`);
+  const xs = o.xs || Y, x = d3.scaleLinear([d3.min(xs), d3.max(xs)], [m.l, W - m.r]);
+  const all = series.flatMap(s => s.vals.filter(v => v != null)), ymax = o.ymax || (d3.max(all) || 1) * 1.12;
+  const y = d3.scaleLinear([0, ymax], [H - m.b, m.t]).nice();
+  svg.append('g').attr('class', 'grid').selectAll('line').data(y.ticks(5)).join('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', d => y(d)).attr('y2', d => y(d));
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickValues(xs.filter((v, i) => i % 2 === (xs.length - 1) % 2)).tickFormat(d3.format('d')).tickSizeOuter(0));
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(o.yfmt || (d => d + '%')).tickSizeOuter(0));
+  const ln = d3.line().defined(d => d != null).x((d, i) => x(xs[i])).y(d => y(d)).curve(d3.curveMonotoneX);
+  series.forEach(s => {
+    const p = svg.append('path').attr('d', ln(s.vals)).attr('fill', 'none').attr('stroke', s.color).attr('stroke-width', s.w || 3).attr('stroke-linecap', 'round');
+    if(s.dash) p.attr('stroke-dasharray', s.dash);
+    const L = p.node().getTotalLength(); if(!s.dash){ p.attr('stroke-dasharray', L).attr('stroke-dashoffset', L).transition().duration(1100).ease(d3.easeCubicOut).attr('stroke-dashoffset', 0); }
+    let li = -1; s.vals.forEach((v, i) => { if(v != null) li = i; });
+    if(li >= 0){ svg.append('circle').attr('cx', x(xs[li])).attr('cy', y(s.vals[li])).attr('r', 4).attr('fill', s.color);
+      svg.append('text').attr('x', x(xs[li]) + 8).attr('y', y(s.vals[li]) + 4).attr('font-size', 11.5).attr('font-weight', 800).attr('fill', s.color).text(`${s.short || s.name} ${(o.vfmt || pct)(s.vals[li])}`); }
+  });
+  const tip = el.append('div').attr('class', 'tk-ctip'), cross = svg.append('line').attr('stroke', 'var(--text-muted)').attr('stroke-dasharray', '3 3').attr('y1', m.t).attr('y2', H - m.b).style('opacity', 0);
+  svg.append('rect').attr('x', m.l).attr('y', m.t).attr('width', W - m.l - m.r).attr('height', H - m.t - m.b).attr('fill', 'transparent')
+    .on('pointermove', e => {
+      const bb = svg.node().getBoundingClientRect(), px = (e.clientX - bb.left) * W / bb.width, yr = Math.round(x.invert(px)), i = xs.indexOf(yr); if(i < 0) return;
+      cross.attr('x1', x(yr)).attr('x2', x(yr)).style('opacity', 1);
+      tip.html(`<b>${yr}</b><br>` + series.map(s => s.vals[i] == null ? '' : `<span style="color:${s.color}">●</span> ${esc(s.name)}: <b>${(o.vfmt || pct)(s.vals[i])}</b>`).filter(Boolean).join('<br>')).style('opacity', 1)
+        .style('left', Math.min(bb.width - 170, Math.max(0, x(yr) * bb.width / W + 12)) + 'px').style('top', '10px');
+    }).on('pointerleave', () => { tip.style('opacity', 0); cross.style('opacity', 0); });
+}
+
+// ---------- spotlight ----------
+const spSel = document.getElementById('sp-sel');
+function fillSelect(){
+  const names = [...new Set(['Trucks', 'Vans', 'Buses'].flatMap(m => countries(m)))].sort();
+  spSel.innerHTML = '<optgroup label="Countries">' + names.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('') + '</optgroup><optgroup label="Regions">' + ['World', 'European Union', 'Europe', 'Asia Pacific', 'Latin America', 'Africa', 'Middle East and Caspian', 'Southeast Asia'].filter(n => R[n]).map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('') + '</optgroup>';
+  spSel.onchange = () => pick(spSel.value);
+}
+function spotlight(){
+  const n = selected; spSel.value = n;
+  const sold = at(n, 'Trucks', 'sales', LAST), sh = at(n, 'Trucks', 'sShare', LAST), stk = at(n, 'Trucks', 'stock', LAST);
+  const rank = countries('Trucks').filter(c => at(c, 'Trucks', 'sales', LAST) != null).sort((a, b) => at(b, 'Trucks', 'sales', LAST) - at(a, 'Trucks', 'sales', LAST)).indexOf(n) + 1;
+  const bevS = at(n, 'Trucks', 'bev', LAST), fc = at(n, 'Trucks', 'fcev', LAST);
+  document.getElementById('sp-kpis').innerHTML = [
+    ['Electric trucks sold ' + Y[LAST], fmt(sold)], ['Share of new trucks', pct(sh)], ['Trucks on the road', fmt(stk)],
+    [`Vans / buses share`, `${pct(at(n, 'Vans', 'sShare', LAST))} / ${pct(at(n, 'Buses', 'sShare', LAST))}`], ['Rank (trucks sold)', rank ? '#' + rank : '–'],
+  ].map(([l, v]) => `<div><span>${l}</span><b>${v}</b></div>`).join('');
+  const defs = [['Trucks', '#f97316'], ['Buses', '#0ea5e9'], ['Vans', '#16a34a'], ['Cars', '#6366f1']];
+  const series = defs.map(([m, c]) => ({ name:m === 'Cars' ? 'Electric cars' : m, short:m, color:c, vals:ser(n, m, 'sShare') || [] })).filter(s => s.vals.some(v => v != null));
+  document.getElementById('sp-lg').innerHTML = series.map(s => `<span><i style="background:${s.color}"></i>${s.name}</span>`).join('');
+  lineChart(document.getElementById('sp-chart'), series, { h:260 });
+  const bits = [];
+  if(bevS != null && sold) bits.push(`${Math.round(100 * bevS / sold)}% of ${Y[LAST]} electric truck sales were battery-electric`);
+  if(fc) bits.push(`${fmt(fc)} fuel-cell trucks sold`);
+  document.getElementById('sp-note').textContent = `Share of new vehicle sales that are electric. ${bits.join(' · ')}${bits.length ? '. ' : ''}Series with no line were not published for this market.`;
+}
+function pick(n){ selected = n; renderMap(); renderRace(); spotlight(); renderTable(); }
+
+// ---------- takeoff (stacked regions + world share) ----------
+function takeoff(){
+  const host = document.getElementById('takeoff'); const W = 720, H = 330, m = { t:18, r:48, b:30, l:52 };
+  const idx = Y.map((y, i) => i).filter(i => Y[i] >= 2015);
+  const ch = ser('China', 'Trucks', 'sales'), eu = ser('Europe', 'Trucks', 'sales'), wo = ser(W0, 'Trucks', 'sales'), sh = ser(W0, 'Trucks', 'sShare');
+  const data = idx.map(i => ({ y:Y[i], China:ch[i] || 0, Europe:eu[i] || 0, Rest:Math.max(0, (wo[i] || 0) - (ch[i] || 0) - (eu[i] || 0)), share:sh[i], total:wo[i] }));
+  const keys = ['China', 'Europe', 'Rest'], cols = { China:'#dc2626', Europe:'#1e3a8a', Rest:'#16a34a' }, names = { China:'China', Europe:'Europe', Rest:'Rest of world (incl. North America)' };
+  document.getElementById('tk-lg').innerHTML = keys.map(k => `<span><i class="sq" style="background:${cols[k]}"></i>${names[k]}</span>`).join('') + '<span><i style="background:#f59e0b"></i>World share of new trucks (right axis)</span>';
+  const el = d3.select(host).html(''), svg = el.append('svg').attr('viewBox', `0 0 ${W} ${H}`);
+  const x = d3.scaleBand(data.map(d => d.y), [m.l, W - m.r]).padding(.22), y = d3.scaleLinear([0, d3.max(data, d => d.total) * 1.08], [H - m.b, m.t]).nice(), y2 = d3.scaleLinear([0, 10], [H - m.b, m.t]);
+  svg.append('g').attr('class', 'grid').selectAll('line').data(y.ticks(5)).join('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', d => y(d)).attr('y2', d => y(d));
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickSizeOuter(0));
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(d => compact(d)).tickSizeOuter(0));
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(${W - m.r},0)`).call(d3.axisRight(y2).ticks(5).tickFormat(d => d + '%').tickSizeOuter(0));
+  const stack = d3.stack().keys(keys)(data);
+  stack.forEach(layer => {
+    svg.append('g').attr('fill', cols[layer.key]).selectAll('rect').data(layer).join('rect').attr('x', d => x(d.data.y)).attr('width', x.bandwidth()).attr('y', y(0)).attr('height', 0).attr('rx', 2)
+      .transition().delay((d, i) => i * 70).duration(800).ease(d3.easeCubicOut).attr('y', d => y(d[1])).attr('height', d => y(d[0]) - y(d[1]));
+  });
+  const ln = d3.line().defined(d => d.share != null).x(d => x(d.y) + x.bandwidth() / 2).y(d => y2(Math.min(10, d.share))).curve(d3.curveMonotoneX);
+  const lp = svg.append('path').attr('d', ln(data)).attr('fill', 'none').attr('stroke', '#f59e0b').attr('stroke-width', 3.5).attr('stroke-linecap', 'round');
+  const L = lp.node().getTotalLength(); lp.attr('stroke-dasharray', L).attr('stroke-dashoffset', L).transition().delay(500).duration(1400).ease(d3.easeCubicOut).attr('stroke-dashoffset', 0);
+  svg.selectAll('.dot').data(data).join('circle').attr('cx', d => x(d.y) + x.bandwidth() / 2).attr('cy', d => y2(Math.min(10, d.share))).attr('r', 4).attr('fill', '#f59e0b').attr('stroke', 'var(--surface)').attr('stroke-width', 1.5);
+  const last = data[data.length - 1];
+  svg.append('text').attr('x', x(last.y) + x.bandwidth() / 2).attr('y', y(last.total) - 8).attr('text-anchor', 'middle').attr('font-size', 12).attr('font-weight', 800).attr('fill', 'var(--text)').text(compact(last.total));
+  const tip = el.append('div').attr('class', 'tk-ctip');
+  svg.selectAll('.hit').data(data).join('rect').attr('x', d => x(d.y) - 4).attr('width', x.bandwidth() + 8).attr('y', m.t).attr('height', H - m.t - m.b).attr('fill', 'transparent')
+    .on('pointermove', (e, d) => { const bb = svg.node().getBoundingClientRect();
+      tip.html(`<b>${d.y}</b> · ${fmt(d.total)} electric trucks<br><span style="color:#dc2626">●</span> China ${fmt(d.China)}<br><span style="color:#1e3a8a">●</span> Europe ${fmt(d.Europe)}<br><span style="color:#16a34a">●</span> Rest of world ${fmt(d.Rest)}<br>Share of new trucks: <b>${pct(d.share)}</b>`).style('opacity', 1)
+        .style('left', Math.min(bb.width - 210, Math.max(0, (x(d.y) + x.bandwidth() / 2) * bb.width / W + 14)) + 'px').style('top', '6px'); })
+    .on('pointerleave', () => tip.style('opacity', 0));
+}
+
+// ---------- trucks vs cars ----------
+function compare(){
+  const shift = document.getElementById('shift').checked, n = +document.getElementById('shift-n').textContent;
+  const cars = ser(W0, 'Cars', 'sShare'), tr = ser(W0, 'Trucks', 'sShare'), bus = ser(W0, 'Buses', 'sShare'), van = ser(W0, 'Vans', 'sShare');
+  const xs = shift ? Y.map(y => y) : Y;
+  const sh = a => shift ? a.map((v, i) => (i + n < a.length ? a[i + n] : null)) : a;   // truck year t+n drawn at t
+  const series = [
+    { name:'Electric cars', short:'Cars', color:'#6366f1', vals:cars, w:3.5 },
+    { name:shift ? `Electric trucks (shifted ${n} years back)` : 'Electric trucks', short:'Trucks', color:'#f97316', vals:sh(tr), w:3.5 },
+    { name:'Electric buses', short:'Buses', color:'#0ea5e9', vals:bus, dash:'5 5', w:2 },
+    { name:'Electric vans', short:'Vans', color:'#16a34a', vals:van, dash:'5 5', w:2 },
+  ];
+  document.getElementById('cmp-lg').innerHTML = series.map(s => `<span><i style="background:${s.color}"></i>${s.name}</span>`).join('');
+  lineChart(document.getElementById('cmp'), series, { h:300, xs });
+  const cs = cars.findIndex(v => v != null && v >= tr[LAST]);
+  document.getElementById('cmp-note').textContent = `Electric cars first passed ${pct(tr[LAST])} of sales in ${Y[cs]}. If trucks followed the same curve, they would reach the 25% that cars have today around ${Y[LAST] + (LAST - cs) }. A forecast, not a fact: the IEA's own projection is at least 20% of truck sales by 2035 under current policies (60% in China).`;
+}
+
+// ---------- waffle ----------
+let wfSel = 'World';
+function wfOptions(){
+  const opts = [
+    { id:'World', label:'World', parts:[['Electric', at(W0, 'Trucks', 'sShare', LAST), '#f59e0b'], ['Diesel, gas & other', 100 - at(W0, 'Trucks', 'sShare', LAST), '#cbd2e1']], note:'IEA, world sales share.' },
+    { id:'China', label:'China', parts:[['Electric', 26, '#f59e0b'], ['Natural gas (LNG)', 15, '#38bdf8'], ['Diesel & other', 59, '#cbd2e1']], note:'IEA: electric above 25%, natural gas an unchanged 15%; the remainder is shown as diesel & other.' },
+    { id:'EU', label:'EU (H1 2026)', parts:[['Electrically chargeable', 4.8, '#f59e0b'], ['Diesel', 92.1, '#cbd2e1'], ['Other (gas, petrol, hydrogen…)', 3.1, '#94a3b8']], note:'ACEA new truck registrations, first half of 2026 (year shown differs).' },
+  ];
+  countries('Trucks').filter(c => at(c, 'Trucks', 'sShare', LAST) != null && at(c, 'Trucks', 'sales', LAST) >= 300 && c !== 'China').sort((a, b) => at(b, 'Trucks', 'sShare', LAST) - at(a, 'Trucks', 'sShare', LAST)).slice(0, 9)
+    .forEach(c => opts.push({ id:c, label:c, parts:[['Electric', at(c, 'Trucks', 'sShare', LAST), '#f59e0b'], ['Diesel, gas & other', 100 - at(c, 'Trucks', 'sShare', LAST), '#cbd2e1']], note:'IEA sales share (rounded).' }));
+  return opts;
+}
+function waffle(){
+  const opts = wfOptions(), o = opts.find(x => x.id === wfSel) || opts[0];
+  document.getElementById('wf-chips').innerHTML = opts.map(x => `<button type="button" data-id="${esc(x.id)}" class="${x.id === o.id ? 'active' : ''}">${esc(x.label)}</button>`).join('');
+  // largest-remainder rounding to exactly 100 dots
+  const raw = o.parts.map(p => p[1]), fl = raw.map(Math.floor); let left = 100 - fl.reduce((a, b) => a + b, 0);
+  raw.map((v, i) => [v - Math.floor(v), i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if(left > 0){ fl[i]++; left--; } });
+  let dots = ''; let k = 0; o.parts.forEach((p, pi) => { for(let j = 0; j < fl[pi]; j++){ dots += `<i style="background:${p[2]};animation-delay:${k * 9}ms"></i>`; k++; } });
+  document.getElementById('wf-grid').innerHTML = dots;
+  const e = o.parts[0][1];
+  document.getElementById('wf-title').innerHTML = `In ${esc(o.label)}, <span style="color:#f59e0b">${pct(e)}</span> of new trucks are ${o.id === 'EU' ? 'electrically chargeable' : 'electric'}.`;
+  document.getElementById('wf-leg').innerHTML = o.parts.map(p => `<span><i style="background:${p[2]}"></i><b>${pct(p[1])}</b> ${esc(p[0])}</span>`).join('');
+  document.getElementById('wf-note').textContent = o.note + (o.id !== 'EU' ? ' ' + Y[LAST] + ' sales.' : '');
+}
+document.getElementById('wf-chips').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; wfSel = b.dataset.id; waffle(); });
+
+// ---------- segments + oil + makers ----------
+function bars(id, rowsData, unitFmt){
+  const mx = Math.max(...rowsData.map(r => r.v));
+  const el = document.getElementById(id);
+  el.innerHTML = rowsData.map(r => `<div class="tk-bar-row"><span>${r.l}</span><span class="tr"><i style="background:${r.c}" data-w="${(100 * r.v / mx).toFixed(1)}"></i></span><span class="v">${r.t || unitFmt(r.v)}</span></div>`).join('');
+  requestAnimationFrame(() => requestAnimationFrame(() => el.querySelectorAll('i[data-w]').forEach(i => { i.style.width = i.dataset.w + '%'; })));
+}
+function segments(){
+  bars('seg-bars', [
+    { l:'Heavy freight trucks 2024', v:84000, c:'#fbbf24' }, { l:'Heavy freight trucks 2025', v:230000, c:'#f97316', t:'230k · 9% of sales' },
+    { l:'Medium freight trucks 2024', v:127000, c:'#a5b4fc', t:'≈127k · 6%' }, { l:'Medium freight trucks 2025', v:210000, c:'#6366f1', t:'210k · 9% of sales' },
+  ], compact);
+  document.querySelectorAll('#seg-bars .v')[0].textContent = '84k · 3%';
+  document.getElementById('seg-call').innerHTML = `<b>China swapped diesel for batteries faster than for gas.</b> In 2025 electric trucks outsold natural-gas (LNG) trucks for the first time — over 25% of the Chinese truck market against an unchanged 15% — and the country now has more than a million of each. About <b>15%</b> of its electric trucks are battery-swap capable, and in some cases battery-electric heavy trucks already match diesel on total cost of ownership after five years. First-quarter 2026 sales were up another 20%. <br><br>Elsewhere it is slower: <b>Europe</b> sold nearly 17,000 (3% of trucks, +40%), <b>North America</b> about 20,000 (over 95% of US electric trucks are medium-duty delivery vans), and the <b>rest of the world</b> just 1,900 — a 15% fall even as India grew from 200 to roughly 800.`;
+}
+function oil(){
+  bars('oil-bars', [
+    { l:'Oil displaced by all EVs, 2025', v:1.7, c:'#6366f1', t:'≈1.7 mb/d' },
+    { l:'… of which electric cars & vans (≈80%)', v:1.36, c:'#38bdf8', t:'≈1.4 mb/d' },
+    { l:'… electric trucks in China (>10%)', v:0.17, c:'#f97316', t:'>0.17 mb/d' },
+    { l:'Trucks + buses in 2035 (policies today)', v:1.3, c:'#e11d48', t:'1.3–1.5 mb/d' },
+  ], v => v);
+  const perTruck = Math.round(0.17e6 * 158.987 * 365 / 970000 / 100) * 100;   // 0.17 mb/d = 170,000 barrels a day
+  document.getElementById('oil-call').innerHTML = `<b>≈ ${fmt(perTruck)} litres of diesel a year per electric truck.</b> That is simple arithmetic: the IEA credits electric trucks in China with more than 0.17 million barrels a day, spread over about 970,000 trucks on the road. Real trucks vary from city delivery vans to 40-tonne tractors, so read it as a floor. <br><br>Electric vehicles overall displaced about <b>1.7 mb/d</b> in 2025 — as much as Indonesia uses — and around <b>5 mb/d by 2030</b>, which would pull road transport oil demand down to ~44 mb/d. Trucks are the second-largest oil-consuming transport mode, so each point of truck electrification counts: <a href="charging-stations.html">the European Union now has over 1,000 charging points built only for electric trucks</a>.`;
+}
+function makers(){
+  const cards = [
+    ['🏭', 'China — the incumbents', '#dc2626', ['Sinotruk', 'BAIC (Foton)', 'FAW', 'Shaanxi (Shacman)', 'Dongfeng'], 'The five biggest conventional truck makers hold nearly 90% of China\'s overall truck market but less than half of electric truck sales.'],
+    ['🏗️', 'China — the newcomers', '#f97316', ['XCMG', 'Sany'], 'Machinery and heavy-industry groups with no diesel trucks in their line-up captured almost 30% of China\'s electric truck market in 2025. Sany plans plants in South Africa, Brazil and Europe.'],
+    ['🛣️', 'Europe', '#1e3a8a', ['Daimler Truck', 'Volvo', 'Traton (MAN, Scania)', 'DAF (Paccar)', 'Iveco', 'Ford Trucks'], 'EU electric truck production doubled to over 13,000 in 2025 (about 3% of the world). Scania is investing EUR 2 billion in a China plant that will build both diesel and battery trucks.'],
+    ['🌎', 'North America', '#16a34a', ['BrightDrop (GM)', 'Rivian', 'RAM'], 'Mostly medium-duty delivery vehicles. BrightDrop\'s Canadian plant makes Canada the biggest exporter of electric trucks, selling into the United States.'],
+    ['🔋', 'The battery behind it', '#6366f1', ['CATL ≈ 80% of China'], 'Electric trucks sold in China are almost entirely Chinese-built with Chinese batteries and chassis. Only about 3% of electric trucks produced worldwide are traded across borders.'],
+  ];
+  document.getElementById('makers').innerHTML = cards.map(([e, h, c, chips, t]) => `<div class="tk-mc" style="--c:${c}"><h3><span>${e}</span>${h}</h3><div>${chips.map(x => `<span class="chip">${esc(x)}</span>`).join('')}</div><p>${t}</p></div>`).join('');
+}
+
+// ---------- table ----------
+let sortKey = 'sales', sortAsc = false;
+const COLS = [
+  ['n', 'Country', c => c], ['sales', 'Sold', c => at(c, mode, 'sales')], ['sShare', 'Share of sales', c => at(c, mode, 'sShare')], ['stock', 'On the road', c => at(c, mode, 'stock')],
+  ['tShare', 'Share of fleet', c => at(c, mode, 'tShare')], ['bev', 'Battery-electric', c => at(c, mode, 'bev')], ['fcev', 'Fuel-cell', c => at(c, mode, 'fcev')],
+];
+function renderTable(){
+  const list = countries(mode), col = COLS.find(c => c[0] === sortKey) || COLS[1];
+  const rowsT = list.map(c => ({ c, v:col[2](c) })).sort((a, b) => { if(sortKey === 'n') return sortAsc ? a.c.localeCompare(b.c) : b.c.localeCompare(a.c); const x = a.v == null ? -Infinity : a.v, y = b.v == null ? -Infinity : b.v; return sortAsc ? x - y : y - x; });
+  const mxS = Math.max(1, ...list.map(c => at(c, mode, 'sales') || 0));
+  document.getElementById('tbl-title').textContent = `Every market · electric ${MODE_LBL[mode]}, ${Y[yi]}`;
+  document.getElementById('tbl-note').textContent = `${list.length} countries reported individually. Click a header to sort, a row to open its spotlight. Follows the vehicle class and year chosen at the top.`;
+  document.getElementById('tk-table').innerHTML = '<thead><tr><th class="rk">#</th>' + COLS.map(c => `<th data-k="${c[0]}" class="${c[0] === sortKey ? 'sorted' + (sortAsc ? ' asc' : '') : ''}">${c[1]}</th>`).join('') + '</tr></thead><tbody>' +
+    rowsT.map(({ c, v }, i) => `<tr data-c="${esc(c)}" class="${c === selected ? 'sel' : ''}"><td class="rk">${v == null ? '–' : i + 1}</td>` + COLS.map(k => {
+      const x = k[2](c); if(k[0] === 'n') return `<td>${esc(c)}</td>`; if(x == null) return '<td class="na">–</td>';
+      if(k[0] === 'sShare' || k[0] === 'tShare') return `<td>${pct(x)}</td>`; if(k[0] === 'sales') return `<td class="bar" style="--w:${(100 * x / mxS).toFixed(1)}%">${fmt(x)}</td>`; return `<td>${fmt(x)}</td>`;
+    }).join('') + '</tr>').join('') + '</tbody>';
+}
+document.getElementById('tk-table').addEventListener('click', e => {
+  const th = e.target.closest('th'); if(th && th.dataset.k){ if(sortKey === th.dataset.k) sortAsc = !sortAsc; else { sortKey = th.dataset.k; sortAsc = th.dataset.k === 'n'; } renderTable(); return; }
+  const tr = e.target.closest('tr[data-c]'); if(tr) { pick(tr.dataset.c); document.getElementById('spot-card').scrollIntoView({ behavior:'smooth', block:'start' }); }
+});
+
+// ---------- controls ----------
+function refresh(){
+  document.getElementById('year-lbl').textContent = Y[yi]; document.getElementById('year').value = yi;
+  renderMap(); renderRace(); renderTable();
+}
+function setSeg(id, v, cb){ document.querySelectorAll('#' + id + ' button').forEach(b => b.classList.toggle('active', b.dataset.v === v)); cb(); }
+document.getElementById('seg-mode').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; mode = b.dataset.v; setSeg('seg-mode', mode, refresh); });
+document.getElementById('seg-metric').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; metric = b.dataset.v; setSeg('seg-metric', metric, refresh); });
+document.getElementById('year').addEventListener('input', e => { yi = +e.target.value; stop(); refresh(); });
+document.getElementById('hide-china').addEventListener('change', e => { hideChina = e.target.checked; renderRace(); });
+document.getElementById('shift').addEventListener('change', compare);
+const playBtn = document.getElementById('play');
+function stop(){ if(timer){ clearInterval(timer); timer = null; } playBtn.textContent = '▶'; }
+playBtn.addEventListener('click', () => {
+  if(timer){ stop(); return; }
+  playBtn.textContent = '❚❚'; if(yi >= LAST) yi = Y.indexOf(2015);
+  refresh();
+  timer = setInterval(() => { if(yi >= LAST){ stop(); return; } yi++; refresh(); }, 950);
+});
+
+hero(); insights(); fillSelect(); spotlight(); takeoff(); compare(); waffle(); segments(); oil(); makers(); refresh();
+})();
+</script>
+</body>
+</html>

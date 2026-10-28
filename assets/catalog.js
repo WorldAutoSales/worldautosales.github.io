@@ -25,5 +25,13 @@ const STATS_CATALOG = [
     description: "Public charging points, stations and ports in 58 countries: slow / fast / ultra-fast, per 100k people aged 15-64 and per EV, with brands and power bands, on a map that zooms to street level.",
     tag: "2019–2026",
     url: "charging-stations.html"
+  },
+  {
+    title: "EV Trucking",
+    subject: "World · Electric trucks, vans & buses",
+    keywords: ["truck", "trucks", "ev trucks", "electric trucks", "trucking", "freight", "heavy-duty", "diesel", "vans", "buses", "china", "europe", "oil", "iea", "semi", "logistics"],
+    description: "How many electric trucks, vans and buses each country sells and keeps on the road, share of new sales 2012-2025, an animated race, trucks vs cars, and what electric trucks keep out of the diesel tank.",
+    tag: "2012–2025",
+    url: "ev-trucking.html"
   }
 ];
