@@ -3748,6 +3748,7 @@ function renderMap(){
 }
 
 // --- Motorisation Trends chart: aggregate of the filtered countries, or focused on one country ---
+const TREND_MONTHS = 18;          // monthly points only for the rolling last 18 months; earlier history = yearly points drawn 12 months wide
 let focusedCountry = null;
 const trendsLegend = document.getElementById('trends-legend');
 const trendsTitle = document.getElementById('trends-title');
@@ -3800,24 +3801,43 @@ function nextYearRow(rows){
 
 function trendsSeriesForCountry(name){
   if(typeof COUNTRY_MONTHLY !== 'undefined' && COUNTRY_MONTHLY[name]){
-    const points = COUNTRY_MONTHLY[name].map(r => ({
-      label: r.ym, isPartial: false, total: r.total,
-      bev: r.bev, phev: r.phev, hev: r.hev, petrol: r.petrol, diesel: r.diesel, others: r.others
-    }));
-    // prepend any real annual-only years that predate the first monthly month, so the line
-    // doesn't start abruptly wherever the monthly data happens to begin — countries like Nepal
-    // (annual since 2023, monthly only from 2026-01) or Chile (annual since 2020, monthly only
-    // from 2025-01) have real earlier history that would otherwise silently vanish from this
-    // chart even though it's still shown correctly in the Annual-period views and stat cards
-    const firstMonthlyYear = points.length ? parseInt(points[0].label.slice(0,4), 10) : Infinity;
-    const priorAnnual = (COUNTRY_YEARLY[name] || [])
-      .filter(r => r.period_type === 'ANNUAL' && r.year < firstMonthlyYear)
-      .sort((a, b) => a.year - b.year)
-      .map(r => ({
-        label: String(r.year), isPartial: false, total: r.total,
-        bev: r.bev, phev: r.phev, hev: r.hev, petrol: r.petrol, diesel: r.diesel, others: r.others
-      }));
-    points.unshift(...priorAnnual);
+    // TIME-PROPORTIONAL series: monthly points only for the rolling last TREND_MONTHS real months, every
+    // earlier period is a yearly point drawn 12 months wide (t0 = start month, w = width in months).
+    // A year only partly before the monthly window keeps its early months as one partial-period point.
+    const monthIdx = ym => parseInt(ym.slice(0,4), 10) * 12 + parseInt(ym.slice(5,7), 10) - 1;
+    const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const monthlyRows = COUNTRY_MONTHLY[name].slice().sort((a, b) => a.ym < b.ym ? -1 : 1);
+    const fuelOf = r => ({ total: r.total, bev: r.bev, phev: r.phev, hev: r.hev, petrol: r.petrol, diesel: r.diesel, others: r.others });
+    const lastIdx = monthlyRows.length ? monthIdx(monthlyRows[monthlyRows.length - 1].ym) : 0;
+    const winStart = lastIdx - (TREND_MONTHS - 1);
+    const winYear = Math.floor(winStart / 12);
+    const points = [];
+    const annualByYear = {};
+    (COUNTRY_YEARLY[name] || []).filter(r => r.period_type === 'ANNUAL').forEach(r => { annualByYear[r.year] = r; });
+    const monthsByYear = {};
+    monthlyRows.forEach(r => { const y = parseInt(r.ym.slice(0,4), 10); (monthsByYear[y] = monthsByYear[y] || []).push(r); });
+    // a year with no monthly rows at all (even one inside the window) stays a yearly point, so no stretch of time is left blank
+    const yearsBefore = [...new Set([...Object.keys(annualByYear), ...Object.keys(monthsByYear)].map(Number))].filter(y => y < winYear || !monthsByYear[y]).sort((a, b) => a - b);
+    yearsBefore.forEach(y => {
+      const a = annualByYear[y];
+      let src = a ? fuelOf(a) : null;
+      if(!src && monthsByYear[y]){
+        src = { total:0, bev:0, phev:0, hev:0, petrol:0, diesel:0, others:0 };
+        monthsByYear[y].forEach(r => FUEL_TOTAL_KEYS.forEach(k => { src[k] += (r[k] || 0); }));
+      }
+      if(src) points.push({ label: String(y), kind: 'year', t0: y * 12, w: 12, isPartial: false, ...src });
+    });
+    // months of the window's first calendar year that fall before the rolling window
+    const earlyMonths = (monthsByYear[winYear] || []).filter(r => monthIdx(r.ym) < winStart);
+    if(earlyMonths.length){
+      const src = { total:0, bev:0, phev:0, hev:0, petrol:0, diesel:0, others:0 };
+      earlyMonths.forEach(r => FUEL_TOTAL_KEYS.forEach(k => { src[k] += (r[k] || 0); }));
+      const i0 = monthIdx(earlyMonths[0].ym), i1 = monthIdx(earlyMonths[earlyMonths.length - 1].ym);
+      points.push({ label: i0 === i1 ? `${MONTH_ABBR[i0 % 12]} ${winYear}` : `${MONTH_ABBR[i0 % 12]}-${MONTH_ABBR[i1 % 12]} ${winYear}`, kind: 'partial', t0: i0, w: i1 - i0 + 1, isPartial: false, ...src });
+    }
+    monthlyRows.filter(r => monthIdx(r.ym) >= winStart).forEach(r => {
+      points.push({ label: r.ym, kind: 'month', t0: monthIdx(r.ym), w: 1, isPartial: false, ...fuelOf(r) });
+    });
     // append the model's IMPLIED RATE for the remaining months of the year (not the full-year
     // cumulative total) as a dashed continuation past the last real month. The full-year total
     // is a blend of every month including ones that may look nothing like the recent trend (an
@@ -3833,7 +3853,7 @@ function trendsSeriesForCountry(name){
       const rate = {};
       FUEL_TOTAL_KEYS.forEach(k => { rate[k] = (proj[k] - ytd[k]) / remaining; });
       points.push({
-        label: String(proj.year), isPartial: false, isProjected: true, total: rate.total,
+        label: String(proj.year), kind: 'proj', t0: lastIdx + 1, w: remaining, isPartial: false, isProjected: true, total: rate.total,
         bev: rate.bev, phev: rate.phev, hev: rate.hev, petrol: rate.petrol, diesel: rate.diesel, others: rate.others
       });
     }
@@ -3897,7 +3917,7 @@ function renderTrendsChart(){
   if(isFocused) trendsCountryPageLink.href = 'country.html?country=' + encodeURIComponent(focusedCountry);
   trendsNote.textContent = isFocused
     ? (isMonthly
-        ? `Monthly powertrain mix for ${focusedCountry}${focusedCountry === 'Canada' ? ' (Statistics Canada reports quarterly — one point per quarter, not per month)' : ''}. Click "Show all filtered countries" to go back to the aggregate view.`
+        ? `Powertrain mix for ${focusedCountry}: one point per month for the last ${TREND_MONTHS} months, and one point per year (drawn 12 months wide, so the time axis is to scale) before that${focusedCountry === 'Canada' ? ' (Statistics Canada reports quarterly — one point per quarter, not per month)' : ''}. Click "Show all filtered countries" to go back to the aggregate view.`
         : `Year-by-year powertrain mix for ${focusedCountry}. Click "Show all filtered countries" to go back to the aggregate view.`)
     : 'Share of new registrations by powertrain, year by year, summed across every country matching the sidebar filters (only countries/years with a full fuel-type split are included). Click a country — on the map, in the table, or in Momentum below — to focus every chart on this page on it: European countries and Canada switch to monthly/quarterly points here once focused, since real data at that granularity exists for them.';
 
@@ -3916,24 +3936,46 @@ function renderTrendsChart(){
     const pct = {};
     const raw = {};
     activeKeys.forEach(k => { pct[k] = d.total ? d[k]/d.total*100 : 0; raw[k] = d[k]; });
-    return { i, label: d.label, total: d.total, isPartial: d.isPartial, isProjected: d.isProjected, raw, ...pct };
+    return { i, label: d.label, kind: d.kind, t0: d.t0 != null ? d.t0 : i - 0.5, w: d.w != null ? d.w : 1, total: d.total, isPartial: d.isPartial, isProjected: d.isProjected, raw, ...pct };
   });
-
-  const xScale = d3.scalePoint().domain(pctSeries.map(d => d.i)).range([0, innerW]).padding(0.05);
+  // x is TIME: a point sits at the middle of the months it covers and a yearly point is 12 months wide
+  // (series without t0/w, i.e. the year-by-year views, just get equal slots)
+  const hasTime = points.every(d => d.t0 != null);
+  pctSeries.forEach(d => { d.t = d.t0 + d.w / 2; });
+  const tMin = d3.min(pctSeries, d => d.t0), tMax = d3.max(pctSeries, d => d.t0 + d.w);
+  // year-by-year views keep their original look (points spread edge to edge with a little padding)
+  const xScale = d3.scaleLinear().domain(hasTime ? [tMin, tMax] : [-0.05, pctSeries.length - 1 + 0.05]).range([0, innerW]);
+  const xOf = d => xScale(d.t);
   const yMax = Math.max(10, d3.max(pctSeries, d => Math.max(...activeKeys.map(k => d[k] || 0))) * 1.15);
   const yScale = d3.scaleLinear().domain([0, yMax]).range([innerH, 0]);
 
   const g = trendsSvg.append('g').attr('transform', `translate(${M.left},${M.top})`);
 
-  const tickValues = isMonthly
-    ? pctSeries.filter(d => d.label.endsWith('-01') || d.label.length === 4 || d.i === pctSeries.length - 1).map(d => d.i)
-    : pctSeries.map(d => d.i);
+  const TREND_MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const pxPerMonth = hasTime ? innerW / Math.max(tMax - tMin, 1) : 0;
+  const monthStep = hasTime ? ([1, 3, 6, 12].find(s => s * pxPerMonth >= 30) || 12) : 1;
+  const lastMonthPt = pctSeries.filter(d => d.kind === 'month').pop();
+  const tickLabelOf = d => {
+    if(!hasTime) return d.isPartial ? `${d.label} (YTD)` : d.isProjected ? `${d.label} (Proj.)` : d.label;
+    if(d.kind === 'proj') return 'Proj.';
+    if(d.kind === 'year') return d.label;
+    if(d.kind === 'partial') return d.label.replace(/ \d{4}$/, '');   // the year is implied by its neighbours; the tooltip has it in full
+    const m = d.t0 % 12;
+    return m === 0 ? d.label.slice(0, 4) : TREND_MONTH_ABBR[m];
+  };
+  let tickPts = pctSeries.filter(d => !hasTime || d.kind !== 'month' || d.t0 % monthStep === 0 || d === lastMonthPt);
+  const tickText = new Map(tickPts.map(d => [d.t, tickLabelOf(d)]));
+  if(hasTime){   // a month label that would run into a year / period label gives way to it
+    const halfW = d => (tickText.get(d.t).length * 6 + 8) / 2;
+    const wide = tickPts.filter(d => d.kind !== 'month');
+    tickPts = tickPts.filter(d => d.kind !== 'month' || !wide.some(o => Math.abs(xOf(o) - xOf(d)) < halfW(o) + halfW(d)));
+  }
   g.append('g').attr('class', 'bubble-axis').attr('transform', `translate(0,${innerH})`)
-    .call(d3.axisBottom(xScale).tickValues(tickValues).tickFormat(i => {
-      const d = pctSeries.find(s => s.i === i);
-      if(isMonthly) return d.isProjected ? `${d.label} (Proj.)` : d.label.endsWith('-01') ? d.label.slice(0,4) : d.label;
-      return d.isPartial ? `${d.label} (YTD)` : d.isProjected ? `${d.label} (Proj.)` : d.label;
-    }));
+    .call(d3.axisBottom(xScale).tickValues(tickPts.map(d => d.t)).tickFormat(t => tickText.get(t)));
+  if(hasTime){   // thin separators where the yearly points hand over to the monthly ones
+    const firstMonth = pctSeries.find(d => d.kind === 'month');
+    if(firstMonth && firstMonth.i > 0) g.append('line').attr('class', 'trend-guideline').attr('x1', xScale(firstMonth.t0)).attr('x2', xScale(firstMonth.t0)).attr('y1', 0).attr('y2', innerH).style('opacity', .6).style('stroke-dasharray', '2,3');
+  }
   g.append('g').attr('class', 'bubble-axis').call(d3.axisLeft(yScale).ticks(5).tickFormat(d => d+'%'));
 
   let trendsIsolatedFuel = null;
@@ -3953,7 +3995,7 @@ function renderTrendsChart(){
     applyTrendsIsolation();
   };
 
-  const line = key => d3.line().defined(d => d[key] != null).x(d => xScale(d.i)).y(d => yScale(d[key])).curve(d3.curveMonotoneX);
+  const line = key => d3.line().defined(d => d[key] != null).x(xOf).y(d => yScale(d[key])).curve(d3.curveMonotoneX);
   activeKeys.forEach(k => {
     if(isMonthly){
       const lastRealIdx = pctSeries.reduce((acc, d, idx) => !d.isProjected ? idx : acc, -1);
@@ -3978,10 +4020,16 @@ function renderTrendsChart(){
     }
     g.append('path').datum(pctSeries).attr('fill', 'none').attr('stroke', 'transparent').attr('stroke-width', isMonthly ? 6 : 14).style('cursor', 'pointer').attr('d', line(k))
       .on('click', () => { trendsIsolatedFuel = (trendsIsolatedFuel === k) ? null : k; applyTrendsIsolation(); });
-    if(!isMonthly){
-      g.selectAll(`.trends-dot-${k}`).data(pctSeries.filter(d => d[k] != null)).join('circle')
-        .attr('class', `trends-dot-${k} trend-dot`).attr('cx', d => xScale(d.i)).attr('cy', d => yScale(d[k])).attr('r', 3.5).attr('fill', FUEL_COLORS[k]);
+    // dots on every year-by-year point; in the monthly view only the wide (yearly / partial-period) points get one,
+    // together with a bar showing the span of time they cover
+    const dotPts = pctSeries.filter(d => d[k] != null && (!isMonthly || d.kind === 'year' || d.kind === 'partial'));
+    if(isMonthly){
+      g.selectAll(`.trends-span-${k}`).data(dotPts).join('line')
+        .attr('class', `trends-span-${k} trend-span`).attr('x1', d => xScale(d.t0) + 2).attr('x2', d => xScale(d.t0 + d.w) - 2)
+        .attr('y1', d => yScale(d[k])).attr('y2', d => yScale(d[k])).attr('stroke', FUEL_COLORS[k]).attr('stroke-width', 5).attr('stroke-linecap', 'round').style('opacity', .3).style('pointer-events', 'none');
     }
+    g.selectAll(`.trends-dot-${k}`).data(dotPts).join('circle')
+      .attr('class', `trends-dot-${k} trend-dot`).attr('cx', xOf).attr('cy', d => yScale(d[k])).attr('r', 3.5).attr('fill', FUEL_COLORS[k]);
   });
 
   const guide = g.append('line').attr('class', 'trend-guideline').attr('y1', 0).attr('y2', innerH).style('opacity', 0);
@@ -3990,14 +4038,19 @@ function renderTrendsChart(){
     .attr('fill', 'transparent')
     .on('pointermove', (e) => {
       const [mx] = d3.pointer(e);
-      const d = pctSeries.reduce((best, s) => (best === null || Math.abs(xScale(s.i) - mx) < Math.abs(xScale(best.i) - mx)) ? s : best, null);
+      // the point whose stretch of time the pointer is over (a yearly point owns its whole year); nearest centre otherwise
+      const tAt = xScale.invert(mx);
+      const d = pctSeries.find(s => tAt >= s.t0 && tAt < s.t0 + s.w)
+        || pctSeries.reduce((best, s) => (best === null || Math.abs(xOf(s) - mx) < Math.abs(xOf(best) - mx)) ? s : best, null);
       if(!d) return;
-      guide.attr('x1', xScale(d.i)).attr('x2', xScale(d.i)).style('opacity', 1);
+      guide.attr('x1', xOf(d)).attr('x2', xOf(d)).style('opacity', 1);
       const rect = trendsWrap.getBoundingClientRect();
       trendsTooltip.style.left = (e.clientX - rect.left) + 'px';
       trendsTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
       trendsTooltip.style.opacity = 1;
-      const trendsPointTitle = d.isPartial ? `${d.label} (YTD)`
+      const trendsPointTitle = d.kind === 'year' ? `${d.label} (full year)`
+        : d.kind === 'partial' ? (d.w > 1 ? `${d.label} (${d.w} months combined)` : d.label)
+        : d.isPartial ? `${d.label} (YTD)`
         : d.isProjected ? (granularity === 'monthly' ? 'Rest of 2026 — implied monthly rate (not a measurement)' : `${d.label} (Projected — not a measurement)`)
         : d.label;
       trendsTooltip.innerHTML = `<strong>${trendsPointTitle}</strong><br>` +
@@ -4022,7 +4075,7 @@ function momentumCardData(c){
   // momentum tracks real change over a real period — exclude any trailing projected point
   const points = allPoints.filter(p => !p.isProjected);
   if(!points || points.length < 2) return null;
-  const series = points.map((p, i) => ({ i, label: p.label, bevPct: p.total ? p.bev/p.total*100 : 0 }));
+  const series = points.map((p, i) => ({ i, t: p.t0 != null ? p.t0 + p.w / 2 : i, label: p.label, bevPct: p.total ? p.bev/p.total*100 : 0 }));
   const latest = series[series.length - 1];
   const targetLabel = granularity === 'monthly' ? monthsBeforeLabel(latest.label, 12) : String(Number(latest.label) - 1);
   const past = findPointByLabel(series, targetLabel);
@@ -4032,9 +4085,9 @@ function momentumCardData(c){
 
 function momentumCardHTML(c){
   const yMax = Math.max(5, d3.max(c.series, s => s.bevPct) * 1.1);
-  const xScale = d3.scaleLinear().domain([0, Math.max(1, c.series.length - 1)]).range([2, 148]);
+  const xScale = d3.scaleLinear().domain([c.series[0].t, Math.max(c.series[0].t + 1, c.series[c.series.length - 1].t)]).range([2, 148]);
   const yScale = d3.scaleLinear().domain([0, yMax]).range([30, 2]);
-  const lineGen = d3.line().x(s => xScale(s.i)).y(s => yScale(s.bevPct));
+  const lineGen = d3.line().x(s => xScale(s.t)).y(s => yScale(s.bevPct));
   const last = c.series[c.series.length - 1];
   const deltaText = c.delta == null ? 'n/a' : `${c.delta > 0 ? '+' : ''}${c.delta}pp`;
   const deltaClass = c.delta == null ? '' : (c.delta >= 0 ? 'up' : 'down');
@@ -4047,7 +4100,7 @@ function momentumCardHTML(c){
       </div>
       <svg class="mc-spark" viewBox="0 0 150 32" preserveAspectRatio="none">
         <path class="spark-line" d="${lineGen(c.series)}"></path>
-        <circle class="spark-dot" cx="${xScale(last.i)}" cy="${yScale(last.bevPct)}" r="2.6"></circle>
+        <circle class="spark-dot" cx="${xScale(last.t)}" cy="${yScale(last.bevPct)}" r="2.6"></circle>
       </svg>
     </div>`;
 }
