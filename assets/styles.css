@@ -498,6 +498,11 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap:10px;
 }
+/* exactly five cards in ONE row (Mix by Country momentum sections); on a narrow screen it falls back to wrapping */
+.momentum-grid.five-up{ grid-template-columns: repeat(5, minmax(0, 1fr)); }
+@media (max-width: 760px){
+  .momentum-grid.five-up{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+}
 .momentum-card{
   background:var(--surface-alt);
   border:1px solid var(--border);

@@ -3,14 +3,6 @@
 // Home page search box and browse grid are both driven from this list.
 const STATS_CATALOG = [
   {
-    title: "Auto Markets by Country",
-    subject: "World · Market Size",
-    keywords: ["market size", "total", "registrations", "volume", "country", "world", "biggest", "largest", "smallest", "growth", "momentum", "1999", "2005", "2026"],
-    description: "Total new vehicle registrations by country and year, 147 markets back to 1999 — market size, not powertrain mix.",
-    tag: "1999–2026",
-    url: "auto-markets-by-country.html"
-  },
-  {
     title: "Powertrain Mix by Country",
     subject: "Europe · Powertrain",
     keywords: ["ev", "electric", "bev", "phev", "hev", "hybrid", "petrol", "diesel", "powertrain", "fuel type", "europe", "eu", "country", "market share", "may 2026"],

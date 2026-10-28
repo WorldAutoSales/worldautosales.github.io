@@ -3,7 +3,7 @@
 Rebuilds the on-road passenger-car fleet table (country_cars_on_road / assets/country-cars-on-road-data.js).
 
 Method (v2, 2026-10-16)
-  1. Registrations per country and year (2005-2026): total from auto-markets-by-country.html MARKETS.series
+  1. Registrations per country and year (2005-2026): total from assets/auto-markets-data.js MARKETS.series
      (+ 2026 projection), BEV from assets/country-yearly-data.js. China 2005-2020 = OICA domestic passenger
      cars (scripts/data/china_domestic_pc_2005_2020.json), 2021+ = CPCA retail already in MARKETS.
      Cohorts before 2005 are back-cast: R(y) = R(2005) * exp(-g*(2005-y)), g = own 2005-2010 growth clamped to [0, 25%].
@@ -45,7 +45,7 @@ EUROPE_GROUP = {'West Europe', 'East Europe', 'Middle East', 'Germany', 'Norway'
 
 
 def load_markets():
-    t = (ROOT / 'auto-markets-by-country.html').read_text(encoding='utf-8')
+    t = (ROOT / 'assets' / 'auto-markets-data.js').read_text(encoding='utf-8')
     out = {}
     for m in re.finditer(r'"([^"]+)":\{abbr:"(\w+)",continent:"([^"]+)",series:(\{[^}]*\}),projected:(\{[^}]*\})', t):
         name, ab, cont, ser, proj = m.groups()

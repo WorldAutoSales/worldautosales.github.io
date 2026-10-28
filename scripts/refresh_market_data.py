@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Rebuilds the `const MARKETS = {...}` block in auto-markets-by-country.html
+Rebuilds the `const MARKETS = {...}` block in assets/auto-markets-data.js
 from the current contents of the world_auto_sales_annual Supabase table.
 
 Run this any time world_auto_sales_annual changes (new YTD figures, a
@@ -11,7 +11,7 @@ it's a full rebuild, not an incremental patch.
 Usage:
     python scripts/refresh_market_data.py
 
-Only touches auto-markets-by-country.html. It does not regenerate
+Only touches assets/auto-markets-data.js (the Auto Markets by Country page itself was retired on 2026-10-28, its data is kept). It does not regenerate
 world-auto-sales.html or powertrain-mix-by-country.html — those pages use a
 different baked-in data shape (monthly HIST arrays) and are not covered by
 this script.
@@ -34,7 +34,9 @@ ANON_KEY = (
 )
 PAGE_SIZE = 1000
 REPO_ROOT = Path(__file__).resolve().parent.parent
-TARGET_HTML = REPO_ROOT / "auto-markets-by-country.html"
+TARGET_HTML = REPO_ROOT / "assets" / "auto-markets-data.js"
+# markets dropped on purpose: the only figures are broken OICA values (Burundi 44 units in 2018, Dominican Republic 167) and no reliable total series exists
+EXCLUDED = {"Burundi", "Dominican Republic"}
 
 # OICA first (most globally standardized, present for nearly every country),
 # else the alphabetically-first remaining source — keeps the output a single
@@ -94,7 +96,7 @@ def build_markets_js(rows):
         else:
             by_country_year[c].setdefault(r["year"], []).append((r["source"], r["total_units"]))
 
-    countries = sorted(set(list(by_country_year.keys()) + list(projected.keys())))
+    countries = sorted(set(list(by_country_year.keys()) + list(projected.keys())) - EXCLUDED)
 
     lines = ["const MARKETS = {"]
     for c in countries:

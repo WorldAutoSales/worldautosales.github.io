@@ -8,7 +8,7 @@ This mechanizes the multi-file edit this project does by hand every time a
 new month lands for a country with real monthly granularity (Australia,
 Japan, India, ...): append to the two JSON asset files, patch the matching
 period block in powertrain-mix-by-country.html (monthly + YTD + projection),
-and patch the country's entry in auto-markets-by-country.html.
+and patch the country's entry in assets/auto-markets-data.js (the MARKETS data kept after the Auto Markets page was retired).
 
 Deliberately NOT automated by this script:
   - Finding and reading the source article/table. That's a judgment call
@@ -47,7 +47,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 MONTHLY_JS = REPO_ROOT / "assets" / "country-monthly-data.js"
 YEARLY_JS = REPO_ROOT / "assets" / "country-yearly-data.js"
 MIX_HTML = REPO_ROOT / "powertrain-mix-by-country.html"
-MARKETS_HTML = REPO_ROOT / "auto-markets-by-country.html"
+MARKETS_JS = REPO_ROOT / "assets" / "auto-markets-data.js"
 
 MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -309,13 +309,13 @@ def update_mix_html(country, ym, year, values, comment, months_covered, ytd, ful
         MIX_HTML.write_text(text, encoding="utf-8", newline="")
 
 
-# ---------- auto-markets-by-country.html ----------
+# ---------- assets/auto-markets-data.js ----------
 
-def update_markets_html(country, year, ytd_total, projected_total, dry_run):
-    text = MARKETS_HTML.read_text(encoding="utf-8")
+def update_markets_data(country, year, ytd_total, projected_total, dry_run):
+    text = MARKETS_JS.read_text(encoding="utf-8")
     m = re.search(r'"' + re.escape(country) + r'":\{[^{}]*series:\{', text)
     if not m:
-        raise SystemExit(f"{MARKETS_HTML.name}: {country!r} entry not found in MARKETS -- this script only updates a country already present")
+        raise SystemExit(f"{MARKETS_JS.name}: {country!r} entry not found in MARKETS -- this script only updates a country already present")
     series_open = text.index("{", m.end() - 1)
     series_close = find_matching_brace(text, series_open)
     section = text[series_open + 1:series_close]
@@ -328,7 +328,7 @@ def update_markets_html(country, year, ytd_total, projected_total, dry_run):
 
     m2 = re.search(r'"' + re.escape(country) + r'":\{[^{}]*series:\{[^{}]*\},projected:\{', text)
     if not m2:
-        raise SystemExit(f"{MARKETS_HTML.name}: {country!r} projected{{}} not found")
+        raise SystemExit(f"{MARKETS_JS.name}: {country!r} projected{{}} not found")
     proj_open = text.index("{", m2.end() - 1)
     proj_close = find_matching_brace(text, proj_open)
     psection = text[proj_open + 1:proj_close]
@@ -339,9 +339,9 @@ def update_markets_html(country, year, ytd_total, projected_total, dry_run):
         psection = (psection.rstrip() + f',"{year}":{projected_total}') if psection.strip() else f'"{year}":{projected_total}'
     text = text[:proj_open + 1] + psection + text[proj_close:]
 
-    print(f"[{MARKETS_HTML.name}] {country} series[{year}]={ytd_total} projected[{year}]={projected_total}")
+    print(f"[{MARKETS_JS.name}] {country} series[{year}]={ytd_total} projected[{year}]={projected_total}")
     if not dry_run:
-        MARKETS_HTML.write_text(text, encoding="utf-8", newline="")
+        MARKETS_JS.write_text(text, encoding="utf-8", newline="")
 
 
 def main():
@@ -358,7 +358,7 @@ def main():
     update_yearly_asset(args.country, year, months_covered, ytd, full_year, remaining, args.source_label, args.projection_label, args.dry_run)
     update_mix_html(args.country, args.ym, year, values, args.comment, months_covered, ytd, full_year, remaining,
                      args.prior_year_bev, args.prior_year_total, args.dry_run)
-    update_markets_html(args.country, year, ytd["total"], full_year["total"], args.dry_run)
+    update_markets_data(args.country, year, ytd["total"], full_year["total"], args.dry_run)
 
     if args.dry_run:
         print("\n(dry run -- nothing written; drop --dry-run to apply)")

@@ -4,7 +4,7 @@
 // purely to compute each tracked country's TRUE world rank (so e.g. a country genuinely 22nd
 // worldwide stays 22nd even though Russia/Iran occupy 2 of the 20 slots above it and never
 // appear on this site -- deliberately produces gaps in the Market Rank filter tiers). Source:
-// same OICA series as auto-markets-by-country.html's own MARKETS object, deduplicated by
+// same OICA series as the MARKETS object in assets/auto-markets-data.js (the Auto Markets by Country page itself was retired 2026-10-28), deduplicated by
 // ISO code (that table double-lists a few markets under two names, e.g. "Taiwan" and "Taiwan
 // Province of China"), with patches (2026-09-03, prompted by a completeness audit of this
 // project's own 96 tracked countries against this table): Iran's value is a real, current 2025
