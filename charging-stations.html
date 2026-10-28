@@ -50,6 +50,7 @@
   .ch-multi-panel .bar input{ flex:1 1 100%; border:1px solid var(--border); background:var(--surface-alt); color:var(--text); border-radius:8px; padding:6px 9px; font-size:12.5px; }
   .ch-multi-panel .bar button{ flex:1; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:8px; padding:5px 8px; font-size:12px; font-weight:700; cursor:pointer; }
   .ch-multi-panel .list{ max-height:300px; overflow:auto; }
+  .ch-multi-panel .gh{ position:sticky; top:0; background:var(--surface); font-size:10.5px; font-weight:800; letter-spacing:.08em; color:var(--text-muted); padding:6px 6px 3px; border-bottom:1px solid var(--border); }
   .ch-multi-panel label{ display:flex; align-items:center; gap:8px; padding:4px 6px; border-radius:6px; font-size:12.5px; cursor:pointer; }
   .ch-multi-panel label:hover{ background:var(--surface-alt); }
   .ch-multi-panel label i{ width:11px; height:11px; border-radius:50%; flex:none; border:1px solid rgba(0,0,0,.45); }
@@ -212,7 +213,7 @@
           <div class="ch-layers" id="ch-layers">
             <button type="button" data-layer="grid" title="Open Charge Map ports in 0.5° cells (about 55 km): darker = more charging ports">Station density</button>
             <button type="button" data-layer="tesla" title="Every open Tesla Supercharger site (dot size = stalls)">Tesla Superchargers</button>
-            <button type="button" id="z-qc" class="act" title="Zoom to southern Québec and show Circuit électrique and Couche-Tard / Circle K">Zoom to Québec</button>
+            <button type="button" id="z-qc" class="act" title="Zoom to southern Québec and show Tesla, Circuit électrique and Couche-Tard / Circle K">Zoom to Québec</button>
           </div>
           <div class="ch-legend" id="ch-legend"></div>
           <div class="ch-tip" id="ch-tip"></div>
@@ -570,14 +571,19 @@ async function refreshBrands(fit){
     if(ctryBox) fitBox(ctryBox[0], ctryBox[1], ctryBox[2], ctryBox[3], 200); else svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
   };
   const list = document.getElementById('bm-list'), panel = document.getElementById('bm-panel'), q = document.getElementById('bm-q');
-  list.innerHTML = BR_SORTED.map(b => `<label data-n="${esc(b.b.toLowerCase())}"><input type="checkbox" value="${esc(b.b)}"><i style="background:${brandCol(b.b)}"></i>${esc(b.b)}<span class="n">${fmt(b.n)} sites</span></label>`).join('');
+  // a company is WORLD when it has at least 10 mapped sites in 3 or more countries spread over 2 or more continents, otherwise it belongs to the continent where most of its sites are
+  const isoCont = {}; CHARGING.countries.forEach(c => { isoCont[c.iso] = c.cont || 'Asia'; });
+  const grpOf = b => { const cc = Object.entries(b.c || {}).filter(([, n]) => n >= 10), conts = new Set(cc.map(([i]) => isoCont[i])); if(cc.length >= 3 && conts.size >= 2) return 'World'; const tally = {}; Object.entries(b.c || {}).forEach(([i, n]) => { tally[isoCont[i] || 'Asia'] = (tally[isoCont[i] || 'Asia'] || 0) + n; }); return Object.entries(tally).sort((a, b2) => b2[1] - a[1])[0]?.[0] || 'World'; };
+  const groups = {}; BRAND_INDEX.forEach(b => { (groups[grpOf(b)] = groups[grpOf(b)] || []).push(b); });
+  const order = ['World', ...Object.keys(groups).filter(g => g !== 'World').sort()];
+  list.innerHTML = order.filter(g => groups[g]).map(g => `<div class="grp"><div class="gh">${g === 'World' ? 'WORLD' : esc(g.toUpperCase())}</div>` + groups[g].sort((x, y) => x.b.localeCompare(y.b, 'en', { sensitivity:'base' })).map(b => `<label data-n="${esc(b.b.toLowerCase())}"><input type="checkbox" value="${esc(b.b)}"><i style="background:${brandCol(b.b)}"></i>${esc(b.b)}<span class="n">${fmt(b.n)} sites</span></label>`).join('') + '</div>').join('');
   const boxes = () => [...list.querySelectorAll('input')];
   const sync = () => boxes().forEach(i => { i.checked = selBrands.has(i.value); });
   const visible = () => boxes().filter(i => i.closest('label').style.display !== 'none');
   list.onchange = e => { const i = e.target; if(i.checked) selBrands.add(i.value); else selBrands.delete(i.value); refreshBrands(true); };
   document.getElementById('bm-all').onclick = () => { visible().forEach(i => selBrands.add(i.value)); sync(); refreshBrands(false); };
   document.getElementById('bm-none').onclick = () => { visible().forEach(i => selBrands.delete(i.value)); sync(); refreshBrands(false); };
-  q.oninput = () => { const t = q.value.trim().toLowerCase(); list.querySelectorAll('label').forEach(l => { l.style.display = !t || l.dataset.n.includes(t) ? '' : 'none'; }); };
+  q.oninput = () => { const t = q.value.trim().toLowerCase(); list.querySelectorAll('label').forEach(l => { l.style.display = !t || l.dataset.n.includes(t) ? '' : 'none'; }); list.querySelectorAll('.grp').forEach(g => { g.style.display = [...g.querySelectorAll('label')].some(l => l.style.display !== 'none') ? '' : 'none'; }); };
   document.getElementById('bm-btn').onclick = e => { panel.hidden = !panel.hidden; e.stopPropagation(); };
   document.addEventListener('click', e => { if(!panel.hidden && !e.target.closest('#brand-multi')) panel.hidden = true; });
   window.__bmSync = sync;
@@ -598,6 +604,7 @@ document.getElementById('ch-layers').addEventListener('click', e => {
 });
 document.getElementById('z-qc').onclick = () => {
   document.getElementById('map-country').value = ''; ctryName = null; buildCtry(null); applyTeslaFilter(); for(const n of selBrands) if(brandData[n]) brandVis(brandData[n]);
+  layers.tesla = true; document.querySelector('#ch-layers [data-layer="tesla"]').classList.add('on'); drawTesla();
   selBrands.clear(); selBrands.add('Circuit électrique'); selBrands.add('Couche-Tard / Circle K'); window.__bmSync(); refreshBrands(false);
   // southern Québec, where nearly all of both networks sit (about -79.5..-64 E, 44.9..48.8 N)
   const a = projection([-79.5, 48.8]), b = projection([-64, 44.9]);
@@ -633,7 +640,7 @@ function renderTable(){
   const key = sortKey || 'pts', col = COLS.find(c => c[0] === key);
   const rows = cs.map(c => ({ c, v:col[2](c) })).sort((a, b) => { if(key === 'n') return sortAsc ? a.v.localeCompare(b.v) : b.v.localeCompare(a.v); const x = a.v == null ? -Infinity : a.v, y = b.v == null ? -Infinity : b.v; return sortAsc ? x - y : y - x; });
   const maxPts = Math.max(1, ...cs.map(c => total(c, year) || 0));
-  document.getElementById('table-note').textContent = `${cs.length} countries, ${year}. Click a column to sort, a row to open its companies below. Ports and EVs are IEA figures (public ports only); stations are official (US, Canada) or Open Charge Map; company data coverage = ports listed in Open Charge Map ÷ IEA ports (low coverage means the company split is only a sample). Stations and the average ports per station are blank where Open Charge Map sees less than a quarter of a country's ports or lists single sockets as stations (under 2 ports per station); the average always uses one source.`;
+  document.getElementById('table-note').textContent = `${cs.length} countries, ${year}. Click a column to sort, a row to open its companies below. Ports and EVs are IEA figures (public ports only); stations are official (US, Canada) or Open Charge Map; data coverage = ports listed in Open Charge Map ÷ IEA ports (low coverage means the company split is only a sample). Stations and the average ports per station are blank where Open Charge Map sees less than a quarter of a country's ports or lists single sockets as stations (under 2 ports per station); the average always uses one source.`;
   document.getElementById('ch-table').innerHTML = '<thead><tr><th class="rk" title="Rank in the current sort order">#</th>' + COLS.map(c => `<th data-k="${c[0]}" title="${esc(c[1].replace(/<br>/g, ' ') + (c[4] ? ' — ' + c[4] : ''))}" class="${c[0] === key ? 'sorted' + (sortAsc ? ' asc' : '') : ''}">${c[1]}</th>`).join('') + '</tr></thead><tbody>' +
     rows.map(({ c, v: sv }, i) => '<tr data-c="' + esc(c.n) + '" class="' + (selected === c.n ? 'sel' : '') + '"><td class="rk">' + (sv == null ? '–' : i + 1) + '</td>' + COLS.map(k => {
       const v = k[2](c);
@@ -689,7 +696,17 @@ const contOn = { ev:new Set(CONTS), pop:new Set(CONTS), co:new Set(CONTS) };
 function renderLegend2(id, key, fn){
   const el = document.getElementById(id);
   el.innerHTML = '<button type="button" class="all" data-all="1">All</button>' + CONTS.filter(k => CHARGING.countries.some(c => (c.cont || 'Asia') === k)).map(k => `<button type="button" data-c="${esc(k)}" class="${contOn[key].has(k) ? '' : 'off'}"><i style="background:${CONT_COL[k]}"></i>${k}</button>`).join('');
-  el.onclick = e => { const b = e.target.closest('button'); if(!b) return; if(b.dataset.all){ CONTS.forEach(k => contOn[key].add(k)); } else { const k = b.dataset.c; contOn[key].has(k) ? contOn[key].delete(k) : contOn[key].add(k); if(!contOn[key].size) CONTS.forEach(x => contOn[key].add(x)); } fn(); };
+  el.onclick = e => {
+    const b = e.target.closest('button'); if(!b) return; const on = contOn[key];
+    if(b.dataset.all){ CONTS.forEach(k => on.add(k)); }
+    else {
+      const k = b.dataset.c;
+      if(on.size === CONTS.length){ on.clear(); on.add(k); }                      // everything shown: isolate this region
+      else if(on.has(k)){ on.delete(k); if(!on.size) CONTS.forEach(x => on.add(x)); }   // click a selected region again: take it out (nothing left = all)
+      else on.add(k);                                                            // a selection exists: add the region
+    }
+    fn();
+  };
 }
 function renderRatio(id, noteId, legId, key, mkey){
   const m = METRICS[mkey], y = m.years && !m.years.includes(year) ? LATEST : year;

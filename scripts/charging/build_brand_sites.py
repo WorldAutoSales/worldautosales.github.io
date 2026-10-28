@@ -10,7 +10,7 @@ Rows: [lat, lon, ports, fast ports (>= 50 kW)]. A site found by both sources is 
 Run from the repo root after build_charging.py:  python scripts/charging/build_brand_sites.py
 """
 import json, math, os, re, sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
@@ -23,7 +23,7 @@ OUT = os.path.join(ROOT, 'assets', 'brand-sites')
 TOP_N = 90
 FORCE = ['Couche-Tard / Circle K']      # small networks the map should always offer
 SKIP = {bc.UNKNOWN, bc.SELF, 'Other brands', 'Other operators', 'Tesla', 'Non-Networked', 'Unknown operator'}
-EXTRA_ALIASES = [(r'couche|circle ?k', 'Couche-Tard / Circle K'), (r'^red e$|^red e ', 'Red E Charge'), (r'^evoke', 'EVoke Systems')]
+EXTRA_ALIASES = [(r'couche|circle ?k', 'Couche-Tard / Circle K'), (r'^red e$|^red e ', 'Red E Charge'), (r'^evoke', 'EVoke Systems'), (r'^chargelab', 'ChargeLab')]
 
 
 def brand_name(title):
@@ -56,7 +56,7 @@ class Sites:
                     return i
         return None
 
-    def add(self, lat, lon, ports, fast, src):
+    def add(self, lat, lon, ports, fast, src, iso=None):
         i = self.find(lat, lon)
         if i is not None:
             r = self.rows[i]
@@ -65,7 +65,7 @@ class Sites:
                 r[3] += int(round(min(fast, max(1, ports))))
             return False             # other source: it is the same site, the first source wins
         self.cells[self.key(lat, lon)] = len(self.rows)
-        self.rows.append([round(lat, 5), round(lon, 5), max(1, int(round(ports))), int(round(min(fast, max(1, ports)))), src])
+        self.rows.append([round(lat, 5), round(lon, 5), max(1, int(round(ports))), int(round(min(fast, max(1, ports)))), src, iso])
         return True
 
 
@@ -82,7 +82,7 @@ def load_afdc():
             b = brand_name(net)
             f = s.get('ev_dc_fast_num') or 0
             p = f + (s.get('ev_level2_evse_num') or 0) + (s.get('ev_level1_evse_num') or 0)
-            out[b].append((s['latitude'], s['longitude'], p, f))
+            out[b].append((s['latitude'], s['longitude'], p, f, s.get('country')))
     return out
 
 
@@ -105,8 +105,8 @@ def main():
     ctry = {b: defaultdict(int) for b in brands}
     # 1. AFDC first (US + Canada)
     for b in brands:
-        for lat, lon, p, f in afdc.get(b, []):
-            sites[b].add(lat, lon, p, f, 'a')
+        for lat, lon, p, f, iso in afdc.get(b, []):
+            sites[b].add(lat, lon, p, f, 'a', iso)
     # 2. Open Charge Map everywhere
     for iso in COUNTRIES:
         f = os.path.join(CACHE, 'ocm', iso + '.json')
@@ -125,7 +125,7 @@ def main():
             q = sum((c.get('Quantity') or 1) for c in conns) or 1
             n = p.get('NumberOfPoints') or q
             fast = sum((c.get('Quantity') or 1) for c in conns if (c.get('PowerKW') or 0) >= 50) * n / q
-            sites[b].add(ai['Latitude'], ai['Longitude'], n, fast, 'o')
+            sites[b].add(ai['Latitude'], ai['Longitude'], n, fast, 'o', iso)
     os.makedirs(OUT, exist_ok=True)
     for fn in os.listdir(OUT):
         os.remove(os.path.join(OUT, fn))
@@ -141,7 +141,7 @@ def main():
         open(os.path.join(OUT, sl + '.js'), 'w', encoding='utf8').write(
             '(window.BRAND_SITES = window.BRAND_SITES || {})[%s] = %s;\n' % (json.dumps(b, ensure_ascii=False), json.dumps(data, separators=(',', ':'))))
         index.append({'b': b, 'f': sl, 'n': len(rows), 'p': sum(r[2] for r in rows), 'fp': sum(r[3] for r in rows), 'a': n_a, 'o': len(rows) - n_a,
-                      'rep': round(rank[b])})
+                      'rep': round(rank[b]), 'c': dict(sorted(Counter(r[5] for r in rows if r[5]).items(), key=lambda kv: -kv[1]))})
     open(os.path.join(ROOT, 'assets', 'charging-brand-index.js'), 'w', encoding='utf8').write(
         '// Brands with a site layer on the charging map (assets/brand-sites/<f>.js): n sites, p ports, fp fast ports (50+ kW), a = sites from AFDC, o = from Open Charge Map, rep = ports reported for the brand on this page\n'
         'const BRAND_INDEX = ' + json.dumps(index, ensure_ascii=False, separators=(',', ':')) + ';\n')
