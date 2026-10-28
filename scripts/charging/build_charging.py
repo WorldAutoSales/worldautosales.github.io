@@ -248,7 +248,7 @@ def main():
         else:
             c['sh'] = [round(pool_u, 3), round(pool_s, 3), 'pool']
     skip = {UNKNOWN, SELF, 'Other brands', 'Other operators'}
-    ranked = sorted(((sum((v[1] or 0) for v in d.values()), b) for b, d in world_brands.items() if b not in skip), reverse=True)[:70]
+    ranked = sorted(((sum((v[1] or 0) for v in d.values()), b) for b, d in world_brands.items() if b not in skip), reverse=True)[:400]
     wbrands = [{'b': b, 'c': {iso: v for iso, v in world_brands[b].items()}} for _, b in ranked]
     unattributed = {iso: sum((world_brands[b].get(iso) or [0, 0])[1] or 0 for b in skip if iso in world_brands[b]) for iso in COUNTRIES}
     meta = {'snapshot': SNAPSHOT, 'ieaYear': 2025, 'years': YEARS, 'bands': BANDS, 'poolShare': [round(pool_u, 3), round(pool_s, 3)],

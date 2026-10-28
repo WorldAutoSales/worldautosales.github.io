@@ -20,7 +20,7 @@ from charging_sources import COUNTRIES  # noqa: E402
 
 CACHE = os.path.join(ROOT, '.scratch', 'chg')
 OUT = os.path.join(ROOT, 'assets', 'brand-sites')
-TOP_N = 90
+TOP_N = 200
 FORCE = ['Couche-Tard / Circle K']      # small networks the map should always offer
 SKIP = {bc.UNKNOWN, bc.SELF, 'Other brands', 'Other operators', 'Tesla', 'Non-Networked', 'Unknown operator'}
 EXTRA_ALIASES = [(r'couche|circle ?k', 'Couche-Tard / Circle K'), (r'^red e$|^red e ', 'Red E Charge'), (r'^evoke', 'EVoke Systems'), (r'^chargelab', 'ChargeLab')]

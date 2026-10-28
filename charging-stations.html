@@ -10,6 +10,11 @@
   .ch-page{ --ch-a:#0ea5a4; --ch-b:#6366f1; }
   .ch-row{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin:18px 0 10px; }
   .ch-label{ font-size:12px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; }
+  .ch-bigtoggle{ display:flex; gap:0; margin:6px 0 12px; border:2px solid var(--ch-a); border-radius:14px; overflow:hidden; }
+  .ch-bigtoggle button{ flex:1; appearance:none; border:none; background:var(--surface); color:var(--text-muted); cursor:pointer; padding:14px 12px; font-size:15px; font-weight:800; line-height:1.2; }
+  .ch-bigtoggle button + button{ border-left:2px solid var(--ch-a); }
+  .ch-bigtoggle button:hover:not(.active){ background:var(--surface-alt); color:var(--text); }
+  .ch-bigtoggle button.active{ background:linear-gradient(135deg,var(--ch-a),var(--ch-b)); color:#fff; }
   .ch-seg{ display:inline-flex; gap:5px; background:var(--surface-alt); border-radius:999px; padding:4px; flex-wrap:wrap; }
   .ch-seg button{ appearance:none; border:none; background:transparent; cursor:pointer; padding:7px 15px; border-radius:999px; font-size:13px; font-weight:700; color:var(--text-muted); }
   .ch-seg button:hover:not(:disabled){ color:var(--text); }
@@ -228,18 +233,15 @@
       </div>
 
 
-      <div class="card chart-card">
-        <h2>Fast ports (50+ kW) per 1,000 electric cars</h2>
-        <p class="note" style="display:block" id="rk-ev-note"></p>
-        <div class="ch-legendbtns" id="lg-ev"></div>
-        <div id="rk-ev"></div>
-      </div>
-
-      <div class="card chart-card">
-        <h2>Fast ports (50+ kW) per 100,000 people aged 15–64</h2>
-        <p class="note" style="display:block" id="rk-pop-note"></p>
-        <div class="ch-legendbtns" id="lg-pop"></div>
-        <div id="rk-pop"></div>
+      <div class="card chart-card" id="ratio-card">
+        <h2 id="rk-title">Fast ports (50+ kW) per 100,000 people aged 15–64</h2>
+        <div class="ch-bigtoggle" id="rk-toggle">
+          <button type="button" data-m="fast100k" class="active">Per 100,000 people aged 15–64</button>
+          <button type="button" data-m="fastEV">Per 1,000 electric cars</button>
+        </div>
+        <p class="note" style="display:block" id="rk-note"></p>
+        <div class="ch-legendbtns" id="lg-rk"></div>
+        <div id="rk-rows"></div>
       </div>
 
       <div class="card chart-card" id="company-card">
@@ -708,6 +710,7 @@ function renderLegend2(id, key, fn){
     fn();
   };
 }
+let ratioMode = 'fast100k';
 function renderRatio(id, noteId, legId, key, mkey){
   const m = METRICS[mkey], y = m.years && !m.years.includes(year) ? LATEST : year;
   renderLegend2(legId, key, () => renderRatio(id, noteId, legId, key, mkey));
@@ -734,7 +737,13 @@ function renderCompanies(){
   const un = sel.reduce((s, c) => s + (CHARGING.unattributed[c.iso] || 0), 0);
   document.getElementById('co-note').innerHTML = `Selected continents: <b>${fmt(mapped)}</b> ports mapped (IEA total for the same countries: <b>${fmt(iea)}</b>), of which <b>${fmt(un)}</b> sit with an unknown operator or an independent site owner and are not ranked here. Chargers hosted by a retailer, hotel or Couche-Tard store count under whoever operates them.`;
 }
-function refresh(){ syncControls(); renderStats(); renderMap(); renderTable(); renderBrands(); renderRatio('rk-ev', 'rk-ev-note', 'lg-ev', 'ev', 'fastEV'); renderRatio('rk-pop', 'rk-pop-note', 'lg-pop', 'pop', 'fast100k'); renderCompanies(); }
+function renderRatioCard(){
+  document.getElementById('rk-title').textContent = METRICS[ratioMode].title;
+  document.querySelectorAll('#rk-toggle button').forEach(b => b.classList.toggle('active', b.dataset.m === ratioMode));
+  renderRatio('rk-rows', 'rk-note', 'lg-rk', 'pop', ratioMode);
+}
+document.getElementById('rk-toggle').addEventListener('click', e => { const b = e.target.closest('button'); if(!b || b.dataset.m === ratioMode) return; ratioMode = b.dataset.m; renderRatioCard(); });
+function refresh(){ syncControls(); renderStats(); renderMap(); renderTable(); renderBrands(); renderRatioCard(); renderCompanies(); }
 selected = 'Norway'; refresh();
 })();
 </script>
