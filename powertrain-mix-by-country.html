@@ -247,7 +247,13 @@
               <button type="button" class="mode-btn" data-sort-key="threeYrPct" title="Sort by BEV registration growth vs. 2023 (full year).">3Y %</button>
             </div>
           </div>
-          <p class="note" id="bars-note">Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments (a narrow BEV slice shows its value to the right instead of hiding it). The dotted line marks 75% — a country whose colored segments reach past it has combined Petrol+Diesel (plus any small Others slice, stacked last) under 25%. Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that country's BEV registration growth — hover any segment for exact figures.</p>
+          <p class="note" id="bars-note">Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments (a narrow BEV slice shows its value to the right instead of hiding it). The dotted line marks 75% — a country whose colored segments reach past it has combined Petrol+Diesel (plus any small Others slice, stacked last) under 25%. Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that country's BEV registration growth — hover any segment for exact figures. Press the round play button to run the bars through 2020-2025 and then the 2026 months (the 3Y column is blank while it plays).</p>
+          <div class="elec-timeline" id="elec-timeline">
+            <button type="button" class="elec-play" id="elec-play" aria-label="Play through time" title="Play: the bars re-rank as the years, then the 2026 months, go by">▶</button>
+            <div class="elec-tl-label" id="elec-tl-label"></div>
+            <input type="range" id="elec-tl-range" min="0" max="0" value="0" aria-label="Timeline">
+            <button type="button" class="mode-btn hidden" id="elec-tl-reset" title="Stop the timeline and go back to the period selected in the sidebar">↺ Selected period</button>
+          </div>
           <div class="legend-row">
             <div class="chart-legend" id="legend"></div>
             <div class="chart-mode-toggle lg" role="group" aria-label="Bar display mode">
@@ -4243,8 +4249,9 @@ function segHTML(d, key, denom, widthDenom, mode = barMode){
 
 function renderBars(){
   rankRows.classList.toggle('raw-mode', barMode === 'raw');
-  const threeYrByCountry = Object.fromEntries(buildFocusStats().map(f => [f.country, f.threeYrPct]));
-  const withGrowth = DATA.map(d => ({ ...d, threeYrPct: threeYrByCountry[d.country] ?? null }));
+  // while the timeline shows a frame, the bars come from that period (same filters); the 3Y column is tied to the selected period, so it is blank then
+  const threeYrByCountry = elecFrameKey ? {} : Object.fromEntries(buildFocusStats().map(f => [f.country, f.threeYrPct]));
+  const withGrowth = (elecFrameKey ? elecFrameData(elecFrameKey) : DATA).map(d => ({ ...d, threeYrPct: threeYrByCountry[d.country] ?? null }));
   const sorted = [...withGrowth].sort((a,b) => {
     const av = a[barSortKey], bv = b[barSortKey];
     if(av == null) return bv == null ? 0 : 1;
@@ -4282,9 +4289,91 @@ function renderBars(){
   renderFuelLegend();
 }
 
+// --- Timeline for Electrified Share by Country: play through the years (2020-2025) and then the 2026 months; bars re-rank and grow as the periods go by ---
+const ELEC_FRAMES = [
+  ...ALL_MONTHS.filter(k => /^\d{4}-annual$/.test(k) && Object.keys(MONTHLY_DATA[k].raw).length >= 20).sort(),   // earlier annual blocks hold a single market
+  ...ALL_MONTHS.filter(k => /^\d{4}-\d{2}$/.test(k)).sort()
+];
+let elecFrameKey = null;     // null = the bars follow the page's selected period; otherwise the timeline frame on screen
+let elecTimer = null;
+const elecPlayBtn = document.getElementById('elec-play'), elecRange = document.getElementById('elec-tl-range'), elecLabel = document.getElementById('elec-tl-label'), elecResetBtn = document.getElementById('elec-tl-reset');
+function elecFrameData(key){          // same rows as buildData(), for one explicit period
+  return Object.values(aggregateByCountry([key]))
+    .filter(d => selectedCountries.has(d.country) && selectedContinents.has(COUNTRY_CONTINENT[d.country] || "OTHER") && passesRankFilter(d.country) && d.total > 0)
+    .filter(d => !focusedCountry || d.country === focusedCountry)
+    .map(d => ({
+      ...d,
+      bevPct: d.total ? +(d.bev/d.total*100).toFixed(1) : 0,
+      icePct: d.total ? +((d.petrol+d.diesel)/d.total*100).toFixed(1) : 0,
+      bevYoyPct: d.bevPrior ? +((d.bev - d.bevPrior)/d.bevPrior*100).toFixed(1) : null,
+    }));
+}
+function elecFrameName(key){
+  const l = MONTHLY_DATA[key].label;
+  return /annual/.test(key) ? { big: l.replace(' (Annual)', ''), small: 'full year' } : { big: l, small: '' };
+}
+function elecSyncControls(){
+  const key = elecFrameKey || [...selectedMonths][0];
+  const nm = MONTHLY_DATA[key] ? elecFrameName(key) : { big: key, small: '' };
+  elecLabel.innerHTML = nm.big + (nm.small ? `<small>${nm.small}</small>` : '');
+  elecRange.max = ELEC_FRAMES.length - 1;
+  const i = ELEC_FRAMES.indexOf(key);
+  elecRange.value = i >= 0 ? i : ELEC_FRAMES.length - 1;
+  elecResetBtn.classList.toggle('hidden', !elecFrameKey);
+  elecPlayBtn.textContent = elecTimer ? '❚❚' : '▶';
+}
+// redraw the bars, sliding every row to its new rank and growing / shrinking each segment from its previous width
+function renderBarsAnimated(){
+  const prevTop = {}, prevW = {};
+  rankRows.querySelectorAll('.rank-row').forEach(r => {
+    const c = r.dataset.country; prevTop[c] = r.getBoundingClientRect().top;
+    r.querySelectorAll('.bar-seg').forEach(s => { prevW[c + '|' + s.dataset.key] = s.style.width; });
+  });
+  renderBars();
+  const rows = [...rankRows.querySelectorAll('.rank-row')];
+  rows.forEach(r => {
+    const c = r.dataset.country;
+    r.style.transition = 'none';
+    if(prevTop[c] != null){ const dy = prevTop[c] - r.getBoundingClientRect().top; if(Math.abs(dy) > 1) r.style.transform = `translateY(${dy}px)`; }
+    else r.style.opacity = '0';                                              // a country with no bar in the previous frame fades in
+    r.querySelectorAll('.bar-seg').forEach(s => { s.dataset.w = s.style.width; s.style.transition = 'none'; s.style.width = prevW[c + '|' + s.dataset.key] || '0%'; });
+  });
+  void rankRows.offsetHeight;
+  requestAnimationFrame(() => rows.forEach(r => {
+    r.style.transition = 'transform .65s ease, opacity .65s ease'; r.style.transform = ''; r.style.opacity = '';
+    r.querySelectorAll('.bar-seg').forEach(s => { s.style.transition = 'width .65s ease'; s.style.width = s.dataset.w; });
+  }));
+}
+function elecShowFrame(i){
+  elecFrameKey = ELEC_FRAMES[i];
+  elecSyncControls();
+  renderBarsAnimated();
+}
+function elecStop(){ if(elecTimer){ clearInterval(elecTimer); elecTimer = null; } elecSyncControls(); }
+function elecTimelineReset(redraw = true){      // back to following the sidebar's period
+  elecStop(); const had = elecFrameKey !== null; elecFrameKey = null; elecSyncControls();
+  if(had && redraw) renderBarsAnimated();
+}
+elecPlayBtn.addEventListener('click', () => {
+  if(elecTimer){ elecStop(); return; }
+  let i = elecFrameKey ? ELEC_FRAMES.indexOf(elecFrameKey) : -1;
+  if(i < 0 || i >= ELEC_FRAMES.length - 1) i = 0;                            // start (or restart) from the first year
+  elecShowFrame(i);
+  elecTimer = setInterval(() => {
+    const cur = ELEC_FRAMES.indexOf(elecFrameKey);
+    if(cur >= ELEC_FRAMES.length - 1){ elecStop(); return; }
+    elecShowFrame(cur + 1);
+    if(cur + 1 >= ELEC_FRAMES.length - 1) elecStop();                          // the last frame stays on screen, the button is ready to replay
+  }, 1300);
+  elecSyncControls();
+});
+elecRange.addEventListener('input', () => { const i = +elecRange.value; elecStop(); elecShowFrame(i); });     // read the thumb first: elecStop() re-syncs the slider
+elecResetBtn.addEventListener('click', () => elecTimelineReset());
+elecSyncControls();
+
 const barsNote = document.getElementById('bars-note');
-const PCT_NOTE = 'Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments (a narrow BEV slice shows its value to the right instead of hiding it). The dotted line marks 75% — a country whose colored segments reach past it has combined Petrol+Diesel (plus any small Others slice, stacked last) under 25%. Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that country\'s BEV registration growth — hover any segment for exact figures.';
-const RAW_NOTE = 'Bar length now reflects actual registrations (scaled to the biggest market shown), so countries are comparable by volume, not just mix. Sorted by BEV share, high to low. Segment labels show unit counts (a narrow BEV slice shows its value to the right instead of hiding it) — hover any segment for exact figures.';
+const PCT_NOTE = 'Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments (a narrow BEV slice shows its value to the right instead of hiding it). The dotted line marks 75% — a country whose colored segments reach past it has combined Petrol+Diesel (plus any small Others slice, stacked last) under 25%. Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that country\'s BEV registration growth — hover any segment for exact figures. Press the round play button to run the bars through 2020-2025 and then the 2026 months (the 3Y column is blank while it plays).';
+const RAW_NOTE = 'Bar length now reflects actual registrations (scaled to the biggest market shown), so countries are comparable by volume, not just mix. Sorted by BEV share, high to low. Segment labels show unit counts (a narrow BEV slice shows its value to the right instead of hiding it) — hover any segment for exact figures. Press the round play button to run the bars through 2020-2025 and then the 2026 months (the 3Y column is blank while it plays).';
 document.querySelectorAll('[data-bar-mode]').forEach(btn => {
   btn.addEventListener('click', () => {
     if(btn.dataset.barMode === barMode) return;
@@ -5415,6 +5504,7 @@ monthsBox.addEventListener('change', e => {
   const rb = e.target;
   if(!rb.matches('input[type="radio"]') || !rb.checked) return;
   selectedMonths = new Set([rb.dataset.month]);
+  elecTimelineReset(false);
   recompute();
 });
 

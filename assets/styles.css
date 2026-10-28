@@ -498,6 +498,22 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap:10px;
 }
+/* ---------- timeline play bar (Electrified Share by Country): round play button, big period label, scrubber ---------- */
+.elec-timeline{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin:6px 0 12px; padding:8px 12px; border:1px solid var(--border); border-radius:12px; background:var(--surface-alt); }
+.elec-play{
+  appearance:none; border:none; cursor:pointer; flex:none; width:40px; height:40px; border-radius:50%;
+  font-size:15px; font-weight:900; color:#fff; line-height:1;
+  background:linear-gradient(135deg, var(--accent), var(--accent-strong));
+  box-shadow:0 5px 14px color-mix(in srgb, var(--accent) 38%, transparent);
+  transition:transform .12s ease, filter .12s ease;
+}
+.elec-play:hover{ filter:brightness(1.08); transform:scale(1.05); }
+.elec-tl-label{ font-size:24px; font-weight:800; letter-spacing:-.02em; min-width:150px; font-variant-numeric:tabular-nums; color:var(--text); }
+.elec-tl-label small{ display:block; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); font-weight:800; margin-top:-3px; }
+.elec-timeline input[type=range]{ flex:1; min-width:180px; accent-color:var(--accent); height:6px; cursor:pointer; }
+/* the bars slide to their new rank while the timeline plays */
+#rank-rows .rank-row{ will-change:transform; }
+
 /* exactly five cards in ONE row (Mix by Country momentum sections); on a narrow screen it falls back to wrapping */
 .momentum-grid.five-up{ grid-template-columns: repeat(5, minmax(0, 1fr)); }
 @media (max-width: 760px){
