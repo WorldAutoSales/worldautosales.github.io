@@ -37,7 +37,7 @@ for x in rows:
     elif x['parameter'] in ('EV sales', 'EV stock') and x['powertrain'] in ('BEV', 'PHEV', 'FCEV'):
         put(x['region'], x['mode'], x['powertrain'].lower() + ('' if f == 'sales' else 'Stock'), x['year'], x['value'])
 for x in cars:
-    if x['powertrain'] != 'EV' or x['parameter'] not in ('EV sales', 'EV sales share'):
+    if x['powertrain'] != 'EV' or x['parameter'] not in ('EV sales', 'EV sales share', 'EV stock', 'EV stock share'):
         continue
     reg = 'United States' if x['region'] == 'USA' else x['region']
     put(reg, 'Cars', KEY[x['parameter']], x['year'], x['value'])
@@ -47,7 +47,18 @@ def clean(v):
     return None if v is None else (round(v, 3) if isinstance(v, float) else v)
 
 
-out = {'years': YEARS, 'regions': {r: {m: {k: [clean(v) for v in a] for k, a in d.items()} for m, d in ms.items()} for r, ms in regions.items()}}
+# shares above 100% are impossible (the IEA's EV count exceeds the market total it uses, e.g. UAE vans 2021-2025): blank them and keep a list
+flags = []
+for reg, ms in regions.items():
+    for m, d in ms.items():
+        for k in ('sShare', 'tShare'):
+            for i, v in enumerate(d.get(k, [])):
+                if v is not None and v > 100:
+                    flags.append({'region': reg, 'mode': m, 'field': k, 'year': YEARS[i], 'value': v})
+                    d[k][i] = None
+# ICCT zero-emission medium+heavy truck and bus sales by country (parse_icct.py): totals, shares, top maker
+icct = json.load(open(os.path.join(HERE, 'data', 'icct_country_zemhdv.json')))
+out = {'years': YEARS, 'flags': flags, 'icct': icct, 'regions': {r: {m: {k: [clean(v) for v in a] for k, a in d.items()} for m, d in ms.items()} for r, ms in regions.items()}}
 js = '// IEA Global EV Data Explorer (CC BY 4.0): electric trucks, vans, buses (and cars for comparison) by region, 2012-2025. Built by scripts/ev_trucks/build_ev_trucks.py\nconst EVT = ' + json.dumps(out, separators=(',', ':')) + ';\n'
 open(os.path.join(ROOT, 'assets', 'ev-trucks-data.js'), 'w', encoding='utf8').write(js)
-print(len(regions), 'regions,', len(js) // 1024, 'KB')
+print(len(regions), 'regions,', len(flags), 'shares above 100% blanked,', len(js) // 1024, 'KB')
