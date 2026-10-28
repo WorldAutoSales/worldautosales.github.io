@@ -27,6 +27,10 @@
      distinct from both --surface-alt (used for "never looked at this country" map fill) and the
      pale-green end of the BEV colorScale, so the three "no color" states read as genuinely different */
   --map-no-motorisation:#c9b8e8;
+  /* map fill for a country that DOES have a fuel-type split, but not for the period selected
+     (e.g. annual-only Morocco while a 2026 month is picked) -- soft blue, so it reads apart from
+     purple (no split in any period), tan (never researched) and the green BEV scale */
+  --map-no-period:#a9c7d9;
   /* map fill for "never researched" countries -- its own token rather than reusing
      --surface-alt, because --surface-alt is near-black in dark mode and made this tier
      unreadable (blending into the map's dark background); darker tan in light mode so
@@ -51,6 +55,7 @@
     --tip-down:#b91c1c;
     --tip-flat:#a16207;
     --map-no-motorisation:#5a4a7a;
+    --map-no-period:#3e5d73;
     --map-not-researched:#ffffff;
   }
 }
@@ -72,6 +77,7 @@
   --tip-flat:#a16207;
   --map-not-researched:#ffffff;
   --map-no-motorisation:#5a4a7a;
+  --map-no-period:#3e5d73;
 }
 
 *{ box-sizing:border-box; }
@@ -1600,6 +1606,7 @@ svg.map-svg{ width:100%; height:auto; display:block; }
 .map-svg .country{ stroke:var(--surface); stroke-width:0.5; }
 .map-svg .country.no-data{ fill:var(--map-not-researched); }
 .map-svg .country.researched-no-data{ fill:var(--map-no-motorisation); cursor:help; }
+.map-svg .country.no-period-data{ fill:var(--map-no-period); }
 .map-svg .country.has-data, .map-svg .country.has-trend{ cursor:pointer; }
 .map-svg .country.has-data:hover, .map-svg .country.has-trend:hover{ stroke:var(--text); stroke-width:1.2; }
 .map-svg .country.researched-no-data:hover{ stroke:var(--text); stroke-width:1; }

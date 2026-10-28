@@ -3566,6 +3566,7 @@ function renderLegend(){
     </div>
     <div class="legend-nodata"><span class="legend-swatch" style="background:var(--map-not-researched);border:1px solid var(--border)"></span>Not researched / filtered out</div>
     <div class="legend-nodata"><span class="legend-swatch" style="background:var(--map-no-motorisation)"></span>Sales data available — no fuel-type split</div>
+    <div class="legend-nodata"><span class="legend-swatch" style="background:var(--map-no-period)"></span>Has a split, but not for the selected period</div>
   `;
 }
 
@@ -3626,7 +3627,12 @@ function isResearchedNoMotorisation(name){
 function purpleVisible(name){
   return selectedCountries.has(name) && selectedContinents.has(COUNTRY_CONTINENT[name] || 'OTHER') && passesRankFilter(name);
 }
-const noDataClass = name => (isResearchedNoMotorisation(name) && purpleVisible(name)) ? 'researched-no-data' : 'no-data';
+// a country that has a split somewhere (a trend) but none for the selected period -> its own blue tier, so it is not
+// mistaken for "never researched" (tan) or for "no split in any period" (purple)
+const hasSplitElsewhere = name => COUNTRIES_WITH_TREND.has(name) && !!LAST_AVAILABLE_PERIOD[name];
+const noDataClass = name => !purpleVisible(name) ? 'no-data'
+  : isResearchedNoMotorisation(name) ? 'researched-no-data'
+  : hasSplitElsewhere(name) ? 'no-period-data' : 'no-data';
 
 // ---- month-over-month change of the BEV share, shown under the BEV share line of the map tooltip ----
 // green + up arrow when positive; red + down arrow when it falls by 0.5 points or more; yellow (down arrow, or a dash at 0) for a fall of less than 0.5 points.
@@ -3666,7 +3672,9 @@ function mapTooltipHTML(entry, name){
       (entry.country === 'Canada' ? `<br><span style="opacity:.7">quarterly StatCan data spread evenly across months; Jul-Sep 2026 is a DesRosiers estimate until StatCan publishes Q3</span>` : '') +
       (COUNTRIES_WITH_TREND.has(name) ? `<br><span style="opacity:.75">Click to focus trend →</span>` : '');
   } else if(LAST_AVAILABLE_PERIOD[name]){
-    base = `${name}<br>No data for this period<br><span style="opacity:.75">Last available: ${LAST_AVAILABLE_PERIOD[name]}</span><br><span style="opacity:.75">Click to focus trend →</span>`;
+    const total = WORLD_MARKET_TOTALS_2025[name];
+    const totalYear = WORLD_MARKET_TOTALS_2025_STALE_YEAR[name] || '2025';
+    base = `${name}<br>No fuel-type split for this period<br><span style="opacity:.75">Last available: ${LAST_AVAILABLE_PERIOD[name]}</span>${total ? `<br><span style="opacity:.75">Total sales: <strong>${total.toLocaleString('en-US')}</strong> (${totalYear})</span>` : ''}<br><span style="opacity:.75">Click to focus trend →</span>`;
   } else if(isResearchedNoMotorisation(name) && purpleVisible(name)){
     const total = WORLD_MARKET_TOTALS_2025[name];
     const totalYear = WORLD_MARKET_TOTALS_2025_STALE_YEAR[name] || '2025';
