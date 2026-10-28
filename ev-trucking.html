@@ -155,6 +155,8 @@
   table.tk-mini th{ text-align:right; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); padding:6px; border-bottom:2px solid var(--border); }
   table.tk-mini td{ text-align:right; padding:5px 6px; border-bottom:1px solid var(--border); }
   table.tk-mini th:first-child, table.tk-mini td:first-child{ text-align:left; font-weight:700; }
+  .tk-col{ display:flex; flex-direction:column; gap:16px; min-width:0; }
+  .tk-sel{ padding:7px 12px; border-radius:12px; border:1.5px solid var(--border); background:var(--surface); color:var(--text); font-weight:800; font-size:13px; }
   .tk-toggle{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700; color:var(--text-muted); cursor:pointer; margin:4px 0; }
 </style>
 </head>
@@ -245,6 +247,7 @@
       <p class="tk-note" id="proj-note" style="display:none"><b>2026 is a projection, not IEA data.</b> China electric truck sales are grown 20% (the IEA's first-quarter 2026 reading), EU markets 48% (ACEA first half 2026; Germany 89%), everything else by half of its 2025 growth (kept between −20% and +50%). The fleet adds the projected sales; shares of sales assume 2025 market totals (EU +9.8%). Fleet estimates stay at their 2025 level. Hatched bars mark projected values.</p>
 
       <div class="tk-two">
+        <div class="tk-col">
         <div class="card chart-card">
           <h2 id="map-title">Share of new trucks that are electric</h2>
           <p class="note" id="map-note" style="display:block"></p>
@@ -255,6 +258,16 @@
             <div class="tk-tip" id="map-tip"></div>
           </div>
           <p class="tk-note" id="map-foot"></p>
+        </div>
+
+        <div class="card chart-card" id="stk-card">
+          <div class="tk-head2"><h2 id="stk-title">Electric vs non-electric trucks on the road</h2>
+            <select id="stk-sel" aria-label="Scope" class="tk-sel"></select></div>
+          <p class="note" style="display:block" id="stk-note"></p>
+          <div class="tk-lg" id="stk-lg"></div>
+          <div class="tk-chart" id="stk-chart"></div>
+          <p class="tk-note" id="stk-foot"></p>
+        </div>
         </div>
         <div class="card chart-card">
           <h2 id="race-title">Race: top markets</h2>
@@ -875,11 +888,91 @@ document.getElementById('tk-table').addEventListener('click', e => {
   const tr = e.target.closest('tr[data-c]'); if(tr) { pick(tr.dataset.c); document.getElementById('spot-card').scrollIntoView({ behavior:'smooth', block:'start' }); }
 });
 
+
+// ---------- stacked bars: electric vs non-electric (fleet / units sold / share of sales), 2010-2026 ----------
+const STK_YEARS = []; for(let y = 2010; y <= Y[NY]; y++) STK_YEARS.push(y);
+let stkScope = 'World';
+function smoothSeries(a){     // centred 3-point mean over the available values, edges filled from the nearest value
+  const out = a.map((v, i) => { const w = [a[i - 1], a[i], a[i + 1]].filter(x => x != null); return w.length ? w.reduce((p, q) => p + q, 0) / w.length : null; });
+  for(let i = a.length - 1; i >= 0; i--) if(a[i] != null){ out[i] = a[i]; break; }       // the newest actual year keeps its raw value (matches the fleet section)
+  let f = out.find(v => v != null); if(f == null) return out;
+  for(let i = 0; i < out.length && out[i] == null; i++) out[i] = f;
+  for(let i = 1; i < out.length; i++) if(out[i] == null) out[i] = out[i - 1];
+  return out;
+}
+function rawFleet(reg, m){    // IEA-implied fleet per year index of Y (null where the IEA share is missing)
+  const st = ser(reg, m, 'stock'), ts = ser(reg, m, 'tShare'); if(!st || !ts) return null;
+  return Y.map((y, i) => i > LAST ? null : (st[i] && ts[i] ? 100 * st[i] / ts[i] : null));
+}
+function worldFleetSeries(m){
+  const c = rawFleet('China', m), a = rawFleet('Advanced Economies', m), d = rawFleet('Developing Economies excl. China', m); if(!c || !a) return null;
+  const sc = smoothSeries(c), sa = smoothSeries(a), sd = d ? smoothSeries(d) : null;
+  const dv = sd ? sd.filter((v, i) => d[i] != null) : [], dMean = dv.length ? dv.reduce((p, q) => p + q, 0) / dv.length : 0;
+  const aRef = (sa.slice(-6).reduce((p, q) => p + q, 0) / 6) || 1;
+  // developing economies other than China: the IEA publishes a usable share only from 2020, earlier years follow the advanced-economy trend scaled to the 2020-25 mean
+  return Y.map((y, i) => i > LAST ? null : sc[i] + sa[i] + (d && d[i] != null ? sd[i] : dMean * (sa[i] / aRef)));
+}
+function stackData(reg, m, kindS){
+  const ev = ser(reg, m, 'stock'), sa = ser(reg, m, 'sales'), sh = ser(reg, m, 'sShare');
+  const at = (arr, y) => { const i = Y.indexOf(y); return i < 0 || !arr ? null : arr[i]; };
+  const bev = [], ice = [];
+  if(kindS === 'fleet'){
+    const raw = reg === 'World' ? worldFleetSeries(m) : rawFleet(reg, m); if(!raw || !ev) return null;
+    const fl = smoothSeries(raw);
+    STK_YEARS.forEach(y => { const i = Y.indexOf(y); if(y > Y[LAST]){ const f = fl[LAST], e = at(ev, y); bev.push(e); ice.push(f != null && e != null ? Math.max(0, f - e) : null); }
+      else { const e = i < 0 ? 0 : (ev[i] || 0), f = i < 0 ? fl[Y.indexOf(2012)] : fl[i]; bev.push(e); ice.push(f != null ? Math.max(0, f - e) : null); } });
+  } else if(kindS === 'sales'){
+    if(!sa || !sh) return null;
+    const tot = smoothSeries(Y.map((y, i) => i > LAST ? null : (sa[i] && sh[i] ? 100 * sa[i] / sh[i] : null)));
+    STK_YEARS.forEach(y => { const i = Y.indexOf(y), e = i < 0 ? 0 : (at(sa, y) || 0), t = i < 0 ? tot[Y.indexOf(2012)] : (i > LAST ? tot[LAST] : tot[i]); bev.push(e); ice.push(t != null ? Math.max(0, t - e) : null); });
+  } else {
+    if(!sh) return null;
+    STK_YEARS.forEach(y => { const v = at(sh, y); const e = Y.indexOf(y) < 0 ? 0 : v; bev.push(e); ice.push(e != null ? 100 - e : null); });
+  }
+  return { bev, ice };
+}
+function renderStack(){
+  const kindS = metric === 'sShare' ? 'share' : metric === 'sales' ? 'sales' : 'fleet';
+  const sel = document.getElementById('stk-sel');
+  const regs = ['World', 'China', 'European Union', 'Europe', 'Advanced Economies', 'Developing Economies excl. China'].filter(r => R[r] && R[r][mode]).concat(countries(mode).filter(c => c !== 'China').sort());
+  if(!regs.includes(stkScope)) stkScope = 'World';
+  sel.innerHTML = regs.map(r => `<option value="${esc(r)}"${r === stkScope ? ' selected' : ''}>${esc(r)}</option>`).join('');
+  const d = stackData(stkScope, mode, kindS), host = document.getElementById('stk-chart'), what = MODE_LBL[mode];
+  const titles = { fleet:`Electric vs non-electric ${what} on the road`, sales:`${what[0].toUpperCase() + what.slice(1)} sold per year: electric vs non-electric`, share:`Share of new ${what} sold: electric vs non-electric` };
+  document.getElementById('stk-title').textContent = titles[kindS] + ' · ' + stkScope;
+  document.getElementById('stk-lg').innerHTML = '<span><i class="sq" style="background:#16a34a"></i>Electric (battery, plug-in, fuel-cell)</span><span><i class="sq" style="background:#374151"></i>Non-electric (diesel, gas, other)</span><span><i class="sq" style="background:repeating-linear-gradient(45deg,#fff 0 3px,#64748b 3px 6px)"></i>2026 projected</span>';
+  document.getElementById('stk-note').textContent = { fleet:'Whole fleet = IEA electric stock ÷ the electric share of the fleet (rounded, smoothed over three years), see the fleet section; 2010–2011 are shown with no electric trucks (the IEA series starts in 2012).', sales:'Total market = electric sales ÷ the electric share of sales (rounded by the IEA, smoothed over three years); non-electric = total − electric.', share:'Share of new sales as published by the IEA (rounded); the rest is diesel, gas and other.' }[kindS];
+  if(!d){ host.innerHTML = '<p class="tk-note">No usable series for this market and vehicle class (the IEA does not publish the electric share of its fleet).</p>'; return; }
+  const W = 720, H = 300, m = { t:16, r:12, b:28, l:54 }, share = kindS === 'share';
+  const rows = STK_YEARS.map((yr, k) => ({ y:yr, bev:d.bev[k] || 0, ice:d.ice[k] || 0, ok:d.ice[k] != null })), top = share ? 100 : Math.max(...rows.map(r => r.bev + r.ice)) * 1.06 || 1;
+  const x = d3.scaleBand(rows.map(r => r.y), [m.l, W - m.r]).padding(.18), y = d3.scaleLinear([0, top], [H - m.b, m.t]).nice();
+  const id = 'sk' + Math.random().toString(36).slice(2, 6), fmtV = v => share ? pct(v) : compact(v);
+  const el = d3.select(host).html(''), svg = el.append('svg').attr('viewBox', `0 0 ${W} ${H}`);
+  svg.append('defs').html(`<pattern id="${id}g" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#374151"/><line x1="0" y1="0" x2="0" y2="6" stroke="#9ca3af" stroke-width="2.4"/></pattern><pattern id="${id}e" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#16a34a"/><line x1="0" y1="0" x2="0" y2="6" stroke="#bbf7d0" stroke-width="2.4"/></pattern>`);
+  svg.append('g').attr('class', 'grid').selectAll('line').data(y.ticks(5)).join('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', d => y(d)).attr('y2', d => y(d));
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickValues(rows.filter((r, i) => i % 2 === 0 || r.y === Y[NY]).map(r => r.y)).tickSizeOuter(0));
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(v => share ? v + '%' : compact(v)).tickSizeOuter(0));
+  rows.forEach((r, k) => { if(!r.ok) return; const pj = r.y > Y[LAST], gx = x(r.y), w = x.bandwidth();
+    svg.append('rect').attr('x', gx).attr('width', w).attr('y', y(r.ice)).attr('height', y(0) - y(r.ice)).attr('fill', pj ? `url(#${id}g)` : '#374151').attr('rx', 1.5);
+    if(r.bev > 0) svg.append('rect').attr('x', gx).attr('width', w).attr('y', y(r.ice + r.bev)).attr('height', Math.max(1.5, y(r.ice) - y(r.ice + r.bev))).attr('fill', pj ? `url(#${id}e)` : '#16a34a'); });
+  const last = rows[rows.length - 1];
+  svg.append('text').attr('x', x(last.y) + x.bandwidth() / 2).attr('y', y(last.ice + last.bev) - 6).attr('text-anchor', 'middle').attr('font-size', 11).attr('font-weight', 800).attr('fill', 'var(--text)').text(share ? pct(last.bev) : compact(last.ice + last.bev));
+  const tip = el.append('div').attr('class', 'tk-ctip');
+  svg.selectAll('.hit').data(rows).join('rect').attr('x', r => x(r.y) - 3).attr('width', x.bandwidth() + 6).attr('y', m.t).attr('height', H - m.t - m.b).attr('fill', 'transparent')
+    .on('pointermove', (e, r) => { const bb = svg.node().getBoundingClientRect(), t = r.bev + r.ice;
+      tip.html(`<b>${r.y}${r.y > Y[LAST] ? ' (projected)' : ''}</b><br><span style="color:#16a34a">●</span> electric <b>${share ? pct(r.bev) : fmt(r.bev)}</b><br><span style="color:#374151">●</span> non-electric <b>${share ? pct(r.ice) : fmt(r.ice)}</b>${share || !t ? '' : `<br>electric share <b>${pct(100 * r.bev / t)}</b>`}`).style('opacity', 1)
+        .style('left', Math.min(bb.width - 200, Math.max(0, (x(r.y) + x.bandwidth() / 2) * bb.width / W + 14)) + 'px').style('top', '6px'); })
+    .on('pointerleave', () => tip.style('opacity', 0));
+  const l25 = rows.find(r => r.y === Y[LAST]);
+  document.getElementById('stk-foot').textContent = l25 && l25.ok && !share ? `${Y[LAST]}: ${fmtV(l25.bev)} electric vs ${fmtV(l25.ice)} non-electric (${pct(100 * l25.bev / (l25.bev + l25.ice))} electric). Follows the vehicle class and metric picked in the bar above (Share of sales, Units sold, or any fleet metric).` : '';
+}
+document.getElementById('stk-sel').addEventListener('change', e => { stkScope = e.target.value; renderStack(); });
+
 // ---------- controls ----------
 function refresh(){
   document.getElementById('year-lbl').innerHTML = isProj(yi) ? Y[yi] + '<small>projected</small>' : Y[yi]; document.getElementById('year').value = yi; document.getElementById('year').max = NY;
   document.getElementById('proj-note').style.display = isProj(yi) ? '' : 'none'; raceEl.classList.toggle('proj', isProj(yi));
-  renderMap(); renderRace(); renderTable();
+  renderMap(); renderRace(); renderTable(); renderStack();
 }
 function setSeg(id, v, cb){ document.querySelectorAll('#' + id + ' button').forEach(b => b.classList.toggle('active', b.dataset.v === v)); cb(); }
 document.getElementById('seg-mode').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; mode = b.dataset.v; setSeg('seg-mode', mode, refresh); });
