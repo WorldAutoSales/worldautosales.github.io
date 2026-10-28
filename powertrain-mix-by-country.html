@@ -3628,8 +3628,10 @@ function purpleVisible(name){
   return selectedCountries.has(name) && selectedContinents.has(COUNTRY_CONTINENT[name] || 'OTHER') && passesRankFilter(name);
 }
 // a country that has a split somewhere (a trend) but none for the selected period -> its own blue tier, so it is not
-// mistaken for "never researched" (tan) or for "no split in any period" (purple)
-const hasSplitElsewhere = name => COUNTRIES_WITH_TREND.has(name) && !!LAST_AVAILABLE_PERIOD[name];
+// mistaken for "never researched" (tan) or for "no split in any period" (purple).
+// While one country is focused the map holds data for that country only, so every other country has "no entry" by
+// construction -- those must not turn blue; only the focused country itself keeps the tier.
+const hasSplitElsewhere = name => COUNTRIES_WITH_TREND.has(name) && !!LAST_AVAILABLE_PERIOD[name] && (!focusedCountry || name === focusedCountry);
 const noDataClass = name => !purpleVisible(name) ? 'no-data'
   : isResearchedNoMotorisation(name) ? 'researched-no-data'
   : hasSplitElsewhere(name) ? 'no-period-data' : 'no-data';
