@@ -59,6 +59,14 @@
   .fx-panel .mfr-combo-group{ color:#8fa0ff; }
   .fx-panel .mfr-combo-opt:hover, .fx-panel .mfr-combo-opt.hl{ background:rgba(34,211,238,.16); }
   .fx-panel .mfr-combo-empty{ color:#9fb0ff; }
+  .bw-chart svg{ width:100%; height:auto; display:block; overflow:visible; }
+  .bw-chart text{ fill:var(--text-muted); font-size:11px; }
+  .bw-chart .vl{ fill:var(--text); font-weight:800; font-size:11px; }
+  .bw-chart .gl{ stroke:var(--border); stroke-dasharray:2 4; }
+  .bw-sub{ margin:10px 0 2px; font-size:14px; font-weight:800; display:flex; flex-wrap:wrap; gap:4px 14px; align-items:baseline; }
+  .bw-sub small{ font-weight:600; color:var(--text-muted); font-size:12px; }
+  .bw-lg{ display:flex; flex-wrap:wrap; gap:6px 16px; font-size:12px; font-weight:700; margin:6px 0 2px; }
+  .bw-lg i{ display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px; vertical-align:-2px; }
   .fx-chipbar{ position:sticky; top:8px; z-index:40; display:flex; flex-wrap:wrap; gap:8px 10px; align-items:center; margin:12px 0 16px; padding:9px 14px; border-radius:16px;
     background:color-mix(in srgb, var(--surface) 86%, transparent); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--border); box-shadow:0 10px 30px -14px rgba(20,16,80,.35); }
   .fx-chip{ display:inline-flex; align-items:center; gap:8px; padding:5px 6px 5px 12px; border-radius:999px; font-weight:800; font-size:12.5px; box-shadow:0 4px 12px -6px rgba(0,0,0,.45); }
@@ -329,6 +337,18 @@
 
       <div class="fx-chipbar" id="fx-chipbar"></div>
 
+      <div class="card chart-card" id="world-card">
+        <h2>World new-vehicle sales per year</h2>
+        <p class="note" style="display:block" id="world-note"></p>
+        <div class="bw-chart" id="world-bars"></div>
+      </div>
+
+      <div class="card chart-card" id="bw-card" style="display:none">
+        <h2 id="bw-title">World volume of the selected manufacturer</h2>
+        <p class="note" style="display:block" id="bw-note"></p>
+        <div id="bw-charts"></div>
+      </div>
+
       <div class="card chart-card">
         <p class="note" id="map-note"></p>
         <div class="map-wrap" id="map-wrap">
@@ -395,6 +415,8 @@
 <script src="assets/manufacturer-holdings-data.js"></script>
 <script src="assets/model-class-data.js"></script>
 <script src="assets/manufacturer-fin-report-sales.js"></script>
+<script src="assets/world-car-sales-data.js"></script>
+<script src="assets/manufacturer-world-history.js"></script>
 <script>
 (function(){
 const COLORS = { bev:'#1e8f5f', phev:'#e0a21a', other:'#8a8f98' };
@@ -1731,6 +1753,70 @@ function hideHover(){ hoverKey = null; hoverPanel.style.opacity = 0; }
 });
 
 // ---------- wiring ----------
+
+// ---------- world charts: world sales per year, and the selected manufacturer's world volume ----------
+const MFR_HIST = typeof MFR_WORLD_HISTORY !== 'undefined' ? MFR_WORLD_HISTORY : null;
+const WORLD_PW = (typeof WCS !== 'undefined' && WCS.powertrain) || [];
+const hatchDefs = id => `<defs><pattern id="${id}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#fde7c8"/><line x1="0" y1="0" x2="0" y2="6" stroke="#f59e0b" stroke-width="2.2"/></pattern></defs>`;
+const mFmt = v => (v / 1e6).toFixed(v >= 1e7 ? 1 : 2).replace(/\.?0+$/, '') + ' M';
+// rows: [{y, v, kind:'a'|'p'|'e'|'proj', tip}] ; kinds: a = solid, p = lighter (different basis), e = estimate, proj = hatched
+function bwChart(host, rows, color){
+  const W = 940, H = 230, m = { t:22, r:10, b:26, l:46 };
+  const mx = Math.max(...rows.map(r => r.v)) * 1.1, bw = (W - m.l - m.r) / rows.length;
+  const y = v => H - m.b - (v / mx) * (H - m.t - m.b), id = 'hx' + Math.random().toString(36).slice(2, 7);
+  let g = hatchDefs(id), ticks = 4;
+  for(let i = 0; i <= ticks; i++){ const v = mx * i / ticks; g += `<line class="gl" x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}"/><text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end">${v === 0 ? '0' : Math.round(v / 1e6) + ' M'}</text>`; }
+  rows.forEach((r, i) => {
+    const x = m.l + i * bw + 2, w = Math.max(2, bw - 4), fill = r.kind === 'proj' ? `url(#${id})` : r.kind === 'p' ? color + '88' : r.kind === 'e' ? color + 'aa' : color;
+    g += `<g><title>${r.tip}</title><rect x="${x}" y="${y(r.v)}" width="${w}" height="${H - m.b - y(r.v)}" rx="2" fill="${fill}"${r.kind === 'proj' ? ` stroke="${color}" stroke-dasharray="3 2"` : ''}/></g>`;
+    if(i % 2 === 0 || i === rows.length - 1) g += `<text x="${x + w / 2}" y="${H - 8}" text-anchor="middle">${r.y}</text>`;
+    if(i === 0 || i === rows.length - 1 || r.kind === 'proj' || r.y % 5 === 0) g += `<text class="vl" x="${x + w / 2}" y="${y(r.v) - 5}" text-anchor="middle">${mFmt(r.v)}</text>`;
+  });
+  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
+}
+function renderWorldBars(){
+  const host = document.getElementById('world-bars'); if(!WORLD_PW.length){ document.getElementById('world-card').style.display = 'none'; return; }
+  const rows = WORLD_PW.map(r => ({ y:r.y, v:r.total, kind:r.proj ? 'proj' : r.est ? 'e' : 'a', tip:`${r.y}${r.proj ? ' (projected)' : r.est ? ' (estimate)' : ''}: ${fmt(r.total)} light vehicles` }));
+  bwChart(host, rows, '#6366f1');
+  const last = WORLD_PW.filter(r => !r.proj).slice(-1)[0], pj = WORLD_PW.find(r => r.proj);
+  document.getElementById('world-note').innerHTML = `Worldwide new light-vehicle sales (cars, SUVs, pickups, light vans), ${WORLD_PW[0].y}–${last.y}${pj ? ` plus a ${pj.y} projection (${(100 * (pj.total / last.total - 1)).toFixed(1)}% vs ${last.y}; hatched)` : ''}. Same series as the <a href="world-car-sales.html">World Car Sales</a> page; earlier years are estimates (lighter bars), 2010–${last.y} anchor on the IEA's global figures.`;
+}
+// manufacturer / brand -> history group: by the parent group the holdings file gives
+const HIST_RULES = [[/toyota|lexus|daihatsu|hino/i, 'Toyota Motor Corporation'], [/volkswagen|audi|porsche|škoda|skoda|seat\b|cupra|bentley|lamborghini|bugatti/i, 'Volkswagen Group'], [/general motors|chevrolet|buick|gmc|cadillac|holden/i, 'General Motors'],
+  [/hyundai|kia|genesis/i, 'Hyundai Motor Group'], [/ford motor|^ford$|lincoln/i, 'Ford Motor Company'], [/honda|acura/i, 'Honda'], [/nissan|infiniti/i, 'Nissan'], [/renault|dacia|alpine/i, 'Renault Group'],
+  [/bmw|mini$|rolls/i, 'BMW Group'], [/mazda/i, 'Mazda'], [/suzuki|maruti/i, 'Suzuki'], [/mitsubishi/i, 'Mitsubishi Motors'], [/daimler ag|mercedes|smart$/i, 'Mercedes-Benz Group'],
+  [/stellantis|fiat|psa|peugeot|citro|jeep|opel|vauxhall|chrysler|dodge|ram$|alfa|exor|ds$|maserati/i, 'Stellantis'], [/saic|mg$|roewe|wuling|baojun|maxus/i, 'SAIC Motor'], [/geely|volvo car|polestar|lynk|zeekr/i, 'Geely Holding'],
+  [/changan|avatr|deepal/i, 'Changan Automobile'], [/byd|denza|fangchengbao/i, 'BYD'], [/chery|jetour|omoda|jaecoo|exeed/i, 'Chery Automobile'], [/faw|hongqi|bestune/i, 'FAW Group'], [/dongfeng|voyah|nammi/i, 'Dongfeng Motor'],
+  [/baic|beijing auto|arcfox/i, 'BAIC Group'], [/tata|jaguar|land rover/i, 'Tata Motors'], [/great wall|gwm|haval|ora$|tank$|wey/i, 'Great Wall Motor']];
+function histFor(name){
+  if(!MFR_HIST || !name) return null;
+  const b = canonicalBrand(name), cands = [name, b, holder(b, CUR_YEAR)];
+  for(const c of cands) for(const [re, key] of HIST_RULES) if(re.test(c) && MFR_HIST.groups[key]) return { key, via:c !== name && c !== b ? c : null, group:MFR_HIST.groups[key] };
+  return null;
+}
+function renderBrandWorld(){
+  const card = document.getElementById('bw-card'), host = document.getElementById('bw-charts');
+  const names = kind === 'brand' ? [mfr, mfr2].filter(Boolean) : [];
+  if(!names.length || !MFR_HIST){ card.style.display = 'none'; return; }
+  const worldG = (() => { const a = WORLD_PW.find(r => r.y === 2025), b = WORLD_PW.find(r => r.proj); return a && b ? b.total / a.total : null; })();
+  const palette = ['#e11d48', '#0ea5e9'];
+  host.innerHTML = '';
+  let any = false;
+  names.forEach((n, ix) => {
+    const h = histFor(n), box = document.createElement('div'); host.appendChild(box);
+    if(!h){ box.innerHTML = `<div class="bw-sub">${esc(n)}<small>no worldwide history on file: only manufacturer groups with a top-15/20 rank are tracked (brand-level worldwide figures are not published)</small></div>`; return; }
+    any = true; const years = Object.keys(h.group.s).map(Number).sort((a, b) => a - b), y0 = years[0];
+    const rows = [];
+    for(let y = 2001; y <= 2025; y++){ const v = h.group.s[y]; rows.push({ y, v:v || 0, kind:v ? (h.group.b[y] === 'p' ? 'p' : 'a') : 'a', tip:v ? `${y}: ${fmt(v)} vehicles (${h.group.b[y] === 'p' ? 'OICA production, all motor vehicles' : 'F&I Tools sales'})` : `${y}: no figure (outside the published top 15–20)` }); }
+    if(worldG && h.group.s[2025]) rows.push({ y:2026, v:Math.round(h.group.s[2025] * worldG), kind:'proj', tip:`2026 projection: 2025 × the world market trend (${(100 * (worldG - 1)).toFixed(1)}%); not a company forecast` });
+    box.innerHTML = `<div class="bw-sub">${esc(h.key)}${h.via || h.key !== n ? `<small>parent group of ${esc(n)}</small>` : ''}<small>${y0}–${years[years.length - 1]}</small></div><div class="bw-chart" id="bwc${ix}"></div><div class="bw-lg"><span><i style="background:${palette[ix]}88"></i>OICA production (2001–2017)</span><span><i style="background:${palette[ix]}"></i>F&amp;I Tools sales (2018–2025)</span><span><i style="background:repeating-linear-gradient(45deg,#fde7c8 0 3px,${palette[ix]} 3px 5px)"></i>2026 projection</span></div>${h.group.note ? `<p class="note" style="display:block;margin:2px 0 6px">${esc(h.group.note)}</p>` : ''}`;
+    bwChart(box.querySelector('.bw-chart'), rows, palette[ix]);
+  });
+  document.getElementById('bw-title').textContent = names.length > 1 ? 'World volume of the two selected manufacturers' : `World volume · ${names[0]}`;
+  document.getElementById('bw-note').innerHTML = `Worldwide vehicles per year for the manufacturer's parent group, 2001 to 2026. <b>The series changes basis in 2018</b>: 2001–2017 is the OICA production count (all motor vehicles, including trucks and buses); from 2018 it is worldwide sales (F&amp;I Tools, light vehicles). A group missing from a year was outside the published top 15–20. Source: <a href="${MFR_HIST.meta.url}" target="_blank" rel="noopener">Wikipedia compilation of OICA and F&amp;I Tools</a>.`;
+  card.style.display = '';
+}
+
 function refresh(rebuildMfr){
   readPeriod();
   if(rebuildMfr){ buildMfrSelect(); if(MODEL_LABEL) buildModelSelect(); }
@@ -1757,6 +1843,7 @@ function refresh(rebuildMfr){
   if(!rankMode && metric === 'share'){ metric = 'units'; setActive('#metric-toggle', 'metric', 'units'); }
   renderQuick(window.__topBrands || [], MODEL_LABEL ? window.__topModels : []);
   renderMap();
+  renderWorldBars(); renderBrandWorld();
 }
 function setActive(sel, attr, val){ document.querySelectorAll(`${sel} .mode-btn`).forEach(b => { if(attr in b.dataset) b.classList.toggle('active', b.dataset[attr] === val); }); }
 selPeriod.onchange = () => refresh(true);

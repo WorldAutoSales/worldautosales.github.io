@@ -259,6 +259,7 @@
         <div class="card chart-card">
           <h2 id="race-title">Race: top markets</h2>
           <p class="note" id="race-note" style="display:block">Press play: bars re-rank as the years pass. Click a country to open its spotlight.</p>
+          <div class="tk-lg" id="race-lg" style="margin:0 0 8px"></div>
           <div class="tk-race" id="race"></div>
           <label class="tk-chk" id="china-wrap"><input type="checkbox" id="hide-china"> Hide China (see the rest of the world)</label>
         </div>
@@ -600,8 +601,8 @@ const raceEl = document.getElementById('race'), rows = {}, ROW = 31;
 function renderRace(){
   const m = metric;
   let list = marketList().map(e => ({ ...e, v:valOf(e) })).filter(r => r.v != null && r.v > 0 && !(hideChina && r.n === 'China'));
-  const iea = list.filter(r => !r.ex).sort((a, b) => b.v - a.v), exl = list.filter(r => r.ex).sort((a, b) => b.v - a.v);
-  list = iea.concat(exl);
+  const exl = list.filter(r => r.ex);
+  list = list.slice().sort((a, b) => b.v - a.v);       // one ranking by value, whatever the source (IEA solid bars, ICCT hatched bars)
   const mx = d3.max(list, r => r.v) || 1, N = list.length;
   raceEl.style.height = (N * ROW) + 'px';
   Object.keys(rows).forEach(k => { if(!list.some(r => r.n === k)){ rows[k].style.opacity = 0; rows[k].style.pointerEvents = 'none'; rows[k].style.transform = `translateY(${N * ROW + 20}px)`; } });
@@ -622,6 +623,9 @@ function renderRace(){
   document.getElementById('race-title').textContent = `${MODE_ICO[mode]} ${METRICS[m].lbl} · every market, ${yLabel(yi)}`;
   document.getElementById('race-note').textContent = exl.length ? `Press play: bars re-rank as the years pass. * Hatched rows (United States, India, Brazil…) are not in the IEA truck data; the figure is the ICCT's, with a slightly different definition.` : 'Press play: bars re-rank as the years pass. Click a country to open its spotlight.';
   document.getElementById('china-wrap').style.display = (m === 'sShare' || m === 'tShare') ? 'none' : '';
+  // legend: bar colour = continent of the country; hatched = not in the IEA truck data (ICCT figure)
+  const present = [...new Set(list.map(r => CONT[r.n] || 'Europe'))];
+  document.getElementById('race-lg').innerHTML = Object.keys(CONT_COL).filter(c => present.includes(c)).map(c => `<span><i class="sq" style="background:${CONT_COL[c]}"></i>${c}</span>`).join('') + (exl.length ? '<span><i class="sq" style="background:repeating-linear-gradient(45deg,#fff 0 3px,#64748b 3px 6px)"></i>hatched = ICCT figure (not in the IEA truck data)</span>' : '');
 }
 
 // ---------- generic line chart ----------

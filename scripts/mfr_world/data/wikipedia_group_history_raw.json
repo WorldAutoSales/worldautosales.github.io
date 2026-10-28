@@ -1,0 +1,1836 @@
+{
+"AvtoVAZ": {
+"2005": {
+"basis": "production",
+"v": 721492
+},
+"2006": {
+"basis": "production",
+"v": 765627
+},
+"2007": {
+"basis": "production",
+"v": 735897
+},
+"2008": {
+"basis": "production",
+"v": 801563
+}
+},
+"BAIC": {
+"2005": {
+"basis": "production",
+"v": 559190
+},
+"2014": {
+"basis": "production",
+"v": 1115847
+},
+"2015": {
+"basis": "production",
+"v": 1169894
+},
+"2016": {
+"basis": "production",
+"v": 1343682
+},
+"2017": {
+"basis": "production",
+"v": 1254483
+}
+},
+"BMW": {
+"2001": {
+"basis": "production",
+"v": 946730
+},
+"2002": {
+"basis": "production",
+"v": 1090258
+},
+"2003": {
+"basis": "production",
+"v": 1118940
+},
+"2004": {
+"basis": "production",
+"v": 1250345
+},
+"2005": {
+"basis": "production",
+"v": 1323119
+},
+"2006": {
+"basis": "production",
+"v": 1366838
+},
+"2007": {
+"basis": "production",
+"v": 1541503
+},
+"2008": {
+"basis": "production",
+"v": 1439918
+},
+"2009": {
+"basis": "production",
+"v": 1258417
+},
+"2010": {
+"basis": "production",
+"v": 1481253
+},
+"2011": {
+"basis": "production",
+"v": 1738160
+},
+"2012": {
+"basis": "production",
+"v": 2065477
+},
+"2013": {
+"basis": "production",
+"v": 2006366
+},
+"2014": {
+"basis": "production",
+"v": 2165566
+},
+"2015": {
+"basis": "production",
+"v": 2279503
+},
+"2016": {
+"basis": "production",
+"v": 2359756
+},
+"2017": {
+"basis": "production",
+"v": 2505741
+},
+"2018": {
+"basis": "sales",
+"v": 2494276
+},
+"2019": {
+"basis": "sales",
+"v": 2520146
+},
+"2020": {
+"basis": "sales",
+"v": 2324778
+}
+},
+"BYD Auto": {
+"2022": {
+"basis": "sales",
+"v": 1881669
+},
+"2023": {
+"basis": "sales",
+"v": 3024417
+},
+"2024": {
+"basis": "sales",
+"v": 4272145
+},
+"2025": {
+"basis": "sales",
+"v": 4602436
+}
+},
+"Beijing Automotive": {
+"2009": {
+"basis": "production",
+"v": 684534
+}
+},
+"Changan": {
+"2009": {
+"basis": "production",
+"v": 1425777
+},
+"2010": {
+"basis": "production",
+"v": 2378052
+},
+"2011": {
+"basis": "production",
+"v": 1167208
+},
+"2012": {
+"basis": "production",
+"v": 1063721
+},
+"2013": {
+"basis": "production",
+"v": 1109889
+},
+"2014": {
+"basis": "production",
+"v": 1447017
+},
+"2015": {
+"basis": "production",
+"v": 1540133
+},
+"2016": {
+"basis": "production",
+"v": 1715871
+},
+"2017": {
+"basis": "production",
+"v": 1616457
+},
+"2021": {
+"basis": "sales",
+"v": 2314547
+},
+"2022": {
+"basis": "sales",
+"v": 2347163
+},
+"2023": {
+"basis": "sales",
+"v": 2553052
+},
+"2024": {
+"basis": "sales",
+"v": 2683798
+},
+"2025": {
+"basis": "sales",
+"v": 2913177
+}
+},
+"Chery": {
+"2021": {
+"basis": "sales",
+"v": 961926
+},
+"2022": {
+"basis": "sales",
+"v": 1241000
+},
+"2023": {
+"basis": "sales",
+"v": 1881316
+},
+"2024": {
+"basis": "sales",
+"v": 2603916
+},
+"2025": {
+"basis": "sales",
+"v": 2806393
+}
+},
+"Chrysler": {
+"2006": {
+"basis": "production",
+"v": 2544590
+},
+"2007": {
+"basis": "production",
+"v": 2538624
+},
+"2008": {
+"basis": "production",
+"v": 1893068
+},
+"2009": {
+"basis": "production",
+"v": 959070
+},
+"2010": {
+"basis": "production",
+"v": 1578488
+},
+"2011": {
+"basis": "production",
+"v": 1999017
+},
+"2012": {
+"basis": "production",
+"v": 2371427
+}
+},
+"Daimler": {
+"2006": {
+"basis": "production",
+"v": 2044533
+},
+"2007": {
+"basis": "production",
+"v": 2096977
+},
+"2008": {
+"basis": "production",
+"v": 2174299
+},
+"2009": {
+"basis": "production",
+"v": 1447953
+},
+"2010": {
+"basis": "production",
+"v": 1940465
+},
+"2011": {
+"basis": "production",
+"v": 2137067
+},
+"2012": {
+"basis": "production",
+"v": 2195152
+},
+"2013": {
+"basis": "production",
+"v": 1781507
+},
+"2014": {
+"basis": "production",
+"v": 1973270
+},
+"2015": {
+"basis": "production",
+"v": 2134645
+},
+"2016": {
+"basis": "production",
+"v": 2526450
+},
+"2017": {
+"basis": "production",
+"v": 2549142
+}
+},
+"DaimlerChrysler": {
+"2001": {
+"basis": "production",
+"v": 4364492
+},
+"2002": {
+"basis": "production",
+"v": 4456325
+},
+"2003": {
+"basis": "production",
+"v": 4231603
+},
+"2004": {
+"basis": "production",
+"v": 4627883
+},
+"2005": {
+"basis": "production",
+"v": 4815593
+}
+},
+"Dongfeng": {
+"2005": {
+"basis": "production",
+"v": 593055
+},
+"2013": {
+"basis": "production",
+"v": 1238948
+},
+"2014": {
+"basis": "production",
+"v": 1301695
+}
+},
+"Dongfeng Motor": {
+"2009": {
+"basis": "production",
+"v": 663262
+},
+"2011": {
+"basis": "production",
+"v": 1108949
+},
+"2012": {
+"basis": "production",
+"v": 1137950
+},
+"2015": {
+"basis": "production",
+"v": 1209296
+},
+"2016": {
+"basis": "production",
+"v": 1315490
+},
+"2017": {
+"basis": "production",
+"v": 1450999
+}
+},
+"FAW": {
+"2010": {
+"basis": "production",
+"v": 2572260
+}
+},
+"FAW Group": {
+"2005": {
+"basis": "production",
+"v": 721492
+},
+"2007": {
+"basis": "production",
+"v": 690712
+},
+"2008": {
+"basis": "production",
+"v": 637720
+},
+"2021": {
+"basis": "sales",
+"v": 3500000
+},
+"2022": {
+"basis": "sales",
+"v": 3200000
+},
+"2023": {
+"basis": "sales",
+"v": 3370000
+},
+"2024": {
+"basis": "sales",
+"v": 3200000
+},
+"2025": {
+"basis": "sales",
+"v": 3302000
+}
+},
+"FCA": {
+"2015": {
+"basis": "production",
+"v": 4865233
+},
+"2016": {
+"basis": "production",
+"v": 4681457
+},
+"2017": {
+"basis": "production",
+"v": 4600847
+}
+},
+"Fiat": {
+"2001": {
+"basis": "production",
+"v": 2409016
+},
+"2002": {
+"basis": "production",
+"v": 2190595
+},
+"2003": {
+"basis": "production",
+"v": 2077828
+},
+"2004": {
+"basis": "production",
+"v": 2119717
+},
+"2005": {
+"basis": "production",
+"v": 2037695
+},
+"2006": {
+"basis": "production",
+"v": 2319642
+},
+"2007": {
+"basis": "production",
+"v": 2679451
+},
+"2008": {
+"basis": "production",
+"v": 2524325
+},
+"2009": {
+"basis": "production",
+"v": 2460222
+},
+"2010": {
+"basis": "production",
+"v": 2410021
+},
+"2011": {
+"basis": "production",
+"v": 2336954
+},
+"2012": {
+"basis": "production",
+"v": 2127295
+}
+},
+"Fiat Chrysler": {
+"2013": {
+"basis": "production",
+"v": 4681704
+},
+"2014": {
+"basis": "production",
+"v": 4865758
+}
+},
+"Fiat-Chrysler": {
+"2018": {
+"basis": "sales",
+"v": 4841366
+},
+"2019": {
+"basis": "sales",
+"v": 4612673
+},
+"2020": {
+"basis": "sales",
+"v": 3693597
+}
+},
+"Ford": {
+"2001": {
+"basis": "production",
+"v": 6676491
+},
+"2002": {
+"basis": "production",
+"v": 6729499
+},
+"2003": {
+"basis": "production",
+"v": 6566089
+},
+"2004": {
+"basis": "production",
+"v": 6644024
+},
+"2005": {
+"basis": "production",
+"v": 6497746
+},
+"2006": {
+"basis": "production",
+"v": 6268193
+},
+"2007": {
+"basis": "production",
+"v": 6247506
+},
+"2008": {
+"basis": "production",
+"v": 5407000
+},
+"2009": {
+"basis": "production",
+"v": 4685394
+},
+"2010": {
+"basis": "production",
+"v": 4988031
+},
+"2011": {
+"basis": "production",
+"v": 5516931
+},
+"2012": {
+"basis": "production",
+"v": 5595483
+},
+"2013": {
+"basis": "production",
+"v": 6077126
+},
+"2014": {
+"basis": "production",
+"v": 5969541
+},
+"2015": {
+"basis": "production",
+"v": 6396369
+},
+"2016": {
+"basis": "production",
+"v": 6457773
+},
+"2017": {
+"basis": "production",
+"v": 6386818
+},
+"2018": {
+"basis": "sales",
+"v": 5734217
+},
+"2019": {
+"basis": "sales",
+"v": 5385972
+},
+"2020": {
+"basis": "sales",
+"v": 4231549
+},
+"2021": {
+"basis": "sales",
+"v": 3942755
+},
+"2022": {
+"basis": "sales",
+"v": 4235737
+},
+"2023": {
+"basis": "sales",
+"v": 4413545
+},
+"2024": {
+"basis": "sales",
+"v": 4470165
+},
+"2025": {
+"basis": "sales",
+"v": 4400000
+}
+},
+"Geely": {
+"2010": {
+"basis": "production",
+"v": 802319
+},
+"2013": {
+"basis": "production",
+"v": 969896
+},
+"2016": {
+"basis": "production",
+"v": 1266456
+},
+"2017": {
+"basis": "production",
+"v": 1950382
+},
+"2018": {
+"basis": "sales",
+"v": 1500458
+},
+"2019": {
+"basis": "sales",
+"v": 1361556
+},
+"2020": {
+"basis": "sales",
+"v": 1320471
+},
+"2021": {
+"basis": "sales",
+"v": 2200000
+},
+"2022": {
+"basis": "sales",
+"v": 2300000
+},
+"2023": {
+"basis": "sales",
+"v": 2790000
+},
+"2024": {
+"basis": "sales",
+"v": 3340000
+},
+"2025": {
+"basis": "sales",
+"v": 4116321
+}
+},
+"General Motors": {
+"2001": {
+"basis": "production",
+"v": 8086250
+},
+"2002": {
+"basis": "production",
+"v": 8732742
+},
+"2003": {
+"basis": "production",
+"v": 8706553
+},
+"2004": {
+"basis": "production",
+"v": 8965476
+},
+"2005": {
+"basis": "production",
+"v": 7943304
+},
+"2006": {
+"basis": "production",
+"v": 8926160
+},
+"2007": {
+"basis": "production",
+"v": 9349818
+},
+"2008": {
+"basis": "production",
+"v": 8282803
+},
+"2009": {
+"basis": "production",
+"v": 6459053
+},
+"2010": {
+"basis": "production",
+"v": 8476192
+},
+"2011": {
+"basis": "production",
+"v": 9031670
+},
+"2012": {
+"basis": "production",
+"v": 9285425
+},
+"2013": {
+"basis": "production",
+"v": 9628912
+},
+"2014": {
+"basis": "production",
+"v": 9609326
+},
+"2015": {
+"basis": "production",
+"v": 7485587
+},
+"2016": {
+"basis": "production",
+"v": 7793066
+},
+"2017": {
+"basis": "production",
+"v": 6856880
+},
+"2018": {
+"basis": "sales",
+"v": 8787233
+},
+"2019": {
+"basis": "sales",
+"v": 7724163
+},
+"2020": {
+"basis": "sales",
+"v": 6833592
+},
+"2021": {
+"basis": "sales",
+"v": 6294385
+},
+"2022": {
+"basis": "sales",
+"v": 5941737
+},
+"2023": {
+"basis": "sales",
+"v": 6188476
+},
+"2024": {
+"basis": "sales",
+"v": 6001247
+},
+"2025": {
+"basis": "sales",
+"v": 6183928
+}
+},
+"Great Wall": {
+"2016": {
+"basis": "production",
+"v": 1094360
+}
+},
+"Groupe PSA": {
+"2015": {
+"basis": "production",
+"v": 2982035
+},
+"2016": {
+"basis": "production",
+"v": 3152787
+},
+"2017": {
+"basis": "production",
+"v": 3649742
+}
+},
+"Honda": {
+"2001": {
+"basis": "production",
+"v": 2673671
+},
+"2002": {
+"basis": "production",
+"v": 2988427
+},
+"2003": {
+"basis": "production",
+"v": 2922526
+},
+"2004": {
+"basis": "production",
+"v": 3237434
+},
+"2005": {
+"basis": "production",
+"v": 3436164
+},
+"2006": {
+"basis": "production",
+"v": 3669514
+},
+"2007": {
+"basis": "production",
+"v": 3911814
+},
+"2008": {
+"basis": "production",
+"v": 3912700
+},
+"2009": {
+"basis": "production",
+"v": 3012637
+},
+"2010": {
+"basis": "production",
+"v": 3643057
+},
+"2011": {
+"basis": "production",
+"v": 2909016
+},
+"2012": {
+"basis": "production",
+"v": 4110857
+},
+"2013": {
+"basis": "production",
+"v": 4298390
+},
+"2014": {
+"basis": "production",
+"v": 4513769
+},
+"2015": {
+"basis": "production",
+"v": 4543838
+},
+"2016": {
+"basis": "production",
+"v": 4999266
+},
+"2017": {
+"basis": "production",
+"v": 5235842
+},
+"2018": {
+"basis": "sales",
+"v": 5265892
+},
+"2019": {
+"basis": "sales",
+"v": 5323319
+},
+"2020": {
+"basis": "sales",
+"v": 4790438
+},
+"2021": {
+"basis": "sales",
+"v": 4456728
+},
+"2022": {
+"basis": "sales",
+"v": 4074372
+},
+"2023": {
+"basis": "sales",
+"v": 4188039
+},
+"2024": {
+"basis": "sales",
+"v": 3716295
+},
+"2025": {
+"basis": "sales",
+"v": 3521905
+}
+},
+"Hyundai Motor Group": {
+"2003": {
+"basis": "production",
+"v": 2697435
+},
+"2004": {
+"basis": "production",
+"v": 2766321
+},
+"2005": {
+"basis": "production",
+"v": 3091060
+},
+"2006": {
+"basis": "production",
+"v": 3775749
+},
+"2007": {
+"basis": "production",
+"v": 3987055
+},
+"2008": {
+"basis": "production",
+"v": 4172461
+},
+"2009": {
+"basis": "production",
+"v": 4645776
+},
+"2010": {
+"basis": "production",
+"v": 5764918
+},
+"2011": {
+"basis": "production",
+"v": 6616858
+},
+"2012": {
+"basis": "production",
+"v": 7126413
+},
+"2013": {
+"basis": "production",
+"v": 7233080
+},
+"2014": {
+"basis": "production",
+"v": 8008987
+},
+"2015": {
+"basis": "production",
+"v": 7988479
+},
+"2016": {
+"basis": "production",
+"v": 7889538
+},
+"2017": {
+"basis": "production",
+"v": 7218391
+},
+"2018": {
+"basis": "sales",
+"v": 7437209
+},
+"2019": {
+"basis": "sales",
+"v": 7189893
+},
+"2020": {
+"basis": "sales",
+"v": 6353514
+},
+"2021": {
+"basis": "sales",
+"v": 6668037
+},
+"2022": {
+"basis": "sales",
+"v": 6848198
+},
+"2023": {
+"basis": "sales",
+"v": 7302451
+},
+"2024": {
+"basis": "sales",
+"v": 7231248
+},
+"2025": {
+"basis": "sales",
+"v": 7272453
+}
+},
+"Hyundai-Kia": {
+"2001": {
+"basis": "production",
+"v": 2518443
+},
+"2002": {
+"basis": "production",
+"v": 2641825
+}
+},
+"Isuzu": {
+"2006": {
+"basis": "production",
+"v": 523648
+}
+},
+"Maruti Suzuki": {
+"2018": {
+"basis": "sales",
+"v": 3212984
+},
+"2019": {
+"basis": "sales",
+"v": 2851598
+}
+},
+"Mazda": {
+"2001": {
+"basis": "production",
+"v": 957012
+},
+"2002": {
+"basis": "production",
+"v": 1044536
+},
+"2003": {
+"basis": "production",
+"v": 1152578
+},
+"2004": {
+"basis": "production",
+"v": 1275080
+},
+"2005": {
+"basis": "production",
+"v": 1287561
+},
+"2006": {
+"basis": "production",
+"v": 1396412
+},
+"2007": {
+"basis": "production",
+"v": 1286730
+},
+"2008": {
+"basis": "production",
+"v": 1349274
+},
+"2009": {
+"basis": "production",
+"v": 984520
+},
+"2010": {
+"basis": "production",
+"v": 1307540
+},
+"2011": {
+"basis": "production",
+"v": 1165591
+},
+"2012": {
+"basis": "production",
+"v": 1189283
+},
+"2013": {
+"basis": "production",
+"v": 1264173
+},
+"2014": {
+"basis": "production",
+"v": 1328426
+},
+"2015": {
+"basis": "production",
+"v": 1540576
+},
+"2016": {
+"basis": "production",
+"v": 1586013
+},
+"2017": {
+"basis": "production",
+"v": 1607602
+},
+"2018": {
+"basis": "sales",
+"v": 1631142
+},
+"2019": {
+"basis": "sales",
+"v": 1454121
+},
+"2020": {
+"basis": "sales",
+"v": 1243039
+}
+},
+"Mercedes": {
+"2018": {
+"basis": "sales",
+"v": 2310253
+},
+"2019": {
+"basis": "sales",
+"v": 2339024
+},
+"2020": {
+"basis": "sales",
+"v": 2164275
+}
+},
+"Mitsubishi": {
+"2001": {
+"basis": "production",
+"v": 1647817
+},
+"2002": {
+"basis": "production",
+"v": 1821466
+},
+"2003": {
+"basis": "production",
+"v": 1582205
+},
+"2004": {
+"basis": "production",
+"v": 1428563
+},
+"2005": {
+"basis": "production",
+"v": 1331060
+},
+"2006": {
+"basis": "production",
+"v": 1313409
+},
+"2007": {
+"basis": "production",
+"v": 1411975
+},
+"2008": {
+"basis": "production",
+"v": 1309231
+},
+"2009": {
+"basis": "production",
+"v": 802463
+},
+"2010": {
+"basis": "production",
+"v": 1174383
+},
+"2011": {
+"basis": "production",
+"v": 1140282
+},
+"2012": {
+"basis": "production",
+"v": 1109731
+},
+"2013": {
+"basis": "production",
+"v": 1229441
+},
+"2014": {
+"basis": "production",
+"v": 1262342
+},
+"2015": {
+"basis": "production",
+"v": 1218853
+},
+"2017": {
+"basis": "production",
+"v": 1210263
+}
+},
+"Nissan": {
+"2001": {
+"basis": "production",
+"v": 2558979
+},
+"2002": {
+"basis": "production",
+"v": 2745596
+},
+"2003": {
+"basis": "production",
+"v": 2981154
+},
+"2004": {
+"basis": "production",
+"v": 3230326
+},
+"2005": {
+"basis": "production",
+"v": 3535345
+},
+"2006": {
+"basis": "production",
+"v": 3266205
+},
+"2007": {
+"basis": "production",
+"v": 3431398
+},
+"2008": {
+"basis": "production",
+"v": 3395065
+},
+"2009": {
+"basis": "production",
+"v": 2744562
+},
+"2010": {
+"basis": "production",
+"v": 3982162
+},
+"2011": {
+"basis": "production",
+"v": 4631673
+},
+"2012": {
+"basis": "production",
+"v": 4889379
+},
+"2013": {
+"basis": "production",
+"v": 4950924
+},
+"2014": {
+"basis": "production",
+"v": 5097772
+},
+"2015": {
+"basis": "production",
+"v": 5170074
+},
+"2016": {
+"basis": "production",
+"v": 5556241
+},
+"2017": {
+"basis": "production",
+"v": 5769277
+},
+"2018": {
+"basis": "sales",
+"v": 5653743
+},
+"2019": {
+"basis": "sales",
+"v": 5176211
+},
+"2020": {
+"basis": "sales",
+"v": 4029174
+},
+"2021": {
+"basis": "sales",
+"v": 4064999
+},
+"2022": {
+"basis": "sales",
+"v": 3225478
+},
+"2023": {
+"basis": "sales",
+"v": 3374271
+},
+"2024": {
+"basis": "sales",
+"v": 3346248
+},
+"2025": {
+"basis": "sales",
+"v": 3202137
+}
+},
+"PSA Group": {
+"2018": {
+"basis": "sales",
+"v": 4126349
+},
+"2019": {
+"basis": "sales",
+"v": 3479152
+},
+"2020": {
+"basis": "sales",
+"v": 2512399
+}
+},
+"PSA Peugeot Citro\u00ebn": {
+"2001": {
+"basis": "production",
+"v": 3102449
+},
+"2002": {
+"basis": "production",
+"v": 3262146
+},
+"2003": {
+"basis": "production",
+"v": 3310368
+},
+"2004": {
+"basis": "production",
+"v": 3405245
+},
+"2005": {
+"basis": "production",
+"v": 3375366
+},
+"2006": {
+"basis": "production",
+"v": 3356859
+},
+"2007": {
+"basis": "production",
+"v": 3457385
+},
+"2008": {
+"basis": "production",
+"v": 3325407
+},
+"2009": {
+"basis": "production",
+"v": 3042311
+},
+"2010": {
+"basis": "production",
+"v": 3605524
+},
+"2011": {
+"basis": "production",
+"v": 3582410
+},
+"2012": {
+"basis": "production",
+"v": 2911764
+},
+"2013": {
+"basis": "production",
+"v": 2833781
+},
+"2014": {
+"basis": "production",
+"v": 2917046
+}
+},
+"Renault": {
+"2001": {
+"basis": "production",
+"v": 2375084
+},
+"2002": {
+"basis": "production",
+"v": 2328508
+},
+"2003": {
+"basis": "production",
+"v": 2386098
+},
+"2004": {
+"basis": "production",
+"v": 2471654
+},
+"2005": {
+"basis": "production",
+"v": 2616818
+},
+"2006": {
+"basis": "production",
+"v": 2543649
+},
+"2007": {
+"basis": "production",
+"v": 2669040
+},
+"2008": {
+"basis": "production",
+"v": 2417351
+},
+"2009": {
+"basis": "production",
+"v": 2296009
+},
+"2010": {
+"basis": "production",
+"v": 2716286
+},
+"2011": {
+"basis": "production",
+"v": 2825089
+},
+"2012": {
+"basis": "production",
+"v": 2676226
+},
+"2013": {
+"basis": "production",
+"v": 2704675
+},
+"2014": {
+"basis": "production",
+"v": 2761969
+},
+"2015": {
+"basis": "production",
+"v": 3032652
+},
+"2016": {
+"basis": "production",
+"v": 3373278
+},
+"2017": {
+"basis": "production",
+"v": 4153589
+},
+"2018": {
+"basis": "sales",
+"v": 3883987
+},
+"2019": {
+"basis": "sales",
+"v": 3749815
+},
+"2020": {
+"basis": "sales",
+"v": 2949871
+}
+},
+"SAIC": {
+"2011": {
+"basis": "production",
+"v": 1478502
+},
+"2012": {
+"basis": "production",
+"v": 1783548
+},
+"2013": {
+"basis": "production",
+"v": 1992250
+},
+"2014": {
+"basis": "production",
+"v": 2087949
+},
+"2015": {
+"basis": "production",
+"v": 2260579
+},
+"2016": {
+"basis": "production",
+"v": 2564786
+},
+"2017": {
+"basis": "production",
+"v": 2866913
+}
+},
+"SAIC Motor": {
+"2021": {
+"basis": "sales",
+"v": 5464000
+},
+"2022": {
+"basis": "sales",
+"v": 5303000
+},
+"2023": {
+"basis": "sales",
+"v": 5020865
+},
+"2024": {
+"basis": "sales",
+"v": 4013023
+},
+"2025": {
+"basis": "sales",
+"v": 4507500
+}
+},
+"Stellantis": {
+"2021": {
+"basis": "sales",
+"v": 6142200
+},
+"2022": {
+"basis": "sales",
+"v": 6002900
+},
+"2023": {
+"basis": "sales",
+"v": 6392600
+},
+"2024": {
+"basis": "sales",
+"v": 5525875
+},
+"2025": {
+"basis": "sales",
+"v": 5600000
+}
+},
+"Subaru": {
+"2005": {
+"basis": "production",
+"v": 591825
+},
+"2006": {
+"basis": "production",
+"v": 587274
+},
+"2007": {
+"basis": "production",
+"v": 585028
+},
+"2008": {
+"basis": "production",
+"v": 616497
+}
+},
+"Suzuki": {
+"2001": {
+"basis": "production",
+"v": 1541103
+},
+"2002": {
+"basis": "production",
+"v": 1703959
+},
+"2003": {
+"basis": "production",
+"v": 1811214
+},
+"2004": {
+"basis": "production",
+"v": 1976824
+},
+"2005": {
+"basis": "production",
+"v": 2071707
+},
+"2006": {
+"basis": "production",
+"v": 2297277
+},
+"2007": {
+"basis": "production",
+"v": 2596316
+},
+"2008": {
+"basis": "production",
+"v": 2623567
+},
+"2009": {
+"basis": "production",
+"v": 2387537
+},
+"2010": {
+"basis": "production",
+"v": 2892945
+},
+"2011": {
+"basis": "production",
+"v": 2725899
+},
+"2012": {
+"basis": "production",
+"v": 2893602
+},
+"2013": {
+"basis": "production",
+"v": 2842133
+},
+"2014": {
+"basis": "production",
+"v": 3016710
+},
+"2015": {
+"basis": "production",
+"v": 3034081
+},
+"2016": {
+"basis": "production",
+"v": 2945295
+},
+"2017": {
+"basis": "production",
+"v": 3302336
+},
+"2022": {
+"basis": "sales",
+"v": 3000945
+},
+"2023": {
+"basis": "sales",
+"v": 3168249
+},
+"2024": {
+"basis": "sales",
+"v": 3240385
+},
+"2025": {
+"basis": "sales",
+"v": 3295013
+}
+},
+"Tata": {
+"2006": {
+"basis": "production",
+"v": 561761
+},
+"2007": {
+"basis": "production",
+"v": 588158
+},
+"2008": {
+"basis": "production",
+"v": 798265
+},
+"2009": {
+"basis": "production",
+"v": 672045
+},
+"2010": {
+"basis": "production",
+"v": 1011343
+},
+"2011": {
+"basis": "production",
+"v": 1197192
+},
+"2012": {
+"basis": "production",
+"v": 1241239
+},
+"2013": {
+"basis": "production",
+"v": 1062654
+},
+"2014": {
+"basis": "production",
+"v": 945113
+},
+"2015": {
+"basis": "production",
+"v": 1009369
+}
+},
+"Toyota": {
+"2001": {
+"basis": "production",
+"v": 6054968
+},
+"2002": {
+"basis": "production",
+"v": 5744156
+},
+"2003": {
+"basis": "production",
+"v": 6240526
+},
+"2004": {
+"basis": "production",
+"v": 6814554
+},
+"2005": {
+"basis": "production",
+"v": 7338314
+},
+"2006": {
+"basis": "production",
+"v": 8036010
+},
+"2007": {
+"basis": "production",
+"v": 8534690
+},
+"2008": {
+"basis": "production",
+"v": 9237780
+},
+"2009": {
+"basis": "production",
+"v": 7234439
+},
+"2010": {
+"basis": "production",
+"v": 8557351
+},
+"2011": {
+"basis": "production",
+"v": 8050181
+},
+"2012": {
+"basis": "production",
+"v": 10104424
+},
+"2013": {
+"basis": "production",
+"v": 10324995
+},
+"2014": {
+"basis": "production",
+"v": 10475338
+},
+"2015": {
+"basis": "production",
+"v": 10083831
+},
+"2016": {
+"basis": "production",
+"v": 10213486
+},
+"2017": {
+"basis": "production",
+"v": 10466051
+},
+"2018": {
+"basis": "sales",
+"v": 10521134
+},
+"2019": {
+"basis": "sales",
+"v": 10741556
+},
+"2020": {
+"basis": "sales",
+"v": 9528753
+},
+"2021": {
+"basis": "sales",
+"v": 9562483
+},
+"2022": {
+"basis": "sales",
+"v": 9566961
+},
+"2023": {
+"basis": "sales",
+"v": 10307395
+},
+"2024": {
+"basis": "sales",
+"v": 11011375
+},
+"2025": {
+"basis": "sales",
+"v": 11322575
+}
+},
+"Volkswagen Group": {
+"2001": {
+"basis": "production",
+"v": 5108982
+},
+"2002": {
+"basis": "production",
+"v": 5017438
+},
+"2003": {
+"basis": "production",
+"v": 5024032
+},
+"2004": {
+"basis": "production",
+"v": 5095480
+},
+"2005": {
+"basis": "production",
+"v": 5211413
+},
+"2006": {
+"basis": "production",
+"v": 5684603
+},
+"2007": {
+"basis": "production",
+"v": 6267891
+},
+"2008": {
+"basis": "production",
+"v": 6437414
+},
+"2009": {
+"basis": "production",
+"v": 6067208
+},
+"2010": {
+"basis": "production",
+"v": 7341065
+},
+"2011": {
+"basis": "production",
+"v": 8525573
+},
+"2012": {
+"basis": "production",
+"v": 9254742
+},
+"2013": {
+"basis": "production",
+"v": 9379229
+},
+"2014": {
+"basis": "production",
+"v": 9894891
+},
+"2015": {
+"basis": "production",
+"v": 9872424
+},
+"2016": {
+"basis": "production",
+"v": 10126281
+},
+"2017": {
+"basis": "production",
+"v": 10382334
+},
+"2018": {
+"basis": "sales",
+"v": 10831232
+},
+"2019": {
+"basis": "sales",
+"v": 10975352
+},
+"2020": {
+"basis": "sales",
+"v": 9305427
+},
+"2021": {
+"basis": "sales",
+"v": 8882346
+},
+"2022": {
+"basis": "sales",
+"v": 8263104
+},
+"2023": {
+"basis": "sales",
+"v": 9239575
+},
+"2024": {
+"basis": "sales",
+"v": 9037425
+},
+"2025": {
+"basis": "sales",
+"v": 8983978
+}
+}
+}
