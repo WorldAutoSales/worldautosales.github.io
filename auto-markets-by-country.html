@@ -350,9 +350,12 @@ const MAP_NAME_TO_COUNTRY = Object.fromEntries(
 
 const COUNTRIES = Object.keys(MARKETS).sort();
 const ALL_CONTINENTS = [...new Set(COUNTRIES.map(c => MARKETS[c].continent))].sort();
+// display name in the Country filter: "France - Mayotte" is shown as "Mayotte - France" (same for every "A - B" territory name);
+// the data keys stay as they are, only the label and the sort order use this
+const filterName = c => c.replace(/^(.+?) - (.+)$/, '$2 - $1');
 const COUNTRIES_SORTED = [...COUNTRIES].sort((a,b) => {
   const ca = MARKETS[a].continent, cb = MARKETS[b].continent;
-  return ca !== cb ? ca.localeCompare(cb) : a.localeCompare(b);
+  return ca !== cb ? ca.localeCompare(cb) : filterName(a).localeCompare(filterName(b));
 });
 
 function yearsOf(country){
@@ -385,7 +388,7 @@ const countriesBox = document.getElementById('filter-countries-group');
 countriesBox.innerHTML = COUNTRIES_SORTED.map(c => `
   <label class="filter-checkbox">
     <input type="checkbox" data-country="${c}" checked>
-    <span class="fc-label">${MARKETS[c].continent} - ${c}</span>
+    <span class="fc-label">${MARKETS[c].continent} - ${filterName(c)}</span>
     <button type="button" class="only-btn" data-only-country="${c}">Only</button>
   </label>`).join('');
 

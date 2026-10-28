@@ -2830,9 +2830,12 @@ const PURPLE_COUNTRIES = Object.keys(COUNTRY_DATA_QUALITY).filter(c => !COUNTRIE
 PURPLE_COUNTRIES.forEach(c => { if(!COUNTRY_CONTINENT[c]) COUNTRY_CONTINENT[c] = PURPLE_CONTINENT[c] || 'OTHER'; });
 const PURPLE_SET = new Set(PURPLE_COUNTRIES);
 const FILTER_COUNTRIES = [...ALL_COUNTRIES, ...PURPLE_COUNTRIES];
+// display name in the Country filter: "France - Mayotte" is shown as "Mayotte - France" (same for every "A - B" territory name);
+// the data keys stay as they are, only the label and the sort order use this
+const filterName = c => c.replace(/^(.+?) - (.+)$/, '$2 - $1');
 const FILTER_COUNTRIES_SORTED = [...FILTER_COUNTRIES].sort((a,b) => {
   const ca = COUNTRY_CONTINENT[a] || 'ZZ', cb = COUNTRY_CONTINENT[b] || 'ZZ';
-  return ca !== cb ? ca.localeCompare(cb) : a.localeCompare(b);
+  return ca !== cb ? ca.localeCompare(cb) : filterName(a).localeCompare(filterName(b));
 });
 
 // --- filter state ---
@@ -2888,7 +2891,7 @@ const countriesBox = document.getElementById('filter-countries-group');
 countriesBox.innerHTML = FILTER_COUNTRIES_SORTED.map(c => `
   <label class="filter-checkbox" data-country-row="${c}">
     <input type="checkbox" data-country="${c}" checked>
-    <span class="fc-label">${contShort(COUNTRY_CONTINENT[c] || 'OTHER')} - ${PURPLE_SET.has(c) ? `<span style="color:#7e57c2;font-weight:600" title="Sales data only: no powertrain split published">${c}</span> <span style="opacity:.6;font-weight:400">(no split)</span>` : c}</span>
+    <span class="fc-label">${contShort(COUNTRY_CONTINENT[c] || 'OTHER')} - ${PURPLE_SET.has(c) ? `<span style="color:#7e57c2;font-weight:600" title="Sales data only: no powertrain split published">${filterName(c)}</span> <span style="opacity:.6;font-weight:400">(no split)</span>` : filterName(c)}</span>
     <button type="button" class="only-btn" data-only-country="${c}">Only</button>
   </label>`).join('');
 
@@ -2902,7 +2905,7 @@ countrySearchInput.addEventListener('input', () => {
     return;
   }
   rows.forEach(row => {
-    const match = row.dataset.countryRow.toLowerCase().includes(q);
+    const match = row.dataset.countryRow.toLowerCase().includes(q) || filterName(row.dataset.countryRow).toLowerCase().includes(q);
     row.classList.toggle('search-hidden', !match);
   });
 });
