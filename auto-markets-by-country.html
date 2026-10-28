@@ -73,7 +73,7 @@
             </span>
           </div>
           <div class="filter-countries" id="filter-countries-group"></div>
-          <p class="filter-note">Sorted by continent, then country. 147 markets total.</p>
+          <p class="filter-note">Sorted by continent, then country. <span data-market-count>147</span> markets total.</p>
         </div>
 
         <button class="filter-reset" id="filter-reset">Reset all filters</button>
@@ -83,7 +83,7 @@
       <header class="page-header">
         <div class="eyebrow">World Auto Sales · Markets</div>
         <h1>Auto Markets by Country</h1>
-        <p class="subtitle">Total new vehicle registrations by country and year — 147 markets, 1999–2026. This is total market size (every powertrain combined), not the BEV/PHEV/Petrol/Diesel mix — see "Mix by Country" and "World Auto Sales" for the powertrain breakdown where it's available. Coverage and precision vary by country; see the notes below.</p>
+        <p class="subtitle">Total new vehicle registrations by country and year — <span data-market-count>147</span> markets, 1999–2026. This is total market size (every powertrain combined), not the BEV/PHEV/Petrol/Diesel mix — see "Mix by Country" and "World Auto Sales" for the powertrain breakdown where it's available. Coverage and precision vary by country; see the notes below.</p>
       </header>
 
       <div class="stat-row" id="stat-row"></div>
@@ -97,8 +97,14 @@
 
       <div class="card chart-card" id="momentum-section">
         <h2>Momentum — Fastest Growing Markets</h2>
-        <p class="note" title="Momentum is the CHANGE in a market's size over 5 years — not its current size. A market can be huge but flat (low momentum) or small but fast-growing (high momentum).">Each market's registration trend since its earliest data, ranked by percent change over the last 5 available years (fastest growers first). A hollow endpoint and "Proj." tag mean the latest point is a 2026 full-year run-rate estimate, not a raw partial total. Click a card to see it full-size below.</p>
+        <p class="note" title="Momentum is the CHANGE in a market's size over 5 years — not its current size. A market can be huge but flat (low momentum) or small but fast-growing (high momentum).">The two rows of filtered markets with the biggest percent change in registrations over their last 5 available years (fastest growers first). A hollow endpoint and "Proj." tag mean the latest point is a 2026 full-year run-rate estimate, not a raw partial total. Click a card to see it full-size below.</p>
         <div class="momentum-grid" id="momentum-grid"></div>
+      </div>
+
+      <div class="card chart-card" id="momentum-slowest-section">
+        <h2>Momentum — Slowest Growing Markets</h2>
+        <p class="note" title="Momentum is the CHANGE in a market's size over 5 years — not its current size. A market can be huge but shrinking, or small and steady.">One row of the filtered markets with the smallest gain or the steepest decline in registrations over their last 5 available years (weakest first). Markets already shown above are left out. Click a card to see it full-size below.</p>
+        <div class="momentum-grid" id="momentum-slowest-grid"></div>
       </div>
 
       <div class="card chart-card">
@@ -349,6 +355,7 @@ const MAP_NAME_TO_COUNTRY = Object.fromEntries(
 );
 
 const COUNTRIES = Object.keys(MARKETS).sort();
+document.querySelectorAll('[data-market-count]').forEach(e => { e.textContent = COUNTRIES.length; });   // was a hard-coded 147
 const ALL_CONTINENTS = [...new Set(COUNTRIES.map(c => MARKETS[c].continent))].sort();
 // display name in the Country filter: "France - Mayotte" is shown as "Mayotte - France" (same for every "A - B" territory name);
 // the data keys stay as they are, only the label and the sort order use this
@@ -811,21 +818,43 @@ function wireMomentumCardClicks(container){
 
 // hidden while a country is isolated — that country's own momentum card moves into the
 // Country Stats row instead (see renderFocusStats), so a 1-card grid here would be redundant
+// cards per row of the momentum grids: same arithmetic as the CSS (auto-fill, 150px minimum, 10px gap), measured on the live width,
+// so "two rows" / "one row" are always full rows whatever the screen
+function momentumColumns(grid){
+  return Math.max(1, Math.floor((grid.clientWidth + 10) / 160));
+}
+let momentumColsShown = 0;
 function renderMomentum(){
   const section = document.getElementById('momentum-section');
+  const slowSection = document.getElementById('momentum-slowest-section');
   const grid = document.getElementById('momentum-grid');
-  if(isolatedCountry){ section.classList.add('hidden'); return; }
-  section.classList.remove('hidden');
+  const slowGrid = document.getElementById('momentum-slowest-grid');
+  if(isolatedCountry){ section.classList.add('hidden'); slowSection.classList.add('hidden'); return; }
+  section.classList.remove('hidden'); slowSection.classList.remove('hidden');
 
-  const cards = DATA.map(momentumCardData).filter(Boolean).sort((a,b) => {
-    if(a.delta == null) return 1;
-    if(b.delta == null) return -1;
-    return b.delta - a.delta;
-  });
+  const cols = momentumColumns(grid); momentumColsShown = cols;
+  const cards = DATA.map(momentumCardData).filter(Boolean);
+  const withDelta = cards.filter(c => c.delta != null).sort((a,b) => b.delta - a.delta);      // fastest first
 
-  grid.innerHTML = cards.map(momentumCardHTML).join('');
+  const fastest = withDelta.slice(0, cols * 2);
+  const shown = new Set(fastest.map(c => c.country));
+  // slowest = weakest of what is left, so a small filtered set can't put the same market in both lists
+  const slowest = withDelta.filter(c => !shown.has(c.country)).sort((a,b) => a.delta - b.delta).slice(0, cols);
+
+  grid.innerHTML = fastest.map(momentumCardHTML).join('');
   wireMomentumCardClicks(grid);
+  slowGrid.innerHTML = slowest.map(momentumCardHTML).join('');
+  wireMomentumCardClicks(slowGrid);
 }
+// the grid's width changes the number of cards per row (window resize, layout settling after load) -> redraw so the rows stay full
+let momentumResizeTimer = null;
+new ResizeObserver(() => {
+  clearTimeout(momentumResizeTimer);
+  momentumResizeTimer = setTimeout(() => {
+    const g = document.getElementById('momentum-grid');
+    if(g && g.clientWidth && momentumColumns(g) !== momentumColsShown && !isolatedCountry) renderMomentum();
+  }, 100);
+}).observe(document.getElementById('momentum-grid'));
 
 // --- market size trend: single line, total across filtered markets, by year ---
 function renderYearlyTrend(){
