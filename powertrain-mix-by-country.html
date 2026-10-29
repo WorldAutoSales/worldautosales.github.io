@@ -5532,7 +5532,7 @@ countriesBox.addEventListener('click', e => {
 // A continent / rank tier that would hide the country is switched back on, so the click never ends on an empty page.
 function selectOnlyCountry(c, toggle = true){
   if(!c || !FILTER_COUNTRIES.includes(c)) return;
-  if(toggle && selectedCountries.size === 1 && selectedCountries.has(c)){ clearSelection(); recompute(); return; }
+  if(toggle && ((selectedCountries.size === 1 && selectedCountries.has(c)) || focusedCountry === c)){ clearSelection(); recompute(); return; }   // also when the country was focused from the map / a bubble
   const cont = COUNTRY_CONTINENT[c] || 'OTHER';
   if(!selectedContinents.has(cont)){
     selectedContinents.add(cont);
