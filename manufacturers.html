@@ -59,7 +59,17 @@
   .fx-panel .mfr-combo-group{ color:#8fa0ff; }
   .fx-panel .mfr-combo-opt:hover, .fx-panel .mfr-combo-opt.hl{ background:rgba(34,211,238,.16); }
   .fx-panel .mfr-combo-empty{ color:#9fb0ff; }
+  .bw-chart{ position:relative; }
   .bw-chart svg{ width:100%; height:auto; display:block; overflow:visible; }
+  .bw-chart .hit{ fill:transparent; cursor:crosshair; }
+  .bw-chart .hit:hover{ fill:rgba(99,102,241,.10); }
+  .bw-tip{ position:absolute; z-index:5; opacity:0; pointer-events:none; background:var(--card, #fff); color:var(--text); border:1px solid var(--border); border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.18); padding:8px 11px; font-size:12px; line-height:1.5; max-width:290px; transition:opacity .08s; }
+  .bw-tip .bw-big{ font-size:15px; font-weight:800; }
+  .bw-tip .up{ color:#16a34a; } .bw-tip .dn{ color:#dc2626; }
+  .bw-tip .bw-basis{ color:var(--text-muted); font-size:11px; }
+  .fx-hist{ position:relative; }
+  .fx-ref{ position:absolute; height:0; border-top:2px dotted; pointer-events:none; z-index:2; }
+  .fx-ref-lbl{ position:absolute; font-size:10.5px; font-weight:800; pointer-events:none; z-index:2; white-space:nowrap; background:var(--card, #fff); padding:0 3px; border-radius:4px; }
   .bw-chart text{ fill:var(--text-muted); font-size:11px; }
   .bw-chart .vl{ fill:var(--text); font-weight:800; font-size:11px; }
   .bw-chart .gl{ stroke:var(--border); stroke-dasharray:2 4; }
@@ -341,15 +351,9 @@
       <div class="fx-chipbar" id="fx-chipbar"></div>
 
       <div class="card chart-card" id="world-card">
-        <h2>World new-vehicle sales per year</h2>
+        <h2 id="world-title">World new-vehicle sales per year</h2>
+        <div id="world-bars"></div>
         <p class="note" style="display:block" id="world-note"></p>
-        <div class="bw-chart" id="world-bars"></div>
-      </div>
-
-      <div class="card chart-card" id="bw-card" style="display:none">
-        <h2 id="bw-title">World volume of the selected manufacturer</h2>
-        <p class="note" style="display:block" id="bw-note"></p>
-        <div id="bw-charts"></div>
       </div>
 
       <div class="card chart-card">
@@ -403,7 +407,7 @@
 
       <div class="card chart-card">
         <h2>How to read this page</h2>
-        <p class="note" style="display:block">Coverage: about 50 countries with brand-level data (monthly from January 2025 where available, yearly back to 2008 for the longest series). Countries drawn in beige have no manufacturer breakdown on this site. Where a source publishes no powertrain split for a brand, its sales are counted as HEV + ICE + Diesel (and a few countries publish totals only). Hong Kong's registry folds hybrids and plug-in hybrids into petrol, so its PHEV share shows 0% even though some plug-in hybrids are in the grey bar; its BEV share is exact. Yearly periods use each country's yearly series; the running year (2026) is offered as "(Projected)" — each brand's year-to-date total through the latest month loaded for that country, annualized to a full-year run-rate (year-to-date &times; 12 / months loaded) — rather than a raw partial total, so it's comparable to the complete prior years in the same list. Every brand has one permanent color taken from its logo (Toyota red, Ford blue, BMW silver…) and each country carries a badge with its winner's logo; logos come from the open-source simple-icons set, so brands without one (BYD, Perodua, Stellantis, VinFast…) show their initials instead. "Compare / Split switches above the continent and country charts redo them for BEV only or non-BEV only (PHEV counts as non-BEV), or cut every bar into BEV and non-BEV. For a manufacturer or parent group with a worldwide total in its financial reports (annual reports, 10-K / 20-F, official year-end sales releases; full years only), the charts add a "Reported worldwide" row and a hatched "Unclassified" row: reported sales minus the sum of the tracked countries, i.e. markets without brand data here, differences of basis (reported wholesale or deliveries vs. registrations) and joint-venture brands that this site files under another owner (Wuling under SAIC, for instance). The reported figures, regions and sources are in the Supabase table manufacturer_fin_report_sales. Parent group" attributes each brand to its owner as of the selected year (e.g. Volvo and Polestar count under Geely, not Ford, from 2010 onward).</p>
+        <p class="note" style="display:block">Coverage: about 50 countries with brand-level data (monthly from January 2025 where available, yearly back to 2008 for the longest series). Countries drawn in beige have no manufacturer breakdown on this site. Where a source publishes no powertrain split for a brand, its sales are counted as HEV + ICE + Diesel (and a few countries publish totals only). Hong Kong's registry folds hybrids and plug-in hybrids into petrol, so its PHEV share shows 0% even though some plug-in hybrids are in the grey bar; its BEV share is exact. Yearly periods use each country's yearly series; the running year (2026) is offered as "(Projected)" — each brand's year-to-date total through the latest month loaded for that country, annualized to a full-year run-rate (year-to-date &times; 12 / months loaded) — rather than a raw partial total, so it's comparable to the complete prior years in the same list. Every brand has one permanent color taken from its logo (Toyota red, Ford blue, BMW silver…) and each country carries a badge with its winner's logo; logos come from the open-source simple-icons set, so brands without one (BYD, Perodua, Stellantis, VinFast…) show their initials instead. "Compare / Split switches above the continent and country charts redo them for BEV only or non-BEV only (PHEV counts as non-BEV), or cut every bar into BEV and non-BEV. For a manufacturer or parent group with a worldwide total in its financial reports (annual reports, 10-K / 20-F, official year-end sales releases; full years only), the charts add a "Reported worldwide" row and a hatched "All other countries" row: reported sales minus the sum of the tracked countries, i.e. markets without brand data here, differences of basis (reported wholesale or deliveries vs. registrations) and joint-venture brands that this site files under another owner (Wuling under SAIC, for instance). The reported figures, regions and sources are in the Supabase table manufacturer_fin_report_sales. Parent group" attributes each brand to its owner as of the selected year (e.g. Volvo and Polestar count under Geely, not Ford, from 2010 onward).</p>
       </div>
     </div>
     </div>
@@ -1152,7 +1156,7 @@ function renderSpotlight(){
       (best ? kpi('Best market', esc(best[0]), `${compactN(best[1].sel.total)} units · #${best[1].rank}`, '#ec4899') : '') +
       kpi('BEV share', (100 * t.bev / (t.total || 1)).toFixed(1) + '%', `${compactN(t.bev)} electric units`, COLORS.bev);
     const fin = !filtersActive() ? finFor(mfr) : null;
-    if(fin) kpis += kpi('Reported worldwide', compactN(fin.units), `financial reports · ${finBasisShort(fin)}`, '#334155') + kpi('Unclassified', fin.units > t.total ? compactN(fin.units - t.total) : 'none', `${(100 * t.total / fin.units).toFixed(0)}% of the reported total sits in the tracked markets`, '#9ca3af');
+    if(fin) kpis += kpi('Reported worldwide', compactN(fin.units), `financial reports · ${finBasisShort(fin)}`, '#334155') + kpi('All other countries', fin.units > t.total ? compactN(fin.units - t.total) : 'none', `${(100 * t.total / fin.units).toFixed(0)}% of the reported total sits in the tracked markets`, '#9ca3af');
     donuts = `<div class="fx-donut">${donutSVG(mixParts(t), (100 * t.bev / (t.total || 1)).toFixed(0) + '%', 'BEV')}<div>${esc(mfr)}</div></div>`;
     histNames = [mfr]; histTitle = 'Five-year trend';
   } else {
@@ -1185,8 +1189,32 @@ function renderSpotlight(){
     const bg = cur ? `linear-gradient(to top, ${sr.col} 0 ${cut}%, color-mix(in srgb, ${sr.col} 30%, white) ${cut}% 100%)` : sr.col;
     return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;width:100%"><div class="fx-hist-val">${compactN(sr.top[i])}</div><div class="fx-hist-bar" style="height:${h * .78}%;background:${bg}" title="${esc(sr.name)} ${y}${cur ? ' projected' : ''}: ${fmt(sr.top[i])}"></div></div>`;
   }).join('') + `</div><div class="fx-hist-lbl">${y}${y === CUR_YEAR ? '*' : ''}</div></div>`).join('') + `</div>` +
-    `<div class="note" style="display:block;margin-top:8px">${series.map(sr => `${esc(sr.name)}: ${sr.n} markets with data in all five years`).join(' · ')}. *${CUR_YEAR} projected (year-to-date x 12 / ${CUR_YEAR_MONTHS_ELAPSED}), lighter part = projection.</div>`;
+    `<div class="note" style="display:block;margin-top:8px">${series.map(sr => `${esc(sr.name)}: ${sr.n} markets with data in all five years`).join(' · ')}. *${CUR_YEAR} projected (year-to-date x 12 / ${CUR_YEAR_MONTHS_ELAPSED}), lighter part = projection. Dotted line = level of the first year, to see at a glance whether sales progressed or regressed.</div>`;
+  drawHistRef(histEl, series);
 }
+// dotted line from the top of each series' first-year bar across to the last year, with the change written at its end
+function drawHistRef(histEl, series){
+  const box = histEl.querySelector('.fx-hist'); if(!box) return;
+  const draw = () => {
+    box.querySelectorAll('.fx-ref,.fx-ref-lbl').forEach(el => el.remove());
+    const yrs = [...box.querySelectorAll('.fx-hist-yr')]; if(yrs.length < 2) return;
+    const bc = box.getBoundingClientRect();
+    series.forEach((sr, si) => {
+      const bars = yrs.map(yr => yr.querySelectorAll('.fx-hist-bar')[si]); if(!bars[0] || !bars[bars.length - 1]) return;
+      const r0 = bars[0].getBoundingClientRect(), rl = bars[bars.length - 1].getBoundingClientRect();
+      const first = sr.top[0], last = sr.top[sr.top.length - 1]; if(!first) return;
+      const line = document.createElement('div'); line.className = 'fx-ref'; line.style.borderColor = sr.col;
+      line.style.top = (r0.top - bc.top) + 'px'; line.style.left = (r0.left - bc.left + r0.width / 2) + 'px'; line.style.width = (rl.left - r0.left + rl.width / 2 + 6) + 'px';
+      box.appendChild(line);
+      const chg = 100 * (last / first - 1), lb = document.createElement('div'); lb.className = 'fx-ref-lbl'; lb.style.color = chg >= 0 ? '#16a34a' : '#dc2626';
+      lb.textContent = (chg >= 0 ? '▲ +' : '▼ −') + Math.abs(chg).toFixed(0) + '% vs ' + yearsLabel(0);
+      lb.style.top = (r0.top - bc.top - 20) + 'px'; lb.style.left = (r0.left - bc.left + r0.width + 4 + si * 0) + 'px';
+      box.appendChild(lb);
+    });
+  };
+  requestAnimationFrame(draw);
+}
+const yearsLabel = i => historyYears()[i];
 
 // ---------- hover modal ----------
 function historyYears(){ return YEARS.slice(0, 5).reverse(); }
@@ -1434,10 +1462,23 @@ const FIN_BRAND_ALIAS = { 'Tesla':'Tesla', 'Kia':'Kia', 'Volvo':'Volvo Cars', 'M
 const finActive = () => cmpMode === 'all' && !filtersActive();      // a reported total only compares with unfiltered all-sales volumes
 const HATCH = 'repeating-linear-gradient(135deg,#6b7384 0 6px,#99a2b2 6px 12px)';
 function finFor(name){
-  if(kind !== 'brand' || !period || period.type !== 'year' || period.projected) return null;
-  const e = groupMode === 'group' ? FIN_BY_SITE.get(name) : FIN_ENT.get(FIN_BRAND_ALIAS[name]);
-  const y = e && e.years[String(period.year)];
-  return y ? Object.assign({ ent:e }, y) : null;
+  if(kind !== 'brand' || !period || period.type !== 'year') return null;
+  if(!period.projected){
+    const e = groupMode === 'group' ? FIN_BY_SITE.get(name) : FIN_ENT.get(FIN_BRAND_ALIAS[name]);
+    const y = e && e.years[String(period.year)];
+    if(y) return Object.assign({ ent:e }, y);
+  }
+  return histRef(name);
+}
+// no company filing on file (or the projected year): the parent group's worldwide volume from the world-history series, so the rest of the world is still accounted for
+function histRef(name){
+  if(groupMode !== 'group' || typeof histFor !== 'function') return null;
+  const h = histFor(name); if(!h || h.via) return null;
+  const grp = h.group, yy = period.year, bk = grp.b[String(Math.min(yy, 2025))] || 's';
+  const units = period.projected ? groupProjection(grp) : grp.s[String(yy)];
+  if(!units) return null;
+  return { ent:{ name:h.key }, units, basis:period.projected ? 'world volume, projected' : BK_TXT[bk], pt:'CY', conf:period.projected ? 'projection' : 'compilation', hist:true, proj:!!period.projected,
+    scope:period.projected ? '2025 x the world market trend, not a company forecast.' : '', src:(MFR_HIST && MFR_HIST.meta.url) || '' };
 }
 const finBasisShort = f => `${f.basis}${f.pt === 'FY' ? ', fiscal year Apr–Mar' : ''}`;
 const finTip = f => `${f.ent.name}: ${fmt(f.units)} (${finBasisShort(f)}; ${String(f.conf).replace('_', ' ')}). ${f.scope || ''} Source: ${f.src}`;
@@ -1447,12 +1488,12 @@ function finRowHTML(label, parts, widthDenom, pct, cls, tip){
   return `<div class="rank-row ${cls}" title="${esc(tip || '')}"><span class="world-rank-badge"></span><span class="country-label">${label}</span>` +
     `<span class="pct-of-total">${pct != null ? pct.toFixed(1) + '%' : ''}</span><span class="bar-track">${bar.replace(/ title="[^"]*"/g, '')}${outside}</span><span class="total-label">${fmt(sumParts(parts))}</span></div>`;
 }
-const finReportedRow = f => finRowHTML('Reported total', [{ value:f.units, color:'#334155', label:'Reported worldwide' }], f.units, 100, 'world-total fin-reported', finTip(f));
-const finGapRow = (gap, f, denom) => finRowHTML('Unclassified', [{ value:gap, color:HATCH, label:`Unclassified: ${fmt(gap)}` }], denom, 100 * gap / f.units, 'fin-gap', GAP_TIP);
+const finReportedRow = f => finRowHTML(f.hist ? (f.proj ? 'World total (projected)' : 'World total') : 'Reported total', [{ value:f.units, color:'#334155', label:'Reported worldwide' }], f.units, 100, 'world-total fin-reported', finTip(f));
+const finGapRow = (gap, f, denom) => finRowHTML('All other countries', [{ value:gap, color:HATCH, label:`All other countries: ${fmt(gap)}` }], denom, 100 * gap / f.units, 'fin-gap', GAP_TIP);
 function finNote(f, tracked){
   const gap = f.units - tracked;
-  return ` Reported worldwide: ${fmt(f.units)} (${finBasisShort(f)}, ${f.ent.name}). The tracked countries add up to ${fmt(tracked)} (${(100 * tracked / f.units).toFixed(0)}%).` +
-    (gap > 0 ? ` The hatched "Unclassified" row (${fmt(gap)}) is the remainder: markets without brand data here, basis differences, and joint-venture brands that sit under another owner.` : ' They already exceed the reported figure (registrations vs. reported wholesale or deliveries), so there is no unclassified remainder.');
+  return ` ${f.hist ? 'Worldwide volume of the group' : 'Reported worldwide'}: ${fmt(f.units)} (${finBasisShort(f)}, ${f.ent.name}${f.hist && !f.proj ? '; OICA / F&I Tools / company reports' : ''}). The tracked countries add up to ${fmt(tracked)} (${(100 * tracked / f.units).toFixed(0)}%).` +
+    (gap > 0 ? ` The hatched "All other countries" row (${fmt(gap)}) is the remainder: markets without brand data here, basis differences, and joint-venture brands that sit under another owner.` : ' They already exceed the reported figure (registrations vs. reported wholesale or deliveries), so there is no unclassified remainder.');
 }
 
 // ---------- single-manufacturer rows: BEV / PHEV / HEV + ICE + Diesel segments, rank badge, share of world, growth ----------
@@ -1559,7 +1600,7 @@ function renderContinentBars(){
       world.set(a.name, e);
     }));
     const worldTotal = [...world.values()].reduce((s, e) => s + e.total, 0);
-    // companies with a reported worldwide total are ranked by it: tracked countries plus the hatched "Unclassified" remainder
+    // companies with a reported worldwide total are ranked by it: tracked countries plus the hatched "All other countries" remainder
     const finOn = !filtersActive();
     const ranked = [...world.entries()].map(([name, e]) => {
       const f = finOn ? finFor(name) : null, gap = f ? Math.max(0, f.units - e.total) : 0;
@@ -1567,7 +1608,7 @@ function renderContinentBars(){
     }).sort((a, b) => b.eff - a.eff).slice(0, WORLD_LIST_CAP);
     const anyFin = ranked.some(r => r.gap > 0);
     legend.innerHTML = `<span><i class="sw" style="background:${COLORS.bev}"></i>BEV</span><span><i class="sw" style="background:${COLORS.phev}"></i>PHEV</span><span><i class="sw" style="background:${COLORS.other}"></i>HEV + ICE + Diesel</span>` +
-      (anyFin ? `<span><i class="sw" style="background:${HATCH}"></i>Unclassified = reported worldwide sales minus the tracked countries</span>` : '');
+      (anyFin ? `<span><i class="sw" style="background:${HATCH}"></i>All other countries = reported worldwide sales minus the tracked countries</span>` : '');
     const widthDenom = ranked.length ? ranked[0].eff : 1;
     rows.innerHTML = ranked.map(({ name, e, f, gap }) => {
       const parts = [
@@ -1575,7 +1616,7 @@ function renderContinentBars(){
         { value:e.phev, color:COLORS.phev, label:`PHEV: ${fmt(e.phev)}` },
         { value:e.other, color:COLORS.other, label:`HEV + ICE + Diesel: ${fmt(e.other)}` },
       ];
-      if(gap > 0) parts.push({ value:gap, color:HATCH, label:`Unclassified: ${fmt(gap)} (reported ${fmt(f.units)} minus tracked ${fmt(e.total)})` });
+      if(gap > 0) parts.push({ value:gap, color:HATCH, label:`All other countries: ${fmt(gap)} (reported ${fmt(f.units)} minus tracked ${fmt(e.total)})` });
       const { bar, outside } = segmentsHTML(parts, widthDenom);
       const pct = worldTotal ? `<span class="pct-of-total">${(100 * e.total / worldTotal).toFixed(1)}%</span>` : '';
       return `<div class="rank-row"${f ? ` title="${esc(finTip(f))}"` : ''}>
@@ -1585,7 +1626,7 @@ function renderContinentBars(){
       </div>`;
     }).join('');
     note.textContent = `Top ${WORLD_LIST_CAP} ${byGroup ? 'parent groups' : 'brands'} worldwide by volume, ${periodLabel(period)}. Bars are split into BEV, PHEV and HEV + ICE + Diesel; the % is the share of the volume in the tracked countries.` +
-      (anyFin ? ` Where the company's financial reports give a worldwide total, the bar is extended by a hatched "Unclassified" segment (reported worldwide minus tracked countries) and the list is ranked by the reported figure; hover a row for the source.` : '') +
+      (anyFin ? ` Where the company's financial reports give a worldwide total, the bar is extended by a hatched "All other countries" segment (reported worldwide minus tracked countries) and the list is ranked by the reported figure; hover a row for the source.` : '') +
       ` Pick a manufacturer above to focus this chart on one market instead.`;
     return;
   }
@@ -1673,7 +1714,7 @@ function renderCountryBars(){
       (f ? finNote(f, worldTotal) : '');
     if(f){
       const gap = f.units - worldTotal;
-      if(gap > 0) built.push({ gap:true, country:'Unclassified', parts:[{ value:gap, color:HATCH, label:`Unclassified: ${fmt(gap)}` }], pctOfWorld:100 * gap / f.units });
+      if(gap > 0) built.push({ gap:true, country:'All other countries', parts:[{ value:gap, color:HATCH, label:`All other countries: ${fmt(gap)}` }], pctOfWorld:100 * gap / f.units });
       built.sort((a, b) => sumParts(b.parts) - sumParts(a.parts));
       finTop = finReportedRow(f);
     }
@@ -1761,28 +1802,56 @@ function hideHover(){ hoverKey = null; hoverPanel.style.opacity = 0; }
 const MFR_HIST = typeof MFR_WORLD_HISTORY !== 'undefined' ? MFR_WORLD_HISTORY : null;
 const WORLD_PW = (typeof WCS !== 'undefined' && WCS.powertrain) || [];
 const hatchDefs = id => `<defs><pattern id="${id}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#fde7c8"/><line x1="0" y1="0" x2="0" y2="6" stroke="#f59e0b" stroke-width="2.2"/></pattern></defs>`;
-const mFmt = v => (v / 1e6).toFixed(v >= 1e7 ? 1 : 2).replace(/\.?0+$/, '') + ' M';
-// rows: [{y, v, kind:'a'|'p'|'e'|'proj', tip}] ; kinds: a = solid, p = lighter (different basis), e = estimate, proj = hatched
+const mFmt = v => v >= 1e6 ? (v / 1e6).toFixed(1) + ' M' : v >= 1e3 ? Math.round(v / 1e3) + ' K' : String(Math.round(v));
+const niceStep = x => { const p10 = Math.pow(10, Math.floor(Math.log10(x))), f = x / p10; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p10; };
+const signPct = x => (x >= 0 ? '+' : '−') + Math.abs(x).toFixed(1) + '%';
+const upDn = x => x >= 0 ? 'up' : 'dn';
+// hover card for one bar: value, change vs the year before and 5 years before, position against the best year of the same basis
+function bwStats(rows, i){
+  const r = rows[i];
+  if(!r.v) return `<b>${r.y}</b><br>${esc(r.none || 'no figure')}`;
+  const L = [`<b>${r.y}${r.kind === 'proj' ? ' · projected' : r.kind === 'e' ? ' · estimate' : ''}</b>`, `<span class="bw-big">${fmt(r.v)}</span> vehicles`];
+  const prev = rows[i - 1];
+  if(prev && prev.v){
+    if(prev.bk === r.bk) L.push(`vs ${prev.y}: <b class="${upDn(r.v - prev.v)}">${signPct(100 * (r.v / prev.v - 1))}</b> (${r.v >= prev.v ? '+' : '−'}${fmt(Math.abs(r.v - prev.v))})`);
+    else L.push(`vs ${prev.y}: not comparable (the basis changes)`);
+  }
+  const b5 = rows[i - 5];
+  if(b5 && b5.v && b5.bk === r.bk) L.push(`vs ${b5.y}: <b class="${upDn(r.v - b5.v)}">${signPct(100 * (r.v / b5.v - 1))}</b> · ${signPct(100 * (Math.pow(r.v / b5.v, 1 / 5) - 1))} a year`);
+  const peak = rows.filter(x => x.v && x.bk === r.bk && x.kind !== 'proj').reduce((m, x) => !m || x.v > m.v ? x : m, null);
+  if(peak && peak !== r && r.kind !== 'proj') L.push(`${(100 * r.v / peak.v).toFixed(0)}% of the best year (${peak.y}: ${mFmt(peak.v)})`);
+  else if(peak === r) L.push('best year of the series');
+  if(r.extra) L.push(r.extra);
+  if(r.basis) L.push(`<span class="bw-basis">${esc(r.basis)}</span>`);
+  return L.join('<br>');
+}
+// rows: [{y, v, kind:'a'|'p'|'e'|'proj', bk:basis key, basis:text, extra:html, none:text}]
 function bwChart(host, rows, color){
   const W = 940, H = 230, m = { t:22, r:10, b:26, l:46 };
-  const mx = Math.max(...rows.map(r => r.v)) * 1.1, bw = (W - m.l - m.r) / rows.length;
+  const top0 = Math.max(...rows.map(r => r.v)), step = niceStep(top0 * 1.1 / 4), nT = Math.ceil(top0 * 1.04 / step), mx = nT * step, bw = (W - m.l - m.r) / rows.length;
   const y = v => H - m.b - (v / mx) * (H - m.t - m.b), id = 'hx' + Math.random().toString(36).slice(2, 7);
-  let g = hatchDefs(id), ticks = 4;
-  for(let i = 0; i <= ticks; i++){ const v = mx * i / ticks; g += `<line class="gl" x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}"/><text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end">${v === 0 ? '0' : Math.round(v / 1e6) + ' M'}</text>`; }
+  let g = hatchDefs(id);
+  for(let i = 0; i <= nT; i++){ const v = step * i; g += `<line class="gl" x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}"/><text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end">${v === 0 ? '0' : step >= 1e6 ? +(v / 1e6).toFixed(1) + ' M' : mFmt(v)}</text>`; }
+  const dense = rows.length > 14;
   rows.forEach((r, i) => {
     const x = m.l + i * bw + 2, w = Math.max(2, bw - 4), fill = r.kind === 'proj' ? `url(#${id})` : r.kind === 'p' ? color + '88' : r.kind === 'e' ? color + 'aa' : color;
-    g += `<g><title>${r.tip}</title><rect x="${x}" y="${y(r.v)}" width="${w}" height="${H - m.b - y(r.v)}" rx="2" fill="${fill}"${r.kind === 'proj' ? ` stroke="${color}" stroke-dasharray="3 2"` : ''}/></g>`;
-    if(i % 2 === 0 || i === rows.length - 1) g += `<text x="${x + w / 2}" y="${H - 8}" text-anchor="middle">${r.y}</text>`;
-    if(i === 0 || i === rows.length - 1 || r.kind === 'proj' || r.y % 5 === 0) g += `<text class="vl" x="${x + w / 2}" y="${y(r.v) - 5}" text-anchor="middle">${mFmt(r.v)}</text>`;
+    if(r.v) g += `<rect x="${x}" y="${y(r.v)}" width="${w}" height="${H - m.b - y(r.v)}" rx="2" fill="${fill}"${r.kind === 'proj' ? ` stroke="${color}" stroke-dasharray="3 2"` : ''}/>`;
+    if(!dense || i % 2 === 0 || i === rows.length - 1) g += `<text x="${x + w / 2}" y="${H - 8}" text-anchor="middle">${r.y}</text>`;
+    if(r.v && (!dense || i === 0 || i === rows.length - 1 || r.kind === 'proj' || r.y % 5 === 0)) g += `<text class="vl" x="${x + w / 2}" y="${y(r.v) - 5}" text-anchor="middle">${mFmt(r.v)}</text>`;
+    g += `<rect class="hit" data-i="${i}" x="${m.l + i * bw}" y="${m.t - 6}" width="${bw}" height="${H - m.t - m.b + 6}"/>`;
   });
-  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
-}
-function renderWorldBars(){
-  const host = document.getElementById('world-bars'); if(!WORLD_PW.length){ document.getElementById('world-card').style.display = 'none'; return; }
-  const rows = WORLD_PW.map(r => ({ y:r.y, v:r.total, kind:r.proj ? 'proj' : r.est ? 'e' : 'a', tip:`${r.y}${r.proj ? ' (projected)' : r.est ? ' (estimate)' : ''}: ${fmt(r.total)} light vehicles` }));
-  bwChart(host, rows, '#6366f1');
-  const last = WORLD_PW.filter(r => !r.proj).slice(-1)[0], pj = WORLD_PW.find(r => r.proj);
-  document.getElementById('world-note').innerHTML = `Worldwide new light-vehicle sales (cars, SUVs, pickups, light vans), ${WORLD_PW[0].y}–${last.y}${pj ? ` plus a ${pj.y} projection (${(100 * (pj.total / last.total - 1)).toFixed(1)}% vs ${last.y}; hatched)` : ''}. Same series as the <a href="world-car-sales.html">World Car Sales</a> page; earlier years are estimates (lighter bars), 2010–${last.y} anchor on the IEA's global figures.`;
+  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img">${g}</svg><div class="bw-tip"></div>`;
+  const tip = host.querySelector('.bw-tip'); let cur = -1;
+  host.onmousemove = e => {
+    const h = e.target.closest && e.target.closest('.hit');
+    if(!h){ tip.style.opacity = 0; return; }
+    const i = +h.dataset.i; if(i !== cur){ tip.innerHTML = bwStats(rows, i); cur = i; }
+    const hr = host.getBoundingClientRect(); let x = e.clientX - hr.left + 14, yy = e.clientY - hr.top - tip.offsetHeight - 10;
+    if(x + tip.offsetWidth > hr.width) x = e.clientX - hr.left - tip.offsetWidth - 14;
+    if(yy < 0) yy = e.clientY - hr.top + 16;
+    tip.style.left = Math.max(0, x) + 'px'; tip.style.top = yy + 'px'; tip.style.opacity = 1;
+  };
+  host.onmouseleave = () => { tip.style.opacity = 0; cur = -1; };
 }
 // manufacturer / brand -> history group: by the parent group the holdings file gives
 const HIST_RULES = [[/toyota|lexus|daihatsu|hino/i, 'Toyota Motor Corporation'], [/volkswagen|audi|porsche|škoda|skoda|seat\b|cupra|bentley|lamborghini|bugatti/i, 'Volkswagen Group'], [/general motors|chevrolet|buick|gmc|cadillac|holden/i, 'General Motors'],
@@ -1790,34 +1859,65 @@ const HIST_RULES = [[/toyota|lexus|daihatsu|hino/i, 'Toyota Motor Corporation'],
   [/bmw|mini$|rolls/i, 'BMW Group'], [/mazda/i, 'Mazda'], [/suzuki|maruti/i, 'Suzuki'], [/mitsubishi/i, 'Mitsubishi Motors'], [/daimler ag|mercedes|smart$/i, 'Mercedes-Benz Group'],
   [/stellantis|fiat|psa|peugeot|citro|jeep|opel|vauxhall|chrysler|dodge|ram$|alfa|exor|ds$|maserati/i, 'Stellantis'], [/saic|mg$|roewe|wuling|baojun|maxus/i, 'SAIC Motor'], [/geely|volvo car|polestar|lynk|zeekr/i, 'Geely Holding'],
   [/changan|avatr|deepal/i, 'Changan Automobile'], [/byd|denza|fangchengbao/i, 'BYD'], [/chery|jetour|omoda|jaecoo|exeed/i, 'Chery Automobile'], [/faw|hongqi|bestune/i, 'FAW Group'], [/dongfeng|voyah|nammi/i, 'Dongfeng Motor'],
-  [/baic|beijing auto|arcfox/i, 'BAIC Group'], [/tata|jaguar|land rover/i, 'Tata Motors'], [/great wall|gwm|haval|ora$|tank$|wey/i, 'Great Wall Motor']];
+  [/baic|beijing auto|arcfox/i, 'BAIC Group'], [/tata|jaguar|land rover/i, 'Tata Motors'], [/great wall|gwm|haval|ora$|tank$|wey/i, 'Great Wall Motor'], [/tesla/i, 'Tesla']];
 function histFor(name){
   if(!MFR_HIST || !name) return null;
   const b = canonicalBrand(name), cands = [name, b, holder(b, CUR_YEAR)];
   for(const c of cands) for(const [re, key] of HIST_RULES) if(re.test(c) && MFR_HIST.groups[key]) return { key, via:c !== name && c !== b ? c : null, group:MFR_HIST.groups[key] };
   return null;
 }
-function renderBrandWorld(){
-  const card = document.getElementById('bw-card'), host = document.getElementById('bw-charts');
-  const names = kind === 'brand' ? [mfr, mfr2].filter(Boolean) : [];
-  if(!names.length || !MFR_HIST){ card.style.display = 'none'; return; }
-  const worldG = (() => { const a = WORLD_PW.find(r => r.y === 2025), b = WORLD_PW.find(r => r.proj); return a && b ? b.total / a.total : null; })();
-  const palette = ['#e11d48', '#0ea5e9'];
-  host.innerHTML = '';
-  let any = false;
-  names.forEach((n, ix) => {
-    const h = histFor(n), box = document.createElement('div'); host.appendChild(box);
-    if(!h){ box.innerHTML = `<div class="bw-sub">${esc(n)}<small>no worldwide history on file: only manufacturer groups with a top-15/20 rank are tracked (brand-level worldwide figures are not published)</small></div>`; return; }
-    any = true; const years = Object.keys(h.group.s).map(Number).sort((a, b) => a - b), y0 = years[0];
-    const rows = [];
-    for(let y = 2001; y <= 2025; y++){ const v = h.group.s[y]; rows.push({ y, v:v || 0, kind:v ? (h.group.b[y] === 'p' ? 'p' : 'a') : 'a', tip:v ? `${y}: ${fmt(v)} vehicles (${h.group.b[y] === 'p' ? 'OICA production, all motor vehicles' : 'F&I Tools sales'})` : `${y}: no figure (outside the published top 15–20)` }); }
-    if(worldG && h.group.s[2025]) rows.push({ y:2026, v:Math.round(h.group.s[2025] * worldG), kind:'proj', tip:`2026 projection: 2025 × the world market trend (${(100 * (worldG - 1)).toFixed(1)}%); not a company forecast` });
-    box.innerHTML = `<div class="bw-sub">${esc(h.key)}${h.via || h.key !== n ? `<small>parent group of ${esc(n)}</small>` : ''}<small>${y0}–${years[years.length - 1]}</small></div><div class="bw-chart" id="bwc${ix}"></div><div class="bw-lg"><span><i style="background:${palette[ix]}88"></i>OICA production (2001–2017)</span><span><i style="background:${palette[ix]}"></i>F&amp;I Tools sales (2018–2025)</span><span><i style="background:repeating-linear-gradient(45deg,#fde7c8 0 3px,${palette[ix]} 3px 5px)"></i>2026 projection</span></div>${h.group.note ? `<p class="note" style="display:block;margin:2px 0 6px">${esc(h.group.note)}</p>` : ''}`;
-    bwChart(box.querySelector('.bw-chart'), rows, palette[ix]);
-  });
-  document.getElementById('bw-title').textContent = names.length > 1 ? 'World volume of the two selected manufacturers' : `World volume · ${names[0]}`;
-  document.getElementById('bw-note').innerHTML = `Worldwide vehicles per year for the manufacturer's parent group, 2001 to 2026. <b>The series changes basis in 2018</b>: 2001–2017 is the OICA production count (all motor vehicles, including trucks and buses); from 2018 it is worldwide sales (F&amp;I Tools, light vehicles). A group missing from a year was outside the published top 15–20. Source: <a href="${MFR_HIST.meta.url}" target="_blank" rel="noopener">Wikipedia compilation of OICA and F&amp;I Tools</a>.`;
+const BK_TXT = { p:'OICA production (all motor vehicles, incl. trucks and buses)', s:'F&I Tools worldwide sales (light vehicles)', r:'company-reported worldwide sales / deliveries', w:'worldwide new light-vehicle sales' };
+const worldGrowth = () => { const a = WORLD_PW.find(r => r.y === 2025), b = WORLD_PW.find(r => r.proj); return a && b ? b.total / a.total : null; };
+// the projected year of a group: its last full year x the world market trend (never a company forecast)
+function groupProjection(group){ const g = worldGrowth(), last = group.s[2025]; return g && last ? Math.round(last * g) : null; }
+// manufacturer group -> sales per year: the world market when nothing is selected, otherwise the parent group of the selected manufacturer(s)
+function renderWorldBars(){
+  const card = document.getElementById('world-card'), host = document.getElementById('world-bars'), title = document.getElementById('world-title'), note = document.getElementById('world-note');
+  if(!WORLD_PW.length){ card.style.display = 'none'; return; }
   card.style.display = '';
+  const names = kind === 'brand' ? [mfr, mfr2].filter(Boolean) : [];
+  const groups = new Map(), missing = [];
+  names.forEach(n => { const h = histFor(n); if(!h){ missing.push(n); return; } const e = groups.get(h.key) || { h, names:[] }; e.names.push(n); groups.set(h.key, e); });
+  host.innerHTML = '';
+  const worldBlock = () => {
+    const box = document.createElement('div'); host.appendChild(box);
+    const rows = WORLD_PW.map(r => ({ y:r.y, v:r.total, kind:r.proj ? 'proj' : r.est ? 'e' : 'a', bk:'w', basis:r.proj ? 'projection from the World Car Sales page' : r.est ? 'estimate' : BK_TXT.w,
+      extra: r.total && r.bev ? `BEV ${(100 * r.bev / r.total).toFixed(1)}% · PHEV ${(100 * (r.phev || 0) / r.total).toFixed(1)}% of sales` : '' }));
+    bwChart(box, rows, '#6366f1');
+  };
+  if(!groups.size){
+    title.textContent = 'World new-vehicle sales per year';
+    if(missing.length) host.insertAdjacentHTML('beforeend', `<p class="note" style="display:block;margin:0 0 6px">${missing.map(esc).join(', ')}: no worldwide history on file (only manufacturer groups in the published top 15–20 and the two reported series are tracked), so the world market is shown.</p>`);
+    worldBlock();
+    const last = WORLD_PW.filter(r => !r.proj).slice(-1)[0], pj = WORLD_PW.find(r => r.proj);
+    note.innerHTML = `Worldwide new light-vehicle sales (cars, SUVs, pickups, light vans), ${WORLD_PW[0].y}–${last.y}${pj ? ` plus a ${pj.y} projection (${(100 * (pj.total / last.total - 1)).toFixed(1)}% vs ${last.y}; hatched)` : ''}. Same series as the <a href="world-car-sales.html">World Car Sales</a> page; earlier years are estimates (lighter bars), 2010–${last.y} anchor on the IEA's global figures. Hover a bar for the change vs the year before and 5 years before. Pick a manufacturer above to see its parent group instead.`;
+    return;
+  }
+  const palette = ['#e11d48', '#0ea5e9'], keys = [...groups.keys()], usedBk = new Set();
+  [...groups.values()].forEach((e, ix) => {
+    const grp = e.h.group, years = Object.keys(grp.s).map(Number).sort((a, b) => a - b), y0 = Math.max(2001, years[0]), col = palette[ix] || palette[0];
+    const rows = [];
+    for(let yy = y0; yy <= 2025; yy++){
+      const v = grp.s[yy], bk = grp.b[yy] || 's', wp = WORLD_PW.find(r => r.y === yy);
+      if(v) usedBk.add(bk);
+      rows.push({ y:yy, v:v || 0, kind:v && bk === 'p' ? 'p' : 'a', bk, basis:v ? BK_TXT[bk] : '', none:'no figure (outside the published top 15–20)',
+        extra: v && bk !== 'p' && wp ? `≈ ${(100 * v / wp.total).toFixed(1)}% of the ${mFmt(wp.total)} world light-vehicle market` : '' });
+    }
+    const pj = groupProjection(grp), g = worldGrowth(), wpj = WORLD_PW.find(r => r.proj);
+    if(pj) rows.push({ y:2026, v:pj, kind:'proj', bk:grp.b[2025] || 's', basis:`2025 × the world market trend (${signPct(100 * (g - 1))}); not a company forecast`, extra: wpj ? `≈ ${(100 * pj / wpj.total).toFixed(1)}% of the projected world market` : '' });
+    const box = document.createElement('div'); host.appendChild(box);
+    box.innerHTML = `<div class="bw-sub">${esc(e.h.key)}${e.names.some(n => n !== e.h.key) ? `<small>parent group of ${e.names.map(esc).join(', ')}</small>` : ''}<small>${years[0]}–${years[years.length - 1]}</small></div><div class="bw-chart"></div>` +
+      (grp.note ? `<p class="note" style="display:block;margin:2px 0 6px">${esc(grp.note)}</p>` : '');
+    bwChart(box.querySelector('.bw-chart'), rows, col);
+    e.col = col;
+  });
+  const sw = (bg, t) => `<span><i style="background:${bg}"></i>${t}</span>`, c0 = palette[0];
+  host.insertAdjacentHTML('beforeend', `<div class="bw-lg">${usedBk.has('p') ? sw(c0 + '88', 'OICA production (lighter)') : ''}${usedBk.has('s') ? sw(c0, 'F&amp;I Tools sales') : ''}${usedBk.has('r') ? sw(c0, 'company-reported sales / deliveries') : ''}${sw(`repeating-linear-gradient(45deg,#fde7c8 0 3px,${c0} 3px 5px)`, '2026 projection')}</div>`);
+  title.textContent = keys.length > 1 ? 'World sales of the two selected manufacturers' : `World sales · ${keys[0]}`;
+  note.innerHTML = `Worldwide vehicles per year for the manufacturer's parent group, up to 2025 plus a 2026 projection. Hover a bar for the change vs the year before and 5 years before and the group's share of the world market. ` +
+    (usedBk.has('p') && (usedBk.has('s') || usedBk.has('r')) ? '<b>The series changes basis in 2018</b>: 2001–2017 is the OICA production count (all motor vehicles, including trucks and buses); from 2018 it is worldwide sales. ' : '') +
+    (usedBk.has('r') ? 'Where the company publishes its own worldwide figure (Tesla, Renault Group from 2021) that figure is used. ' : '') +
+    `A group missing from a year was outside the published top 15–20. Source: <a href="${MFR_HIST.meta.url}" target="_blank" rel="noopener">Wikipedia compilation of OICA and F&amp;I Tools</a> and the companies' own reports.`;
 }
 
 function refresh(rebuildMfr){
@@ -1846,7 +1946,7 @@ function refresh(rebuildMfr){
   if(!rankMode && metric === 'share'){ metric = 'units'; setActive('#metric-toggle', 'metric', 'units'); }
   renderQuick(window.__topBrands || [], MODEL_LABEL ? window.__topModels : []);
   renderMap();
-  renderWorldBars(); renderBrandWorld();
+  renderWorldBars();
 }
 function setActive(sel, attr, val){ document.querySelectorAll(`${sel} .mode-btn`).forEach(b => { if(attr in b.dataset) b.classList.toggle('active', b.dataset[attr] === val); }); }
 selPeriod.onchange = () => refresh(true);

@@ -40,6 +40,15 @@ GROUPS = {
     'Tata Motors': (['Tata'], '2006-2015 (includes Jaguar Land Rover)'),
     'Great Wall Motor': (['Great Wall'], '2016 only'),
 }
+# COMPANY-REPORTED worldwide volumes (basis 'r'), read in the companies' own filings / sales releases. They fill years the Wikipedia compilation lacks
+# (Renault Group after 2020) and add groups it never lists (Tesla). For a group already present, a reported value is only used for a year with no value yet.
+# group -> (note, {year: units}, source line, [approximate years])
+REPORTED = {
+    'Tesla': ('Company-reported deliveries (Tesla 10-K for 2019-2022, quarterly production & deliveries releases 2018 and 2023-2025); 2013-2017 rounded to the nearest 100 (sources differ by up to 0.3%)',
+              {2013: 22400, 2014: 31700, 2015: 50600, 2016: 76200, 2017: 103100, 2018: 245240, 2019: 367656, 2020: 499647, 2021: 936222, 2022: 1313851, 2023: 1808581, 2024: 1789226, 2025: 1636129}),
+    'Renault Group': ('2021-2025 are the group own reported sales (Renault, Dacia, Alpine, Renault Korea; 2021 also Lada and Jinbei/Huasong; Russia is out from 2022, so 2021 is not comparable)',
+                      {2021: 2696401, 2022: 2051174, 2023: 2235345, 2024: 2264815, 2025: 2336807}),
+}
 STELLANTIS_PARTS = {
     'fiat': ['Fiat'], 'chrysler': ['Chrysler'], 'fca': ['Fiat Chrysler', 'FCA', 'Fiat-Chrysler'], 'psa': ['PSA Peugeot Citroën', 'Groupe PSA', 'PSA Group'], 'stl': ['Stellantis'],
 }
@@ -79,8 +88,16 @@ for key, (names, note) in GROUPS.items():
             s[str(y)] = tot; b[str(y)] = 'p' if bas == 'production' else 's'
     if s:
         out[key] = {'s': s, 'b': b, 'note': note}
+for key, (rnote, vals) in REPORTED.items():
+    d = out.setdefault(key, {'s': {}, 'b': {}, 'note': ''})
+    added = 0
+    for y, v in vals.items():
+        if str(y) not in d['s']:
+            d['s'][str(y)] = v; d['b'][str(y)] = 'r'; added += 1
+    d['note'] = rnote
+    d['s'] = dict(sorted(d['s'].items(), key=lambda kv: int(kv[0]))); d['b'] = {k: d['b'][k] for k in d['s']}
 meta = {'years': [2001, 2025], 'p': 'OICA world ranking of manufacturers: motor vehicle production (cars, light and heavy commercial vehicles, buses), 2001-2017',
-        's': 'F&I Tools USA worldwide sales by group, 2018-2025', 'via': 'Wikipedia "List of automotive manufacturers by production" (compiled 2026-10-28)',
+        's': 'F&I Tools USA worldwide sales by group, 2018-2025', 'r': 'Company-reported worldwide deliveries / sales (Tesla 2013-2025, Renault Group 2021-2025): see each group note', 'via': 'Wikipedia "List of automotive manufacturers by production" (compiled 2026-10-28)',
         'url': 'https://en.wikipedia.org/wiki/List_of_automotive_manufacturers_by_production'}
 js = '// World volume per manufacturer group: OICA production 2001-2017, F&I Tools sales 2018-2025 (series break at 2018). Built by scripts/mfr_world/build_world_history.py\nconst MFR_WORLD_HISTORY = ' + json.dumps({'meta': meta, 'groups': out}, ensure_ascii=False, separators=(',', ':')) + ';\n'
 open(os.path.join(ROOT, 'assets', 'manufacturer-world-history.js'), 'w', encoding='utf8').write(js)
@@ -88,8 +105,8 @@ os.makedirs(os.path.join(HERE, 'out'), exist_ok=True)
 rows = []
 for g, d in out.items():
     for y, v in d['s'].items():
-        rows.append("('%s',%s,%d,'%s')" % (g.replace("'", "''"), y, v, 'production' if d['b'][y] == 'p' else 'sales'))
-sql = ("create table if not exists public.manufacturer_world_history (group_name text not null, year integer not null, volume bigint not null, basis text not null check (basis in ('production','sales')),\n"
+        rows.append("('%s',%s,%d,'%s')" % (g.replace("'", "''"), y, v, 'production' if d['b'][y] == 'p' else 'reported' if d['b'][y] == 'r' else 'sales'))
+sql = ("create table if not exists public.manufacturer_world_history (group_name text not null, year integer not null, volume bigint not null, basis text not null check (basis in ('production','sales','reported')),\n"
        "  source text not null default 'Wikipedia (OICA production 2001-2017, F&I Tools sales 2018-2025), compiled 2026-10-28', primary key (group_name, year));\n"
        "alter table public.manufacturer_world_history enable row level security;\n"
        "comment on table public.manufacturer_world_history is 'World volume per manufacturer group and year: OICA production 2001-2017 (all motor vehicles), F&I Tools sales 2018-2025; the two bases differ. Built by scripts/mfr_world/build_world_history.py.';\n"
