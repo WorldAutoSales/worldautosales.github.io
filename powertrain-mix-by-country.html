@@ -252,9 +252,9 @@
               <button type="button" class="mode-btn hidden" id="sort-fuel-btn" data-sort-key="" title="Sorted by the number of registrations of the powertrain you clicked, biggest first.">Nb units</button>
             </div>
           </div>
-          <p class="note" id="bars-note">Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments (a narrow BEV slice shows its value to the right instead of hiding it). The dotted line marks 75% — a country whose colored segments reach past it has combined Petrol+Diesel (plus any small Others slice, stacked last) under 25%. Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that country's BEV registration growth — hover any segment for exact figures. Press the round play button to run the bars through 2020-2025 and then the 2026 months (the 3Y column is blank while it plays).</p>
+          <p class="note" id="bars-note">Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments (a narrow BEV slice shows its value to the right instead of hiding it). The dotted line marks 75% — a country whose colored segments reach past it has combined Petrol+Diesel (plus any small Others slice, stacked last) under 25%. Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that country's BEV registration growth — hover any segment for exact figures. Press the round play button to run the bars through the annual results (2020-2025) and then the months of the current year (the 3Y column is blank while it plays).</p>
           <div class="elec-timeline" id="elec-timeline">
-            <button type="button" class="elec-play" id="elec-play" aria-label="Play through time" title="Play: the bars re-rank as the years, then the 2026 months, go by">▶</button>
+            <button type="button" class="elec-play" id="elec-play" aria-label="Play through time" title="Play: the bars re-rank through the annual results, then the months of the current year">▶</button>
             <div class="elec-tl-label" id="elec-tl-label"></div>
             <input type="range" id="elec-tl-range" min="0" max="0" value="0" aria-label="Timeline">
             <button type="button" class="mode-btn hidden" id="elec-tl-reset" title="Stop the timeline and go back to the period selected in the sidebar">↺ Selected period</button>
@@ -4307,10 +4307,11 @@ function renderBars(){
   renderFuelLegend();
 }
 
-// --- Timeline for Electrified Share by Country: play through the years (2020-2025) and then the 2026 months; bars re-rank and grow as the periods go by ---
+// --- Timeline for Electrified Share by Country: play through the annual results (2020-2025) and then the months of the current year; bars re-rank and grow as the periods go by ---
+const ELEC_CUR_YEAR = ALL_MONTHS.filter(k => /^\d{4}-\d{2}$/.test(k)).map(k => k.slice(0, 4)).sort().pop();
 const ELEC_FRAMES = [
   ...ALL_MONTHS.filter(k => /^\d{4}-annual$/.test(k) && Object.keys(MONTHLY_DATA[k].raw).length >= 20).sort(),   // earlier annual blocks hold a single market
-  ...ALL_MONTHS.filter(k => /^\d{4}-\d{2}$/.test(k)).sort()
+  ...ALL_MONTHS.filter(k => /^\d{4}-\d{2}$/.test(k) && k.slice(0, 4) === ELEC_CUR_YEAR).sort()                  // months only for the running year
 ];
 let elecFrameKey = null;     // null = the bars follow the page's selected period; otherwise the timeline frame on screen
 let elecTimer = null;
@@ -4390,8 +4391,8 @@ elecResetBtn.addEventListener('click', () => elecTimelineReset());
 elecSyncControls();
 
 const barsNote = document.getElementById('bars-note');
-const PCT_NOTE = 'Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments (a narrow BEV slice shows its value to the right instead of hiding it). The dotted line marks 75% — a country whose colored segments reach past it has combined Petrol+Diesel (plus any small Others slice, stacked last) under 25%. Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that country\'s BEV registration growth — hover any segment for exact figures. Press the round play button to run the bars through 2020-2025 and then the 2026 months (the 3Y column is blank while it plays).';
-const RAW_NOTE = 'Bar length now reflects actual registrations (scaled to the biggest market shown), so countries are comparable by volume, not just mix. Sorted by BEV share, high to low. Segment labels show unit counts (a narrow BEV slice shows its value to the right instead of hiding it) — hover any segment for exact figures. Press the round play button to run the bars through 2020-2025 and then the 2026 months (the 3Y column is blank while it plays).';
+const PCT_NOTE = 'Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments (a narrow BEV slice shows its value to the right instead of hiding it). The dotted line marks 75% — a country whose colored segments reach past it has combined Petrol+Diesel (plus any small Others slice, stacked last) under 25%. Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that country\'s BEV registration growth — hover any segment for exact figures. Press the round play button to run the bars through the annual results (2020-2025) and then the months of the current year (the 3Y column is blank while it plays).';
+const RAW_NOTE = 'Bar length now reflects actual registrations (scaled to the biggest market shown), so countries are comparable by volume, not just mix. Sorted by BEV share, high to low. Segment labels show unit counts (a narrow BEV slice shows its value to the right instead of hiding it) — hover any segment for exact figures. Press the round play button to run the bars through the annual results (2020-2025) and then the months of the current year (the 3Y column is blank while it plays).';
 document.querySelectorAll('[data-bar-mode]').forEach(btn => {
   btn.addEventListener('click', () => {
     if(btn.dataset.barMode === barMode) return;
@@ -4595,7 +4596,7 @@ function renderElecShareYearChart(rows){
   const svgEl = document.getElementById('elec-share-year-svg');
   const svg = d3.select(svgEl);
   svg.selectAll('*').remove();
-  if(!rows.length) return;
+  if(!rows.length){ svg.append('text').attr('x', 160).attr('y', 130).attr('text-anchor', 'middle').style('font-size', '13px').style('fill', 'var(--text-muted)').text('No annual BEV data loaded yet'); return; }
   const W = 320, H = 260, M = { top: 16, right: 10, bottom: 28, left: 46 };
   const innerW = W - M.left - M.right, innerH = H - M.top - M.bottom;
   const x = d3.scaleBand().domain(rows.map(d => d.year)).range([0, innerW]).padding(0.25);
@@ -4719,7 +4720,7 @@ function renderElecShareModelsChart(rows){
     .text((d,i) => `#${i + 1}`);
   g.selectAll('.model-label').data(rows).join('text').attr('class', 'model-label')
     .attr('x', -6).attr('y', (d,i) => i * rowH + rowH / 2).attr('dy', '0.32em').attr('text-anchor', 'end')
-    .style('font-size', '11.5px').style('fill', 'var(--text)').text(d => mfrModelLabel(d.brand, d.model));
+    .style('font-size', '11.5px').style('fill', 'var(--text)').text(d => (window.mfrModelLabel || ((b, m) => `${b} ${m}`))(d.brand, d.model));
   g.selectAll('.value-label').data(rows).join('text').attr('class', 'value-label')
     .attr('x', d => Math.max(1, x(d.bev)) + 5).attr('y', (d,i) => i * rowH + rowH / 2).attr('dy', '0.32em')
     .style('font-size', '11.5px').style('fill', 'var(--text)').text(d => d.bev.toLocaleString('en-US'));
@@ -4729,10 +4730,9 @@ function showElecSharePreview(kind, key, anchorEl){
   if(!elecSharePreview) return;
   const countries = elecShareCountries(kind, key);
   const yearRows = buildBevYearRows(countries);
-  if(!yearRows.length){ elecSharePreview.classList.add('hidden'); return; }
   const displayName = kind === 'continent' ? (CONTINENT_LABELS[key] || key) : key;
   document.getElementById('elec-share-preview-title').textContent = `${displayName} — BEV sales`;
-  renderElecShareYearChart(yearRows);
+  try{ renderElecShareYearChart(yearRows); }catch(err){ console.error(err); }
 
   const modelsSvg = document.getElementById('elec-share-models-svg');
   const noModelsEl = document.getElementById('elec-share-no-models');
@@ -4741,7 +4741,7 @@ function showElecSharePreview(kind, key, anchorEl){
   if(modelRows.length){
     const yearLabel = years.length > 1 ? `each country's latest year: ${years.join(', ')}` : years[0];
     panelTitle.textContent = `Top 10 best-selling BEV models — ${yearLabel}`;
-    renderElecShareModelsChart(modelRows);
+    try{ renderElecShareModelsChart(modelRows); }catch(err){ console.error(err); }
     modelsSvg.classList.remove('hidden');
     noModelsEl.classList.add('hidden');
   } else {
@@ -5210,7 +5210,7 @@ function renderStats(){
   const worldNote = `Shown markets' 2025 new-vehicle sales ÷ the 2025 world market (${(wmtTotal / 1e6).toFixed(0)} M, ~150 countries)` + (noSales.length ? `. No 2025 world figure for: ${noSales.join(', ')}` : '');
   const popNote = `Shown markets' population ÷ world population (World Bank 2024, ${(WORLD_POP / 1e9).toFixed(2)} billion)` + (noPop.length ? `. No population on file for: ${noPop.join(', ')}` : '');
   const stats = [
-    {label:'Markets Shown', value:DATA.length, small:`of ${ALL_COUNTRIES.length}`, extra:[[(wmtTotal ? (100 * wmtShown / wmtTotal).toFixed(1) : '0') + '% of world sales', worldNote], [(100 * popShown / WORLD_POP).toFixed(1) + '% of world population', popNote]]},
+    {label:'Markets Shown', value:DATA.length, small:`of ${ALL_COUNTRIES.length}`, inline:true, extra:[[(wmtTotal ? (100 * wmtShown / wmtTotal).toFixed(0) : '0') + '% of world sales', worldNote], [(100 * popShown / WORLD_POP).toFixed(0) + '% of world population', popNote]]},
     {label:'BEV Share (avg)', value:avgPct+'%', small:monthLabel, yoy:totalYoy},
     {label:'Highest', value: top ? top.bevPct+'%' : '—', small: top ? top.country : ''},
     {label:'Lowest', value: bottom ? bottom.bevPct+'%' : '—', small: bottom ? bottom.country : ''},
@@ -5220,8 +5220,8 @@ function renderStats(){
   document.getElementById('stat-row').innerHTML = stats.map(s => `
     <div class="stat">
       <div class="label">${s.label}</div>
-      <div class="value">${s.value}<small>${s.small}</small>${s.yoy == null ? '' : `<small class="stat-yoy ${s.yoy >= 0 ? 'yoy-up' : 'yoy-down'}">${s.yoy > 0 ? '+' : ''}${s.yoy}% YoY</small>`}</div>
-      ${(s.extra || []).map(([t, n]) => `<div class="stat-sub" title="${n.replace(/"/g, '&quot;')}">${t}</div>`).join('')}
+      <div class="value">${s.value}<small${s.inline ? ' style="display:inline;margin-left:6px"' : ''}>${s.small}</small>${s.yoy == null ? '' : `<small class="stat-yoy ${s.yoy >= 0 ? 'yoy-up' : 'yoy-down'}">${s.yoy > 0 ? '+' : ''}${s.yoy}% YoY</small>`}</div>
+      ${(s.extra || []).map(([t, n]) => `<div class="stat-sub"${/world sales/.test(t) ? ' style="white-space:nowrap;font-size:11.5px"' : ''} title="${n.replace(/"/g, '&quot;')}">${t}</div>`).join('')}
     </div>`).join('');
 }
 
@@ -6046,7 +6046,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   function mfrIsSyntheticKey(key){ return /^\d{4}-(ytd|projection)$/.test(key); }
   const MFR_MODEL_PREFIX_ALIAS = { greatwallmotors: ['gwm'], gwm: ['greatwall'] };
   // "Brand Model", without repeating the brand when the source's model name already starts with it ("Fiat Strada")
-  function mfrModelLabel(brand, model){
+  function mfrModelLabel(brand, model){   // also exposed as window.mfrModelLabel for the Electrified Share hover window
     // also skips the brand when the model starts with its first word ("Mercedes-Benz | Mercedes-AMG GT", "MG Rover | MG ZS") or a known short form (Great Wall Motors | GWM Haval H6)
     const norm = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
     const m = norm(model), b = norm(brand);
@@ -6054,6 +6054,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const dup = prefixes.some(p => m.startsWith(p) && m.length > p.length);
     return dup ? String(model) : `${brand} ${model}`;
   }
+  window.mfrModelLabel = mfrModelLabel;
   function mfrPeriodLabel(key){
     const m = key.match(/^(\d{4})-(ytd|projection)$/);
     if(!m) return key;
@@ -6567,9 +6568,10 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       setMfrCardEmpty(mfrSection, mfrComingSoon, true, mfrRows);
       setMfrCardEmpty(mfrModelSection, mfrModelComingSoon, true, mfrModelRows);
       setMfrCardEmpty(mfrCountrySection, mfrCountryGroupComingSoon, true, mfrCountryGroupRows);
-      mfrTitle.textContent = `Sales by Brand — ${focusedCountry}`;
-      mfrModelTitle.textContent = `Sales by Model — ${focusedCountry}`;
-      mfrCountryGroupTitle.textContent = `Sales by Manufacturing Country — ${focusedCountry}`;
+      const whoTitle = t => focusedCountry ? `${t} — ${focusedCountry}` : `${t} : select a country to display sales`;
+      mfrTitle.textContent = whoTitle('Sales by Brand');
+      mfrModelTitle.textContent = whoTitle('Sales by Model');
+      mfrCountryGroupTitle.textContent = whoTitle('Sales by Manufacturing Country');
       mfrCountry = null;
       mfrYear = null;
       mfrMonthly = false;
