@@ -102,6 +102,20 @@
   .mfr-side .mfr-combo-list{ max-height:240px; }
   .mfr-side .fx-quick{ margin-top:12px; }
   @media (max-width:1000px){ .filters-panel.mfr-side{ width:100%; } .mfr-side .fx-lane{ grid-template-columns:1fr; } }
+  /* ---------- period strips: year + month buttons, play button, scrubber (Period filter and the continent / country cards) ---------- */
+  .mfr-tl{ margin:2px 0 12px; }
+  .mfr-tl .elec-timeline{ margin:6px 0 8px; }
+  .tl-chips{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 6px; }
+  .tl-chips-lbl{ font-size:10px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--text-muted); margin:0 2px 0 8px; }
+  .tl-chips-lbl:first-child{ margin-left:0; }
+  .tl-chip-group{ display:inline-flex; flex-wrap:wrap; gap:4px; }
+  .tl-chip{ appearance:none; cursor:pointer; border:1px solid var(--border); background:var(--surface); color:var(--text); font:inherit; font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; }
+  .tl-chip:hover{ border-color:var(--accent); }
+  .tl-chip.proj{ border-style:dashed; }
+  .tl-chip.on{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .tl-chip.gone{ display:none; }
+  .mfr-side .mfr-tl{ margin:0; }
+  #continent-bars .rank-row, #country-bars .rank-row{ will-change:transform; }
   /* ---------- compare toggles (country / continent cards) and reported-vs-tracked rows ---------- */
   .cmp-bar{ display:flex; flex-wrap:wrap; gap:12px 26px; align-items:center; margin:6px 0 16px; padding:12px 14px; border-radius:16px; background:var(--surface-alt); border:1px solid var(--border); }
   .cmp-group{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
@@ -277,6 +291,7 @@
             <label class="fx-field"><span class="fx-label">Period</span>
               <select id="f-period" class="fx-select"></select>
             </label>
+            <div class="mfr-tl" data-tl="chips"></div>
             <div class="fx-seg" role="group" aria-label="Group by">
               <button type="button" class="mode-btn active" data-group="brand" title="Rank individual brands (Toyota, Lexus, Audi…).">Brand</button>
               <button type="button" class="mode-btn" data-group="group" title="Roll brands up to their parent group as of the selected period (Volkswagen Group, Stellantis, Toyota Motor…).">Parent group</button>
@@ -381,6 +396,7 @@
 
       <div class="card chart-card hidden" id="continent-bars-card">
         <h2 id="continent-bars-title">Continent by continent</h2>
+        <div class="mfr-tl" data-tl="full"></div>
         <div class="cmp-bar hidden" data-cmpbar></div>
         <div class="chart-mode-toggle hidden" id="bars-group-toggle" role="group" aria-label="Group by" style="margin:2px 0 10px;">
           <button type="button" class="mode-btn active" data-group="brand">Brand</button>
@@ -396,6 +412,7 @@
 
       <div class="card chart-card" id="bars-card">
         <h2 id="bars-title">Sales by country</h2>
+        <div class="mfr-tl" data-tl="full"></div>
         <div class="cmp-bar hidden" data-cmpbar></div>
         <p class="note" id="bars-note" style="display:block"></p>
         <div class="rank-rows-header">
@@ -407,7 +424,7 @@
 
       <div class="card chart-card">
         <h2>How to read this page</h2>
-        <p class="note" style="display:block">Coverage: about 50 countries with brand-level data (monthly from January 2025 where available, yearly back to 2008 for the longest series). Countries drawn in beige have no manufacturer breakdown on this site. Where a source publishes no powertrain split for a brand, its sales are counted as HEV + ICE + Diesel (and a few countries publish totals only). Hong Kong's registry folds hybrids and plug-in hybrids into petrol, so its PHEV share shows 0% even though some plug-in hybrids are in the grey bar; its BEV share is exact. Yearly periods use each country's yearly series; the running year (2026) is offered as "(Projected)" — each brand's year-to-date total through the latest month loaded for that country, annualized to a full-year run-rate (year-to-date &times; 12 / months loaded) — rather than a raw partial total, so it's comparable to the complete prior years in the same list. Every brand has one permanent color taken from its logo (Toyota red, Ford blue, BMW silver…) and each country carries a badge with its winner's logo; logos come from the open-source simple-icons set, so brands without one (BYD, Perodua, Stellantis, VinFast…) show their initials instead. "Compare / Split switches above the continent and country charts redo them for BEV only or non-BEV only (PHEV counts as non-BEV), or cut every bar into BEV and non-BEV. For a manufacturer or parent group with a worldwide total in its financial reports (annual reports, 10-K / 20-F, official year-end sales releases; full years only), the charts add a "Reported worldwide" row and a hatched "All other countries" row: reported sales minus the sum of the tracked countries, i.e. markets without brand data here, differences of basis (reported wholesale or deliveries vs. registrations) and joint-venture brands that this site files under another owner (Wuling under SAIC, for instance). The reported figures, regions and sources are in the Supabase table manufacturer_fin_report_sales. Parent group" attributes each brand to its owner as of the selected year (e.g. Volvo and Polestar count under Geely, not Ford, from 2010 onward).</p>
+        <p class="note" style="display:block">Coverage: about 50 countries with brand-level data (monthly from January 2025 where available, yearly back to 2008 for the longest series). Countries drawn in beige have no manufacturer breakdown on this site. Where a source publishes no powertrain split for a brand, its sales are counted as HEV + ICE + Diesel (and a few countries publish totals only). Hong Kong's registry folds hybrids and plug-in hybrids into petrol, so its PHEV share shows 0% even though some plug-in hybrids are in the grey bar; its BEV share is exact. Yearly periods use each country's yearly series; the running year (2026) is offered as "(Projected)" — each brand's year-to-date total through the latest month loaded for that country, annualized to a full-year run-rate (year-to-date &times; 12 / months loaded) — rather than a raw partial total, so it's comparable to the complete prior years in the same list. The Year and month buttons under Period and above the continent and country charts jump to any year or to any month of the running year, and the play button steps through the years, then the months, and ends on the running year projected to a full year while the bars re-rank; earlier years cover fewer countries (each country enters when its source starts), so a manufacturer's world total also grows with coverage, which is why the number of markets is written under the period name. Every brand has one permanent color taken from its logo (Toyota red, Ford blue, BMW silver…) and each country carries a badge with its winner's logo; logos come from the open-source simple-icons set, so brands without one (BYD, Perodua, Stellantis, VinFast…) show their initials instead. "Compare / Split switches above the continent and country charts redo them for BEV only or non-BEV only (PHEV counts as non-BEV), or cut every bar into BEV and non-BEV. For a manufacturer or parent group with a worldwide total in its financial reports (annual reports, 10-K / 20-F, official year-end sales releases; full years only), the charts add a "Reported worldwide" row and a hatched "All other countries" row: reported sales minus the sum of the tracked countries, i.e. markets without brand data here, differences of basis (reported wholesale or deliveries vs. registrations) and joint-venture brands that this site files under another owner (Wuling under SAIC, for instance). The reported figures, regions and sources are in the Supabase table manufacturer_fin_report_sales. Parent group" attributes each brand to its owner as of the selected year (e.g. Volvo and Polestar count under Geely, not Ford, from 2010 onward).</p>
       </div>
     </div>
     </div>
@@ -1058,6 +1075,7 @@ function renderMap(){
   renderSpotlight();
   renderChipBar();
   updateSegStatus(n);
+  syncStrips();
 }
 
 
@@ -1965,6 +1983,138 @@ document.querySelectorAll('[data-group]').forEach(b => b.onclick = () => {
   refresh(true);
 });
 document.querySelectorAll('[data-metric]').forEach(b => b.onclick = () => { if(b.disabled) return; metric = b.dataset.metric; setActive('#metric-toggle', 'metric', metric); renderMap(); });
+
+// ---------- period strips: year + month buttons, a play button and a scrubber, in the Period filter and above the continent / country charts ----------
+// The period is still the Period dropdown: every button sets it and refreshes the page, so the map, spotlight and both bar charts always agree.
+// Play steps through the years that have data for the selection, then the months of the running year; the rows glide to their new rank.
+const tlHosts = [...document.querySelectorAll('[data-tl]')];
+const tlCache = new Map();
+let tlSig = '', tlTimer = null, tlDirty = false;
+const tlParse = key => { const [t, v] = key.split(':'); return t === 'yp' ? { type:'year', year:+v, projected:true } : t === 'y' ? { type:'year', year:+v } : { type:'month', ym:v }; };
+const tlChipLabel = key => { const p = tlParse(key); return p.type === 'month' ? MONTH_NAMES[+p.ym.slice(5) - 1].slice(0, 3) : p.projected ? `${p.year} proj.` : String(p.year); };
+const tlYearKeys = [...YEARS].sort((a, b) => a - b).map(y => y === CUR_YEAR ? 'yp:' + y : 'y:' + y);
+const tlMonthKeys = MONTHS.filter(m => m.startsWith(CUR_YEAR + '-')).slice().sort().map(m => 'm:' + m);
+// the frames of the animation, oldest first: every year before the running one, then its months, then the running year projected to a full year
+const tlFrameList = () => tlYearKeys.filter(k => k.startsWith('y:')).concat(tlMonthKeys, tlYearKeys.filter(k => k.startsWith('yp:')));
+// does the selection have sales in this period? (tested for every button only where that is cheap: brand view, no car class)
+function tlAvail(key, force){
+  const sig = [kind, groupMode, mfr, mfr2, [...clsSel].sort().join(), [...motSel].sort().join()].join('|');
+  if(sig !== tlSig){ tlSig = sig; tlCache.clear(); }
+  let a = tlCache.get(key);
+  if(a) return a;
+  if(!mfr || (!force && !(kind === 'brand' && !clsSel.size))) return { has:true, n:null };
+  const p = tlParse(key);
+  let n = 0;
+  COUNTRIES.forEach(c => { const m = aggregate(c, p), x = m.get(mfr), y = mfr2 && mfr2 !== mfr ? m.get(mfr2) : null; if((x && x.total > 0) || (y && y.total > 0)) n++; });
+  a = { has:n > 0, n };
+  tlCache.set(key, a);
+  return a;
+}
+const tlPlayable = () => tlFrameList().filter(k => tlAvail(k).has);
+function selMarketCount(){
+  const md = mode(), es = Object.values(byCountry);
+  if(md === 'market') return es.length;
+  return es.filter(d => (d.sel && d.sel.total > 0) || (md === 'match' && d.sel2 && d.sel2.total > 0)).length;
+}
+function tlName(key, n){
+  const p = tlParse(key), mk = n ? ` · ${n} market${n === 1 ? '' : 's'}` : '';
+  if(p.type === 'month') return { big:periodLabel(p), small:'month' + mk };
+  return { big:String(p.year), small:(p.projected ? 'projected full year' : 'full year') + mk };
+}
+const tlChip = k => `<button type="button" class="tl-chip${k.startsWith('yp:') ? ' proj' : ''}" data-tl-key="${k}">${tlChipLabel(k)}</button>`;
+const tlChipsHTML = `<div class="tl-chips"><span class="tl-chips-lbl">Year</span><span class="tl-chip-group">${tlYearKeys.map(tlChip).join('')}</span>` +
+  (tlMonthKeys.length ? `<span class="tl-chips-lbl">${CUR_YEAR} by month</span><span class="tl-chip-group">${tlMonthKeys.map(tlChip).join('')}</span>` : '') + `</div>`;
+tlHosts.forEach(h => {
+  h.innerHTML = h.dataset.tl === 'chips' ? tlChipsHTML :
+    `<div class="elec-timeline"><button type="button" class="elec-play" data-tl-play title="Play: step through the years, then the months of ${CUR_YEAR}, ending on ${CUR_YEAR} projected to a full year" aria-label="Play">▶</button>` +
+    `<div class="elec-tl-label" data-tl-label></div><input type="range" min="0" max="0" value="0" step="1" data-tl-range aria-label="Period"></div>` + tlChipsHTML;
+});
+function syncStrips(){
+  if(!tlHosts.length) return;
+  const key = selPeriod.value, frames = tlPlayable(), idx = frames.indexOf(key), nm = tlName(key, selMarketCount());
+  tlHosts.forEach(h => {
+    const lbl = h.querySelector('[data-tl-label]');
+    if(lbl){
+      lbl.innerHTML = `${nm.big}<small>${nm.small}</small>`;
+      const r = h.querySelector('[data-tl-range]'); r.max = Math.max(0, frames.length - 1); r.value = idx >= 0 ? idx : frames.length - 1;
+      h.querySelector('[data-tl-play]').textContent = tlTimer ? '❚❚' : '▶';
+    }
+    h.querySelectorAll('[data-tl-key]').forEach(c => {
+      const k = c.dataset.tlKey, a = tlAvail(k);
+      c.classList.toggle('on', k === key); c.classList.toggle('gone', !a.has && k !== key);
+      c.title = a.n != null ? `${periodLabel(tlParse(k))}: ${a.n} market${a.n === 1 ? '' : 's'} with sales` : periodLabel(tlParse(k));
+    });
+  });
+}
+// redraw the page for a new period with the bar rows sliding to their new rank and every segment growing / shrinking from its previous width
+function flipRender(fn){
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hosts = ['continent-bars', 'country-bars'].map(id => document.getElementById(id));
+  const rowKey = r => { const l = r.querySelector('.country-label'); return l ? l.textContent.trim() : ''; };
+  const before = hosts.map(h => {
+    const m = new Map(); if(h.offsetParent === null) return m;
+    const top = h.getBoundingClientRect().top;
+    h.querySelectorAll('.rank-row').forEach(r => { const w = {}; r.querySelectorAll('.bar-seg').forEach(s => { w[s.style.background] = s.style.width; }); m.set(rowKey(r), { y:r.getBoundingClientRect().top - top, w }); });
+    return m;
+  });
+  fn();
+  if(reduce) return;
+  const moved = [];
+  hosts.forEach((h, i) => {
+    if(h.offsetParent === null || !before[i].size) return;
+    const top = h.getBoundingClientRect().top;
+    h.querySelectorAll('.rank-row').forEach(r => {
+      const p = before[i].get(rowKey(r)); r.style.transition = 'none';
+      if(p){ const dy = p.y - (r.getBoundingClientRect().top - top); if(Math.abs(dy) > 1) r.style.transform = `translateY(${dy}px)`; } else r.style.opacity = '0';   // a row with no bar in the previous period fades in
+      r.querySelectorAll('.bar-seg').forEach(s => { s.dataset.w = s.style.width; s.style.transition = 'none'; s.style.width = (p && p.w[s.style.background]) || '0%'; });
+      moved.push(r);
+    });
+  });
+  if(!moved.length) return;
+  void document.body.offsetHeight;
+  requestAnimationFrame(() => moved.forEach(r => {
+    r.style.transition = 'transform .65s ease, opacity .65s ease'; r.style.transform = ''; r.style.opacity = '';
+    r.querySelectorAll('.bar-seg').forEach(s => { s.style.transition = 'width .65s ease'; s.style.width = s.dataset.w; });
+  }));
+}
+// rebuild = true does what picking the period in the dropdown does (the manufacturer lists follow the period); a playing frame skips that and the page catches up when the play stops
+function tlShow(key, rebuild){
+  flipRender(() => { selPeriod.value = key; refresh(rebuild); });
+  tlDirty = !rebuild;
+}
+function tlResync(){ if(tlTimer || !tlDirty) return; tlDirty = false; refresh(true); }
+function tlStop(resync){
+  if(tlTimer){ clearInterval(tlTimer); tlTimer = null; }
+  syncStrips();
+  if(resync) setTimeout(tlResync, 900);        // let the last frame finish sliding first
+}
+function tlPlay(){
+  if(tlTimer){ tlStop(true); return; }
+  const frames = tlFrameList();
+  let i = frames.indexOf(selPeriod.value);
+  if(i < 0 || i >= frames.length - 1) i = -1;                                // start (or restart) from the first period with data
+  const nextIdx = from => { for(let j = from + 1; j < frames.length; j++) if(tlAvail(frames[j], true).has) return j; return -1; };
+  const step = () => {
+    const j = nextIdx(i);
+    if(j < 0){ tlStop(true); return; }
+    i = j; tlShow(frames[j], false);
+    if(nextIdx(j) < 0) tlStop(true);                                         // the last frame stays on screen, the button is ready to replay
+  };
+  tlTimer = setInterval(step, 1300);
+  step();
+}
+document.addEventListener('click', e => {
+  const c = e.target.closest('[data-tl-key]');
+  if(c){ tlStop(false); tlShow(c.dataset.tlKey, true); return; }
+  if(e.target.closest('[data-tl-play]')) tlPlay();
+});
+document.addEventListener('input', e => {
+  const r = e.target.closest('[data-tl-range]'); if(!r) return;
+  tlStop(false);
+  const f = tlPlayable()[+r.value]; if(f) tlShow(f, false);
+});
+document.addEventListener('change', e => { if(e.target.matches('[data-tl-range]')) tlResync(); });
+selPeriod.addEventListener('change', () => tlStop(false));
 
 // ---------- segment filters (Car class, Motorization) ----------
 function renderSegUI(){

@@ -252,7 +252,7 @@
               <button type="button" class="mode-btn hidden" id="sort-fuel-btn" data-sort-key="" title="Sorted by the number of registrations of the powertrain you clicked, biggest first.">Nb units</button>
             </div>
           </div>
-          <p class="note" id="bars-note">Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments (a narrow BEV slice shows its value to the right instead of hiding it). The dotted line marks 75% — a country whose colored segments reach past it has combined Petrol+Diesel (plus any small Others slice, stacked last) under 25%. Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that country's BEV registration growth — hover any segment for exact figures. Press the round play button to run the bars through the annual results (2020-2025) and then the months of the current year (the 3Y column is blank while it plays).</p>
+          <p class="note" id="bars-note">Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments (a narrow BEV slice shows its value to the right instead of hiding it). The dotted line marks 75% — a country whose colored segments reach past it has combined Petrol+Diesel (plus any small Others slice, stacked last) under 25%. Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that country's BEV registration growth — hover any segment for exact figures. Press the round play button to run the bars through the annual results (2020-2025), then the months of the current year, and ends on the current year projected to a full year (the 3Y column is blank while it plays).</p>
           <div class="elec-timeline" id="elec-timeline">
             <button type="button" class="elec-play" id="elec-play" aria-label="Play through time" title="Play: the bars re-rank through the annual results, then the months of the current year">▶</button>
             <div class="elec-tl-label" id="elec-tl-label"></div>
@@ -4311,7 +4311,8 @@ function renderBars(){
 const ELEC_CUR_YEAR = ALL_MONTHS.filter(k => /^\d{4}-\d{2}$/.test(k)).map(k => k.slice(0, 4)).sort().pop();
 const ELEC_FRAMES = [
   ...ALL_MONTHS.filter(k => /^\d{4}-annual$/.test(k) && Object.keys(MONTHLY_DATA[k].raw).length >= 20).sort(),   // earlier annual blocks hold a single market
-  ...ALL_MONTHS.filter(k => /^\d{4}-\d{2}$/.test(k) && k.slice(0, 4) === ELEC_CUR_YEAR).sort()                  // months only for the running year
+  ...ALL_MONTHS.filter(k => /^\d{4}-\d{2}$/.test(k) && k.slice(0, 4) === ELEC_CUR_YEAR).sort(),                 // months only for the running year
+  ...ALL_MONTHS.filter(k => k === ELEC_CUR_YEAR + '-projection')                                                // and a last frame: the running year projected to a full year
 ];
 let elecFrameKey = null;     // null = the bars follow the page's selected period; otherwise the timeline frame on screen
 let elecTimer = null;
@@ -4329,6 +4330,7 @@ function elecFrameData(key){          // same rows as buildData(), for one expli
 }
 function elecFrameName(key){
   const l = MONTHLY_DATA[key].label;
+  if(/projection/.test(key)) return { big: l.replace(' (Projected)', ''), small: 'projected full year' };
   return /annual/.test(key) ? { big: l.replace(' (Annual)', ''), small: 'full year' } : { big: l, small: '' };
 }
 function elecSyncControls(){
@@ -4391,8 +4393,8 @@ elecResetBtn.addEventListener('click', () => elecTimelineReset());
 elecSyncControls();
 
 const barsNote = document.getElementById('bars-note');
-const PCT_NOTE = 'Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments (a narrow BEV slice shows its value to the right instead of hiding it). The dotted line marks 75% — a country whose colored segments reach past it has combined Petrol+Diesel (plus any small Others slice, stacked last) under 25%. Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that country\'s BEV registration growth — hover any segment for exact figures. Press the round play button to run the bars through the annual results (2020-2025) and then the months of the current year (the 3Y column is blank while it plays).';
-const RAW_NOTE = 'Bar length now reflects actual registrations (scaled to the biggest market shown), so countries are comparable by volume, not just mix. Sorted by BEV share, high to low. Segment labels show unit counts (a narrow BEV slice shows its value to the right instead of hiding it) — hover any segment for exact figures. Press the round play button to run the bars through the annual results (2020-2025) and then the months of the current year (the 3Y column is blank while it plays).';
+const PCT_NOTE = 'Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments (a narrow BEV slice shows its value to the right instead of hiding it). The dotted line marks 75% — a country whose colored segments reach past it has combined Petrol+Diesel (plus any small Others slice, stacked last) under 25%. Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that country\'s BEV registration growth — hover any segment for exact figures. Press the round play button to run the bars through the annual results (2020-2025), then the months of the current year, and ends on the current year projected to a full year (the 3Y column is blank while it plays).';
+const RAW_NOTE = 'Bar length now reflects actual registrations (scaled to the biggest market shown), so countries are comparable by volume, not just mix. Sorted by BEV share, high to low. Segment labels show unit counts (a narrow BEV slice shows its value to the right instead of hiding it) — hover any segment for exact figures. Press the round play button to run the bars through the annual results (2020-2025), then the months of the current year, and ends on the current year projected to a full year (the 3Y column is blank while it plays).';
 document.querySelectorAll('[data-bar-mode]').forEach(btn => {
   btn.addEventListener('click', () => {
     if(btn.dataset.barMode === barMode) return;
