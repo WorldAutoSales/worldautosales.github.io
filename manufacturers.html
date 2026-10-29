@@ -1906,7 +1906,7 @@ function renderWorldBars(){
   names.forEach(n => { const h = histFor(n); if(!h){ missing.push(n); return; } const e = groups.get(h.key) || { h, names:[] }; e.names.push(n); groups.set(h.key, e); });
   host.innerHTML = '';
   const worldBlock = () => {
-    const box = document.createElement('div'); host.appendChild(box);
+    const box = document.createElement('div'); box.className = 'bw-chart'; host.appendChild(box);     // the class carries the chart CSS (transparent hover rects, grid lines, label colors, tooltip anchor)
     const rows = WORLD_PW.map(r => ({ y:r.y, v:r.total, kind:r.proj ? 'proj' : r.est ? 'e' : 'a', bk:'w', basis:r.proj ? 'projection from the World Car Sales page' : r.est ? 'estimate' : BK_TXT.w,
       extra: r.total && r.bev ? `BEV ${(100 * r.bev / r.total).toFixed(1)}% · PHEV ${(100 * (r.phev || 0) / r.total).toFixed(1)}% of sales` : '' }));
     bwChart(box, rows, '#6366f1');
