@@ -424,7 +424,7 @@
 
       <div class="card chart-card">
         <h2>How to read this page</h2>
-        <p class="note" style="display:block">Coverage: about 50 countries with brand-level data (monthly from January 2025 where available, yearly back to 2008 for the longest series). Countries drawn in beige have no manufacturer breakdown on this site. Where a source publishes no powertrain split for a brand, its sales are counted as HEV + ICE + Diesel (and a few countries publish totals only). Hong Kong's registry folds hybrids and plug-in hybrids into petrol, so its PHEV share shows 0% even though some plug-in hybrids are in the grey bar; its BEV share is exact. Yearly periods use each country's yearly series; the running year (2026) is offered as "(Projected)" — each brand's year-to-date total through the latest month loaded for that country, annualized to a full-year run-rate (year-to-date &times; 12 / months loaded) — rather than a raw partial total, so it's comparable to the complete prior years in the same list. The Year and month buttons under Period and above the continent and country charts jump to any year or to any month of the running year, and the play button steps through the years, then the months, and ends on the running year projected to a full year while the bars re-rank; earlier years cover fewer countries (each country enters when its source starts), so a manufacturer's world total also grows with coverage, which is why the number of markets is written under the period name. Every brand has one permanent color taken from its logo (Toyota red, Ford blue, BMW silver…) and each country carries a badge with its winner's logo; logos come from the open-source simple-icons set, so brands without one (BYD, Perodua, Stellantis, VinFast…) show their initials instead. "Compare / Split switches above the continent and country charts redo them for BEV only or non-BEV only (PHEV counts as non-BEV), or cut every bar into BEV and non-BEV. For a manufacturer or parent group with a worldwide total in its financial reports (annual reports, 10-K / 20-F, official year-end sales releases; full years only), the charts add a "Reported worldwide" row and a hatched "All other countries" row: reported sales minus the sum of the tracked countries, i.e. markets without brand data here, differences of basis (reported wholesale or deliveries vs. registrations) and joint-venture brands that this site files under another owner (Wuling under SAIC, for instance). The reported figures, regions and sources are in the Supabase table manufacturer_fin_report_sales. Parent group" attributes each brand to its owner as of the selected year (e.g. Volvo and Polestar count under Geely, not Ford, from 2010 onward).</p>
+        <p class="note" style="display:block">Coverage: about 50 countries with brand-level data (monthly from June 2026, only for the markets that report that month, so monthly figures never cover all world sales; earlier months are not offered because too few markets report them; yearly back to 2008 for the longest series). Countries drawn in beige have no manufacturer breakdown on this site. Where a source publishes no powertrain split for a brand, its sales are counted as HEV + ICE + Diesel (and a few countries publish totals only). Hong Kong's registry folds hybrids and plug-in hybrids into petrol, so its PHEV share shows 0% even though some plug-in hybrids are in the grey bar; its BEV share is exact. Yearly periods use each country's yearly series; the running year (2026) is offered as "(Projected)" — each brand's year-to-date total through the latest month loaded for that country, annualized to a full-year run-rate (year-to-date &times; 12 / months loaded) — rather than a raw partial total, so it's comparable to the complete prior years in the same list. The Year and month buttons under Period and above the continent and country charts jump to any year or to any month of the running year, and the play button steps through the years, then the months, and ends on the running year projected to a full year while the bars re-rank; earlier years cover fewer countries (each country enters when its source starts), so a manufacturer's world total also grows with coverage, which is why the number of markets is written under the period name. Every brand has one permanent color taken from its logo (Toyota red, Ford blue, BMW silver…) and each country carries a badge with its winner's logo; logos come from the open-source simple-icons set, so brands without one (BYD, Perodua, Stellantis, VinFast…) show their initials instead. "Compare / Split switches above the continent and country charts redo them for BEV only or non-BEV only (PHEV counts as non-BEV), or cut every bar into BEV and non-BEV. For a manufacturer or parent group with a worldwide total in its financial reports (annual reports, 10-K / 20-F, official year-end sales releases; full years only), the charts add a "Reported worldwide" row and a hatched "All other countries" row: reported sales minus the sum of the tracked countries, i.e. markets without brand data here, differences of basis (reported wholesale or deliveries vs. registrations) and joint-venture brands that this site files under another owner (Wuling under SAIC, for instance). The reported figures, regions and sources are in the Supabase table manufacturer_fin_report_sales. Parent group" attributes each brand to its owner as of the selected year (e.g. Volvo and Polestar count under Geely, not Ford, from 2010 onward).</p>
       </div>
     </div>
     </div>
@@ -463,10 +463,10 @@ function rankTierLabel(rank){
 }
 // badge for the country-by-country list: the SELECTED BRAND's own rank in that country's market
 // (not the country's overall size), colored to match the bar/map's own rank-tier coloring
-function brandRankBadgeHTML(rank, name){
+function brandRankBadgeHTML(rank, name, title){
   if(!rank) return '<span class="world-rank-badge"></span>';
   const bg = rankColor(rank);
-  return `<span class="world-rank-badge" style="background:${bg};border-color:${bg};color:#fff" title="${name}'s rank in this country's market: ${rankTierLabel(rank)}">#${rank}</span>`;
+  return `<span class="world-rank-badge" style="background:${bg};border-color:${bg};color:#fff" title="${title || `${name}'s rank in this country's market: ${rankTierLabel(rank)}`}">#${rank}</span>`;
 }
 // PERMANENT brand colors, one per brand, taken from each logo's dominant color (Toyota red, Ford blue, BMW
 // silver, Volkswagen navy, Chevrolet gold, Renault yellow...) and pushed apart in CIELAB space wherever two
@@ -572,6 +572,10 @@ const CUR_YEAR = YEARS[0];
 // per-country) for the same reason periodLabel() marks CUR_YEAR "(year-to-date)" uniformly rather
 // than per country: this project doesn't track each country's own latest-loaded month separately.
 const CUR_YEAR_MONTHS_ELAPSED = MONTHS.filter(m => m.startsWith(CUR_YEAR + '-')).length || 12;
+// the month filters (dropdown + buttons + timeline) start here: the 2025 months hold brand data for only 5 markets and Jan-May 2026 were dropped on request.
+// MONTHS itself stays complete because CUR_YEAR_MONTHS_ELAPSED above annualizes the running year with it.
+const FIRST_MONTH_SHOWN = '2026-06';
+const MONTHS_SHOWN = MONTHS.filter(m => m >= FIRST_MONTH_SHOWN);
 
 function periodLabel(p){
   if(p.type === 'year') return p.projected ? `${p.year} (Projected)` : p.year === CUR_YEAR ? `${p.year} year-to-date` : String(p.year);
@@ -747,7 +751,7 @@ function buildPeriodSelect(){
   let h = '<optgroup label="Years">';
   YEARS.forEach(y => { h += y === CUR_YEAR ? `<option value="yp:${y}">${y} (Projected)</option>` : `<option value="y:${y}">${y}</option>`; });
   h += '</optgroup><optgroup label="Months">';
-  MONTHS.forEach(m => { h += `<option value="m:${m}">${periodLabel({type:'month', ym:m})}</option>`; });
+  MONTHS_SHOWN.forEach(m => { h += `<option value="m:${m}">${periodLabel({type:'month', ym:m})}</option>`; });
   h += '</optgroup>';
   selPeriod.innerHTML = h;
   selPeriod.value = `yp:${YEARS[0]}`; // current year, projected full-year run-rate
@@ -1628,7 +1632,7 @@ function renderContinentBars(){
     legend.innerHTML = `<span><i class="sw" style="background:${COLORS.bev}"></i>BEV</span><span><i class="sw" style="background:${COLORS.phev}"></i>PHEV</span><span><i class="sw" style="background:${COLORS.other}"></i>HEV + ICE + Diesel</span>` +
       (anyFin ? `<span><i class="sw" style="background:${HATCH}"></i>All other countries = reported worldwide sales minus the tracked countries</span>` : '');
     const widthDenom = ranked.length ? ranked[0].eff : 1;
-    rows.innerHTML = ranked.map(({ name, e, f, gap }) => {
+    rows.innerHTML = ranked.map(({ name, e, f, gap, eff }, i) => {
       const parts = [
         { value:e.bev, color:COLORS.bev, label:`BEV: ${fmt(e.bev)}` },
         { value:e.phev, color:COLORS.phev, label:`PHEV: ${fmt(e.phev)}` },
@@ -1637,13 +1641,17 @@ function renderContinentBars(){
       if(gap > 0) parts.push({ value:gap, color:HATCH, label:`All other countries: ${fmt(gap)} (reported ${fmt(f.units)} minus tracked ${fmt(e.total)})` });
       const { bar, outside } = segmentsHTML(parts, widthDenom);
       const pct = worldTotal ? `<span class="pct-of-total">${(100 * e.total / worldTotal).toFixed(1)}%</span>` : '';
+      const totalTip = gap > 0 ? `Reported worldwide ${fmt(f.units)} = tracked countries ${fmt(e.total)} + all other countries ${fmt(gap)}` : `Total sales in the tracked countries`;
       return `<div class="rank-row"${f ? ` title="${esc(finTip(f))}"` : ''}>
+        ${brandRankBadgeHTML(i + 1, name, `${esc(name)}: #${i + 1} in this ranking`)}
         <span class="country-label">${esc(name)}</span>
         ${pct}
         <span class="bar-track">${bar}${outside}</span>
+        <span class="total-label" title="${esc(totalTip)}">${fmt(eff)}</span>
       </div>`;
     }).join('');
-    note.textContent = `Top ${WORLD_LIST_CAP} ${byGroup ? 'parent groups' : 'brands'} worldwide by volume, ${periodLabel(period)}. Bars are split into BEV, PHEV and HEV + ICE + Diesel; the % is the share of the volume in the tracked countries.` +
+    note.textContent = `Top ${WORLD_LIST_CAP} ${byGroup ? 'parent groups' : 'brands'} worldwide by volume, ${periodLabel(period)}: rank on the left, total sales on the right. Bars are split into BEV, PHEV and HEV + ICE + Diesel; the % is the share of the volume in the tracked countries.` +
+      (period.type === 'month' ? ` Monthly figures come from the ${Object.keys(byCountry).length} markets that report brand data for ${periodLabel(period)}, not from every country, so they do not include all world sales.` : '') +
       (anyFin ? ` Where the company's financial reports give a worldwide total, the bar is extended by a hatched "All other countries" segment (reported worldwide minus tracked countries) and the list is ranked by the reported figure; hover a row for the source.` : '') +
       ` Pick a manufacturer above to focus this chart on one market instead.`;
     return;
@@ -1993,7 +2001,7 @@ let tlSig = '', tlTimer = null, tlDirty = false;
 const tlParse = key => { const [t, v] = key.split(':'); return t === 'yp' ? { type:'year', year:+v, projected:true } : t === 'y' ? { type:'year', year:+v } : { type:'month', ym:v }; };
 const tlChipLabel = key => { const p = tlParse(key); return p.type === 'month' ? MONTH_NAMES[+p.ym.slice(5) - 1].slice(0, 3) : p.projected ? `${p.year} proj.` : String(p.year); };
 const tlYearKeys = [...YEARS].sort((a, b) => a - b).map(y => y === CUR_YEAR ? 'yp:' + y : 'y:' + y);
-const tlMonthKeys = MONTHS.filter(m => m.startsWith(CUR_YEAR + '-')).slice().sort().map(m => 'm:' + m);
+const tlMonthKeys = MONTHS_SHOWN.filter(m => m.startsWith(CUR_YEAR + '-')).slice().sort().map(m => 'm:' + m);
 // the frames of the animation, oldest first: every year before the running one, then its months, then the running year projected to a full year
 const tlFrameList = () => tlYearKeys.filter(k => k.startsWith('y:')).concat(tlMonthKeys, tlYearKeys.filter(k => k.startsWith('yp:')));
 // does the selection have sales in this period? (tested for every button only where that is cheap: brand view, no car class)
