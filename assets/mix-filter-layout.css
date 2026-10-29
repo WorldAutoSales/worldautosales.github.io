@@ -1,0 +1,131 @@
+/* Mix by Country -- filter layout experiments (assets/mix-filter-layout.js).
+   Four layouts over the SAME filter markup: classic (as before), collapsible (accordion groups + retractable side rails), top bar (chips with popovers), drawer (slide-in panel + active-filter chips).
+   In every layout the middle column is no longer capped at 1180px. */
+
+/* ---------- a wider middle ---------- */
+body[data-fl-mode] .content-with-filters{ max-width:none; }
+body[data-fl-mode] .content-with-filters .page{ max-width:none; }
+
+/* ---------- layout switcher (page header) ---------- */
+.fl-switch{
+  float:right; display:flex; align-items:center; gap:2px; padding:3px; border:1px solid var(--border); border-radius:10px; background:var(--surface-alt);
+  font-size:11px; margin-left:12px;
+}
+.fl-switch > span{ padding:0 8px 0 6px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--text-muted); font-size:10px; }
+.fl-switch button{
+  appearance:none; border:none; background:none; cursor:pointer; font:inherit; font-weight:700; color:var(--text-muted);
+  padding:5px 10px; border-radius:7px;
+}
+.fl-switch button:hover{ color:var(--text); }
+.fl-switch button.active{ background:var(--accent); color:#fff; }
+@media (max-width: 760px){ .fl-switch{ float:none; margin:0 0 10px; flex-wrap:wrap; } }
+
+/* ---------- classic: everything the module adds stays out of the way ---------- */
+body[data-fl-mode="classic"] .fl-chev,
+body[data-fl-mode="classic"] .fl-sum,
+body[data-fl-mode="classic"] .fl-panel-head{ display:none; }
+
+/* ---------- group headers (collapsible + drawer) ---------- */
+.fl-left{ display:flex; align-items:center; gap:7px; min-width:0; flex:1; cursor:pointer; }
+.fl-left .fl-title{ white-space:nowrap; }
+.fl-chev{
+  appearance:none; border:none; background:none; cursor:pointer; padding:0; width:16px; height:16px; flex:none; line-height:1;
+  color:var(--text-muted); font-size:11px; transition:transform .15s ease;
+}
+.fl-left:hover .fl-chev{ color:var(--accent); }
+.fl-collapsed .fl-chev{ transform:rotate(-90deg); }
+.fl-sum{
+  text-transform:none; letter-spacing:0; font-weight:600; font-size:11.5px; color:var(--text-muted);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;
+}
+.fl-sum.is-active{ color:var(--accent); font-weight:700; }
+.fl-collapsed > *:not(.filter-label){ display:none; }
+.fl-collapsed .filter-bulk{ display:none; }
+.fl-collapsed{ gap:0; padding-top:11px; padding-bottom:11px; }
+/* the popover / bar layouts always show the full group, and have their own header */
+body[data-fl-mode="bar"] .fl-chev, body[data-fl-mode="bar"] .fl-sum{ display:none; }
+body[data-fl-mode="bar"] .fl-left{ cursor:default; }
+
+/* ---------- retractable side rails (collapsible layout) ---------- */
+.fl-panel-head{ display:flex; }
+.fl-panel-toggle{
+  appearance:none; cursor:pointer; display:flex; align-items:center; gap:8px; width:100%; padding:7px 10px;
+  border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--text-muted);
+  font:inherit; font-size:11px; font-weight:800; letter-spacing:.07em; text-transform:uppercase;
+}
+.fl-panel-toggle:hover{ color:var(--accent); border-color:var(--accent); }
+.fl-badge{
+  margin-left:auto; min-width:18px; padding:1px 6px; border-radius:999px; background:var(--accent); color:#fff;
+  font-size:10px; font-weight:800; letter-spacing:0; text-align:center;
+}
+.fl-badge:empty, .fl-badge[data-n="0"]{ display:none; }
+.filters-panel.fl-panel-collapsed{ width:46px; overflow:hidden; gap:0; }
+.filters-panel.fl-panel-collapsed > *:not(.fl-panel-head){ display:none; }
+.filters-panel.fl-panel-collapsed .fl-panel-toggle{
+  flex-direction:column; justify-content:flex-start; padding:12px 0; height:132px; border-radius:12px; gap:10px;
+}
+.filters-panel.fl-panel-collapsed .fl-pt-txt{ writing-mode:vertical-rl; transform:rotate(180deg); }
+.filters-panel.fl-panel-collapsed .fl-badge{ margin:0; order:-1; }
+@media (max-width: 1000px){ .fl-panel-head{ display:none; } .filters-panel.fl-panel-collapsed{ width:100%; } }
+
+/* ---------- top bar ---------- */
+body[data-fl-mode="bar"] .filters-panel,
+body[data-fl-mode="drawer"] .filters-panel{ display:none; }
+.fl-bar{
+  position:sticky; top:0; z-index:50; display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  margin:-10px 0 -8px; padding:10px 0; background:color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter:blur(6px);
+}
+.fl-chips{ display:flex; flex-wrap:wrap; gap:8px; align-items:flex-start; }
+.fl-chipwrap{ position:relative; }
+.fl-chip{
+  appearance:none; cursor:pointer; display:flex; align-items:center; gap:7px; padding:7px 11px; border:1px solid var(--border); border-radius:999px;
+  background:var(--surface); color:var(--text); font:inherit; font-size:12.5px; box-shadow:var(--shadow);
+}
+.fl-chip:hover{ border-color:var(--accent); }
+.fl-chip-k{ font-size:10px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text-muted); }
+.fl-chip-v{ font-weight:700; max-width:190px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.fl-caret{ font-size:9px; color:var(--text-muted); transition:transform .15s ease; }
+.fl-chip[aria-expanded="true"]{ border-color:var(--accent); }
+.fl-chip[aria-expanded="true"] .fl-caret{ transform:rotate(180deg); }
+.fl-chip.is-active{ background:color-mix(in srgb, var(--accent) 12%, var(--surface)); border-color:var(--accent); }
+.fl-chip.is-active .fl-chip-v{ color:var(--accent); }
+.fl-pop{
+  position:absolute; top:calc(100% + 8px); left:0; z-index:60; width:300px; max-height:72vh; overflow:auto;
+  border-radius:12px; box-shadow:0 18px 40px rgba(0,0,0,.28);
+}
+.fl-chipwrap.fl-pop-wide .fl-pop{ width:380px; }
+.fl-chipwrap.fl-pop-right .fl-pop{ left:auto; right:0; }
+.fl-pop[hidden]{ display:none; }
+.fl-pop .filter-group{ box-shadow:none; }
+.fl-pop .filter-countries{ max-height:300px; }
+.fl-bar-actions .filter-actions{ flex-direction:row; align-items:center; gap:12px; }
+.fl-bar-actions .filter-reset{ white-space:nowrap; }
+.fl-bar-actions .copy-link-btn{ white-space:nowrap; }
+
+/* ---------- drawer ---------- */
+.fl-open{
+  appearance:none; cursor:pointer; display:flex; align-items:center; gap:8px; padding:8px 14px; border:none; border-radius:999px;
+  background:linear-gradient(135deg, var(--accent), var(--accent-strong)); color:#fff; font:inherit; font-size:13px; font-weight:800;
+  box-shadow:0 5px 14px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.fl-open .fl-badge{ background:#fff; color:var(--accent); margin-left:2px; }
+.fl-active{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; flex:1; min-width:0; }
+.fl-tag{
+  display:inline-flex; align-items:center; gap:6px; padding:5px 6px 5px 11px; border-radius:999px; border:1px solid var(--accent);
+  background:color-mix(in srgb, var(--accent) 10%, var(--surface)); font-size:12px; font-weight:700; color:var(--text);
+}
+.fl-tag small{ font-size:9.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text-muted); }
+.fl-tag button{
+  appearance:none; border:none; cursor:pointer; width:18px; height:18px; line-height:1; border-radius:50%; background:var(--accent); color:#fff; font-size:11px; padding:0;
+}
+.fl-tag.plain{ border-color:var(--border); background:var(--surface); }
+.fl-drawer{
+  position:fixed; top:0; left:0; bottom:0; z-index:200; width:min(390px, 92vw); transform:translateX(-102%); transition:transform .22s ease;
+  display:flex; flex-direction:column; background:var(--bg); border-right:1px solid var(--border); box-shadow:12px 0 40px rgba(0,0,0,.25);
+}
+.fl-drawer.open{ transform:translateX(0); }
+.fl-drawer-head{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid var(--border); font-weight:800; font-size:15px; }
+.fl-drawer-head button{ appearance:none; border:none; background:none; cursor:pointer; font-size:20px; line-height:1; color:var(--text-muted); }
+.fl-drawer-body{ flex:1; overflow:auto; padding:14px; display:flex; flex-direction:column; gap:12px; }
+.fl-backdrop{ position:fixed; inset:0; z-index:190; background:rgba(0,0,0,.35); opacity:0; pointer-events:none; transition:opacity .2s ease; }
+.fl-backdrop.open{ opacity:1; pointer-events:auto; }
