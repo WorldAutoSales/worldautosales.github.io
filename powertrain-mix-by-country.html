@@ -44,6 +44,9 @@
       <a href="biggest-movers.html"><span class="dot"></span>Biggest Movers</a>
 
       <div class="nav-heading">Trends<span class="soon-pill">Soon</span></div>
+
+      <div class="nav-heading">Archive</div>
+      <a href="powertrain-mix-by-country-copy.html"><span class="dot"></span>Mix by Country (copy)</a>
     </nav>
 
     <div class="sidebar-footer">
@@ -245,6 +248,7 @@
               <button type="button" class="mode-btn" data-sort-key="total" title="Sort by total registrations, all powertrains combined.">Nb Reg. Units</button>
               <button type="button" class="mode-btn" data-sort-key="bevYoyPct" title="Sort by BEV registration growth vs. the same period last year.">YoY %</button>
               <button type="button" class="mode-btn" data-sort-key="threeYrPct" title="Sort by BEV registration growth vs. 2023 (full year).">3Y %</button>
+              <button type="button" class="mode-btn hidden" id="sort-fuel-btn" data-sort-key="" title="Sorted by the number of registrations of the powertrain you clicked, biggest first.">Nb units</button>
             </div>
           </div>
           <p class="note" id="bars-note">Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments (a narrow BEV slice shows its value to the right instead of hiding it). The dotted line marks 75% — a country whose colored segments reach past it has combined Petrol+Diesel (plus any small Others slice, stacked last) under 25%. Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that country's BEV registration growth — hover any segment for exact figures. Press the round play button to run the bars through 2020-2025 and then the 2026 months (the 3Y column is blank while it plays).</p>
@@ -3154,7 +3158,7 @@ function renderMovers(){
     <li class="movers-row">
       <span class="movers-rank"></span>
       ${moversFlagHTML(m.country)}
-      <span class="movers-country">${m.country}</span>
+      <span class="movers-country country-click" data-pick-country="${m.country}">${m.country}</span>
       ${valueHTML}
       <span class="movers-detail">${m.prevBev.toLocaleString('en-US')} → ${m.curBev.toLocaleString('en-US')} BEV · ${m.prevLabel} → ${m.curLabel}</span>
     </li>`;
@@ -4157,7 +4161,7 @@ function momentumCardHTML(c){
 
 function wireMomentumCardClicks(container){
   container.querySelectorAll('.momentum-card').forEach(card => {
-    card.addEventListener('click', () => focusCountry(card.dataset.momentumCountry));
+    card.addEventListener('click', () => selectOnlyCountry(card.dataset.momentumCountry, false));
   });
 }
 
@@ -4215,9 +4219,15 @@ function renderFuelLegend(){
     <div class="legend-chip${selectedFuels.has(k) ? '' : ' dimmed'}" data-fuel="${k}"><span class="swatch" style="background:${FUEL_COLORS[k]}"></span>${FUEL_LABELS[k]}</div>
   `).join('');
 }
+let barSortBeforeFuel = null;     // the sort that was active before a powertrain was clicked, put back when it is un-isolated
 function toggleFuelIsolation(key){
-  selectedFuels = (selectedFuels.size === 1 && selectedFuels.has(key)) ? new Set(FUEL_KEYS) : new Set([key]);
+  const restoring = selectedFuels.size === 1 && selectedFuels.has(key);
+  selectedFuels = restoring ? new Set(FUEL_KEYS) : new Set([key]);
   fuelsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = selectedFuels.has(cb.dataset.fuel); });
+  // the countries are re-ranked by the number of units of the clicked powertrain, biggest first; clicking it again restores the previous sort
+  if(restoring){ if(FUEL_KEYS.includes(barSortKey)) barSortKey = barSortBeforeFuel || 'bevPct'; barSortBeforeFuel = null; }
+  else { if(!FUEL_KEYS.includes(barSortKey)) barSortBeforeFuel = barSortKey; barSortKey = key; }
+  syncBarSortButtons();
   renderBars();
   if(typeof renderContinentBars === 'function') renderContinentBars();
   updateURL();
@@ -4241,10 +4251,17 @@ function segHTML(d, key, denom, widthDenom, mode = barMode){
   if(units <= 0 || denom <= 0) return '';
   const pct = units / denom * 100; // always the true share, used for the tooltip
   const width = units / widthDenom * 100; // bar geometry: 100%-stacked in pct mode, scaled-to-max in raw mode
-  const showLabel = width >= 7;
+  const showLabel = width >= (mode === 'raw' ? 11 : 7);
   // `mode` is each chart's own display mode (country bars default to barMode; the continent chart passes continentBarMode)
   const labelText = mode === 'raw' ? units.toLocaleString('en-US') : pct.toFixed(0) + '%';
   return `<div class="bar-seg" style="width:${width}%; background:${FUEL_COLORS[key]}" data-country="${d.country}" data-key="${key}" data-units="${units}" data-pct="${pct.toFixed(1)}">${showLabel ? `<span class="seg-label">${labelText}</span>` : ''}</div>`;
+}
+
+// raw mode: a bar too short to hold its number gets it written just to the right of the bar's end (units of the powertrains shown)
+function outsideBarLabel(units, widthDenom, mode){
+  if(mode !== 'raw' || !(units > 0) || !(widthDenom > 0)) return '';
+  const w = units / widthDenom * 100;
+  return w < 11 ? `<span class="bar-out-label" style="left:calc(${w.toFixed(2)}% + 6px)">${units.toLocaleString('en-US')}</span>` : '';
 }
 
 function renderBars(){
@@ -4276,11 +4293,11 @@ function renderBars(){
     const bevOutsideText = barMode === 'raw' ? d.bev.toLocaleString('en-US') : (d.bev/denom*100).toFixed(1) + '%';
     return `
     <div class="rank-row" data-country="${d.country}">
-      <div class="country-label">${d.country}</div>
+      <div class="country-label country-click" data-pick-country="${d.country}">${d.country}</div>
       ${worldRankBadgeHTML(d.country)}
       <span class="bev-outside-label" style="color:${FUEL_COLORS.bev}">${bevNarrow ? `BEV ${bevOutsideText}` : ''}</span>
       <div class="bar-track">
-        ${fuels.map(k => segHTML(d,k,denom,widthDenom)).join('')}
+        ${fuels.map(k => segHTML(d,k,denom,widthDenom)).join('')}${outsideBarLabel(denom, widthDenom, barMode)}
       </div>
       <div class="pct-label ${yoyClass}" title="BEV vs. same period last year">${yoyText}</div>
       <div class="pct-label ${y3Class}" title="BEV vs. 2023 (full year)">${y3Text}</div>
@@ -4393,11 +4410,19 @@ document.querySelectorAll('[data-movers-mode]').forEach(btn => {
   });
 });
 
+function syncBarSortButtons(){
+  const fuelBtn = document.getElementById('sort-fuel-btn');
+  const byFuel = FUEL_KEYS.includes(barSortKey);
+  fuelBtn.classList.toggle('hidden', !byFuel);
+  if(byFuel){ fuelBtn.dataset.sortKey = barSortKey; fuelBtn.textContent = 'Nb ' + FUEL_LABELS[barSortKey]; }
+  document.querySelectorAll('[data-sort-key]').forEach(b => b.classList.toggle('active', b.dataset.sortKey === barSortKey));
+}
 document.querySelectorAll('[data-sort-key]').forEach(btn => {
   btn.addEventListener('click', () => {
-    if(btn.dataset.sortKey === barSortKey) return;
+    if(btn.dataset.sortKey === barSortKey || !btn.dataset.sortKey) return;
     barSortKey = btn.dataset.sortKey;
-    document.querySelectorAll('[data-sort-key]').forEach(b => b.classList.toggle('active', b === btn));
+    barSortBeforeFuel = null;
+    syncBarSortButtons();
     renderBars();
   });
 });
@@ -4488,7 +4513,7 @@ function renderContinentBars(){
       <div class="country-label">${d.country}</div>
       <span class="bev-outside-label" style="color:${FUEL_COLORS.bev}">${bevNarrow ? `BEV ${bevOutsideText}` : ''}</span>
       <div class="bar-track">
-        ${fuels.map(k => segHTML(d,k,denom,widthDenom,continentBarMode)).join('')}
+        ${fuels.map(k => segHTML(d,k,denom,widthDenom,continentBarMode)).join('')}${outsideBarLabel(denom, widthDenom, continentBarMode)}
       </div>
       <div class="pct-label ${yoyClass}" title="BEV vs. same period last year">${yoyText}</div>
       <div class="pct-label ${y3Class}" title="BEV vs. 2023 (full year)">${y3Text}</div>
@@ -5274,7 +5299,7 @@ document.querySelectorAll('#data-table thead th').forEach(th=>{
 });
 tbody.addEventListener('click', e => {
   const cell = e.target.closest('.country-link');
-  if(cell) focusCountry(cell.dataset.country);
+  if(cell) selectOnlyCountry(cell.dataset.country);
 });
 
 // --- main recompute ---
@@ -5498,6 +5523,31 @@ countriesBox.addEventListener('click', e => {
   focusedCountry = COUNTRIES_WITH_TREND.has(c) ? c : null;
   countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = cb.dataset.country === c; });
   recompute();
+});
+
+// Clicking ANY country name on the page (Electrified Share bars, Biggest Movers, momentum cards, Country Detail rows) is the sidebar's "Only" button for that
+// country: only it stays selected (and focused when it has a trend). With `toggle`, a second click while it is the only one selected brings every country back.
+// A continent / rank tier that would hide the country is switched back on, so the click never ends on an empty page.
+function selectOnlyCountry(c, toggle = true){
+  if(!c || !FILTER_COUNTRIES.includes(c)) return;
+  if(toggle && selectedCountries.size === 1 && selectedCountries.has(c)){ clearSelection(); recompute(); return; }
+  const cont = COUNTRY_CONTINENT[c] || 'OTHER';
+  if(!selectedContinents.has(cont)){
+    selectedContinents.add(cont);
+    continentsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { if(cb.dataset.continent === cont) cb.checked = true; });
+  }
+  if(!passesRankFilter(c)){
+    selectedRankTiers = new Set(RANK_TIER_KEYS);
+    rankTiersBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = true; });
+  }
+  selectedCountries = new Set([c]);
+  focusedCountry = COUNTRIES_WITH_TREND.has(c) ? c : null;
+  countriesBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = cb.dataset.country === c; });
+  recompute();
+}
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-pick-country]');
+  if(el){ e.preventDefault(); selectOnlyCountry(el.dataset.pickCountry); }
 });
 
 monthsBox.addEventListener('change', e => {
