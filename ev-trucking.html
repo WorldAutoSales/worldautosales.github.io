@@ -936,18 +936,31 @@ function stackData(reg, m, kindS){
   }
   return { bev, ice };
 }
+// markets with no IEA truck line (USA, Austria, Italy...): the ICCT's yearly sales. Electric = its zero-emission medium + heavy trucks and buses, total = its medium + heavy trucks and buses (the ICCT share is the same ratio)
+function stackDataIcct(n, kindS){
+  const bev = [], ice = [];
+  STK_YEARS.forEach(y => { const r = ICCT[n][y]; if(!r || !r.totalHDV){ bev.push(0); ice.push(null); return; }
+    const e = r.zeSales || 0, t = r.totalHDV;
+    if(kindS === 'share'){ bev.push(100 * e / t); ice.push(100 - 100 * e / t); } else { bev.push(e); ice.push(Math.max(0, t - e)); } });
+  return { bev, ice };
+}
 function renderStack(){
   setStkYears();
   const kindS = metric === 'sShare' ? 'share' : metric === 'tShare' ? 'fshare' : metric === 'sales' ? 'sales' : 'fleet';
   const sel = document.getElementById('stk-sel');
   const regs = ['World', 'China', 'European Union', 'Europe', 'Advanced Economies', 'Developing Economies excl. China'].filter(r => R[r] && R[r][mode]).concat(countries(mode).filter(c => c !== 'China').sort());
-  if(!regs.includes(stkScope)) stkScope = 'World';
-  sel.innerHTML = regs.map(r => `<option value="${esc(r)}"${r === stkScope ? ' selected' : ''}>${esc(r)}</option>`).join('');
-  const d = stackData(stkScope, mode, kindS), host = document.getElementById('stk-chart'), what = MODE_LBL[mode];
+  const xs = kindS === 'sales' || kindS === 'share' ? extras(mode).sort() : [];     // ICCT-only markets have yearly sales and a share, but no electric fleet
+  if(!regs.includes(stkScope) && !xs.includes(stkScope)) stkScope = 'World';
+  const opt = r => `<option value="${esc(r)}"${r === stkScope ? ' selected' : ''}>${esc(r)}</option>`;
+  sel.innerHTML = regs.map(opt).join('') + (xs.length ? `<optgroup label="ICCT figures (no IEA truck line)">${xs.map(opt).join('')}</optgroup>` : '');
+  const ex = xs.includes(stkScope);
+  if(ex){ const first = Math.min(...Object.keys(ICCT[stkScope]).map(Number)); STK_YEARS = STK_YEARS.filter(y => y >= first && y <= Y[LAST]); }     // ICCT series: first year with data to the latest actual year, no projection
+  const d = ex ? stackDataIcct(stkScope, kindS) : stackData(stkScope, mode, kindS), host = document.getElementById('stk-chart'), what = MODE_LBL[mode];
   const titles = { fshare:`Share of the ${what} on the road: electric vs non-electric`, fleet:`Electric vs non-electric ${what} on the road`, sales:`${what[0].toUpperCase() + what.slice(1)} sold per year: electric vs non-electric`, share:`Share of new ${what} sold: electric vs non-electric` };
   document.getElementById('stk-title').textContent = titles[kindS] + ' · ' + stkScope;
   document.getElementById('stk-lg').innerHTML = '<span><i class="sq" style="background:#16a34a"></i>Electric (battery, plug-in, fuel-cell)</span><span><i class="sq" style="background:#374151"></i>Non-electric (diesel, gas, other)</span><span><i class="sq" style="background:repeating-linear-gradient(45deg,#fff 0 3px,#64748b 3px 6px)"></i>2026 projected</span>';
   document.getElementById('stk-note').textContent = { fshare:'Electric share of the whole fleet = IEA electric stock ÷ the estimated fleet (see the fleet section; smoothed over three years); the rest is diesel, gas and other. Same measure as the Share of fleet button.', fleet:'Whole fleet = IEA electric stock ÷ the electric share of the fleet (rounded, smoothed over three years), see the fleet section; 2010–2011 are shown with no electric trucks (the IEA series starts in 2012).', sales:'Total market = electric sales ÷ the electric share of sales (rounded by the IEA, smoothed over three years); non-electric = total − electric.', share:'Share of new sales as published by the IEA (rounded); the rest is diesel, gas and other.' }[kindS];
+  if(ex) document.getElementById('stk-note').textContent = `${stkScope}: ICCT figures, not the IEA. Electric = zero-emission medium and heavy trucks plus buses; the total is the ICCT's count of all medium and heavy trucks and buses sold, so non-electric includes diesel, gas and other trucks and buses. The ICCT series is short and has no 2026 projection.`;
   if(!d){ host.innerHTML = '<p class="tk-note">No usable series for this market and vehicle class (the IEA does not publish the electric share of its fleet).</p>'; return; }
   const W = 720, H = 300, m = { t:16, r:12, b:28, l:54 }, share = kindS === 'share' || kindS === 'fshare';
   const rows = STK_YEARS.map((yr, k) => ({ y:yr, bev:d.bev[k] || 0, ice:d.ice[k] || 0, ok:d.ice[k] != null })), top = share ? 100 : Math.max(...rows.map(r => r.bev + r.ice)) * 1.06 || 1;
@@ -956,7 +969,7 @@ function renderStack(){
   const el = d3.select(host).html(''), svg = el.append('svg').attr('viewBox', `0 0 ${W} ${H}`);
   svg.append('defs').html(`<pattern id="${id}g" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#374151"/><line x1="0" y1="0" x2="0" y2="6" stroke="#9ca3af" stroke-width="2.4"/></pattern><pattern id="${id}e" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#16a34a"/><line x1="0" y1="0" x2="0" y2="6" stroke="#bbf7d0" stroke-width="2.4"/></pattern>`);
   svg.append('g').attr('class', 'grid').selectAll('line').data(y.ticks(5)).join('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', d => y(d)).attr('y2', d => y(d));
-  svg.append('g').attr('class', 'ax').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickValues(rows.filter((r, i) => i % 2 === 0 || r.y === Y[NY]).map(r => r.y)).tickSizeOuter(0));
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickValues(rows.filter((r, i) => rows.length <= 8 || i % 2 === 0 || i === rows.length - 1).map(r => r.y)).tickSizeOuter(0));
   svg.append('g').attr('class', 'ax').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(v => share ? v + '%' : compact(v)).tickSizeOuter(0));
   rows.forEach((r, k) => { if(!r.ok) return; const pj = r.y > Y[LAST], gx = x(r.y), w = x.bandwidth();
     svg.append('rect').attr('x', gx).attr('width', w).attr('y', y(r.ice)).attr('height', y(0) - y(r.ice)).attr('fill', pj ? `url(#${id}g)` : '#374151').attr('rx', 1.5);
