@@ -404,6 +404,7 @@ const MODE_ICO = { Trucks:'🚛', Vans:'🚐', Buses:'🚌' }, MODE_LBL = { Truc
 // Anchors: China electric truck sales +20% (IEA: Q1 2026 "up more than 20%"), EU electrically chargeable trucks +47.7% (ACEA H1 2026), Germany +88.5%,
 // total EU truck market +9.8%. Everything else: half of last year's growth, kept between -20% and +50%. Stock 2026 = stock 2025 + sales 2026
 // (scrappage of such young fleets ignored); share of fleet 2026 = share 2025 x stock growth (fleet size held at its 2025 level).
+(function dropEarlyTrucks(){ const i15 = EVT.years.indexOf(2015); Object.values(R).forEach(r => { if(r.Trucks) Object.values(r.Trucks).forEach(a => { for(let i = 0; i < i15; i++) a[i] = null; }); }); })();
 (function project(){
   const EU = new Set(['Europe', 'European Union', 'Germany', 'France', 'Netherlands', 'Sweden', 'Switzerland', 'Norway', 'Denmark', 'Spain', 'Finland', 'United Kingdom']);
   const damped = a => { const v25 = a && a[LAST], v24 = a && a[LAST - 1]; return v25 && v24 ? 1 + Math.max(-0.2, Math.min(0.5, 0.5 * (v25 / v24 - 1))) : 1; };
@@ -511,7 +512,7 @@ function hero(){
   ];
   document.getElementById('hero-kpis').innerHTML = k.map(([v, l]) => `<div class="tk-kpi"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
   const sa = s.slice(0, LAST + 1); const sv = d3.select('#hero-spark'), x = d3.scaleLinear([0, LAST], [4, 556]), y = d3.scaleLinear([0, d3.max(sa)], [86, 6]);
-  const line = d3.line().x((d, i) => x(i)).y(d => y(d)).curve(d3.curveMonotoneX), area = d3.area().x((d, i) => x(i)).y0(88).y1(d => y(d)).curve(d3.curveMonotoneX);
+  const line = d3.line().defined(d => d != null).x((d, i) => x(i)).y(d => y(d)).curve(d3.curveMonotoneX), area = d3.area().defined(d => d != null).x((d, i) => x(i)).y0(88).y1(d => y(d)).curve(d3.curveMonotoneX);
   sv.append('defs').html('<linearGradient id="hg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fb923c" stop-opacity=".55"/><stop offset="1" stop-color="#fb923c" stop-opacity="0"/></linearGradient>');
   sv.append('path').attr('d', area(sa)).attr('fill', 'url(#hg)');
   const p = sv.append('path').attr('d', line(sa)).attr('fill', 'none').attr('stroke', '#fde68a').attr('stroke-width', 2.5).attr('vector-effect', 'non-scaling-stroke');
@@ -890,7 +891,7 @@ document.getElementById('tk-table').addEventListener('click', e => {
 
 
 // ---------- stacked bars: electric vs non-electric (fleet / units sold / share of sales), 2010-2026 ----------
-const STK_YEARS = []; for(let y = 2010; y <= Y[NY]; y++) STK_YEARS.push(y);
+let STK_YEARS = []; const setStkYears = () => { STK_YEARS = []; for(let y = (mode === 'Trucks' ? 2015 : 2010); y <= Y[NY]; y++) STK_YEARS.push(y); };
 let stkScope = 'World';
 function smoothSeries(a){     // centred 3-point mean over the available values, edges filled from the nearest value
   const out = a.map((v, i) => { const w = [a[i - 1], a[i], a[i + 1]].filter(x => x != null); return w.length ? w.reduce((p, q) => p + q, 0) / w.length : null; });
@@ -916,11 +917,12 @@ function stackData(reg, m, kindS){
   const ev = ser(reg, m, 'stock'), sa = ser(reg, m, 'sales'), sh = ser(reg, m, 'sShare');
   const at = (arr, y) => { const i = Y.indexOf(y); return i < 0 || !arr ? null : arr[i]; };
   const bev = [], ice = [];
-  if(kindS === 'fleet'){
+  if(kindS === 'fleet' || kindS === 'fshare'){
     const raw = reg === 'World' ? worldFleetSeries(m) : rawFleet(reg, m); if(!raw || !ev) return null;
     const fl = smoothSeries(raw);
     STK_YEARS.forEach(y => { const i = Y.indexOf(y); if(y > Y[LAST]){ const f = fl[LAST], e = at(ev, y); bev.push(e); ice.push(f != null && e != null ? Math.max(0, f - e) : null); }
       else { const e = i < 0 ? 0 : (ev[i] || 0), f = i < 0 ? fl[Y.indexOf(2012)] : fl[i]; bev.push(e); ice.push(f != null ? Math.max(0, f - e) : null); } });
+    if(kindS === 'fshare'){ for(let k = 0; k < bev.length; k++){ const t = (bev[k] || 0) + (ice[k] || 0); if(ice[k] == null || !t){ bev[k] = 0; ice[k] = ice[k] == null ? null : 100; } else { const sh = 100 * bev[k] / t; bev[k] = sh; ice[k] = 100 - sh; } } }
   } else if(kindS === 'sales'){
     if(!sa || !sh) return null;
     const tot = smoothSeries(Y.map((y, i) => i > LAST ? null : (sa[i] && sh[i] ? 100 * sa[i] / sh[i] : null)));
@@ -932,18 +934,19 @@ function stackData(reg, m, kindS){
   return { bev, ice };
 }
 function renderStack(){
-  const kindS = metric === 'sShare' ? 'share' : metric === 'sales' ? 'sales' : 'fleet';
+  setStkYears();
+  const kindS = metric === 'sShare' ? 'share' : metric === 'tShare' ? 'fshare' : metric === 'sales' ? 'sales' : 'fleet';
   const sel = document.getElementById('stk-sel');
   const regs = ['World', 'China', 'European Union', 'Europe', 'Advanced Economies', 'Developing Economies excl. China'].filter(r => R[r] && R[r][mode]).concat(countries(mode).filter(c => c !== 'China').sort());
   if(!regs.includes(stkScope)) stkScope = 'World';
   sel.innerHTML = regs.map(r => `<option value="${esc(r)}"${r === stkScope ? ' selected' : ''}>${esc(r)}</option>`).join('');
   const d = stackData(stkScope, mode, kindS), host = document.getElementById('stk-chart'), what = MODE_LBL[mode];
-  const titles = { fleet:`Electric vs non-electric ${what} on the road`, sales:`${what[0].toUpperCase() + what.slice(1)} sold per year: electric vs non-electric`, share:`Share of new ${what} sold: electric vs non-electric` };
+  const titles = { fshare:`Share of the ${what} on the road: electric vs non-electric`, fleet:`Electric vs non-electric ${what} on the road`, sales:`${what[0].toUpperCase() + what.slice(1)} sold per year: electric vs non-electric`, share:`Share of new ${what} sold: electric vs non-electric` };
   document.getElementById('stk-title').textContent = titles[kindS] + ' · ' + stkScope;
   document.getElementById('stk-lg').innerHTML = '<span><i class="sq" style="background:#16a34a"></i>Electric (battery, plug-in, fuel-cell)</span><span><i class="sq" style="background:#374151"></i>Non-electric (diesel, gas, other)</span><span><i class="sq" style="background:repeating-linear-gradient(45deg,#fff 0 3px,#64748b 3px 6px)"></i>2026 projected</span>';
-  document.getElementById('stk-note').textContent = { fleet:'Whole fleet = IEA electric stock ÷ the electric share of the fleet (rounded, smoothed over three years), see the fleet section; 2010–2011 are shown with no electric trucks (the IEA series starts in 2012).', sales:'Total market = electric sales ÷ the electric share of sales (rounded by the IEA, smoothed over three years); non-electric = total − electric.', share:'Share of new sales as published by the IEA (rounded); the rest is diesel, gas and other.' }[kindS];
+  document.getElementById('stk-note').textContent = { fshare:'Electric share of the whole fleet = IEA electric stock ÷ the estimated fleet (see the fleet section; smoothed over three years); the rest is diesel, gas and other. Same measure as the Share of fleet button.', fleet:'Whole fleet = IEA electric stock ÷ the electric share of the fleet (rounded, smoothed over three years), see the fleet section; 2010–2011 are shown with no electric trucks (the IEA series starts in 2012).', sales:'Total market = electric sales ÷ the electric share of sales (rounded by the IEA, smoothed over three years); non-electric = total − electric.', share:'Share of new sales as published by the IEA (rounded); the rest is diesel, gas and other.' }[kindS];
   if(!d){ host.innerHTML = '<p class="tk-note">No usable series for this market and vehicle class (the IEA does not publish the electric share of its fleet).</p>'; return; }
-  const W = 720, H = 300, m = { t:16, r:12, b:28, l:54 }, share = kindS === 'share';
+  const W = 720, H = 300, m = { t:16, r:12, b:28, l:54 }, share = kindS === 'share' || kindS === 'fshare';
   const rows = STK_YEARS.map((yr, k) => ({ y:yr, bev:d.bev[k] || 0, ice:d.ice[k] || 0, ok:d.ice[k] != null })), top = share ? 100 : Math.max(...rows.map(r => r.bev + r.ice)) * 1.06 || 1;
   const x = d3.scaleBand(rows.map(r => r.y), [m.l, W - m.r]).padding(.18), y = d3.scaleLinear([0, top], [H - m.b, m.t]).nice();
   const id = 'sk' + Math.random().toString(36).slice(2, 6), fmtV = v => share ? pct(v) : compact(v);
@@ -964,13 +967,13 @@ function renderStack(){
         .style('left', Math.min(bb.width - 200, Math.max(0, (x(r.y) + x.bandwidth() / 2) * bb.width / W + 14)) + 'px').style('top', '6px'); })
     .on('pointerleave', () => tip.style('opacity', 0));
   const l25 = rows.find(r => r.y === Y[LAST]);
-  document.getElementById('stk-foot').textContent = l25 && l25.ok && !share ? `${Y[LAST]}: ${fmtV(l25.bev)} electric vs ${fmtV(l25.ice)} non-electric (${pct(100 * l25.bev / (l25.bev + l25.ice))} electric). Follows the vehicle class and metric picked in the bar above (Share of sales, Units sold, or any fleet metric).` : '';
+  document.getElementById('stk-foot').textContent = l25 && l25.ok && share ? `${Y[LAST]}: ${pct(l25.bev)} electric, ${pct(l25.ice)} non-electric. Follows the vehicle class and metric picked in the bar above.` : l25 && l25.ok && !share ? `${Y[LAST]}: ${fmtV(l25.bev)} electric vs ${fmtV(l25.ice)} non-electric (${pct(100 * l25.bev / (l25.bev + l25.ice))} electric). Follows the vehicle class and metric picked in the bar above (Share of sales, Units sold, or any fleet metric).` : '';
 }
 document.getElementById('stk-sel').addEventListener('change', e => { stkScope = e.target.value; renderStack(); });
 
 // ---------- controls ----------
 function refresh(){
-  document.getElementById('year-lbl').innerHTML = isProj(yi) ? Y[yi] + '<small>projected</small>' : Y[yi]; document.getElementById('year').value = yi; document.getElementById('year').max = NY;
+  document.getElementById('year-lbl').innerHTML = isProj(yi) ? Y[yi] + '<small>projected</small>' : Y[yi]; const yr = document.getElementById('year'), mn = mode === 'Trucks' ? Y.indexOf(2015) : 0; yr.min = mn; if(yi < mn) yi = mn; yr.max = NY; yr.value = yi;
   document.getElementById('proj-note').style.display = isProj(yi) ? '' : 'none'; raceEl.classList.toggle('proj', isProj(yi));
   renderMap(); renderRace(); renderTable(); renderStack();
 }
