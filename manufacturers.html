@@ -115,6 +115,9 @@
   .tl-chip.on{ background:var(--accent); border-color:var(--accent); color:#fff; }
   .tl-chip.gone{ display:none; }
   .mfr-side .mfr-tl{ margin:0; }
+  .rank-row.is-sel{ background:color-mix(in srgb, var(--accent) 12%, transparent); border-radius:8px; box-shadow:0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent); }
+  .map-svg .country.has-data{ cursor:pointer; }
+  .ctry-sub-note{ margin:6px 0 2px; font-size:12px; color:var(--text-muted); }
   #continent-bars .rank-row, #country-bars .rank-row{ will-change:transform; }
   /* ---------- compare toggles (country / continent cards) and reported-vs-tracked rows ---------- */
   .cmp-bar{ display:flex; flex-wrap:wrap; gap:12px 26px; align-items:center; margin:6px 0 16px; padding:12px 14px; border-radius:16px; background:var(--surface-alt); border:1px solid var(--border); }
@@ -292,6 +295,9 @@
               <select id="f-period" class="fx-select"></select>
             </label>
             <div class="mfr-tl" data-tl="chips"></div>
+            <label class="fx-field"><span class="fx-label">Country</span>
+              <select id="f-country" class="fx-select" title="Show one country only: the spotlight, the brand ranking and the yearly chart follow it. You can also click a country on the map."></select>
+            </label>
             <div class="fx-seg" role="group" aria-label="Group by">
               <button type="button" class="mode-btn active" data-group="brand" title="Rank individual brands (Toyota, Lexus, Audi…).">Brand</button>
               <button type="button" class="mode-btn" data-group="group" title="Roll brands up to their parent group as of the selected period (Volkswagen Group, Stellantis, Toyota Motor…).">Parent group</button>
@@ -392,6 +398,12 @@
           <div class="fx-spot-box"><h3 id="spot-mix-title">Powertrain mix</h3><div id="spot-donut"></div></div>
           <div class="fx-spot-box"><h3 id="spot-hist-title">Five-year trend</h3><div id="spot-hist"></div></div>
         </div>
+      </div>
+
+      <div class="card chart-card hidden" id="ctry-card">
+        <h2 id="ctry-title">Sales in one country</h2>
+        <p class="note" id="ctry-note" style="display:block"></p>
+        <div id="ctry-bars"></div>
       </div>
 
       <div class="card chart-card hidden" id="continent-bars-card">
@@ -870,6 +882,10 @@ document.getElementById('zoom-out').onclick = () => svg.transition().duration(20
 document.getElementById('zoom-reset').onclick = () => svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity);
 
 let byCountry = {};   // country -> {list:[entities sorted], total, sel, sel2}
+let ctry = '';        // Country filter: '' = every country. Otherwise only that country feeds the spotlight, the brand ranking and the yearly chart (the map keeps showing all)
+const view = () => ctry ? (byCountry[ctry] ? { [ctry]: byCountry[ctry] } : {}) : byCountry;
+const selCountry = document.getElementById('f-country');
+function setCountry(c){ selCountry.value = c; if(selCountry.value !== c) selCountry.value = ''; tlStop(false); refresh(false); }
 let colorFn = () => null;
 // 'market' = no manufacturer picked (shade by total market size)
 // 'rank'   = one manufacturer picked (shade by its rank tier in each country)
@@ -1056,7 +1072,9 @@ function renderMap(){
     .attr('d', path)
     .attr('fill', d => { const c = nameOf(d); return byCountry[c] ? countryColor(c) : null; })
     .on('mousemove', (e, d) => showModal(e, nameOf(d)))
-    .on('mouseleave', hideModal);
+    .on('mouseleave', hideModal)
+    .classed('selected', d => !!ctry && nameOf(d) === ctry)
+    .on('click', (e, d) => { const c = nameOf(d); if(byCountry[c]) setCountry(c === ctry ? '' : c); });
   const mk = Object.entries(MARKERS).filter(([c]) => byCountry[c]);
   mapG.selectAll('circle.mfr-marker').data(mk, d => d[0]).join('circle')
     .attr('class', 'mfr-marker').attr('r', 3.2)
@@ -1075,6 +1093,7 @@ function renderMap(){
     '. The badge in each country is its winner (a plain badge with initials where no logo is available). Scroll or use the buttons to zoom, drag to pan.';
   renderContinentBars();
   renderCountryBars();
+  renderCtryCard();
   renderCmpBars();
   renderSpotlight();
   renderChipBar();
@@ -1096,6 +1115,7 @@ function renderChipBar(){
   if(mfr && mfr2) h += `<span class="fx-chipvs">VS</span>` + chip(mfr2, 2);
   if(clsSel.size) h += `<span class="fx-chip neutral">Class: ${CLASS_DEFS.filter(d => clsSel.has(d[0])).map(d => esc(d[1])).join(', ')}<button type="button" data-clear="cls" title="Remove">×</button></span>`;
   if(motSel.size) h += `<span class="fx-chip neutral">Motorization: ${MOTOR_DEFS.filter(d => motSel.has(d[0])).map(d => esc(d[1])).join(', ')}<button type="button" data-clear="mot" title="Remove">×</button></span>`;
+  if(ctry) h += `<span class="fx-chip neutral">${esc(ctry)}<button type="button" data-clear="country" title="Back to every country">×</button></span>`;
   if(!mfr) h += `<span class="fx-chipvs" style="margin-left:6px">All manufacturers — pick a brand or a model above, or click a quick pick</span>`;
   else h += `<button type="button" class="fx-clear" data-clear="all">Clear selection</button>`;
   bar.innerHTML = h;
@@ -1103,6 +1123,7 @@ function renderChipBar(){
 document.getElementById('fx-chipbar').addEventListener('click', e => {
   const b = e.target.closest('[data-clear]'); if(!b) return;
   const w = b.dataset.clear, M1 = kind === 'model' ? selModel : selMfr, M2 = kind === 'model' ? selModel2 : selMfr2;
+  if(w === 'country'){ setCountry(''); return; }
   if(w === 'cls' || w === 'mot'){ (w === 'cls' ? clsSel : motSel).clear(); renderSegUI(); refresh(false); return; }
   if(w === '2') M2.value = ''; else { M1.value = ''; M2.value = ''; }
   M1.dispatchEvent(new Event('change'));
@@ -1140,6 +1161,7 @@ function donutSVG(parts, centerTop, centerBottom){
     `<text text-anchor="middle" y="-2" font-size="17" font-weight="800" fill="currentColor">${centerTop}</text><text text-anchor="middle" y="14" font-size="9.5" fill="currentColor" opacity=".6">${centerBottom}</text></svg>`;
 }
 function renderSpotlight(){
+  if(ctry){ renderSpotlightCountry(); return; }
   const card = document.getElementById('spot-card'), md = mode();
   const entries = Object.entries(byCountry);
   if(!entries.length){ card.classList.add('hidden'); return; }
@@ -1203,7 +1225,10 @@ function renderSpotlight(){
   document.getElementById('spot-hist-title').textContent = histTitle;
   const histEl = document.getElementById('spot-hist');
   if(!histNames.length){ histEl.innerHTML = '<div class="note" style="display:block">Select a manufacturer or a model above to see how it evolved over the last five years in the markets where data exists for every year.</div>'; return; }
-  const years = historyYears(), series = spotHistory(histNames, Object.keys(byCountry));
+  drawSpotHist(histEl, histNames, spotHistory(histNames, Object.keys(byCountry)), sr => `${esc(sr.name)}: ${sr.n} markets with data in all five years`);
+}
+function drawSpotHist(histEl, histNames, series, noteFn){
+  const years = historyYears();
   series.forEach(sr => { sr.col = histNames.length > 1 ? matchColor(histNames.indexOf(sr.name) + 1) : brandColor(sr.name); sr.top = sr.vals.map((v, i) => years[i] === CUR_YEAR ? v * 12 / CUR_YEAR_MONTHS_ELAPSED : v); });
   const max = Math.max(1, ...series.flatMap(sr => sr.top));
   histEl.innerHTML = `<div class="fx-hist">` + years.map((y, i) => `<div class="fx-hist-yr"><div class="fx-hist-bars">` + series.map(sr => {
@@ -1211,8 +1236,108 @@ function renderSpotlight(){
     const bg = cur ? `linear-gradient(to top, ${sr.col} 0 ${cut}%, color-mix(in srgb, ${sr.col} 30%, white) ${cut}% 100%)` : sr.col;
     return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;width:100%"><div class="fx-hist-val">${compactN(sr.top[i])}</div><div class="fx-hist-bar" style="height:${h * .78}%;background:${bg}" title="${esc(sr.name)} ${y}${cur ? ' projected' : ''}: ${fmt(sr.top[i])}"></div></div>`;
   }).join('') + `</div><div class="fx-hist-lbl">${y}${y === CUR_YEAR ? '*' : ''}</div></div>`).join('') + `</div>` +
-    `<div class="note" style="display:block;margin-top:8px">${series.map(sr => `${esc(sr.name)}: ${sr.n} markets with data in all five years`).join(' · ')}. *${CUR_YEAR} projected (year-to-date x 12 / ${CUR_YEAR_MONTHS_ELAPSED}), lighter part = projection. Dotted line = level of the first year, to see at a glance whether sales progressed or regressed.</div>`;
+    `<div class="note" style="display:block;margin-top:8px">${series.map(noteFn).join(' · ')}. *${CUR_YEAR} projected (year-to-date x 12 / ${CUR_YEAR_MONTHS_ELAPSED}), lighter part = projection. Dotted line = level of the first year, to see at a glance whether sales progressed or regressed.</div>`;
   drawHistRef(histEl, series);
+}
+// ---------- Country filter: spotlight of one country ----------
+function renderSpotlightCountry(){
+  const card = document.getElementById('spot-card'), d = byCountry[ctry], md = mode();
+  card.classList.remove('hidden');
+  const kpi = (label, value, sub, color) => `<div class="fx-kpi" style="--k:${color || 'var(--accent)'}"><div class="fx-kpi-label">${label}</div><div class="fx-kpi-value">${value}</div><div class="fx-kpi-sub">${sub || ''}</div></div>`;
+  const legend = `<div class="fx-donut-leg"><span><i class="sw" style="background:${COLORS.bev}"></i>BEV</span><span><i class="sw" style="background:${COLORS.phev}"></i>PHEV</span><span><i class="sw" style="background:${COLORS.other}"></i>HEV + ICE + Diesel</span></div>`;
+  const mixParts = t => [{ label:'BEV', v:t.bev, color:COLORS.bev }, { label:'PHEV', v:t.phev, color:COLORS.phev }, { label:'HEV + ICE + Diesel', v:Math.max(t.other, 0), color:COLORS.other }];
+  const donutOf = (t, name) => `<div class="fx-donut">${donutSVG(mixParts(t), (100 * t.bev / (t.total || 1)).toFixed(0) + '%', 'BEV')}<div>${esc(name)}</div></div>`;
+  const histEl = document.getElementById('spot-hist');
+  document.getElementById('spot-sub').textContent = `${periodLabel(period)} · ${ctry}`;
+  if(!d){
+    document.getElementById('spot-title').textContent = ctry;
+    document.getElementById('spot-kpis').innerHTML = kpi('No data', '–', `${esc(ctry)} has no manufacturer data for ${esc(periodLabel(period))}: pick another period or country.`, '#94a3b8');
+    document.getElementById('spot-donut').innerHTML = ''; document.getElementById('spot-hist-title').textContent = ''; histEl.innerHTML = '';
+    return;
+  }
+  const world = Object.values(byCountry).reduce((s, x) => s + (x.sel ? x.sel.total : 0), 0), world2 = Object.values(byCountry).reduce((s, x) => s + (x.sel2 ? x.sel2.total : 0), 0);
+  const brands = d.list.filter(a => !isOtherName(a.name)), mk = d.market || d.total, top = brands[0];
+  const allT = d.list.reduce((s, a) => ({ bev:s.bev + a.bev, phev:s.phev + a.phev, other:s.other + a.other, total:s.total + a.total }), { bev:0, phev:0, other:0, total:0 });
+  const unit = kind === 'model' ? 'models' : groupMode === 'group' ? 'parent groups' : 'brands';
+  const sideKpis = (sel, rank, name, col, worldUnits) => sel
+    ? kpi(`${esc(name)} · units`, compactN(sel.total), `${fmt(sel.total)} in ${esc(ctry)}`, col) + kpi('Rank here', '#' + rank, `of ${brands.length} ${unit}`, '#f59e0b') +
+      kpi('Market share', (100 * sel.total / (mk || 1)).toFixed(1) + '%', `of ${compactN(mk)} units`, '#0ea5e9') +
+      kpi('BEV share', (100 * sel.bev / (sel.total || 1)).toFixed(1) + '%', `${compactN(sel.bev)} electric units`, COLORS.bev) +
+      kpi('Share of its world volume', worldUnits ? (100 * sel.total / worldUnits).toFixed(1) + '%' : '–', `of ${compactN(worldUnits)} units in all covered markets`, '#6366f1')
+    : kpi(`${esc(name)} · units`, '0', `no sales recorded in ${esc(ctry)} for this period`, col);
+  let kpis, donuts, histNames, series, title, histTitle;
+  const years = historyYears();
+  const yearsOf = (fn, name) => { const vals = years.map(y => fn(y) || 0); return { name, vals, n:years.filter(y => fn(y) != null).length }; };
+  if(md === 'market'){
+    title = `${ctry} at a glance`;
+    kpis = kpi('Market size', compactN(d.total), `${fmt(d.total)} units · ${periodLabel(period)}`, '#6366f1') +
+      kpi('Biggest ' + unit.replace(/s$/, ''), top ? esc(top.name) : '–', top ? `${compactN(top.total)} units · ${(100 * top.total / (d.total || 1)).toFixed(1)}% of the market` : '', top ? brandColor(top.name) : undefined) +
+      kpi(`${unit[0].toUpperCase() + unit.slice(1)} with sales`, brands.length, 'in this period', '#f59e0b') +
+      kpi('BEV share', (100 * allT.bev / (allT.total || 1)).toFixed(1) + '%', `${compactN(allT.bev)} electric units`, COLORS.bev) +
+      kpi('PHEV share', (100 * allT.phev / (allT.total || 1)).toFixed(1) + '%', `${compactN(allT.phev)} plug-in hybrids`, COLORS.phev);
+    donuts = donutOf(allT, ctry); histNames = [ctry]; histTitle = `Market size, last five years`;
+    series = [yearsOf(y => countryYearTotal(ctry, y), ctry)];
+  } else if(md === 'rank'){
+    title = `Spotlight — ${mfr} in ${ctry}`;
+    kpis = sideKpis(d.sel, d.rank, mfr, brandColor(mfr), world) + (top ? kpi('Leader here', esc(top.name), `${compactN(top.total)} units · ${(100 * top.total / (d.total || 1)).toFixed(1)}% of the market`, brandColor(top.name)) : '');
+    donuts = donutOf(d.sel || { bev:0, phev:0, other:0, total:0 }, mfr); histNames = [mfr]; histTitle = `${mfr} in ${ctry}, last five years`;
+    series = [yearsOf(y => entityYearTotal(ctry, y, mfr), mfr)];
+  } else {
+    title = `Head to head in ${ctry} — ${mfr} vs. ${mfr2}`;
+    kpis = sideKpis(d.sel, d.rank, mfr, matchColor(1), world) + sideKpis(d.sel2, d.rank2, mfr2, matchColor(2), world2);
+    donuts = donutOf(d.sel || { bev:0, phev:0, other:0, total:0 }, mfr) + donutOf(d.sel2 || { bev:0, phev:0, other:0, total:0 }, mfr2);
+    histNames = [mfr, mfr2]; histTitle = `${mfr} vs. ${mfr2} in ${ctry}, last five years`;
+    series = [yearsOf(y => entityYearTotal(ctry, y, mfr), mfr), yearsOf(y => entityYearTotal(ctry, y, mfr2), mfr2)];
+  }
+  document.getElementById('spot-title').textContent = title;
+  document.getElementById('spot-kpis').innerHTML = kpis;
+  document.getElementById('spot-donut').innerHTML = `<div class="fx-donuts">${donuts}</div>${legend}`;
+  document.getElementById('spot-hist-title').textContent = histTitle;
+  drawSpotHist(histEl, histNames, series, sr => `${esc(sr.name)}: ${sr.n} of 5 years with data`);
+}
+
+// ---------- Country filter: the selected manufacturer / model in that country, year by year and month by month ----------
+function renderCtryCard(){
+  const card = document.getElementById('ctry-card'), host = document.getElementById('ctry-bars'), md = mode();
+  if(!ctry || md === 'market'){ card.classList.add('hidden'); host.innerHTML = ''; return; }
+  card.classList.remove('hidden');
+  const names = md === 'match' ? [mfr, mfr2] : [mfr];
+  document.getElementById('ctry-title').textContent = `${names.join(' vs. ')} in ${ctry}`;
+  host.innerHTML = '';
+  const mixTxt = a => a && a.total ? `BEV ${(100 * a.bev / a.total).toFixed(1)}% · PHEV ${(100 * a.phev / a.total).toFixed(1)}% of ${esc(ctry)} sales` : '';
+  let any = false;
+  names.forEach((name, i) => {
+    const col = names.length > 1 ? matchColor(i + 1) : brandColor(name);
+    const byYear = new Map();
+    [...YEARS].sort((a, b) => a - b).forEach(y => {
+      const p = y === CUR_YEAR ? { type:'year', year:y, projected:true } : { type:'year', year:y };
+      const a = aggregate(ctry, p).get(name); if(a && a.total > 0) byYear.set(y, a);
+    });
+    if(!byYear.size){ host.insertAdjacentHTML('beforeend', `<p class="note" style="display:block">${esc(name)}: no sales recorded in ${esc(ctry)} in any year of the data.</p>`); return; }
+    any = true;
+    const first = Math.min(...byYear.keys()), rows = [];
+    for(let y = first; y <= CUR_YEAR; y++){
+      const a = byYear.get(y), proj = y === CUR_YEAR;
+      rows.push({ y, v:a ? Math.round(a.total) : 0, kind:proj ? 'proj' : 'a', bk:'w', none:`no ${name} sales recorded in ${ctry}`,
+        basis: proj ? `${CUR_YEAR} year-to-date x 12 / ${CUR_YEAR_MONTHS_ELAPSED} months (a run-rate, not a forecast)` : `sales / registrations in ${ctry}`, extra: mixTxt(a) });
+    }
+    const box = document.createElement('div'); host.appendChild(box);
+    box.innerHTML = `<div class="bw-sub">${esc(name)}<small>${esc(ctry)} · ${first}–${CUR_YEAR} per year</small></div><div class="bw-chart"></div>`;
+    bwChart(box.querySelector('.bw-chart'), rows, col);
+    // the months on offer (the Period filter's months), when the country reports them
+    const mrows = MONTHS_SHOWN.slice().sort().map(m => {
+      const a = aggregate(ctry, { type:'month', ym:m }).get(name);
+      return { y:`${MONTH_NAMES[+m.slice(5) - 1].slice(0, 3)} ${m.slice(2, 4)}`, v:a ? Math.round(a.total) : 0, kind:'a', bk:'m', none:`no ${name} sales recorded in ${ctry}`, basis:`${MONTH_NAMES[+m.slice(5) - 1]} ${m.slice(0, 4)}`, extra:mixTxt(a) };
+    });
+    if(mrows.filter(r => r.v > 0).length >= 2){
+      const mbox = document.createElement('div'); host.appendChild(mbox);
+      mbox.innerHTML = `<div class="ctry-sub-note">${esc(name)} · month by month</div><div class="bw-chart"></div>`;
+      bwChart(mbox.querySelector('.bw-chart'), mrows, col);
+    }
+  });
+  document.getElementById('ctry-note').textContent = any
+    ? `Full years as reported for ${ctry} (${CUR_YEAR} is the year-to-date run-rate, hatched), then the latest months. Hover a bar for the change vs. the year before and the BEV / PHEV share. The Period filter above still sets which period the spotlight and the brand ranking show.`
+    : '';
 }
 // dotted line from the top of each series' first-year bar across to the last year, with the change written at its end
 function drawHistRef(histEl, series){
@@ -1557,7 +1682,7 @@ function plainRowHTML(e, widthDenom){
     </div>`;
 }
 function scopeCountries(scope, key){
-  const cs = Object.keys(byCountry);
+  const cs = Object.keys(view());
   if(scope === 'country') return byCountry[key] ? [key] : [];
   if(scope === 'continent') return cs.filter(c => continentOf(c) === key);
   return cs;
@@ -1604,7 +1729,7 @@ function renderContinentBarsForBrand(card, title, note, legend, rows){
 // continent breakdown (match mode); hidden entirely in rank mode (single manufacturer) ----------
 function renderContinentBars(){
   const card = document.getElementById('continent-bars-card'), toggle = document.getElementById('bars-group-toggle');
-  const md = mode();
+  const md = ctry ? 'market' : mode();      // one country picked: the card ranks that country's brands, whatever is selected (the selection is highlighted)
   card.classList.remove('hidden');
   const title = document.getElementById('continent-bars-title'), note = document.getElementById('continent-bars-note'),
         legend = document.getElementById('continent-bars-legend'), rows = document.getElementById('continent-bars');
@@ -1613,9 +1738,10 @@ function renderContinentBars(){
   if(md === 'market'){
     toggle.classList.remove('hidden');
     const byGroup = groupMode === 'group';
-    title.textContent = byGroup ? 'World sales by parent group' : 'World sales by brand';
+    const what = kind === 'model' ? 'model' : byGroup ? 'parent group' : 'brand';
+    title.textContent = ctry ? `Sales by ${what} in ${ctry}` : byGroup ? 'World sales by parent group' : 'World sales by brand';
     const world = new Map();
-    Object.values(byCountry).forEach(d => d.list.forEach(a => {
+    Object.values(view()).forEach(d => d.list.forEach(a => {
       if(isOtherName(a.name)) return;
       const e = world.get(a.name) || { bev:0, phev:0, other:0, total:0 };
       e.bev += a.bev; e.phev += a.phev; e.other += a.other; e.total += a.total;
@@ -1623,16 +1749,18 @@ function renderContinentBars(){
     }));
     const worldTotal = [...world.values()].reduce((s, e) => s + e.total, 0);
     // companies with a reported worldwide total are ranked by it: tracked countries plus the hatched "All other countries" remainder
-    const finOn = !filtersActive();
-    const ranked = [...world.entries()].map(([name, e]) => {
+    const finOn = !filtersActive() && !ctry;
+    const rankedAll = [...world.entries()].map(([name, e]) => {
       const f = finOn ? finFor(name) : null, gap = f ? Math.max(0, f.units - e.total) : 0;
       return { name, e, f, gap, eff:e.total + gap };
-    }).sort((a, b) => b.eff - a.eff).slice(0, WORLD_LIST_CAP);
+    }).sort((a, b) => b.eff - a.eff).map((r, i) => ({ ...r, rank:i + 1 }));
+    const pickNames = ctry ? [mfr, mfr2].filter(Boolean) : [];
+    const ranked = rankedAll.slice(0, WORLD_LIST_CAP).concat(rankedAll.slice(WORLD_LIST_CAP).filter(r => pickNames.includes(r.name)));     // a picked brand outside the cap still shows, with its real rank
     const anyFin = ranked.some(r => r.gap > 0);
     legend.innerHTML = `<span><i class="sw" style="background:${COLORS.bev}"></i>BEV</span><span><i class="sw" style="background:${COLORS.phev}"></i>PHEV</span><span><i class="sw" style="background:${COLORS.other}"></i>HEV + ICE + Diesel</span>` +
       (anyFin ? `<span><i class="sw" style="background:${HATCH}"></i>All other countries = reported worldwide sales minus the tracked countries</span>` : '');
     const widthDenom = ranked.length ? ranked[0].eff : 1;
-    rows.innerHTML = ranked.map(({ name, e, f, gap, eff }, i) => {
+    rows.innerHTML = ranked.map(({ name, e, f, gap, eff, rank }) => {
       const parts = [
         { value:e.bev, color:COLORS.bev, label:`BEV: ${fmt(e.bev)}` },
         { value:e.phev, color:COLORS.phev, label:`PHEV: ${fmt(e.phev)}` },
@@ -1642,15 +1770,17 @@ function renderContinentBars(){
       const { bar, outside } = segmentsHTML(parts, widthDenom);
       const pct = worldTotal ? `<span class="pct-of-total">${(100 * e.total / worldTotal).toFixed(1)}%</span>` : '';
       const totalTip = gap > 0 ? `Reported worldwide ${fmt(f.units)} = tracked countries ${fmt(e.total)} + all other countries ${fmt(gap)}` : `Total sales in the tracked countries`;
-      return `<div class="rank-row"${f ? ` title="${esc(finTip(f))}"` : ''}>
-        ${brandRankBadgeHTML(i + 1, name, `${esc(name)}: #${i + 1} in this ranking`)}
+      return `<div class="rank-row${pickNames.includes(name) ? ' is-sel' : ''}"${f ? ` title="${esc(finTip(f))}"` : ''}>
+        ${brandRankBadgeHTML(rank, name, `${esc(name)}: #${rank} in this ranking`)}
         <span class="country-label">${esc(name)}</span>
         ${pct}
         <span class="bar-track">${bar}${outside}</span>
         <span class="total-label" title="${esc(totalTip)}">${fmt(eff)}</span>
       </div>`;
     }).join('');
-    note.textContent = `Top ${WORLD_LIST_CAP} ${byGroup ? 'parent groups' : 'brands'} worldwide by volume, ${periodLabel(period)}: rank on the left, total sales on the right. Bars are split into BEV, PHEV and HEV + ICE + Diesel; the % is the share of the volume in the tracked countries.` +
+    if(ctry) note.textContent = `Top ${WORLD_LIST_CAP} ${what}s in ${ctry} by volume, ${periodLabel(period)}: rank on the left, total sales on the right. Bars are split into BEV, PHEV and HEV + ICE + Diesel; the % is the share of ${ctry}'s market.` +
+      (pickNames.length ? ` Your selection (${pickNames.map(esc).join(', ')}) is highlighted.` : ' Pick a manufacturer above to see how it does here year by year.') + ' Click the country on the map again, or remove its chip, to go back to every country.';
+    else note.textContent = `Top ${WORLD_LIST_CAP} ${byGroup ? 'parent groups' : 'brands'} worldwide by volume, ${periodLabel(period)}: rank on the left, total sales on the right. Bars are split into BEV, PHEV and HEV + ICE + Diesel; the % is the share of the volume in the tracked countries.` +
       (period.type === 'month' ? ` Monthly figures come from the ${Object.keys(byCountry).length} markets that report brand data for ${periodLabel(period)}, not from every country, so they do not include all world sales.` : '') +
       (anyFin ? ` Where the company's financial reports give a worldwide total, the bar is extended by a hatched "All other countries" segment (reported worldwide minus tracked countries) and the list is ranked by the reported figure; hover a row for the source.` : '') +
       ` Pick a manufacturer above to focus this chart on one market instead.`;
@@ -1699,7 +1829,7 @@ function renderContinentBars(){
 // market mode (no manufacturer picked -- there's no single country breakdown to show) ----------
 function renderCountryBars(){
   const md = mode(), card = document.getElementById('bars-card');
-  if(md === 'market'){ card.classList.add('hidden'); return; }
+  if(md === 'market' || ctry){ card.classList.add('hidden'); return; }
   card.classList.remove('hidden');
   const title = document.getElementById('bars-title'), note = document.getElementById('bars-note'),
         legend = document.getElementById('bars-legend'), rows = document.getElementById('country-bars');
@@ -1948,6 +2078,7 @@ function renderWorldBars(){
 
 function refresh(rebuildMfr){
   readPeriod();
+  ctry = selCountry.value;
   if(rebuildMfr){ buildMfrSelect(); if(MODEL_LABEL) buildModelSelect(); }
   if(selModel.value && MODEL_LABEL){
     kind = 'model';
@@ -1976,6 +2107,7 @@ function refresh(rebuildMfr){
 }
 function setActive(sel, attr, val){ document.querySelectorAll(`${sel} .mode-btn`).forEach(b => { if(attr in b.dataset) b.classList.toggle('active', b.dataset[attr] === val); }); }
 selPeriod.onchange = () => refresh(true);
+selCountry.onchange = () => { tlStop(false); refresh(false); };
 selMfr.onchange = () => { if(selMfr2.value === selMfr.value) selMfr2.value = ''; if(selMfr.value){ selModel.value = ''; selModel2.value = ''; } refresh(false); };
 selMfr2.onchange = () => { if(selMfr2.value){ selModel.value = ''; selModel2.value = ''; } refresh(false); };
 selModel.onchange = () => { if(selModel2.value === selModel.value) selModel2.value = ''; if(selModel.value){ selMfr.value = ''; selMfr2.value = ''; } refresh(false); };
@@ -2006,21 +2138,21 @@ const tlMonthKeys = MONTHS_SHOWN.filter(m => m.startsWith(CUR_YEAR + '-')).slice
 const tlFrameList = () => tlYearKeys.filter(k => k.startsWith('y:')).concat(tlMonthKeys, tlYearKeys.filter(k => k.startsWith('yp:')));
 // does the selection have sales in this period? (tested for every button only where that is cheap: brand view, no car class)
 function tlAvail(key, force){
-  const sig = [kind, groupMode, mfr, mfr2, [...clsSel].sort().join(), [...motSel].sort().join()].join('|');
+  const sig = [kind, groupMode, mfr, mfr2, ctry, [...clsSel].sort().join(), [...motSel].sort().join()].join('|');
   if(sig !== tlSig){ tlSig = sig; tlCache.clear(); }
   let a = tlCache.get(key);
   if(a) return a;
   if(!mfr || (!force && !(kind === 'brand' && !clsSel.size))) return { has:true, n:null };
   const p = tlParse(key);
   let n = 0;
-  COUNTRIES.forEach(c => { const m = aggregate(c, p), x = m.get(mfr), y = mfr2 && mfr2 !== mfr ? m.get(mfr2) : null; if((x && x.total > 0) || (y && y.total > 0)) n++; });
+  (ctry ? [ctry] : COUNTRIES).forEach(c => { const m = aggregate(c, p), x = m.get(mfr), y = mfr2 && mfr2 !== mfr ? m.get(mfr2) : null; if((x && x.total > 0) || (y && y.total > 0)) n++; });
   a = { has:n > 0, n };
   tlCache.set(key, a);
   return a;
 }
 const tlPlayable = () => tlFrameList().filter(k => tlAvail(k).has);
 function selMarketCount(){
-  const md = mode(), es = Object.values(byCountry);
+  const md = mode(), es = Object.values(view());
   if(md === 'market') return es.length;
   return es.filter(d => (d.sel && d.sel.total > 0) || (md === 'match' && d.sel2 && d.sel2.total > 0)).length;
 }
@@ -2151,6 +2283,7 @@ function updateSegStatus(nCountries){
 }
 
 buildPeriodSelect();
+selCountry.innerHTML = '<option value="">All countries</option>' + COUNTRIES.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
 readPeriod();
 renderSegUI();
 wireCombo(selMfr, document.getElementById('f-mfr-search'), document.getElementById('f-mfr-list'));
