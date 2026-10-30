@@ -1098,6 +1098,12 @@ ul.notes-body{
   .movers-columns{ grid-template-columns:1fr; }
 }
 
+/* Mix by Country, Sales by Brand / Sales by Manufacturing Country: the total sits on the LEFT, between the name and the bar (header and rows share these widths) */
+.rank-rows.mfr-total-left .rank-row .mfr-rank-num{ width:20px; flex-shrink:0; text-align:right; font-size:11.5px; font-weight:600; color:var(--text-muted); font-variant-numeric:tabular-nums; }
+.rank-rows.mfr-total-left .rank-row .total-label{ width:84px; text-align:right; color:var(--text); font-weight:700; }
+.rank-rows-header.mfr-total-left .rrh-name-gap{ width:150px; flex-shrink:0; }
+.rank-rows-header.mfr-total-left .rrh-total{ width:84px; }
+.rank-rows-header.mfr-total-left .rrh-pct{ width:52px; flex-shrink:0; font-size:10.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-muted); }
 #mfr-rank-rows .rank-row .total-label, #mfr-model-rank-rows .rank-row .total-label{ color:var(--text); font-weight:700; }
 #mfr-rank-rows .rank-row .country-label, #mfr-model-rank-rows .rank-row .country-label{ cursor:help; text-decoration:underline dotted; text-decoration-color:var(--border); text-underline-offset:3px; }
 #mfr-rank-rows .rank-row .mfr-rank-num, #mfr-model-rank-rows .rank-row .mfr-rank-num{

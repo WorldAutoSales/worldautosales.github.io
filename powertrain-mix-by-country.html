@@ -380,11 +380,12 @@
           </div>
           <p class="note" id="mfr-country-group-note">Bars show each manufacturing country's total new registrations, summed across all its brands sold here; the green segment is its BEV share of that total. Sorted by total sales.</p>
           <div class="mfr-coverage-note hidden" id="mfr-country-group-coverage-note"></div>
-          <div class="rank-rows-header">
-            <span class="rrh-spacer"></span>
-            <span class="rrh-total">BEV %</span>
-            <span class="rrh-total">Share</span>
+          <div class="rank-rows-header mfr-total-left">
+            <span class="rrh-name-gap"></span>
             <span class="rrh-total">Total</span>
+            <span class="rrh-spacer"></span>
+            <span class="rrh-pct">BEV %</span>
+            <span class="rrh-pct">Share</span>
           </div>
           <div class="rank-rows" id="mfr-country-group-rank-rows"></div>
           <div class="tooltip" id="mfr-country-group-tooltip"></div>
@@ -422,11 +423,12 @@
           </div>
           <p class="note" id="mfr-note">Bars show each brand's total new registrations; the green segment is its BEV share of that total. Sorted by total sales.</p>
           <div class="mfr-coverage-note hidden" id="mfr-coverage-note"></div>
-          <div class="rank-rows-header">
-            <span class="rrh-spacer"></span>
-            <span class="rrh-total">BEV %</span>
-            <span class="rrh-total">Share</span>
+          <div class="rank-rows-header mfr-total-left">
+            <span class="rrh-name-gap"></span>
             <span class="rrh-total">Total</span>
+            <span class="rrh-spacer"></span>
+            <span class="rrh-pct">BEV %</span>
+            <span class="rrh-pct">Share</span>
           </div>
           <div class="rank-rows" id="mfr-rank-rows"></div>
           <div class="tooltip" id="mfr-tooltip"></div>
@@ -6204,6 +6206,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const visible = kind === 'model' ? withPct.filter(r => mfrModelCategoryFilter.has(mfrRowCategory(r))) : withPct;
     const sorted = kind === 'model' ? visible.slice().sort(mfrModelSortCmp(mfrSortKey)) : visible.slice().sort((a,b) => b[mfrSortKey] - a[mfrSortKey]);
     rowsEl.classList.toggle('raw-mode', mode === 'raw');
+    rowsEl.classList.toggle('mfr-total-left', kind !== 'model');       // brand + manufacturing country: the total sits between the name and the bar
     const globalMax = Math.max(1, ...sorted.map(r => r.total));
     rowsEl.innerHTML = sorted.map((row, i) => {
       const sharePct = marketTotal ? row.total / marketTotal * 100 : 0;
@@ -6223,16 +6226,18 @@ const MFR_MONTHLY_SOURCE_NOTE = {
         ? `<div class="mfr-rank-num" title="#${rankNum} best-selling model overall">${rankNum}</div>${catBadgeHTML}`
         : `<div class="mfr-rank-num">${rankNum}</div>`;
       const brandAttr = kind === 'model' ? ` data-brand="${row.brand}" data-model="${row.model}"` : '';
+      const totalHTML = `<div class="total-label">${row.total.toLocaleString('en-US')}</div>`;
       return `
       <div class="rank-row" data-label="${row.label}" data-kind="${kind}"${brandAttr}>
         ${rankHTML}
         <div class="country-label">${row.label}</div>
+        ${kind !== 'model' ? totalHTML : ''}
         <div class="bar-track">
           ${MFR_FUEL_KEYS.map(k => mfrSegHTML(row, k, widthDenom, mode)).join('')}
         </div>
         <div class="pct-label" style="color:${FUEL_COLORS.bev}"${row.others && row.others === row.total ? ' title="No powertrain split published by the source"' : ''}>${row.others && row.others === row.total ? '—' : row.bevPct.toFixed(1) + '%'}</div>
         <div class="pct-label">${sharePct.toFixed(1)}%</div>
-        <div class="total-label">${row.total.toLocaleString('en-US')}</div>
+        ${kind === 'model' ? totalHTML : ''}
       </div>`;
     }).join('');
   }
